@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.16 2001/01/26 20:42:02 youngde Exp $
+;;; $Id: funcall.lisp,v 1.17 2001/01/27 20:41:21 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,14 +61,22 @@
                   (get-slot-name binding)))
 
 #+ignore
-(defmethod evaluate ((self function-call) context)
-  (flet ((build-arglist ()
-           (mapcar #'(lambda (binding)
-                       (make-lexical-binding binding context))
-                   (get-bindings self))))
-    (let ((val (apply (get-function self) (build-arglist))))
-      (values val))))
+(defmacro make-lexical-binding (binding context)
+  `(etypecase ,binding
+     (local-slot-binding
+      (get-slot-value (get-fact ,context) (get-slot-name ,binding)))
+     (global-slot-binding
+      (let ((fact (find-fact (get-token ,context) (get-location ,binding))))
+        (cl:assert (not (null fact)) ()
+          "No fact for location ~D." (get-location ,binding))
+        (get-slot-value fact (get-slot-name ,binding))))
+     (pattern-binding
+      (let ((fact (find-fact (get-token ,context) (get-location ,binding))))
+        (cl:assert (not (null fact)) ()
+          "No fact for location ~D." (get-location ,binding))
+        (values fact)))))
 
+#+ignore
 (defun evaluate (func context)
   (declare (type function-call func)
            (type function-call-context context))
@@ -76,6 +84,17 @@
          (mapcar #'(lambda (binding)
                      (make-lexical-binding binding context))
                  (get-bindings func))))
+
+(defun evaluate (func context)
+  (declare (type function-call func)
+           (type function-call-context context))
+  (declare (optimize (speed 3) (debug 0) (safety 1)))
+  (let ((bindings nil))
+    (apply (get-function func)
+           (dolist (binding (get-bindings func) bindings)
+             (setf bindings
+               (nconc bindings
+                      `(,(make-lexical-binding binding context))))))))
 
 (defmethod equals ((self function-call) (obj function-call))
   (eq self obj))
