@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.57 2001/05/22 16:24:48 youngde Exp $
+;;; $Id: defsys.lisp,v 1.58 2001/06/04 22:02:29 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -68,7 +68,10 @@
     :components ((:module "packages"
                           :source-pathname "packages"
                           :binary-pathname "packages"
-                          :components ((:file "pkgdecl")))
+                          :components 
+                          ((:file "pkgdecl")
+                           (:file "lisa-package"
+                                  :depends-on (pkgdecl))))
                  (:module "reflection"
                           :source-pathname "reflect"
                           :binary-pathname "reflect"

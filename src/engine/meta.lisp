@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.31 2001/05/24 19:55:46 youngde Exp $
+;;; $Id: meta.lisp,v 1.32 2001/06/04 22:02:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -162,7 +162,8 @@
       (values meta))))
 
 (defun create-class-template (name slots)
-  (let* ((class (eval `(defclass ,name (deftemplate) ())))
+  (let* ((class (reflect:ensure-class 
+                 name :direct-superclasses '(deftemplate)))
          (meta (make-meta-fact name (class-name class) slots)))
     (register-meta-class name meta)
     (values class)))
