@@ -17,25 +17,21 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: language.lisp
-;;; Description: Code that implements the LISA programming language.
-;;;
-;;; $Id: language.lisp,v 1.2 2002/08/21 19:47:34 youngde Exp $
+;;; File: rete.lisp
+;;; Description: Class representing the inference engine itself.
+
+;;; $Id: rete.lisp,v 1.1 2002/08/21 19:47:34 youngde Exp $
 
 (in-package "LISA")
 
-(defmacro defrule (name (&key (salience 0) (module nil)) &body body)
-  (let ((rule-name (gensym)))
-    `(let ((,rule-name ,@(if (consp name)
-                             `(,name)
-                             `(',name))))
-       (redefine-defrule ,rule-name
-                         ',body
-                         :salience ,salience
-                         :module ,module))))
+(defclass rete ()
+  ((meta-data :reader get-meta-data
+              :initform (make-hash-table))
+   (strategy :initarg :strategy
+             :initform nil)))
 
-(defmacro deftemplate (name (&key) &body body)
-  (redefine-deftemplate name body))
+(defun make-rete (strategy)
+  (make-instance 'rete :strategy strategy))
 
-(defmacro defimport (class-name &key (use-inheritancep t))
-  `(import-class ,class-name ,use-inheritancep))
+(defun make-inference-engine ()
+  (make-rete nil))
