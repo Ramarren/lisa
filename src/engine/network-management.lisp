@@ -17,10 +17,10 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File:
-;;; Description:
+;;; File: network-management.lisp
+;;; Description: Functions used to maintain and inspect the Rete network.
 
-;;; $Id: network-management.lisp,v 1.3 2001/08/24 14:23:32 youngde Exp $
+;;; $Id: network-management.lisp,v 1.4 2001/08/24 14:30:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,7 +52,7 @@
                       (remove-rule node (rest nodes)))))))
     (let ((paths (find-paths-to-rule engine rule-name)))
       (cl:assert (not (null paths)) ()
-        "No path(s) found for rule ~A~%" rule-name)
+        "No path(s) in the network found for rule ~A~%" rule-name)
       (mapc #'(lambda (path)
                 (remove-rule (first path) (rest path)))
             paths))))
