@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.59 2002/11/13 16:06:30 youngde Exp $
+;;; $Id: parser.lisp,v 1.60 2002/11/13 21:31:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -137,11 +137,12 @@
     (fixup-bindings patterns nil)))
 
 (defun preprocess-left-side (lhs)
-  (cond ((null lhs)
-         (push (list 'initial-fact) lhs))
-        ((rule)
-         (fixup-runtime-bindings lhs))
-        (t lhs)))
+  (when (or (null lhs)
+            (eq (caar lhs) 'logical))
+    (push (list 'initial-fact) lhs))
+  (if (rule)
+      (fixup-runtime-bindings lhs)
+    lhs))
 
 (defvar *in-logical-pattern-p* nil)
 

@@ -92,7 +92,6 @@
   (modify ?sam (name samwise)))
 
 (defrule logical-rule ()
-  (frodo)
   (logical
    (gandalf))
   =>
@@ -167,7 +166,7 @@
 (defparameter *gandalf* (assert (gandalf (name gandalf) (age 200))))
 |#
 
-(assert (frodo))
+(reset)
 (assert (gandalf))
 (run)
 (facts)
