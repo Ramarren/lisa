@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.15 2002/09/27 15:29:44 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.16 2002/09/27 20:51:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,6 +64,7 @@
    (pattern-slot-value slot)
    (pattern-slot-negated slot)))
 
+#+ignore
 (defmacro make-variable-test (slot-name binding)
   `(function
     (lambda (tokens)
@@ -73,16 +74,27 @@
               (binding-slot-name ,binding))))))
 
 (defun make-inter-pattern-test (slot)
-  (let ((predicate
-         (make-variable-test (pattern-slot-name slot)
-                             (pattern-slot-slot-binding slot))))
-    (if (negated-slot-p slot)
-        (complement predicate)
-      predicate)))
+  (let* ((binding (pattern-slot-slot-binding slot))
+         (test
+          (function
+           (lambda (tokens)
+             (equal (get-slot-value (token-top-fact tokens)
+                                    (pattern-slot-name slot))
+                    (get-slot-value
+                     (token-find-fact tokens (binding-address binding))
+                     (binding-slot-name binding)))))))
+    (if (negated-slot-p slot) (complement test) test)))
 
 (defun make-intra-pattern-test (slot)
-  (make-variable-test (pattern-slot-name slot)
-                      (pattern-slot-slot-binding slot)))
+  (let ((test
+         (function
+          (lambda (tokens)
+            (equal (get-slot-value (token-top-fact tokens)
+                                   (pattern-slot-name slot))
+                   (get-slot-value (token-top-fact tokens)
+                                   (binding-slot-name 
+                                    (pattern-slot-slot-binding slot))))))))
+    (if (negated-slot-p slot) (complement test) test)))
 
 (defun make-predicate-test (forms bindings &optional (negated-p nil))
   (let* ((special-vars
@@ -98,18 +110,64 @@
          (test
           (function
            (lambda (tokens)
-             (progv
-                 `(,@special-vars)
-                 `(,@(mapcar #'(lambda (binding)
-                                 (if (pattern-binding-p binding)
-                                     (token-find-fact 
-                                      tokens (binding-address binding))
-                                   (get-slot-value
-                                    (token-find-fact 
-                                     tokens (binding-address binding))
-                                    (binding-slot-name binding))))
-                             bindings))
-               (funcall predicate))))))
+             (handler-case
+                 (progv
+                     `(,@special-vars)
+                     `(,@(mapcar #'(lambda (binding)
+                                     (if (pattern-binding-p binding)
+                                         (token-find-fact 
+                                          tokens (binding-address binding))
+                                       (get-slot-value
+                                        (token-find-fact 
+                                         tokens (binding-address binding))
+                                        (binding-slot-name binding))))
+                                 bindings))
+                   (funcall predicate))
+               (error (e)
+                 (progn
+                   (format t "forms: ~S~%" forms)
+                   (format t "negated-p: ~S~%" negated-p)
+                   (format t "bindings: ~S~%" bindings)
+                   (format t "token: ~S~%" tokens)
+                   (format t "token stack: ~S~%" (token-facts tokens))
+                   (break))))))))
+    (if negated-p (complement test) test)))
+
+(defun make-intra-pattern-predicate-test (forms bindings 
+                                          &optional (negated-p nil))
+  (let* ((special-vars
+          (mapcar #'binding-variable bindings))
+         (body
+          (if (consp (first forms)) 
+              forms
+            (list forms)))
+         (predicate
+          (compile nil `(lambda ()
+                          (declare (special ,@special-vars))
+                          ,@body)))
+         (test
+          (function
+           (lambda (tokens)
+             (handler-case
+                 (progv
+                     `(,@special-vars)
+                     `(,@(mapcar #'(lambda (binding)
+                                     (if (pattern-binding-p binding)
+                                         (token-find-fact 
+                                          tokens (binding-address binding))
+                                       (get-slot-value
+                                        (token-top-fact tokens)
+                                        (binding-slot-name binding))))
+                                 bindings))
+                   (funcall predicate))
+               (error (e)
+                 (progn
+                   (format t "forms: ~S~%" forms)
+                   (format t "negated-p: ~S~%" negated-p)
+                   (format t "bindings: ~S~%" bindings)
+                   (format t "token: ~S~%" tokens)
+                   (format t "token stack: ~S~%" (token-facts tokens))
+                   (break))))))))
     (if negated-p (complement test) test)))
          
 (defun make-behavior (function bindings)

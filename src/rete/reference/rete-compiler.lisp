@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.26 2002/09/27 15:29:44 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.27 2002/09/27 20:51:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,7 +60,7 @@
          (cond ((simple-slot-p slot)
                 (make-simple-slot-test slot))
                ((constrained-slot-p slot)
-                (make-predicate-test
+                (make-intra-pattern-test
                  (pattern-slot-constraint slot)
                  (pattern-slot-constraint-bindings slot)
                  (negated-slot-p slot)))
