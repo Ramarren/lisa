@@ -20,18 +20,18 @@
 ;;; File: TODO
 ;;; Description: Ongoing list of things that need to be done.
 
-;;; $Id: TODO,v 1.1 2001/03/29 20:31:30 youngde Exp $
+;;; $Id: TODO,v 1.2 2001/04/25 20:11:26 youngde Exp $
 
 ;;; Absolutely necessary...
 
-* Start work on condition hierarchy.
+* Start work on condition hierarchy. -- DONE
 
-* Get rule salience working.
+* Get rule salience working. -- DONE
 
-* Add support for TEST conditional element.
+* Add support for TEST conditional element. -- DONE
 
 * CLOS reasoning support. Expand defimport to allow specification of
-  relevant slots?
+  relevant slots? -- DONE
 
 ;;; Really nice to have...
 
@@ -47,7 +47,7 @@
 
 * Rule redefinition.
 
-* Expanded slot-value types (including lists).
+* Expanded slot-value types (including lists). -- DONE
 
 * Some kind of OR* support, as in
 

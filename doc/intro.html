@@ -44,12 +44,6 @@ but the implementation requires some thought.</li>
 
 <br>&nbsp;
 <li>
-<i>Limited fact slot values</i>: Right now LISA limits the values fact
-slots can possess to '(string, number, symbol). In particular, lists are
-not yet supported.</li>
-
-<br>&nbsp;
-<li>
 <i>Patterns like this</i>: LISA currently doesn't support patterns like
 (<b>pattern-1 (slot-1 ?var) (slot-2 ?var))</b>, where <b>?var</b> first
 occurs in <b>pattern-1</b> and multiple times within its slots. I hope
@@ -109,71 +103,71 @@ today. Most commands are pretty obvious; none are sufficiently documented.
 <li>
 <i>defrule</i>: Defines a production rule. If you're familiar with CLIPS
 or JESS you're in great shape; LISA has her roots in those two systems.
-If not you'll have to muddle throught the MAB example for now.<br>
-<BR></li>
+If not you'll have to muddle throught the MAB example for now.</li>
 
+<br>&nbsp;
 <li>
-<i>deftemplate</i>: Defines a type representing a LISA "unordered" fact.<br>
-<BR></li>
+<i>deftemplate</i>: Defines a type representing a LISA "unordered" fact.</li>
 
+<br>&nbsp;
 <li>
 <i>defimport</i>: Makes a CLOS class known to LISA and allows instances
-of this class to be inserted into the knowledge base.<br>
-<BR></li>
+of this class to be inserted into the knowledge base.</li>
 
+<br>&nbsp;
 <li>
-<i>assert</i>: Asserts a fact into the knowledge base.<br>
-<BR></li>
+<i>assert</i>: Asserts a fact into the knowledge base.</li>
 
+<br>&nbsp;
 <li>
-<i>assert-instance</i>: Asserts a CLOS instance into the knowledge base.<br>
-<BR></li>
+<i>assert-instance</i>: Asserts a CLOS instance into the knowledge base.</li>
 
+<br>&nbsp;
 <li>
 <i>retract</i>: Removes a fact from the knowledge base. You can give <i>retract</i>
-either the fact identifier (an integer) or a fact object.<br>
-<BR></li>
+either the fact identifier (an integer) or a fact object.</li>
 
+<br>&nbsp;
 <li>
 <i>modify</i>: Modifies a fact. In essence, this function causes a <i>retract</i>
-followed by an <i>assert</i>.<br>
-<BR></li>
+followed by an <i>assert</i>.</li>
 
+<br>&nbsp;
 <li>
-<i>facts</i>: Prints a list of facts.<br>
-<BR></li>
+<i>facts</i>: Prints a list of facts.</li>
 
+<br>&nbsp;
 <li>
-<i>agenda</i>: Prints the current rule activations.<br>
-<BR></li>
+<i>agenda</i>: Prints the current rule activations.</li>
 
+<br>&nbsp;
 <li>
 <i>reset</i>: Clears all facts from the knowledge base, resets the inference
-engine and asserts the <i>initial fact</i>.<br>
-<BR></li>
+engine and asserts the <i>initial fact</i>.</li>
 
+<br>&nbsp;
 <li>
 <i>clear</i>: Re-initializes the inference engine and destroys any existing
-Rete network.<br>
-<BR></li>
+Rete network.</li>
 
+<br>&nbsp;
 <li>
 <i>run</i>: Runs the engine until there are no more activations. Optionally
 takes as an argument an integer indicating the number of rules to fire
-before halting.<br>
-<BR></li>
+before halting.</li>
 
+<br>&nbsp;
 <li>
-<i>halt</i>. Not yet implemented.<br>
-<BR></li>
+<i>halt</i>. Not yet implemented.</li>
 
+<br>&nbsp;
 <li>
 <i>watch</i>: Asks the engine to indicate the occurrence of certain events.
 Currently, one can monitor assertions, retractions, activations and firings;
 give <i>watch</i> one of the keywords '(:facts :activations :rules) depending
-on what you want to monitor.<br>
-<BR></li>
+on what you want to monitor.</li>
 
+<br>&nbsp;
 <li>
 <i>unwatch</i>: Undoes the effect of a previous <i>watch</i>.</li>
 </ul>
