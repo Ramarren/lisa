@@ -22,7 +22,7 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.9 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.10 2001/08/24 15:37:01 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,7 +39,7 @@
 (defun mappaths (func rule-name)
   (mapc #'(lambda (path)
             (mapc func path))
-        (find-paths-to-rule rule-name)))
+        (find-paths-to-rule (current-engine) rule-name)))
 
 (defun instrument-rule (rule-name)
   "Instruments each node in the network that leads to the rule
