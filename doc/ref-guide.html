@@ -187,7 +187,7 @@ are currently no supported keywords for this macro.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(assert (<i>template-name</i> (<i>slot-name value</i>)*))</td>
+<td WIDTH="80%" NOSAVE>(assert (<i>fact-specifier</i>))</td>
 
 
 
@@ -199,13 +199,28 @@ are currently no supported keywords for this macro.</blockquote>
 
 
 
-<blockquote>Inserts a fact identified by <i>template-name</i> into the
+<blockquote>Inserts a fact identified by <i>fact-specifier</i> into the
 
-knowledge base. Slot values are assigned using a list of (<i>slot-name
-
-value</i>) pairs. The template associated with <i>template-name</i> must
-
-be known to LISA a priori.</blockquote>
+knowledge base. There are two forms of ASSERT; the first operates on
+  template-based facts, the other on CLOS instances. For templates, ASSERT takes
+  a symbol representing the name of the template, followed by a list of (<i>slot-name
+  value</i>) pairs:
+  <dl>
+    <dd>(assert (frodo (name frodo) (age 100))</dd>
+  </dl>
+  <p>For instances of user-defined classes, ASSERT takes a form that must
+  evaluate to a CLOS instance:</p>
+  <dl>
+    <dd>(assert ((make-instance 'frodo :name 'frodo :age 100)))</dd>
+  </dl>
+  <p>or:</p>
+  <dl>
+    <dd>(let ((?instance (make-instance 'frodo :name 'frodo)))</dd>
+    <dd>&nbsp;&nbsp;&nbsp; (assert (?instance)))</dd>
+  </dl>
+  <p>If the template associated with a fact has not been declared prior to its
+  assertion, LISA will signal a continuable error.</p>
+</blockquote>
 
 
 
@@ -213,7 +228,7 @@ be known to LISA a priori.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(retract <i>fact</i> &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(retract <i>fact-or-instance</i>)</td>
 
 
 
@@ -225,13 +240,11 @@ be known to LISA a priori.</blockquote>
 
 
 
-<blockquote>Removes a fact from the knowledge base. The symbol <i>fact</i>
-
-should be bound to either a LISA fact object or an integer representing
-
-the fact identifier. Unless <i>engine</i> is supplied, the inference engine
-
-returned by (current-engine) will be used.</blockquote>
+<blockquote>Removes a fact or instance from the knowledge base. In the case of a
+  template-based fact, <i>fact-or-instance</i> may be either a symbol
+  representing the name of the fact, or an integer mapping to the fact
+  identifier; for CLOS objects <i>fact-or-instance</i> must be an instance of
+  STANDARD-OBJECT.</blockquote>
 
 
 
@@ -1914,7 +1927,14 @@ mechanism akin to the CLIPS module system would be more useful. Or both...<br>
 <li>
 
 <i>Backward chaining</i>: Perhaps an implementation of Prolog's backchaining
-algorithm that has concurrent access to working memory (i.e. along with Rete).</li>
+algorithm that has concurrent access to working memory (i.e. along with Rete).<br>
+</li>
+
+
+
+<li>
+
+<i>The EXISTS conditional element.</i></li>
 
 
 
