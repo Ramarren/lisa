@@ -20,7 +20,7 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.8 2002/11/02 17:30:46 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.9 2003/05/20 19:19:32 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,12 +111,13 @@
         (fact (first facts) (first facts))
         (index 0 (incf index)))
       ((endp facts))
-    (if verbose
-        (format t "  [~D] ~S~%" index fact)
-      (format t "  [~D] ~A, ~A~%"
-              index
-              (fact-symbolic-id fact)
-              (fact-name fact))))
+    (when (typep fact 'fact)
+      (if verbose
+          (format t "  [~D] ~S~%" index fact)
+        (format t "  [~D] ~A, ~A~%"
+                index
+                (fact-symbolic-id fact)
+                (fact-name fact)))))
   (values))
 
 (defun bindings ()
