@@ -24,13 +24,14 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.46 2002/10/30 20:34:25 youngde Exp $
+;;; $Id: parser.lisp,v 1.47 2002/10/31 19:52:38 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
 
-(defvar *binding-table* nil)
+(defvar *compound-patterns-p*)
+(defvar *binding-table*)
 
 (defun make-binding-set ()
   (loop for binding being the hash-value of *binding-table*
@@ -72,14 +73,26 @@
     `(multiple-value-bind (,doc-string ,remains)
          (extract-rule-headers ,rule-form)
        (multiple-value-bind (,lhs ,rhs)
-           (let ((*binding-table* (make-hash-table)))
+           (let ((*binding-table* (make-hash-table))
+                 (*compound-patterns-p* nil))
              (parse-rulebody ,remains))
          ,@body))))
+
+(defun manage-compound-patterns (patterns)
+  (let ((ruleset (list)))
+    (labels ((build-ruleset (patterns ruleset)
+               (let ((pattern (first patterns)))
+                 (cond ((endp patterns) ruleset)
+                       ((compound-pattern-p pattern)
+                        ()))))))))
+                        
 
 (defun define-rule (name body &optional (salience 0) (module nil))
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
+    (when *compound-patterns-p*
+      (manage-compound-patterns lhs))
     (make-rule name (inference-engine) lhs rhs
                :doc-string doc-string
                :salience salience
