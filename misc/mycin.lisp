@@ -21,17 +21,23 @@
 ;;; Description: An implementation of MYCIN as illustrated in PAIP, pg. 553. This example
 ;;; is used to exercise Lisa's new support for certainty factors.
 
-;;; $Id: mycin.lisp,v 1.1 2004/09/15 18:34:06 youngde Exp $
+;;; $Id: mycin.lisp,v 1.2 2004/09/15 19:23:57 youngde Exp $
 
 (in-package :lisa-user)
 
-(defclass culture ()
-  ((site :initarg :site
-         :initform nil
-         :reader site)
-   (days-old :initarg :days-old
-             :initform nil
-             :reader days-old)))
+(defclass param-mixin ()
+  ((value :initarg :value
+          :initform nil
+          :reader value)
+   (entity :initarg :entity
+           :initform nil
+           :reader entity)))
+
+(defclass culture () ())
+
+(defclass culture-site (param-mixin) ())
+
+(defclass culture-age (param-mixin) ())
 
 (defclass patient ()
   ((name :initarg :name
@@ -42,29 +48,97 @@
         :reader sex)
    (age :initarg :age
         :initform nil
-        :reader age)
-   (burn :initarg :burn
-         :initform nil
-         :reader burn)
-   (compromised-host :initarg :compromised-host
-                     :initform nil
-                     :reader compromised-host)))
+        :reader age)))
 
-(defclass organism ()
-  ((identity :initarg :identity
-             :initform :unknown
-             :reader id)
-   (gram :initarg :gram
-         :initform nil
-         :reader gram)
-   (morphology :initarg :morphology
-               :initform nil
-               :reader morphology)
-   (aerobicity :initarg :aerobicity
-               :initform nil
-               :reader aerobicity)
-   (growth-conformation :initarg :growth-conformation
-                        :initform nil
-                        :reader growth-conformation)))
+(defclass burn (param-mixin) ())
 
+(defclass compromised-host (param-mixin) ())
 
+(defclass organism () ())
+
+(defclass gram (param-mixin) ())
+
+(defclass morphology (param-mixin) ())
+
+(defclass aerobicity (param-mixin) ())
+
+(defclass growth-conformation (param-mixin) ())
+
+(defclass organism-identity (param-mixin) ())
+
+(defrule rule-52 (:cf 0.4)
+  (culture-site (value blood))
+  (gram (value neg) (entity ?organism))
+  (morphology (value rod) (entity ?organism))
+  (burn (value serious))
+  =>
+  (assert (organism-identity (value pseudomonas) (entity ?organism))))
+
+(defrule rule-71 (:cf 0.7)
+  (gram (value pos) (entity ?organism))
+  (morphology (value coccus) (entity ?organism))
+  (growth-conformation (value clumps) (entity ?organism))
+  =>
+  (assert (organism-identity (value staphylococcus) (entity ?organism))))
+
+(defrule rule-73 (:cf 0.9)
+  (culture-site (value blood))
+  (gram (value neg) (entity ?organism))
+  (morphology (value rod) (entity ?organism))
+  (aerobicity (value anaerobic) (entity ?organism))
+  =>
+  (assert (organism-identity (value bacteroides) (entity ?organism))))
+
+(defrule rule-75 (:cf 0.6)
+  (gram (value neg) (entity ?organism))
+  (morphology (value rod) (entity ?organism))
+  (compromised-host (value t))
+  =>
+  (assert (organism-identity (value pseudomonas) (entity ?organism))))
+
+(defrule rule-107 (:cf 0.8)
+  (gram (value neg) (organism ?organism))
+  (morphology (value rod) (entity ?organism))
+  (aerobicity (value aerobic) (entity ?organism))
+  =>
+  (assert (organism-identity (value enterobacteriaceae) (entity ?organism))))
+
+(defrule rule-165 (:cf 0.7)
+  (gram (value pos) (entity ?organism))
+  (morphology (value coccus) (entity ?organism))
+  (growth-conformation (value chains) (entity ?organism))
+  =>
+  (assert (organism-identity (value streptococcus) (entity ?organism))))
+
+(defun culture-1 ()
+  (reset)
+  (let ((?organism (make-instance 'organism))
+        (?patient (make-instance 'patient
+                                 :name "Sylvia Fischer"
+                                 :sex 'female
+                                 :age 27)))
+    (assert (compromised-host (value t) (entity ?patient)))
+    (assert (burn (value serious) (entity ?patient)))
+    (assert (culture-site (value blood)))
+    (assert (culture-age (value 3)))
+    (assert (gram (value neg) (entity ?organism)))
+    (assert (morphology (value rod) (entity ?organism)))
+    (assert (aerobicity (value aerobic) (entity ?organism)))
+    (run)))
+
+(defun culture-2 ()
+  (reset)
+  (let ((?organism (make-instance 'organism))
+        (?patient (make-instance 'patient
+                                 :name "Sylvia Fischer"
+                                 :sex 'female
+                                 :age 27)))
+    (assert (compromised-host (value t) (entity ?patient)))
+    (assert (burn (value serious) (entity ?patient)))
+    (assert (culture-site (value blood)))
+    (assert (culture-age (value 3)))
+    (assert (gram (value neg) (entity ?organism)) :cf 0.8)
+    (assert (gram (value pos) (entity ?organism)) :cf 0.2)
+    (assert (morphology (value rod) (entity ?organism)))
+    (assert (aerobicity (value anaerobic) (entity ?organism)))
+    (run)))
