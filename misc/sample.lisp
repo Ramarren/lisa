@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.22 2000/12/08 02:25:49 youngde Exp $
+;;; $Id: sample.lisp,v 1.23 2000/12/11 16:49:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,6 +55,7 @@
 (defimport boris lisa::boris)
 (defimport natasha lisa::natasha)
 
+#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name ?nemesis))
@@ -62,6 +63,7 @@
   (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis)
   (assert (boris (name ?nemesis))))
 
+#+ignore
 (defrule boris
   (?fact (boris (name ?name "rocky")))
   =>
@@ -69,19 +71,23 @@
   (modify ?fact (name ?name))
   (retract ?fact))
 
+#+ignore
 (defrule multiple-references
   (natasha (name ?name "natasha") (nemesis ?name))
   =>
   (format t "multiple-references fired! Value of ?name is ~S~%" ?name))
 
-#+ignore
 (defrule schtum
   (?f-1 (rocky (name "rocky")))
-  (?f-2 (boris (name "boris")))
   =>
-  (format t "schtum fired! (?f-1 = ~S, ?f-2 = ~S)~%" ?f-1 ?f-2)
-  (retract ?f-1)
-  (retract ?f-2))
+  (format t "schtum fired (?f-1 = ~S).~%" ?f-1)
+  (modify ?f-1 (name "boris")))
+
+(defrule rocky-boris
+  (?f-1 (rocky (name ?name "boris")))
+  =>
+  (format t "rocky-boris fired (name =  ~S).~%" ?name)
+  (retract ?f-1))
 
 #+ignore
 (defrule no-patterns

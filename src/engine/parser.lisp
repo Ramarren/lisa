@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.21 2000/12/10 03:26:01 youngde Exp $
+;;; $Id: parser.lisp,v 1.22 2000/12/11 16:49:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -178,5 +178,5 @@
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
 (defun parse-and-modify-fact (fact body)
-  `(format t "modify fact: ~S ~S~%" ,fact
-           (normalize-slots ,@(expand-slot-variables body))))
+  `(modify-fact (current-engine)
+                ,fact (normalize-slots ,@(expand-slot-variables body))))
