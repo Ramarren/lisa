@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.19 2001/02/12 15:59:57 youngde Exp $
+;;; $Id: strategies.lisp,v 1.20 2001/02/22 21:26:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -141,4 +141,36 @@
 
 (defun make-depth-first-strategy ()
   (make-instance 'depth-first-strategy))
+
+(defclass breadth-first-strategy (strategy)
+  ((priority-queue :reader get-priority-queue))
+  (:documentation
+   "A breadth-first conflict resolution strategy."))
+
+(defmethod add-activation ((self breadth-first-strategy) activation)
+  (insert-activation (get-priority-queue self) activation))
+
+(defmethod find-activation ((self breadth-first-strategy) rule token)
+  (lookup-activation (get-priority-queue self) rule token))
+
+(defmethod next-activation ((self breadth-first-strategy))
+  (get-next-activation (get-priority-queue self)))
+
+(defmethod remove-activations ((self breadth-first-strategy))
+  (initialize-queue self))
+
+(defmethod list-activations ((self breadth-first-strategy))
+  (get-all-activations (get-priority-queue self)))
+
+(defmethod initialize-queue ((self breadth-first-strategy))
+  (setf (slot-value self 'priority-queue)
+    (make-indexed-priority-list
+     #'(lambda (obj place) (append place `(,obj))))))
+
+(defmethod initialize-instance :after ((self breadth-first-strategy) &rest args)
+  (declare (ignore args))
+  (initialize-queue self))
+
+(defun make-breadth-first-strategy ()
+  (make-instance 'breadth-first-strategy))
 

@@ -377,6 +377,11 @@
   (printout t "Elapsed time: "
             (- (time) ?start) crlf))
 
+(deffunction walk ()
+  (run 1)
+  (facts)
+  (agenda))
+
 ;(reset)
 ;(run)
 

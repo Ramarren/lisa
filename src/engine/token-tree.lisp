@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.16 2001/02/13 18:22:02 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.17 2001/02/22 21:26:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,9 +70,9 @@
 
 (defun create-hash-code (tree token)
   (declare (type token-tree tree) (type token token))
-  (if (use-sortcode-p tree)
-      (hash-code token)
-    (get-fact-id (find-fact token (get-token-index tree)))))
+  (abs (if (use-sortcode-p tree)
+           (hash-code token)
+         (get-fact-id (find-fact token (get-token-index tree))))))
 
 (defun clear-tree (self)
   (declare (type token-tree self))

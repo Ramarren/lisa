@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.26 2001/02/13 21:16:32 youngde Exp $
+;;; $Id: token.lisp,v 1.27 2001/02/22 21:26:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,41 +70,12 @@
 #+ignore
 (defun find-fact (token level)
   (declare (type token token) (type integer level))
-  (flet ((start-token ()
-           (let ((bad-class (find-class 'not-or-test-fact)))
-             (do ((tok token (get-parent tok)))
-                 ((or (null tok)
-                      (not (eq bad-class (get-class (get-top-fact tok)))))
-                  tok)))))
-    (describe token)
-    (terpri)
-    (let ((fact-token (start-token)))
-      (cl:assert (not (null fact-token)) ()
-                 "The starting token could not be found from ~S." token)
-      (format t "find-fact is starting with ~S, level ~D~%" fact-token level)
-      (describe fact-token)
-      (terpri)
-      (dotimes (i (- (get-depth fact-token) level))
-        (setf fact-token (get-parent fact-token)))
-      (cl:assert (not (null fact-token)) ())
-      (get-top-fact fact-token))))
-
-#+ignore
-(defun find-fact (token level)
-  (declare (type token token) (type integer level))
-  (flet ((start-token ()
-           (let ((bad-class (find-class 'not-or-test-fact)))
-             (do ((tok token (get-parent tok)))
-                 ((or (null tok)
-                      (not (eq bad-class (get-class (get-top-fact tok)))))
-                  tok)))))
-    (let ((fact-token (start-token)))
-      (cl:assert (not (null fact-token)) ()
-                 "The starting token could not be found from ~S." token)
-      (dotimes (i (- (get-depth fact-token) level))
-        (setf fact-token (get-parent fact-token)))
-      (cl:assert (not (null fact-token)) ())
-      (get-top-fact fact-token))))
+  (let ((fact-token token))
+    (do ((i (- (get-depth token) level)))
+        ((not (plusp (decf i))))
+      (setf fact-token (get-parent fact-token)))
+    (cl:assert (not (null fact-token)) ())
+    (get-top-fact fact-token)))
 
 (defmethod increment-negation-count ((self token))
   (incf (get-negation-count self)))

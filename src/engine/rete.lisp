@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.41 2001/02/13 21:16:32 youngde Exp $
+;;; $Id: rete.lisp,v 1.42 2001/02/22 21:26:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -193,5 +193,5 @@
                  (fire-rule activation)
                  (incf count))))))))
 
-(defun make-rete (&key (strategy (make-depth-first-strategy)))
+(defun make-rete (&key (strategy (make-breadth-first-strategy)))
   (make-instance 'rete :strategy strategy))
