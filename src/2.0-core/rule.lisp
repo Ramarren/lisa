@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.9 2002/10/24 19:24:56 youngde Exp $
+;;; $Id: rule.lisp,v 1.10 2002/11/02 02:17:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,6 +44,8 @@
                 :reader rule-binding-set)
    (node-list :initform nil
               :reader rule-node-list)
+   (subrules :initform nil
+             :accessor rule-subrules)
    (engine :initarg :engine
            :initform nil
            :reader rule-engine))
@@ -73,6 +75,9 @@
   (add-rule-to-network (rule-engine rule) rule patterns)
   rule)
 
+(defun add-subrule (rule subrule)
+  (push subrule (rule-subrules rule)))
+
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
   (flet ((make-rule-binding-set ()
@@ -88,3 +93,14 @@
        :module module
        :binding-set (make-rule-binding-set))
      patterns actions)))
+
+(defun make-composite-rule (name engine patterns actions
+                            &rest args
+                            &key &allow-other-keys)
+  (let ((primary-rule
+         (apply #'make-rule name engine (first patterns) actions args)))
+    (dolist (pattern (rest patterns) primary-rule)
+      (add-subrule 
+       primary-rule (apply #'make-rule 
+                           (gensym) engine pattern actions args)))))
+    

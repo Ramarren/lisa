@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.49 2002/11/01 19:34:14 youngde Exp $
+;;; $Id: parser.lisp,v 1.50 2002/11/02 02:17:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,7 +78,7 @@
              (parse-rulebody ,remains)
            ,@body)))))
 
-(defun manage-compound-patterns (patterns)
+(defun make-composite-ruleset (patterns)
   (let ((rulesets (list)))
     (labels ((build-ruleset (patterns ruleset)
                (let ((pattern (first patterns)))
@@ -102,13 +102,17 @@
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
-    (when *compound-patterns-p*
-      (format t "compound patterns: ~S~%" (manage-compound-patterns lhs))
-      (break))
-    (make-rule name (inference-engine) lhs rhs
-               :doc-string doc-string
-               :salience salience
-               :module module)))
+    (if *compound-patterns-p*
+        (make-composite-rule 
+         name (inference-engine) 
+         (make-composite-ruleset lhs) rhs
+         :doc-string doc-string
+         :salience salience
+         :module module)
+      (make-rule name (inference-engine) lhs rhs
+                 :doc-string doc-string
+                 :salience salience
+                 :module module))))
 
 (defun redefine-defrule (name body &key (salience 0) (module nil))
   (define-rule name body salience module))

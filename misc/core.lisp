@@ -3,6 +3,8 @@
 
 (use-default-engine)
 
+(clear)
+
 (deftemplate frodo ()
   (slot name)
   (slot has-ring)
@@ -91,6 +93,14 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
+(defrule or-rule ()
+  (frodo)
+  (or (gandalf)
+      (samwise))
+  =>
+  (format t "or-rule~%"))
+
+#+ignore
 (defrule or-rule ()
   (or (samwise (name sam) (friend ?name))
       (gandalf (name gandalf)))
