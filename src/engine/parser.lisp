@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.54 2001/04/03 01:03:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.55 2001/04/03 15:07:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -151,22 +151,6 @@
 (defun make-default-pattern (p)
   (parse-default-pattern p))
 
-#+ignore
-(defun normalize-slots (slots)
-  (flet ((normalize (slot)
-           (let ((slot-name (first slot))
-                 (slot-value (second slot)))
-             (cond ((and (symbolp slot-name)
-                         (or (literalp slot-value)
-                             (variablep slot-value)))
-                    (if (quotablep slot-value)
-                        ``(,',slot-name ,',slot-value)
-                      ``(,',slot-name ,,slot-value)))
-                   (t
-                    (parsing-error
-                     "There's a type problem in this slot: ~S." slot))))))
-    `(list ,@(mapcar #'normalize slots))))
-
 (defun normalize-slots (slots)
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
@@ -195,28 +179,6 @@
                    "This slot has a structural problem: ~S" slot)))))
     (mapcar #'examine-slot slots)))
 
-#+ignore
-(defun canonicalize-slot-names (meta-class slots)
-  (mapcar #'(lambda (slot)
-              `(,(find-meta-slot meta-class (first slot))
-                ,(second slot)))
-          slots))
-
-#+ignore
-(defun parse-and-insert-fact (body)
-  (let ((head (first body))
-        (slots (rest body)))
-    (cond ((symbolp head)
-           (let ((class (find-meta-class head)))
-             `(assert-fact
-               (current-engine)
-               (make-fact ',(get-name class)
-                (canonicalize-slot-names
-                 ,class (,@(normalize-slots slots)))))))
-          (t
-           (parsing-error
-            "A fact must begin with a symbol: ~S." head)))))
-
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
         (slots (rest body)))
@@ -230,17 +192,6 @@
           (t
            (parsing-error
             "A fact must begin with a symbol: ~S." head)))))
-
-#+ignore
-(defun parse-and-modify-fact (fact body)
-  (flet ((generate-modify ()
-           `(modify-fact (current-engine) ,fact
-             (canonicalize-slot-names (find-meta-class (fact-name ,fact))
-              (,@(normalize-slots body))))))
-    (handler-case
-        (generate-modify)
-      (lisa-error (condition)
-        (command-structure-error 'modify-fact condition)))))
 
 (defmacro with-modify-form (((class binding slots) modify) &body body)
   `(destructuring-bind (,class ,binding &rest ,slots) ,modify
@@ -265,27 +216,6 @@
                    (t
                     (parsing-error
                      "There's a structural problem with this form: ~S" body))))))
-    (handler-case
-        (generate-modify)
-      (lisa-error (condition)
-        (command-structure-error 'modify-fact condition)))))
-
-#+ignore
-(defun parse-and-modify-fact (body)
-  (flet ((generate-modify ()
-           (with-modify-form ((class binding slots) body)
-             (cond ((and (symbolp class)
-                         (variablep binding)
-                         (consp slots))
-                    (let ((slot-list
-                           (canonicalize-slot-names
-                            (find-meta-class class) slots)))
-                      `(modify-fact (current-engine) ,binding
-                        (,@(normalize-slots slot-list)))))
-                   (t
-                    (parsing-error
-                     "There's a structural problem with this form: ~S"
-                     body))))))
     (handler-case
         (generate-modify)
       (lisa-error (condition)

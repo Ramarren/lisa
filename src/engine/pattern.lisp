@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.49 2001/03/16 21:07:28 youngde Exp $
+;;; $Id: pattern.lisp,v 1.50 2001/04/03 15:07:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -86,7 +86,7 @@
 
 (defun canonicalize-slots (self global-bindings)
   (declare (type pattern self))
-  (let ((slots '())
+  (let ((slots (list))
         (meta (find-meta-class (get-name self))))
     (mapc #'(lambda (slot-desc)
               (push
