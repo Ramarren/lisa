@@ -34,6 +34,9 @@ distribution, but exposure to other rule sets is vital to ensuring the stability
 of forthcoming releases.</p>
 <p>Version 2.0 contains its own DEFSYSTEM file, lisa2.system. Building 2.0 is
 very similar to how one builds 1.x; the system name is LISA2 rather than LISA.
-So, something like (mk:compile-system :lisa2) should work for you.</p>
+So, something like (mk:compile-system :lisa2) should work for you. The 2.0 code
+base is kept separate from 1.x; you'll notice two new directories in the source
+tree; 2.0-core contains the core system files, rete/reference contains those
+files strictly associated with the 2.0 Rete implementation.</p>
 <p>This alpha version of 2.0 has been tested with ACL 6.2 and CLISP 2.29, both
 on Windows 2000.</p>
