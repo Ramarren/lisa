@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.10 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: debug.lisp,v 1.11 2001/02/08 16:11:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,13 +60,14 @@
            (get-rule-list engine)))
   
 (defun find-node (node-type &optional (engine (current-engine)))
-  (let ((collection nil))
+  (let ((collection nil)
+        (node-class (find-class node-type)))
     (labels ((trace-graph (nodes)
                (let ((node (first nodes)))
                  (cond ((null node)
                         (values nil))
                        (t
-                        (when (typep node node-type)
+                        (when (eq (class-of node) node-class)
                           (push node collection))
                         (trace-graph (get-successors node))
                         (trace-graph (rest nodes)))))))
@@ -76,3 +77,33 @@
 
 (defun find-node2 (&optional (engine (current-engine)))
   (find-node 'node2 engine))
+
+(defun find-paths-to-rule (rule-name)
+  (let ((root (get-root-node (get-compiler (current-engine))))
+        (paths (list)))
+    (labels ((trace-graph (nodes path)
+               (let ((node (first nodes)))
+                 (cond ((null node)
+                        (values nil))
+                       ((and (typep node 'terminal-node)
+                             (eq rule-name (get-name (get-rule node))))
+                        (push (append path `(,node)) paths)
+                        (values t))
+                       (t
+                        (trace-graph (get-successors node)
+                                     (append path `(,node)))
+                        (trace-graph (rest nodes) path))))))
+      (trace-graph (get-successors root) (list root)))
+    (values paths)))
+
+(defun print-paths-to-rule (rule-name &optional (strm t))
+  (labels ((print-path (nodes level)
+             (unless (null nodes)
+               (let ((obj (format nil "~S" (first nodes))))
+                 (format strm "~V<~A~>~%"
+                         (+ level (length obj)) obj)
+                 (print-path (rest nodes) (+ level 3))))))
+    (mapc #'(lambda (path)
+              (print-path path 0))
+          (find-paths-to-rule rule-name)))
+  (values))

@@ -21,7 +21,7 @@
 ;;; Description: This class holds an individual test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-eq.lisp,v 1.2 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: test2-eq.lisp,v 1.3 2001/02/08 16:11:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,15 +38,12 @@
 (defmethod do-test ((self test2-eq) left-token right-fact)
   (let ((left-fact (find-fact left-token (get-fact-location self))))
     (cl:assert (not (null left-fact)))
-    #+ignore
-    (when (eq *current-rule* 'unlock-chest-with-key)
+    (when trace-it
       (format t "DO-TEST running:~%")
       (format t "  left-slot-name: ~S~%" (get-left-slot-name self))
       (format t "  slot-value-left: ~S~%" (get-slot-value left-fact (get-left-slot-name self)))
       (format t "  right-slot-name: ~S~%" (get-right-slot-name self))
-      (format t "  slot-value-right: ~S~%" (get-slot-value right-fact (get-right-slot-name self)))
-      (setf *test2-token* left-token)
-      (setf *test2-right-fact* right-fact))
+      (format t "  slot-value-right: ~S~%" (get-slot-value right-fact (get-right-slot-name self))))
     (equal (get-slot-value left-fact (get-left-slot-name self))
            (get-slot-value right-fact (get-right-slot-name self)))))
 
