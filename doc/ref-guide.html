@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.4.2-2 i586) [Netscape]">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -25,14 +25,95 @@ Fact-related Operators</h4>
 &nbsp;
 <table BORDER WIDTH="100%" NOSAVE >
 <tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(deftemplate <i>name</i> () (<i>slot-name</i>)*)</td>
+<td WIDTH="80%" NOSAVE>(deftemplate <i>name</i> () (<i>slot-name*</i>))</td>
 
 <td>Macro</td>
 </tr>
 </table>
 
 <blockquote>Creates an internal LISA class identified by <i>name</i> that
-can be instantiated as a fact within the knowledge base.</blockquote>
+can be instantiated as a fact within the knowledge base. The <i>slot-name</i>s
+are analogous to class slots, but without any of the keyword arguments.
+Templates are a convenient way of specifying concepts that don't need the
+full support of CLOS. Reasoning over them is slightly more efficient, both
+in terms of time and size.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(defimport <i>symbolic-name</i> (<i>class-name</i>)
+(<i>slot-name</i>*))</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Makes a CLOS class known to LISA and allows instances of this
+class to be asserted into the knowledge base. The <i>symbolic-name</i>
+is the name that will be used in rules and during pattern matching; <i>class-name</i>
+is the fully-qualified name of the class as it is known to Lisp. To limit
+the slots available for pattern matching, include a list of relevant <i>slot-name</i>s.
+If no slot-names are specified LISA will examine the meta class for <i>class-name</i>
+and make all of the slots in the class hierarchy available.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(assert (<i>template-name</i> (<i>slot-name value</i>)*))</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Inserts a fact identified by <i>template-name</i> into the
+knowledge base. Slot values are assigned using a list of (<i>slot-name
+value</i>) pairs. The template associated with <i>template-name</i> must
+be known to LISA a priori.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(retract <i>fact</i> &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Removes a fact from the knowledge base. The symbol <i>fact</i>
+should be bound to either a LISA fact object or an integer representing
+the fact identifier. Unless <i>engine</i> is supplied, the inference engine
+returned by (current-engine) will be used.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(assert-instance <i>instance</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Inserts a CLOS instance into the knowledge base. The class
+of <i>instance</i> should already exist and have been identified to LISA
+via a <i>defimport</i>.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(retract-instance <i>instance</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Removes a CLOS instance from the knowledge base. The class
+of <i>instance</i> should already exist and have been identified to LISA
+via a <i>defimport</i>.</blockquote>
+
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(modify <i>fact</i> (<i>slot-name value</i>))</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Makes changes to the fact instance identified by <i>fact</i>.</blockquote>
 
 <h4>
 Rule-related Operators</h4>
@@ -132,8 +213,9 @@ pattern
 will succeed if the AND form returns non-<i>nil</i>; i.e. the functions
 HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
 If a rule provides no conditional elements, then it is said to match the
-<i>initial-fact</i>, which is asserted as the result of a call to <i>reset</i>.
-Thus, the following rule will always activate after each reset:
+<i>initial-fact</i>,
+which is asserted as the result of a call to <i>reset</i>. Thus, the following
+rule will always activate after each reset:
 <br>&nbsp;
 <dd>
 (defrule always-fires ()</dd>
