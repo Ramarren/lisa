@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.63 2002/11/15 16:36:05 youngde Exp $
+;;; $Id: parser.lisp,v 1.64 2002/11/15 20:31:36 youngde Exp $
 
 (in-package "LISA")
 
@@ -366,7 +366,7 @@
     `(let ((,deffacts (list)))
        (dolist (fact ',body)
          (let ((head (first fact)))
-           (ensure-meta-data-exists head head)
+           (ensure-meta-data-exists head)
            (push 
             (apply #'make-fact head (rest fact))
             ,deffacts)))

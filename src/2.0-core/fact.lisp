@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.10 2002/11/15 16:36:04 youngde Exp $
+;;; $Id: fact.lisp,v 1.11 2002/11/15 20:31:36 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,7 +53,7 @@
   (setf (gethash slot-name (fact-slot-table fact)) value)
   fact)
 
-(defun set-slot-from-instance (fact meta-fact instance slot-name)
+(defun set-slot-from-instance (fact instance slot-name)
   "Assigns to a slot the value from the corresponding slot in the fact's CLOS
   instance. FACT is a FACT instance; META-FACT is a META-FACT instance;
   INSTANCE is the fact's CLOS instance; SLOT-NAME is a symbol representing the
@@ -105,11 +105,10 @@
         (meta (fact-meta-data fact)))
     (flet ((synchronize-all-slots ()
              (mapc #'(lambda (slot-name)
-                       (set-slot-from-instance 
-                        fact meta instance slot-name))
+                       (set-slot-from-instance fact instance slot-name))
                    (get-slot-list meta)))
            (synchronize-this-slot ()
-             (set-slot-from-instance fact meta instance effective-slot)))
+             (set-slot-from-instance fact instance effective-slot)))
       (if (null effective-slot)
           (synchronize-all-slots)
         (synchronize-this-slot)))
@@ -163,7 +162,7 @@
   slot values are taken from the CLOS instance. FACT is a FACT instance;
   INSTANCE is the CLOS instance associated with this fact."
   (mapc #'(lambda (slot-name)
-            (set-slot-from-instance fact meta-data instance slot-name))
+            (set-slot-from-instance fact instance slot-name))
         (get-slot-list meta-data))
   (initialize-slot-value fact :object instance)
   fact)

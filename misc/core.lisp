@@ -1,5 +1,5 @@
 
-(in-package "LISA")
+(in-package "LISA-USER")
 
 (clear)
 
@@ -31,7 +31,6 @@
 (deftemplate pippin ()
   (slot name))
 
-#+ignore
 (defrule frodo ()
   (frodo (name ?name frodo))
   =>
@@ -98,6 +97,7 @@
   =>
   (assert (bilbo)))
 
+#+ignore
 (defrule logical-2 ()
   (logical
    (not (frodo)))

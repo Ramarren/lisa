@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.11 2002/11/15 16:36:04 youngde Exp $
+;;; $Id: meta.lisp,v 1.12 2002/11/15 20:31:36 youngde Exp $
 
 (in-package "LISA")
 
@@ -70,10 +70,11 @@
     (examine-class (find-class actual-name))))
 
 (defun import-class-specification (class-name)
-  (let ((class-object (find-class class-name)))
-    (intern (symbol-name class-name))
-    (dolist (slot-name (reflect:class-slot-list class-name))
-      (intern (symbol-name slot-name)))
+  (let ((class-object (find-class class-name))
+        (class-symbols (list class-name)))
+    (dolist (slot-name (reflect:class-slot-list class-object))
+      (push slot-name class-symbols))
+    (import class-symbols)
     (when *consider-taxonomy-when-reasoning*
       (dolist (ancestor (reflect:find-direct-superclasses class-object))
         (import-class-specification ancestor)))
