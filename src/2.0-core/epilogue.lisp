@@ -20,8 +20,11 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.1 2002/10/01 15:15:54 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.2 2002/10/10 20:20:42 youngde Exp $
 
 (in-package "LISA")
 
 (deftemplate initial-fact ())
+
+(deftemplate query-fact ()
+  (slot query-name))
