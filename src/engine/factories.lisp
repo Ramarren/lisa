@@ -3,25 +3,25 @@
 
 ;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
 
-;;; This program is free software; you can redistribute it and/or
-;;; modify it under the terms of the GNU General Public License
-;;; as published by the Free Software Foundation; either version 2
+;;; This library is free software; you can redistribute it and/or
+;;; modify it under the terms of the GNU Lesser General Public License
+;;; as published by the Free Software Foundation; either version 2.1
 ;;; of the License, or (at your option) any later version.
 
-;;; This program is distributed in the hope that it will be useful,
+;;; This library is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;; GNU General Public License for more details.
+;;; GNU Lesser General Public License for more details.
 
-;;; You should have received a copy of the GNU General Public License
-;;; along with this program; if not, write to the Free Software
+;;; You should have received a copy of the GNU Lesser General Public License
+;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: factories.lisp
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.25 2001/03/02 21:50:50 youngde Exp $
+;;; $Id: factories.lisp,v 1.26 2001/03/14 18:54:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -52,13 +52,13 @@
 (defun make-node-function-call (slot pattern)
   (make-function-call `(,(get-constraint slot)) (get-bindings pattern)))
 
-(defmethod make-node1 ((slot optimisable-simple-constraint-slot) pattern)
+(defmethod make-node1 ((slot simple-constraint-slot) pattern)
   (declare (ignore pattern))
   (if (is-negatedp slot)
       (make-node1-neq (get-name slot) (get-constraint slot))
     (make-node1-teq (get-name slot) (get-constraint slot))))
 
-(defmethod make-node1 ((slot optimisable-literal-slot) pattern)
+(defmethod make-node1 ((slot literal-slot) pattern)
   (declare (ignore pattern))
   (if (is-negatedp slot)
       (make-node1-neq (get-name slot) (get-value slot))
@@ -68,10 +68,10 @@
   (make-node1-tfn (get-name slot)
                   (make-node-function-call slot pattern)))
 
-(defmethod make-node2-test ((slot optimisable-slot) pattern)
+(defmethod make-node2-test ((slot simple-slot) pattern)
   (values nil))
 
-(defmethod make-node2-test ((slot optimisable-variable-slot) pattern)
+(defmethod make-node2-test ((slot simple-variable-slot) pattern)
   (let ((binding (lookup-binding pattern (get-value slot))))
     (if (is-negatedp slot)
         (make-test2-neq (get-location binding) (get-slot-name binding)

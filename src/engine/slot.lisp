@@ -3,24 +3,24 @@
 
 ;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
 
-;;; This program is free software; you can redistribute it and/or
-;;; modify it under the terms of the GNU General Public License
-;;; as published by the Free Software Foundation; either version 2
+;;; This library is free software; you can redistribute it and/or
+;;; modify it under the terms of the GNU Lesser General Public License
+;;; as published by the Free Software Foundation; either version 2.1
 ;;; of the License, or (at your option) any later version.
 
-;;; This program is distributed in the hope that it will be useful,
+;;; This library is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;; GNU General Public License for more details.
+;;; GNU Lesser General Public License for more details.
 
-;;; You should have received a copy of the GNU General Public License
-;;; along with this program; if not, write to the Free Software
+;;; You should have received a copy of the GNU Lesser General Public License
+;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.18 2001/03/13 21:56:13 youngde Exp $
+;;; $Id: slot.lisp,v 1.19 2001/03/14 18:54:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -74,16 +74,15 @@
             (get-constraint self)
             (get-negated self))))
 
-(defclass optimisable-slot (slot)
+(defclass simple-slot (slot)
   ()
   (:documentation
-   "A subclass of SLOT describing a slot instance that's eligible for
-   certain optimisations."))
+   "A subclass of SLOT describing instances that might be eligible for certain
+   optimisations."))
 
-(defclass simple-slot () ())
-(defclass optimisable-literal-slot (optimisable-slot simple-slot) ())
-(defclass optimisable-variable-slot (optimisable-slot) ())
-(defclass optimisable-simple-constraint-slot (optimisable-slot simple-slot) ())
+(defclass literal-slot (simple-slot) ())
+(defclass simple-variable-slot (simple-slot) ())
+(defclass simple-constraint-slot (simple-slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
@@ -107,25 +106,25 @@
                     `(not (equal ,,var ,,value))
                   `(equal ,,var ,,value))))
     (cond ((literalp value)
-           (make-instance 'optimisable-literal-slot :name name :value value))
+           (make-instance 'literal-slot :name name :value value))
           ((negated-literalp value)
-           (make-instance 'optimisable-literal-slot
+           (make-instance 'literal-slot
              :name name :value (second value) :negated t))
           ((negated-variablep value)
-           (make-instance 'optimisable-variable-slot
+           (make-instance 'simple-variable-slot
              :name name :value (second value) :negated t))
           ;; Then the slot value must be a variable...
           ((null constraint)
            (if (lookup-binding global-bindings value)
-               (make-instance 'optimisable-variable-slot 
+               (make-instance 'simple-variable-slot 
                  :name name :value value)
              (make-instance 'slot :name name :value value)))
           ;; The value is a variable and there is a constraint...
           ((literalp constraint)
-           (make-instance 'optimisable-simple-constraint-slot 
+           (make-instance 'simple-constraint-slot 
              :name name :value value :constraint constraint))
           ((negated-literalp constraint)
-           (make-instance 'optimisable-simple-constraint-slot
+           (make-instance 'simple-constraint-slot
              :name name :value value 
              :constraint (second constraint) :negated t))
           ((variablep constraint)

@@ -3,18 +3,18 @@
 
 ;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
 
-;;; This program is free software; you can redistribute it and/or
-;;; modify it under the terms of the GNU General Public License
-;;; as published by the Free Software Foundation; either version 2
+;;; This library is free software; you can redistribute it and/or
+;;; modify it under the terms of the GNU Lesser General Public License
+;;; as published by the Free Software Foundation; either version 2.1
 ;;; of the License, or (at your option) any later version.
 
-;;; This program is distributed in the hope that it will be useful,
+;;; This library is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;; GNU General Public License for more details.
+;;; GNU Lesser General Public License for more details.
 
-;;; You should have received a copy of the GNU General Public License
-;;; along with this program; if not, write to the Free Software
+;;; You should have received a copy of the GNU Lesser General Public License
+;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: rete-compiler.lisp
@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.54 2001/03/13 21:56:13 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.55 2001/03/14 18:54:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,13 +58,6 @@
 (defmethod initialize-instance :after ((self rete-compiler) &rest args)
   (declare (ignore args))
   (setf (slot-value self 'root-node) (make-root-node)))
-
-#+ignore
-(defmacro simple-slotp (slot)
-  `(or (typep ,slot 'optimisable-literal-slot)
-       (typep ,slot 'optimisable-simple-constraint-slot)
-       (and (has-complex-constraintp ,slot)
-            (localized-slotp ,slot))))
 
 (defmacro simple-slotp (slot)
   `(or (typep ,slot 'simple-slot)

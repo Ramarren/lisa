@@ -3,18 +3,18 @@
 
 ;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
 
-;;; This program is free software; you can redistribute it and/or
-;;; modify it under the terms of the GNU General Public License
-;;; as published by the Free Software Foundation; either version 2
+;;; This library is free software; you can redistribute it and/or
+;;; modify it under the terms of the GNU Lesser General Public License
+;;; as published by the Free Software Foundation; either version 2.1
 ;;; of the License, or (at your option) any later version.
 
-;;; This program is distributed in the hope that it will be useful,
+;;; This library is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;; GNU General Public License for more details.
+;;; GNU Lesser General Public License for more details.
 
-;;; You should have received a copy of the GNU General Public License
-;;; along with this program; if not, write to the Free Software
+;;; You should have received a copy of the GNU Lesser General Public License
+;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: watch.lisp
@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.10 2001/02/12 19:22:52 youngde Exp $
+;;; $Id: watch.lisp,v 1.11 2001/03/14 18:54:36 youngde Exp $
 
 (in-package :lisa)
 
