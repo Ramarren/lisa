@@ -20,13 +20,51 @@
 ;;; File: rpc.lisp
 ;;; Description:
 
-;;; $Id: rpc.lisp,v 1.1 2002/12/09 17:47:11 youngde Exp $
+;;; $Id: rpc.lisp,v 1.2 2002/12/09 18:19:36 youngde Exp $
+
+(in-package "CL-USER")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (require 'aclrpc)
   (unless (find-package "RPC")
     (defpackage "RPC"
-      (:use "COMMON-LISP")))
-  (require 'aclrpc))
+      (:use "COMMON-LISP" "NET.RPC"))))
 
 (in-package "RPC")
 
+(defvar *server-host* "localhost")
+(defvar *server-port* 10000)
+(defvar *server-proc* nil)
+
+(defun make-server ()
+  (make-rpc-server
+   'rpc-socket-server
+   :name "RPC Server"
+   :local-port *server-port*
+   :open :listener
+   :connect-action :process
+   :connect-function
+   #'(lambda (port &rest args)
+       (format t "Connection from ~S~%" port)
+       (values))))
+
+(defun start-server ()
+  (when (null *server-proc*)
+    (setf *server-proc* (make-server)))
+  *server-proc*)
+
+(defun stop-server ()
+  (unless (null *server-proc*)
+    (rpc-close :stop :final)))
+
+(defun make-client ()
+  (make-rpc-client
+   'rpc-socket-port
+   :remote-host *server-host*
+   :remote-port *server-port*))
+   
+(defun run-client ()
+  (multiple-value-bind (port stuff)
+      (make-client)
+    (with-remote-port (port :close t)
+      (rcall 'print "Hello from client"))))
