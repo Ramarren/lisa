@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.61 2001/04/20 19:37:15 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.62 2001/04/21 15:26:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,7 +64,14 @@
        (and (typep ,slot 'complex-slot)
             (localized-slotp ,slot))))
 
-(defun add-simple-tests (pattern rule parent-node)
+(defgeneric add-simple-tests (pattern rule parent-node)
+  (:method (pattern rule parent-node)
+           (declare (ignore rule parent-node))
+           (error
+            "The Rete compiler doesn't understand this pattern type: ~S."
+            pattern)))
+
+(defmethod add-simple-tests ((self generic-pattern) rule parent-node)
   (let ((last-node parent-node))
     (mapc #'(lambda (slot)
               (when (or (simple-slotp slot)
@@ -76,6 +83,10 @@
                                    rule))))
           (get-slots pattern))
     (values last-node)))
+
+(defmethod add-simple-tests ((self test-pattern) rule parent-node)
+  (declare (ignore rule))
+  (values parent-node))
 
 #+ignore
 (defun create-single-nodes (compiler rule patterns)
@@ -97,6 +108,18 @@
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 
+(defgeneric generate-single-node (pattern)
+  (:method (pattern)
+           (error
+            "The Rete compiler doesn't understand this pattern type: ~S."
+            pattern)))
+
+(defmethod generate-single-node ((self generic-pattern))
+  (make-node1-tect (get-name pattern)))
+
+(defmethod generate-single-node ((self test-pattern))
+  (make-node1-nop))
+  
 (defun create-single-nodes (compiler rule patterns)
   (declare (optimize (speed 3) (debug 1) (safety 1)))
   (with-accessors ((terminals get-terminals)
@@ -106,16 +129,15 @@
                  (cond ((null pattern)
                         (values t))
                        (t
-                        (let ((last (merge-successor
-                                     (get-root-node compiler)
-                                     (make-node1-tect
-                                      (get-name pattern)) rule)))
+                        (let ((last
+                               (merge-successor (get-root-node compiler)
+                                                (generate-single-node pattern)
+                                                rule)))
                           (setf (aref roots i) last)
                           (setf (aref terminals i)
                             (add-simple-tests pattern rule last))
                           (first-pass (rest patterns) (1+ i))))))))
-      (first-pass (collect #'(lambda (p) 
-                               (typep p 'generic-pattern)) patterns) 0))))
+      (first-pass patterns 0))))
 
 (defun add-right-to-left-node (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler

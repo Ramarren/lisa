@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.45 2001/04/20 20:09:52 youngde Exp $
+;;; $Id: defsys.lisp,v 1.46 2001/04/21 15:26:07 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -122,7 +122,7 @@
                                        (:file "node1-nop"
                                               :depends-on (node1))
                                        (:file "node1-tfn"
-                                              :depends-on (nod1e))
+                                              :depends-on (node1))
                                        (:file "node1-teq"
                                               :depends-on (node1))
                                        (:file "node1-neq"
