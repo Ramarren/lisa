@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.22 2002/11/21 20:32:17 youngde Exp $
+;;; $Id: language.lisp,v 1.23 2002/11/22 15:10:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,6 +37,10 @@
                          :salience ,salience
                          :context ,context
                          :auto-focus ,auto-focus))))
+
+(defun undefrule (rule-name)
+  (with-rule-name-parts (context short-name long-name) rule-name
+    (forget-rule (inference-engine) long-name)))
 
 (defmacro deftemplate (name (&key) &body body)
   (redefine-deftemplate name body))

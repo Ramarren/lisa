@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.45 2002/11/21 19:35:44 youngde Exp $
+;;; $Id: rete.lisp,v 1.46 2002/11/22 15:10:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -108,6 +108,9 @@
 
 (defmethod forget-rule ((self rete) (rule rule))
   (forget-rule self (rule-name rule)))
+
+(defmethod forget-rule ((self rete) (rule-name string))
+  (forget-rule self (find-symbol rule-name)))
 
 (defun remember-fact (rete fact)
   (with-accessors ((fact-table rete-fact-table)) rete

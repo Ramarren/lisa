@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.65 2002/11/21 16:10:58 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.66 2002/11/22 15:10:43 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -47,7 +47,7 @@
            "*BREAK-ON-SUBRULES*" "LOGICAL" "CONSIDER-TAXONOMY" "EXISTS"
            "DEFCONTEXT" "FOCUS" "REFOCUS" "FIND-CONTEXT" "CONTEXTS" "CONTEXT"
            "FIND-RULE" "RULE-NAME" "RULE-SHORT-NAME" "FOCUS-STACK"
-           "UNDEFCONTEXT")
+           "UNDEFCONTEXT" "ALLOW-DUPLICATE-FACTS")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -69,7 +69,8 @@
                 "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
                 "CONSIDER-TAXONOMY" "EXISTS" "DEFCONTEXT" "FOCUS" "REFOCUS"
                 "FIND-CONTEXT" "CONTEXTS" "CONTEXT" "FIND-RULE" "RULE-NAME"
-                "RULE-SHORT-NAME" "FOCUS-STACK" "UNDEFCONTEXT"))
+                "RULE-SHORT-NAME" "FOCUS-STACK" "UNDEFCONTEXT"
+                "ALLOW-DUPLICATE-FACTS"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")

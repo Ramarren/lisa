@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.16 2002/11/21 19:35:44 youngde Exp $
+;;; $Id: preamble.lisp,v 1.17 2002/11/22 15:10:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,8 +49,17 @@
 (defvar *consider-taxonomy-when-reasoning* nil)
 (defvar *allow-duplicate-facts* t)
 
-(defmacro consider-taxonomy ()
-  `(setf *consider-taxonomy-when-reasoning* t))
+(defun consider-taxonomy ()
+  *consider-taxonomy-when-reasoning*)
+
+(defsetf consider-taxonomy () (new-value)
+  `(setf *consider-taxonomy-when-reasoning* ,new-value))
+
+(defun allow-duplicate-facts ()
+  *allow-duplicate-facts*)
+
+(defsetf allow-duplicate-facts () (new-value)
+  `(setf *allow-duplicate-facts* ,new-value))
 
 (defclass inference-engine-object () ())
 
