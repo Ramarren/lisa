@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: sys.lisp,v 1.1 2001/03/06 21:23:28 youngde Exp $
+;;; $Id: sys.lisp,v 1.2 2001/03/06 23:59:21 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/sys.lisp,v $
 
 (eval-when (compile load eval)
@@ -172,7 +172,8 @@ but there is a TYPE slot, move TYPE into NAME."
   #+allegro (excl::probe-directory filename)
   #+clisp (lisp:probe-directory filename)
   #+cmu (eq :directory (unix:unix-file-kind filename))
-  #+lispworks (not (sys::probe-file-not-directory-p filename))
+  #+nil (not (sys::probe-file-not-directory-p filename))
+  #+lispworks (lw:file-directory-p filename)
   #-(or allegro clisp cmu lispworks)
   ;; From: Bill Schelter <wfs@fireant.ma.utexas.edu>
   ;; Date: Wed, 5 May 1999 11:51:19 -0500
