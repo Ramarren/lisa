@@ -91,6 +91,7 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
+#+ignore
 (defrule logical-1 ()
   (logical
    (not (gandalf)))

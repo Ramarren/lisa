@@ -18,13 +18,9 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: parser.lisp
-;;; Description: The LISA programming language parser. Basic parsing and
-;;; validation is done here, but it isn't comprehensive. Additional parsing
-;;; work (and error discovery) for some constructs (such as defrule, assert,
-;;; modify) is performed elsewhere as these constructs undergo additional
-;;; transformations.
+;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.61 2002/11/14 14:45:37 youngde Exp $
+;;; $Id: parser.lisp,v 1.62 2002/11/14 18:21:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -312,7 +308,7 @@
         (values
          `(,head ,@(parse-pattern-body (rest pattern) nil)) nil)))))
 
-;;; End of the rule parsing stuff
+;;; End of the rule parsing stuff.
 
 (defun create-template-class-slots (class-name slot-list)
   (labels ((determine-default (default-form)

@@ -20,7 +20,7 @@
 ;;; File: tms-support.lisp
 ;;; Description: Support functions for LISA's Truth Maintenance System (TMS).
 
-;;; $Id: tms-support.lisp,v 1.4 2002/11/13 21:31:27 youngde Exp $
+;;; $Id: tms-support.lisp,v 1.5 2002/11/14 18:21:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,7 +37,7 @@
 
 (defun make-dependency-set (tokens marker)
   (let ((dependencies (list)))
-    (loop for i from 0 to marker
+    (loop for i from 1 to marker
         do (push (token-find-fact tokens i) dependencies))
     (nreverse dependencies)))
 

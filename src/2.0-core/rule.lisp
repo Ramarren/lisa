@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.16 2002/11/13 21:13:56 youngde Exp $
+;;; $Id: rule.lisp,v 1.17 2002/11/14 18:21:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -106,17 +106,31 @@
 (defun logical-rule-p (rule)
   (numberp (rule-logical-marker rule)))
 
+(defun find-any-logical-boundaries (patterns)
+  (flet ((ensure-logical-blocks-are-valid (addresses)
+           (cl:assert (and (= (first (last addresses)) 1)
+                           (eq (parsed-pattern-class (first patterns))
+                               'initial-fact)) nil
+             "Logical patterns must appear first within a rule.")
+           (reduce #'(lambda (first second)
+                       (cl:assert (= second (1+ first)) nil
+                         "All logical patterns within a rule must be contiguous.")
+                       second)
+                   addresses :from-end t)))
+    (let ((addresses (list)))
+      (dolist (pattern patterns)
+        (when (logical-pattern-p pattern)
+          (push (parsed-pattern-address pattern) addresses)))
+      (unless (null addresses)
+        (ensure-logical-blocks-are-valid addresses))
+      (first addresses))))
+
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
             (loop for pattern in patterns
-                append (parsed-pattern-binding-set pattern))))
-         (find-logical-marker ()
-           (let ((addresses (list)))
-             (dolist (pattern patterns (first addresses))
-               (when (logical-pattern-p pattern)
-                 (push (parsed-pattern-address pattern) addresses))))))
+                append (parsed-pattern-binding-set pattern)))))
     (compile-rule
      (make-instance 'rule 
        :name name 
@@ -124,7 +138,7 @@
        :comment doc-string
        :salience salience
        :module module
-       :logical-marker (find-logical-marker)
+       :logical-marker (find-any-logical-boundaries patterns)
        :binding-set (make-rule-binding-set))
      patterns actions)))
 
