@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.56 2001/04/03 17:39:31 youngde Exp $
+;;; $Id: parser.lisp,v 1.57 2001/04/06 13:10:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,23 +46,13 @@
   (flet ((redefine-rule ()
            (with-rule-components ((doc-string decls lhs rhs) body)
              (let ((rule (make-rule name (current-engine)
-                                    :doc-string doc-string
-                                    :directives decls
-                                    :source body)))
+                                    :doc-string doc-string :source body)))
                (finalize-rule-definition rule lhs rhs)
                (add-rule (current-engine) rule)))))
     (handler-case
         (redefine-rule)
       (syntactical-error (condition)
         (rule-structure-error name condition)))))
-
-(defun extract-directives (body)
-  (flet ((create-directive (form)
-           (if (consp form)
-               (make-directive (first form) (rest form))
-             (pattern-error
-              body "The form of this declaration is incorrect: ~S" body))))
-    (mapcar #'create-directive body)))
 
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers doc)
@@ -76,8 +66,7 @@
                       (let ((decl (first obj)))
                         (if (and (symbolp decl)
                                  (eq decl 'declare))
-                            (values doc (extract-directives (rest obj))
-                                    (rest headers))
+                            (values doc obj (rest headers))
                           (values doc nil headers))))
                      (t (values doc nil headers))))))
     (extract-headers body nil)))
@@ -166,67 +155,49 @@
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
-             (if (quotablep slot-value)
-                 ``(,',slot-name ,',slot-value)
-               ``(,',slot-name ,,slot-value)))))
+             (cond ((and (symbolp slot-name)
+                         (or (literalp slot-value)
+                             (variablep slot-value)))
+                    (if (quotablep slot-value)
+                        ``(,',slot-name ,',slot-value)
+                      ``(,',slot-name ,,slot-value)))
+                   (t
+                    (parsing-error
+                     "There's a type problem in this slot: ~S." slot))))))
     `(list ,@(mapcar #'normalize slots))))
 
 (defun canonicalize-slot-names (meta-class slots)
-  (flet ((examine-slot (slot)
-           (cond ((consp slot)
-                  (let ((slot-name (first slot))
-                        (slot-value (second slot)))
-                    (cond ((and (symbolp slot-name)
-                                (or (literalp slot-value)
-                                    (variablep slot-value)))
-                           `(,(find-meta-slot meta-class slot-name)
-                             ,slot-value))
-                          (t
-                           (parsing-error
-                            "There's a type problem in this slot: ~S."
-                            slot)))))
-                 (t
-                  (parsing-error
-                   "This slot has a structural problem: ~S" slot)))))
-    (mapcar #'examine-slot slots)))
+  (mapcar #'(lambda (slot)
+              `(,(find-meta-slot meta-class (first slot))
+                ,(second slot)))
+          slots))
 
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
         (slots (rest body)))
     (cond ((symbolp head)
-           (let* ((class (find-meta-class head))
-                  (slot-list (canonicalize-slot-names class slots)))
-             `(assert-fact
-               (current-engine)
-               (make-fact ',(get-name class)
-                (,@(normalize-slots slot-list))))))
+           (let ((func
+                  (function
+                   (lambda (fact-name slots)
+                     (let ((class (find-meta-class fact-name)))
+                       (assert-fact (current-engine)
+                                    (make-fact
+                                     fact-name
+                                     (canonicalize-slot-names class slots))))))))
+             `(funcall ,func ',head (,@(normalize-slots slots)))))
           (t
            (parsing-error
             "A fact must begin with a symbol: ~S." head)))))
 
-(defmacro with-modify-form (((class binding slots) modify) &body body)
-  `(destructuring-bind (,class ,binding &rest ,slots) ,modify
-    ,@body))
-
-(defun parse-and-modify-fact (body)
+(defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()
-           (with-modify-form ((class binding slots) body)
-             (cond ((and (symbolp class)
-                         (variablep binding)
-                         (consp slots))
-                    (let* ((meta (find-meta-class class))
-                           (slot-list (canonicalize-slot-names meta slots))
-                           (func (function
-                                  (lambda (fact slots)
-                                   (if (eq meta (find-meta-class (fact-name fact)))
-                                       (modify-fact (current-engine) fact slots)
-                                     (parsing-error
-                                      "The class of this fact doesn't match its binding: ~S."
-                                      class))))))
-                      `(funcall ,func ,binding (,@(normalize-slots slot-list)))))
-                   (t
-                    (parsing-error
-                     "There's a structural problem with this form: ~S" body))))))
+           (let ((func
+                  (function
+                   (lambda (fact slots)
+                     (let ((meta-class (find-meta-class (fact-name fact))))
+                       (modify-fact (current-engine) fact
+                                    (canonicalize-slot-names meta-class slots)))))))
+             `(funcall ,func ,fact (,@(normalize-slots body))))))
     (handler-case
         (generate-modify)
       (lisa-error (condition)

@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.40 2001/04/02 21:05:15 youngde Exp $
+;;; $Id: mab.lisp,v 1.41 2001/04/06 13:08:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -67,8 +67,8 @@
   (?thing (thing (name ?chest)))
   =>
   (format t "Monkey throws the ~A off the ~A onto the floor.~%" ?chest ?on)
-  (modify (monkey ?monkey (holding blank)))
-  (modify (thing ?thing (location ?place) (on-top-of floor))))
+  (modify ?monkey (holding blank))
+  (modify ?thing (location ?place) (on-top-of floor)))
 
 (defrule get-key-to-unlock
   (goal-is-to (action unlock) (argument-1 ?obj))
@@ -98,7 +98,7 @@
   =>
   (format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
           ?name ?key ?contents)
-  (modify (chest ?chest (contents nothing)))
+  (modify ?chest (contents nothing))
   (assert (thing (name ?contents) (location ?place) 
                  (weight light) (on-top-of ?name)))
   (retract ?goal))
@@ -139,8 +139,8 @@
   (?monkey (monkey (location ?place) (on-top-of ladder) (holding blank)))
   =>
   (format t "Monkey grabs the ~A.~%" ?name)
-  (modify (thing ?thing (location held) (on-top-of held)))
-  (modify (monkey ?monkey (holding ?name)))
+  (modify ?thing (location held) (on-top-of held))
+  (modify ?monkey (holding ?name))
   (retract ?goal))
 
 (defrule climb-to-hold
@@ -179,8 +179,8 @@
   (?monkey (monkey (location ?place) (on-top-of ?on) (holding blank)))
   =>
   (format t "Monkey grabs the ~A.~%" ?name)
-  (modify (thing ?thing (location held) (on-top-of held)))
-  (modify (monkey ?monkey (holding ?name)))
+  (modify ?thing (location held) (on-top-of held))
+  (modify ?monkey (holding ?name))
   (retract ?goal))
 
 (defrule drop-object
@@ -190,8 +190,8 @@
   (?thing (thing (name ?name)))
   =>
   (format t "Monkey drops the ~A.~%" ?name)
-  (modify (monkey ?monkey (holding blank)))
-  (modify (thing ?thing (location ?place) (on-top-of ?on)))
+  (modify ?monkey (holding blank))
+  (modify ?thing (location ?place) (on-top-of ?on))
   (retract ?goal))
 
 ;;; Move-object rules...
@@ -227,8 +227,8 @@
   (?thing (thing (name ?name) (weight light)))
   =>
   (format t "Monkey drops the ~A.~%" ?name)
-  (modify (monkey ?monkey (holding blank)))
-  (modify (thing ?thing (location ?place) (on-top-of floor)))
+  (modify ?monkey (holding blank))
+  (modify ?thing (location ?place) (on-top-of floor))
   (retract ?goal))
 
 (defrule already-moved-object
@@ -258,7 +258,7 @@
   (?monkey (monkey (location (not ?place)) (on-top-of floor) (holding blank)))
   =>
   (format t "Monkey walks to ~A.~%" ?place)
-  (modify (monkey ?monkey (location ?place)))
+  (modify ?monkey (location ?place))
   (retract ?goal))
 
 (defrule walk-holding-object
@@ -267,7 +267,7 @@
   (thing (name ?obj))
   =>
   (format t "Monkey walks to ~A holding the ~A.~%" ?place ?obj)
-  (modify (monkey ?monkey (location ?place)))
+  (modify ?monkey (location ?place))
   (retract ?goal))
 
 ;;; Get-on-object rules...
@@ -277,7 +277,7 @@
   (?monkey (monkey (on-top-of ?on (not floor))))
   =>
   (format t "Monkey jumps off the ~A onto the floor.~%" ?on)
-  (modify (monkey ?monkey (on-top-of floor)))
+  (modify ?monkey (on-top-of floor))
   (retract ?goal))
 
 (defrule walk-to-place-to-climb
@@ -316,7 +316,7 @@
   (?monkey (monkey (location ?place) (on-top-of ?on) (holding blank)))
   =>
   (format t "Monkey climbs onto the ~A.~%" ?obj)
-  (modify (monkey ?monkey (on-top-of ?obj)))
+  (modify ?monkey (on-top-of ?obj))
   (retract ?goal))
 
 (defrule already-on-object
@@ -341,7 +341,7 @@
   (?thing (thing (name ?name)))
   =>
   (format t "Monkey eats the ~A.~%" ?name)
-  (modify (monkey ?monkey (holding blank)))
+  (modify ?monkey (holding blank))
   (retract ?goal)
   (retract ?thing))
 
