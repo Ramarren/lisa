@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.15 2001/04/17 20:27:47 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.16 2001/04/17 23:19:57 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -51,27 +51,10 @@
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
-  #+(or Allegro CMU)
-  (:import-from "CLOS"
-                "CLASS-SLOTS"
-                "SLOT-DEFINITION-NAME"
-                "FINALIZE-INHERITANCE"
-                "CLASS-FINALIZED-P")
-  #+Lispworks
-  (:import-from "HCL"
-                "CLASS-SLOTS"
-                "SLOT-DEFINITION-NAME")
-  #+Lispworks
+  #+(or Allegro CMU LispWorks)
   (:import-from "CLOS"
                 "FINALIZE-INHERITANCE"
                 "CLASS-FINALIZED-P")
-  #+CLISP
-  (:import-from "CLOS"
-                clos::class-slots
-                clos::slot-definition-name)
-  #-(or Allegro CMU Lispworks CLISP)
-  (error "Unsupported implementation.")
-  (:export "CLASS-SLOTS"
-           "SLOT-DEFINITION-NAME"
+  (:export "CLASS-SLOT-LIST"
            "FINALIZE-INHERITANCE"
            "CLASS-FINALIZED-P"))
