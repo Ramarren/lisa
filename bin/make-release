@@ -21,7 +21,7 @@
 # File: make-release
 # Description: Trivial script to help make LISA releases.
 
-# $Id: make-release,v 1.4 2001/04/24 14:28:28 youngde Exp $
+# $Id: make-release,v 1.5 2001/06/28 18:23:41 youngde Exp $
 
 ROOT=/files/devel/sourceforge/lisa
 FASL_FILES="*.fasl *.ufsl *.x86f *.err *.fas *.lib"
@@ -29,7 +29,7 @@ FASL_FILES="*.fasl *.ufsl *.x86f *.err *.fas *.lib"
 remove_fasl ()
 {
     find -name "*.fasl" -o -name "*.ufsl" -o -name "*.x86f" -o -name\
-        "*.err" -o -name "*.fas" -o -name "*.lib" | xargs rm -f
+        "*.err" -o -name "*.fas" -o -name "*.fsl" -o -name "*.lib" | xargs rm -f
 }
 
 cd $ROOT/lib
