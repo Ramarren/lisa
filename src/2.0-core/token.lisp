@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.9 2002/09/10 19:34:44 youngde Exp $
+;;; $Id: token.lisp,v 1.10 2002/09/11 01:50:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,11 +28,6 @@
   ((facts :initform
           (make-array 0 :adjustable t :fill-pointer t)
           :reader token-facts)))
-
-(defmethod initialize-instance :after ((self token) &key fact)
-  (unless (null fact)
-    (vector-push-extend fact (slot-value self 'facts)))
-  self)
 
 (defclass add-token (token) ())
 (defclass remove-token (token) ())
@@ -45,7 +40,8 @@
     (aref fact-vector (1- (length fact-vector)))))
 
 (defun token-push-fact (token fact)
-  (vector-push-extend fact (slot-value token 'facts)))
+  (vector-push-extend fact (slot-value token 'facts))
+  token)
 
 (defun token-pop-fact (token)
   (with-slots ((fact-vector facts)) token
@@ -57,14 +53,13 @@
 (defun replicate-token (token)
   (let ((new-token (make-instance (class-of token))))
     (with-slots ((new-fact-vector facts)) new-token
-      (with-slots ((existing-fact-vector facts)) token
-        (dotimes (i (length existing-fact-vector))
-          (vector-push-extend (aref existing-fact-vector i) new-fact-vector))))
+      (dotimes (i (length existing-fact-vector))
+        (token-push-fact new-token (aref existing-fact-vector i))))
     new-token))
 
 (defun make-add-token (fact)
-  (make-instance 'add-token :fact fact))
+  (token-push-fact (make-instance 'add-token) fact))
 
 (defun make-remove-token (fact)
-  (make-instance 'remove-token :fact fact))
+  (token-push-fact (make-instance 'remove-token)))
 
