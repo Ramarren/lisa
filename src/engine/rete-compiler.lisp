@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.32 2001/01/10 21:37:42 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.33 2001/01/10 22:01:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -148,36 +148,24 @@
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
 
-(defmethod add-node2-test ((test test1-var) rule pattern slot node2)
-  (let ((binding (find-binding rule (get-value test))))
-    (cl:assert (typep binding 'slot-binding))
-    (unless (= (get-location binding)
-               (get-location pattern))
-      (add-binding-test node2 binding 
-                        (get-name slot)))))
-
-(defmethod add-node2-test ((test test1-eval) rule pattern slot node2)
-  (flet ((make-bindings ()
-           (let ((bindings (list)))
-             (maphash #'(lambda (key binding)
-                          (declare (ignore key))
-                          (when (and (typep binding 'slot-binding)
-                                     (<= (get-location binding)
-                                         (get-location pattern)))
-                            (push binding bindings)))
-                      (get-bindings rule))
-             (values bindings))))
-    (make-test2-eval
-     (make-function-call
-      `(,(get-value test)) (make-bindings)))))
-
 (defun add-node2-tests (rule node2 pattern)
-  (mapc #'(lambda (slot)
-            (mapc #'(lambda (test)
-                      (add-node2-test test rule pattern slot node2))
-                  (get-tests slot)))
-        (get-slots pattern))
-  (values node2))
+  (flet ((add-variable-test (slot)
+           (let ((binding (find-binding rule (get-value slot))))
+             (cl:assert (typep binding 'slot-binding))
+             (unless (= (get-location binding)
+                        (get-location pattern))
+               (add-binding-test node2 binding (get-name slot)))))
+         (add-constraint-test (slot)
+           (add-test node2
+                     (make-test2-eval
+                      (make-node-function-call slot pattern rule)))))
+    (mapc #'(lambda (slot)
+              (when (not (is-localized-patternp pattern))
+                (add-variable-test slot))
+              (unless (null (get-constraint slot))
+                (add-constraint-test slot)))
+          (get-slots pattern))
+    (values node2)))
 
 ;;; the "third pass"...
 
