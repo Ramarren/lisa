@@ -1,3 +1,34 @@
+Wed Mar 21 00:31:51 2001  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp (rmdir): LispWorks: check whether
+	 `lw:delete-directory' is `fboundp'
+
+Mon Mar 19 16:03:50 2001  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp: removed the last patch
+
+Sat Mar 17 22:50:30 2001  liam  <liam@david.kstream.com>
+
+	* sys.lisp:
+	Removed LispWorks from rmdir; function lw:delete-directory is not
+	defined.  Export mkdir, rmdir.
+
+Sat Mar 17 19:56:38 2001  Sam Steingold  <sds@david.kstream.com>
+
+	* net.lisp (socket-accept): ACL5 cannot change socket format
+
+Tue Mar 13 23:09:49 2001  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp (mkdir): fixed arg name
+
+	* ext.lisp (required-argument): export on non-CMUCL platforms
+
+Wed Mar  7 20:39:27 2001  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp (probe-directory):
+	fixed for LispWorks (thanks to David E. Young)
+	(mkdir, rmdir): new functions
+
 Fri Feb 23 23:29:28 2001  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (required-argument): fix import/export for CMUCL

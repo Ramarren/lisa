@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: net.lisp,v 1.3 2001/03/10 20:10:27 youngde Exp $
+;;; $Id: net.lisp,v 1.4 2001/03/29 20:34:49 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/net.lisp,v $
 
 (eval-when (compile load eval)
@@ -206,20 +206,27 @@ Returns a socket stream or NIL."
   (declare (type socket-server serv)
            #+(and allegro (version>= 6))
            (ignore bin))
-  #+allegro (let ((sock (if wait
-                            (if (plusp wait)
-                                (mp:with-timeout (wait)
-                                  (socket:accept-connection serv :wait t))
-                                (socket:accept-connection serv :wait nil))
-                            (socket:accept-connection serv :wait t))))
+  #+allegro (let* ((fmt (if bin :binary :text))
+                   #+allegro-v5.0
+                   (excl:*default-external-format* fmt)
+                   (sock (if wait
+                             (if (plusp wait)
+                                 (mp:with-timeout (wait)
+                                   (socket:accept-connection serv :wait t))
+                                 (socket:accept-connection serv :wait nil))
+                             (socket:accept-connection serv :wait t))))
               (when sock
                 ;; From: John Foderaro <jkf@franz.com>
                 ;; Date: Sun, 12 Nov 2000 16:58:28 -0800
                 ;; in ACL6 and later, all sockets are bivalent (both
                 ;; text and binary) and thus there's no need to convert
                 ;; between the element types.
-                ;;#+(and allegro (not (version>= 6)))
-                ;;(socket:set-socket-format sock (if bin :binary :text))
+                #+allegro-v5.0
+                (unless (eq (socket:socket-format sock) fmt)
+                  (warn "~s: ACL5 cannot modify socket format"
+                        'socket-accept))
+                #+allegro-v4.3
+                (socket:set-socket-format sock fmt)
                 sock))
   #+clisp (multiple-value-bind (sec usec) (floor (or wait 0))
             (when (lisp:socket-wait serv (and wait sec) (round usec 1d-6))

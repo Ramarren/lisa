@@ -10,7 +10,7 @@
 # SYSTEM     - the system name for defsystem (usually the dir name)
 # TOP        - the path to the top-level CLOCC directory
 #
-# $Id: clocc.mk,v 1.2 2001/03/08 15:43:01 youngde Exp $
+# $Id: clocc.mk,v 1.3 2001/03/29 20:34:49 youngde Exp $
 # $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/extra/Attic/clocc.mk,v $
 
 ifndef CLOCC_MK

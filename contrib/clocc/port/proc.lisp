@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: proc.lisp,v 1.2 2001/03/08 15:43:01 youngde Exp $
+;;; $Id: proc.lisp,v 1.3 2001/03/29 20:34:49 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/proc.lisp,v $
 ;;;
 ;;; This is based on the code donated by Cycorp, Inc. to the public domain.

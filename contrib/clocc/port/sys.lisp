@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: sys.lisp,v 1.4 2001/03/08 15:46:15 youngde Exp $
+;;; $Id: sys.lisp,v 1.5 2001/03/29 20:34:49 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/sys.lisp,v $
 
 (eval-when (compile load eval)
@@ -19,8 +19,8 @@
 (export
  '(getenv finalize variable-special-p arglist
    class-slot-list class-slot-initargs
-   pathname-ensure-name probe-directory default-directory chdir sysinfo
-   +month-names+ +week-days+ +time-zones+ tz->string current-time))
+   pathname-ensure-name probe-directory default-directory chdir mkdir rmdir
+   +month-names+ +week-days+ +time-zones+ tz->string current-time sysinfo))
 
 ;;;
 ;;; System
@@ -206,10 +206,10 @@ but there is a TYPE slot, move TYPE into NAME."
 (defsetf default-directory chdir "Change the current directory.")
 
 (defun mkdir (dir)
-  #+allegro (excl:make-directory path)
-  #+clisp (lisp:make-dir path)
-  #+cmu (unix:unix-mkdir (directory-namestring path) #o777)
-  #+lispworks (system:make-directory path)
+  #+allegro (excl:make-directory dir)
+  #+clisp (lisp:make-dir dir)
+  #+cmu (unix:unix-mkdir (directory-namestring dir) #o777)
+  #+lispworks (system:make-directory dir)
   #-(or allegro clisp cmu lispworks)
   (error 'not-implemented :proc (list 'mkdir dir)))
 
@@ -217,7 +217,11 @@ but there is a TYPE slot, move TYPE into NAME."
   #+allegro (excl:delete-directory dir)
   #+clisp (lisp:delete-dir dir)
   #+cmu (unix:unix-rmdir dir)
-  #+lispworks (lw:delete-directory dir)
+  #+lispworks
+  ;; `lw:delete-directory' is present in LWW 4.1.20 but not on LWL 4.1.0
+  (if (fboundp 'lw::delete-directory)
+      (lw::delete-directory dir)
+      (delete-file dir))
   #-(or allegro clisp cmu lispworks) (delete-file dir))
 
 (defun sysinfo (&optional (out *standard-output*))

@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: ext.lisp,v 1.2 2001/03/08 15:43:01 youngde Exp $
+;;; $Id: ext.lisp,v 1.3 2001/03/29 20:34:49 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/ext.lisp,v $
 
 (defpackage "PORT"
@@ -20,6 +20,7 @@
    "MK-ARR" "MAP-IN" "WITH-GENSYMS"
    "GC" "QUIT"
    "+EOF+" "EOF-P" "STRING-TOKENS"
+   #-cmu "REQUIRED-ARGUMENT"
    "COMPOSE" "COMPOSE-F" "COMPOSE-ALL"))
 
 (in-package :port)
@@ -144,8 +145,8 @@ so that the bare symbols are read as keywords."
 #-cmu (progn
         (proclaim '(ftype (function () nil) required-argument))
         (defun required-argument ()
-          "A useful default for required keyword args and DEFSTRUCT slots."
-          (error "A required keyword argument was not supplied.")))
+          "A useful default for required arguments and DEFSTRUCT slots."
+          (error "A required argument was not supplied.")))
 
 ;;;
 ;;; Function Compositions
