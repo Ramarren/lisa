@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -259,7 +259,7 @@ If a rule provides no conditional elements, then it is said to match the
 <i>initial-fact</i>,
 which is asserted as the result of a call to <i>reset</i>. Thus, the following
 rule will always activate after each reset:
-<br>&nbsp;
+  <dl>
 <dd>
 (defrule always-fires ()</dd>
 
@@ -269,10 +269,6 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
@@ -282,10 +278,6 @@ any other:
 <dd>
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>Once bound, method and function calls can be made on this object from
 the rule's LHS and RHS.
 <p>When reasoning over CLOS objects, LISA is capable of considering an
@@ -325,15 +317,13 @@ ancestry. The following code fragment provides an example:
 <dd>
 &nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
 and <i>boris</i> in the knowledge base, retracting each in turn. Note how
 the <i>defimport</i> forms for <i>rocky</i> and <i>boris</i> specify the
 symbolic name of the ancestor class <i>fundamental</i>, rather than the
-CLOS identifier.</blockquote>
+CLOS identifier.
+  </dl>
+</blockquote>
 
 <blockquote>
 <h5>
