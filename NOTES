@@ -20,7 +20,7 @@
 ;;; File: NOTES
 ;;; Description: Ongoing project notes.
 
-;;; $Id: NOTES,v 1.1 2001/03/13 16:11:48 youngde Exp $
+;;; $Id: NOTES,v 1.2 2001/03/13 16:25:25 youngde Exp $
 
 This file is an ongoing record of development issues related to the
 LISA project. It was (belatedly) started just after LISA's first alpha
@@ -73,5 +73,3 @@ versions have been tested.
    3. CLISP's implementation of LOAD doesn't understand logical
       pathnames. According to CLtL2 it should, but I haven't yet found
       this stated in the Hyperspec.
-      
-     
