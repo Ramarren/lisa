@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.55 2004/06/06 18:46:21 youngde Exp $
+;;; $Id: rete.lisp,v 1.56 2004/06/07 18:49:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -80,8 +80,8 @@
 (defun add-rule-to-network (rete rule patterns)
   (flet ((load-facts (network)
            (maphash #'(lambda (key fact)
-                        (unless (integerp key)
-                          (add-fact-to-network network fact)))
+                        (declare (ignore key))
+                        (add-fact-to-network network fact))
                     (rete-fact-table rete))))
     (when (find-rule rete (rule-name rule))
       (forget-rule rete rule))
