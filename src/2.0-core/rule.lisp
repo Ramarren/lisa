@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.6 2002/10/08 17:31:32 youngde Exp $
+;;; $Id: rule.lisp,v 1.7 2002/10/09 18:24:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,6 +50,12 @@
 
 (defvar *merge* nil)
 
+(defmethod initialize-instance :after ((self rule) &key patterns actions)
+  (add-rule-to-network (rule-engine self) self patterns)
+  (compile-rule-behavior self actions)
+  self)
+
+#+ignore
 (defmethod initialize-instance :after ((self rule) &key patterns actions)
   (if *merge*
       (merge-rule-into-network (rete-network (rule-engine self))

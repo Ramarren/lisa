@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.14 2002/10/03 14:47:45 youngde Exp $
+;;; $Id: rete.lisp,v 1.16 2002/10/09 18:24:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -45,20 +45,42 @@
              :initform nil
              :reader rete-strategy)))
 
+(defun rete-fact-count (rete)
+  (hash-table-count (rete-fact-table rete)))
+
 (defun find-rule (rete rule-name)
-  (gethash rule-name (rete-rule-table rete)))
+  (values (gethash rule-name (rete-rule-table rete))))
 
-(defmethod add-new-rule ((self rete) rule)
-  (setf (gethash (rule-name rule) (rete-rule-table self)) rule)
-  rule)
-
-(defmethod forget-rule ((self rete) rule-name)
-  (let ((rule (find-rule self rule-name)))
-    (cl:assert (not (null rule)) nil
-      "The rule named ~S is not known to be defined." rule-name)
-    (remove-rule-from-network (rete-network self) rule)
-    (remhash rule-name (rete-rule-table self))
+(defun add-rule-to-network (rete rule patterns)
+  (flet ((load-facts (network)
+           (loop for fact being the hash-value
+               of (rete-fact-table rete)
+               do (add-fact-to-network network fact))))
+    (when (find-rule rete (rule-name rule))
+      (forget-rule rete rule))
+    (if (zerop (rete-fact-count rete))
+        (compile-rule-into-network (rete-network rete) rule patterns)
+      (merge-rule-into-network 
+       (rete-network rete) patterns rule :loader #'load-facts))
+    (setf (gethash (rule-name rule) (rete-rule-table rete)) rule)
     rule))
+
+(defmethod forget-rule ((self rete) (rule-name symbol))
+  (macrolet ((disable-activations (rete rule)
+               `(mapc #'(lambda (activation)
+                          (setf (activation-eligible activation) nil))
+                      (find-all-activations
+                       (rete-strategy ,rete) ,rule))))
+    (let ((rule (find-rule self rule-name)))
+      (cl:assert (not (null rule)) nil
+        "The rule named ~S is not known to be defined." rule-name)
+      (remove-rule-from-network (rete-network self) rule)
+      (remhash rule-name (rete-rule-table self))
+      (disable-activations self rule)
+      rule)))
+
+(defmethod forget-rule ((self rete) (rule rule))
+  (forget-rule self (rule-name rule)))
 
 (defun remember-fact (rete fact)
   (setf (gethash (fact-id fact) (rete-fact-table rete)) fact))

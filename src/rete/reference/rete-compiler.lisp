@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.34 2002/10/09 14:35:08 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.35 2002/10/09 18:24:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -202,13 +202,12 @@
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)
     rete-network))
 
-(defun merge-rule-into-network (to-network patterns rule)
-  (let ((node-set
-         (merge-networks
-          (compile-rule-into-network (make-rete-network) patterns rule)
-          to-network)))
-    (unless (null node-set)
-      (attach-rule-nodes rule node-set))
+(defun merge-rule-into-network (to-network patterns rule &key (loader nil))
+  (let ((from-network
+         (compile-rule-into-network (make-rete-network) patterns rule)))
+    (unless (null loader)
+      (funcall loader from-network))
+    (attach-rule-nodes rule (merge-networks from-network to-network))
     to-network))
 
 (defvar *test-network* nil)

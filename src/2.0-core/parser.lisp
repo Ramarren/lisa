@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.36 2002/09/30 23:57:47 youngde Exp $
+;;; $Id: parser.lisp,v 1.37 2002/10/09 18:24:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -72,12 +72,10 @@
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
-    (add-new-rule 
-     (inference-engine)
-     (make-rule name (inference-engine) lhs rhs
-                :doc-string doc-string
-                :salience salience
-                :module module))))
+    (make-rule name (inference-engine) lhs rhs
+               :doc-string doc-string
+               :salience salience
+               :module module)))
 
 (defvar *network* nil)
 
