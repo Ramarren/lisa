@@ -8,11 +8,11 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: shell.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: shell.lisp,v 1.5 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/shell.lisp,v $
 
 (eval-when (compile load eval)
-  (require :ext (translate-logical-pathname "clocc:src;port;ext")))
+  (require :port-ext (translate-logical-pathname "clocc:src;port;ext")))
 
 (in-package :port)
 
@@ -41,7 +41,8 @@
                      (format nil "~a~{ '~a'~}~@[ &~]" prog args (not wait))
                      opts)
   #+lucid (apply #'lcl:run-program prog :wait wait :arguments args opts)
-  #-(or allegro clisp cmu gcl liquid lispworks lucid)
+  #+sbcl (apply #'sb-ext:run-program prog args :wait wait opts)
+  #-(or allegro clisp cmu gcl liquid lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'run-prog prog opts)))
 
 (defun pipe-output (prog &rest args)
@@ -57,7 +58,9 @@
   #+lispworks (sys::open-pipe (format nil "~a~{ ~a~}" prog args)
                               :direction :output)
   #+lucid (lcl:run-program prog :arguments args :wait nil :output :stream)
-  #-(or allegro clisp cmu gcl lispworks lucid)
+  #+sbcl (sb-ext:process-input (sb-ext:run-program prog args :input :stream
+                                                   :output t :wait nil))
+  #-(or allegro clisp cmu gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'pipe-output prog args)))
 
 (defun pipe-input (prog &rest args)
@@ -68,12 +71,14 @@
            #-lisp=cl lisp:make-pipe-input-stream
                      (format nil "~a~{ ~a~}" prog args))
   #+cmu (ext:process-output (ext:run-program prog args :output :stream
-                                             :input t :wait nil))
+                                             :error t :input t :wait nil))
   #+gcl (si::fp-output-stream (apply #'si:run-process prog args))
   #+lispworks (sys::open-pipe (format nil "~a~{ ~a~}" prog args)
                               :direction :input)
   #+lucid (lcl:run-program prog :arguments args :wait nil :input :stream)
-  #-(or allegro clisp cmu gcl lispworks lucid)
+  #+sbcl (sb-ext:process-output (sb-ext:run-program prog args :output :stream
+                                                    :error t :input t :wait nil))
+  #-(or allegro clisp cmu gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'pipe-input prog args)))
 
 ;;; Allegro CL: a simple `close' does NOT get rid of the process.
@@ -95,5 +100,5 @@
     (unwind-protect (progn ,@body)
       (close-pipe ,pipe))))
 
-(provide :shell)
+(provide :port-shell)
 ;;; file shell.lisp ends here

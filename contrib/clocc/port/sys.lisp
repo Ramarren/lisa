@@ -1,6 +1,6 @@
 ;;; Environment & System access
 ;;;
-;;; Copyright (C) 1999 by Sam Steingold
+;;; Copyright (C) 1999-2001 by Sam Steingold
 ;;; This is open-source software.
 ;;; GNU Lesser General Public License (LGPL) is applicable:
 ;;; No warranty; you may copy/modify/redistribute under the same
@@ -8,19 +8,26 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: sys.lisp,v 1.7 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: sys.lisp,v 1.8 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/sys.lisp,v $
 
 (eval-when (compile load eval)
-  (require :ext (translate-logical-pathname "clocc:src;port;ext")))
+  (require :port-ext (translate-logical-pathname "clocc:src;port;ext"))
+  ;; `default-directory'
+  (require :port-path (translate-logical-pathname "port:path"))
+  #+(and allegro mswindows)
+  (require :ole))
 
 (in-package :port)
+
+#+sbcl (eval-when (compile load eval)
+         (shadow '(getenv finalize)))
 
 (export
  '(getenv finalize variable-special-p arglist
    class-slot-list class-slot-initargs
-   pathname-ensure-name probe-directory default-directory chdir mkdir rmdir
-   +month-names+ +week-days+ +time-zones+ tz->string current-time sysinfo))
+   +month-names+ +week-days+ +time-zones+ tz->string string->tz
+   current-time sysinfo))
 
 ;;;
 ;;; System
@@ -31,12 +38,28 @@
   #+allegro (sys::getenv (string var))
   #+clisp (sys::getenv (string var))
   #+cmu (cdr (assoc (string var) ext:*environment-list* :test #'equalp
-                    :key #'string)) ; xlib::getenv
+                    :key #'string))
   #+gcl (si:getenv (string var))
   #+lispworks (lw:environment-variable (string var))
   #+lucid (lcl:environment-variable (string var))
-  #-(or allegro clisp cmu gcl lispworks lucid)
+  #+sbcl (sb-ext:posix-getenv var)
+  #-(or allegro clisp cmu gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'getenv var)))
+
+(defun (setf getenv) (val var)
+  "Set an environment variable."
+  #+allegro (setf (sys::getenv (string var)) (string val))
+  #+clisp (setf (sys::getenv (string var)) (string val))
+  #+cmu (let ((cell (assoc (string var) ext:*environment-list* :test #'equalp
+                           :key #'string)))
+          (if cell
+              (setf (cdr cell) (string val))
+              (push (cons (string var) (string val)) ext:*environment-list*)))
+  #+gcl (si:setenv (string var) (string val))
+  #+lispworks (setf (lw:environment-variable (string var)) (string val))
+  #+lucid (setf (lcl:environment-variable (string var)) (string val))
+  #-(or allegro clisp cmu gcl lispworks lucid)
+  (error 'not-implemented :proc (list '(setf getenv) var)))
 
 (defun finalize (obj func)
   "When OBJ is GCed, FUNC is called on it."
@@ -44,7 +67,8 @@
   #+clisp (#+lisp=cl ext:finalize #-lisp=cl lisp:finalize obj func)
   #+cmu (ext:finalize obj func)
   #+cormanlisp (cl::register-finalization obj func)
-  #-(or allegro clisp cmu cormanlisp)
+  #+sbcl (sb-ext:finalize obj func)
+  #-(or allegro clisp cmu cormanlisp sbcl)
   (error 'not-implemented :proc (list 'finalize obj func)))
 
 ;;;
@@ -60,7 +84,8 @@
   #+gcl (si:specialp symbol)
   #+lispworks (eq :special (hcl:variable-information symbol))
   #+lucid (system:proclaimed-special-p symbol)
-  #-(or allegro clisp cmu gcl lispworks lucid)
+  #+sbcl (sb-walker:variable-globally-special-p symbol)
+  #-(or allegro clisp cmu gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'variable-special-p symbol)))
 
 (defun arglist (fn)
@@ -78,11 +103,14 @@
           (get fn 'si:debug))
   #+lispworks (lw:function-lambda-list fn)
   #+lucid (lcl:arglist fn)
-  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid)
+  #+sbcl (values (let ((st (sb-kernel:%function-arglist fn)))
+                  (if (stringp st) (read-from-string st)
+                      #+ignore(eval:interpreted-function-arglist fn))))
+  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'arglist fn)))
 
 ;; implementations with MOP-ish CLOS
-#+(or allegro clisp cmu cormanlisp lispworks lucid)
+#+(or allegro clisp cmu cormanlisp lispworks lucid sbcl)
 ;; we use `macrolet' for speed - so please be careful about double evaluations
 ;; and mapping (you cannot map or funcall a macro, you know)
 (macrolet ((class-slots* (class)
@@ -91,7 +119,8 @@
              #+cmu `(pcl::class-slots ,class)
              #+cormanlisp `(cl:class-slots ,class)
              #+lispworks `(hcl::class-slots ,class)
-             #+lucid `(clos:class-slots ,class))
+             #+lucid `(clos:class-slots ,class)
+             #+sbcl `(sb-pcl::class-slots ,class))
            (class-slots1 (obj)
              `(class-slots*
                (typecase ,obj
@@ -105,7 +134,8 @@
              #+cmu `(slot-value ,slot 'pcl::name)
              #+cormanlisp `(getf ,slot :name)
              #+lispworks `(hcl::slot-definition-name ,slot)
-             #+lucid `(clos:slot-definition-name ,slot))
+             #+lucid `(clos:slot-definition-name ,slot)
+             #+sbcl `(slot-value ,slot 'sb-pcl::name))
            (slot-initargs (slot)
              #+(and allegro (not (version>= 6))) `(clos::slotd-initargs ,slot)
              #+(and allegro (version>= 6))
@@ -114,7 +144,8 @@
              #+cmu `(slot-value ,slot 'pcl::initargs)
              #+cormanlisp `(getf ,slot :initargs)
              #+lispworks `(hcl::slot-definition-initargs ,slot)
-             #+lucid `(clos:slot-definition-initargs ,slot))
+             #+lucid `(clos:slot-definition-initargs ,slot)
+             #+sbcl `(slot-value ,slot 'sb-pcl::initargs))
            (slot-one-initarg (slot) `(car (slot-initargs ,slot)))
            (slot-alloc (slot)
              #+(and allegro (not (version>= 6)))
@@ -125,7 +156,8 @@
              #+cmu `(pcl::slot-definition-allocation ,slot)
              #+cormanlisp `(getf ,slot :allocation)
              #+lispworks `(hcl::slot-definition-allocation ,slot)
-             #+lucid `(clos:slot-definition-allocation ,slot)))
+             #+lucid `(clos:slot-definition-allocation ,slot)
+             #+sbcl `(sb-pcl::slot-definition-allocation ,slot)))
 
   (defun class-slot-list (class &optional (all t))
     "Return the list of slots of a CLASS.
@@ -156,76 +188,6 @@ initargs for all slots are returned, otherwise only the slots with
 ;;;
 ;;; Environment
 ;;;
-
-(defun pathname-ensure-name (path)
-  "Make sure that the pathname has a name slot.
-Call `pathname' on it argument and, if there is no NAME slot,
-but there is a TYPE slot, move TYPE into NAME."
-  (let ((path (pathname path)))
-    (if (or (pathname-name path) (null (pathname-type path))) path
-        ;; if you use CLISP, you will need 2000-03-09 or newer
-        (make-pathname :name (concatenate 'string "." (pathname-type path))
-                       :type nil :defaults path))))
-
-(defun probe-directory (filename)
-  "Check whether the file name names an existing directory."
-  #+allegro (excl::probe-directory filename)
-  #+clisp (values
-           (ignore-errors
-             (#+lisp=cl ext:probe-directory #-lisp=cl lisp:probe-directory
-                        filename)))
-  #+cmu (eq :directory (unix:unix-file-kind (namestring filename)))
-  #+lispworks (lw:file-directory-p filename)
-  #-(or allegro clisp cmu lispworks)
-  ;; From: Bill Schelter <wfs@fireant.ma.utexas.edu>
-  ;; Date: Wed, 5 May 1999 11:51:19 -0500
-  (let* ((path (pathname filename))
-         (dir (pathname-directory path))
-         (name (pathname-name path)))
-    (when name (setq dir (append dir (list name))))
-    (probe-file (make-pathname :directory dir))))
-
-(defun default-directory ()
-  "The default directory."
-  #+allegro (excl:current-directory)
-  #+clisp (#+lisp=cl ext:default-directory #-lisp=cl lisp:default-directory)
-  #+cmucl (ext:default-directory)
-  #+cormanlisp (ccl:get-current-directory)
-  #+lispworks (hcl:get-working-directory)
-  #+lucid (lcl:working-directory)
-  #-(or allegro clisp cmucl cormanlisp lispworks lucid) (truename "."))
-
-(defun chdir (dir)
-  #+allegro (excl:chdir dir)
-  #+clisp (#+lisp=cl ext:cd #-lisp=cl lisp:cd dir)
-  #+cmu (setf (ext:default-directory) dir)
-  #+cormanlisp (ccl:set-current-directory dir)
-  #+gcl (si:chdir dir)
-  #+lispworks (hcl:change-directory dir)
-  #+lucid (lcl:working-directory dir)
-  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid)
-  (error 'not-implemented :proc (list 'chdir dir)))
-
-(defsetf default-directory chdir "Change the current directory.")
-
-(defun mkdir (dir)
-  #+allegro (excl:make-directory dir)
-  #+clisp (#+lisp=cl ext:make-dir #-lisp=cl lisp:make-dir dir)
-  #+cmu (unix:unix-mkdir (directory-namestring dir) #o777)
-  #+lispworks (system:make-directory dir)
-  #-(or allegro clisp cmu lispworks)
-  (error 'not-implemented :proc (list 'mkdir dir)))
-
-(defun rmdir (dir)
-  #+allegro (excl:delete-directory dir)
-  #+clisp (#+lisp=cl ext:delete-dir #-lisp=cl lisp:delete-dir dir)
-  #+cmu (unix:unix-rmdir dir)
-  #+lispworks
-  ;; `lw:delete-directory' is present in LWW 4.1.20 but not on LWL 4.1.0
-  (if (fboundp 'lw::delete-directory)
-      (lw::delete-directory dir)
-      (delete-file dir))
-  #-(or allegro clisp cmu lispworks) (delete-file dir))
 
 (defun sysinfo (&optional (out *standard-output*))
   "Print the current environment to a stream."
@@ -305,6 +267,10 @@ Long Floats:~25t~3d bits exponent, ~3d bits significand (mantissa)~%"
 Current time:~25t" (/ internal-time-units-per-second) *gensym-counter*)
   (current-time out) (format out "~%~75~~%") (room) (values))
 
+;;;
+;;; time & date
+;;;
+
 (defconst +month-names+ (simple-array simple-string (12))
   (mk-arr 'simple-string '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug"
                            "Sep" "Oct" "Nov" "Dec"))
@@ -316,24 +282,32 @@ Current time:~25t" (/ internal-time-units-per-second) *gensym-counter*)
 
 (defconst +time-zones+ list
   '((5 "EDT" . "EST") (6 "CDT" . "CST") (7 "MDT" . "MST") (8 "PDT" . "PST")
-    (0 "GMT" . "GDT") (-2 "MET" . "MET DST"))
+    (0 "BST" . "GMT") (-2 "MET DST" . "MET"))
   "*The string representations of the time zones.")
 
-(defun tz->string (tz)
+(defun tz->string (tz dst &optional (long t))
   "Convert the CL timezone (rational [-24;24], multiple of 3600) to a string."
   (declare (type rational tz))
-  (multiple-value-bind (hr mm) (floor (abs tz))
-    (let ((mi (floor (* 60 mm))))
-      (format nil "~:[+~;-~]~2,'0d~2,'0d" (minusp tz) hr mi))))
+  (multiple-value-bind (hr mm) (floor (abs (- (if dst 1 0) tz)))
+    (let ((mi (floor (* 60 mm)))
+          (zo (assoc tz +time-zones+)))
+      (format nil "~:[+~;-~]~2,'0d~:[:~;~]~2,'0d~@[ (~a)~]"
+              (minusp tz) hr long mi
+              (and long (if dst (cadr zo) (cddr zo)))))))
+
+(defun string->tz (obj)
+  "Find the OBJ (symbol or string) in +TIME-ZONES+."
+  (find obj +time-zones+ :test
+        (lambda (st el) (or (string-equal st (cadr el))
+                            (string-equal st (cddr el))))))
 
 (defun current-time (&optional (out t))
   "Print the current time to the stream (defaults to t)."
   (multiple-value-bind (se mi ho da mo ye dw dst tz) (get-decoded-time)
-    (declare (fixnum se mi ho da mo ye dw tz))
-    (format out "~4d-~2,'0d-~2,'0d ~a ~2,'0d:~2,'0d:~2,'0d ~a (~a)"
+    (declare (fixnum se mi ho da mo ye dw) (type rational tz))
+    (format out "~4d-~2,'0d-~2,'0d ~a ~2,'0d:~2,'0d:~2,'0d ~a"
             ye mo da (aref +week-days+ dw) ho mi se
-            (tz->string (- (if dst 1 0) tz))
-            (funcall (if dst #'cadr #'cddr) (assoc tz +time-zones+)))))
+            (tz->string tz dst))))
 
-(provide :sys)
+(provide :port-sys)
 ;;; file sys.lisp ends here

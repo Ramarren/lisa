@@ -10,7 +10,7 @@
 # SYSTEM     - the system name for defsystem (usually the dir name)
 # TOP        - the path to the top-level CLOCC directory
 #
-# $Id: clocc.mk,v 1.4 2001/06/26 18:08:30 youngde Exp $
+# $Id: clocc.mk,v 1.5 2002/04/08 02:19:54 youngde Exp $
 # $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/extra/Attic/clocc.mk,v $
 
 ifndef CLOCC_MK
@@ -49,7 +49,7 @@ default: force
 	@echo " + $(SYSTEM).zip - the archive of SOURCES, DOCFILES ($(DOCFILES)), MAKEFILES ($(MAKEFILES)) and ZIPEXTRA ($(ZIPEXTRA))"
 
 system: $(SYSTEM).system
-	$(RUNLISP) $(CLOCC_TOP) \
+	$(RUNLISP) $(CLOCC_TOP) -i $^ \
 		-x '(funcall (intern "COMPILE-SYSTEM" :mk) "$(SYSTEM)")'
 
 all: $(addsuffix .$(FASLEXT),$(SOURCES))

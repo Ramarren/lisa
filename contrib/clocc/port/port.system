@@ -2,7 +2,7 @@
 ;;;
 ;;; Cross-implementation Portability System
 ;;;
-;;; $Id: port.system,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: port.system,v 1.5 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/port.system,v $
 
 (mk:defsystem port
@@ -12,9 +12,10 @@
     ((:file "ext")
      (:file "gray" :depends-on ("ext"))
      (:file "net" :depends-on ("ext" "sys"))
+     (:file "path" :depends-on ("ext"))
      (:file "proc" :depends-on ("ext"))
      (:file "shell" :depends-on ("ext"))
-     (:file "sys" :depends-on ("ext")))
+     (:file "sys" :depends-on ("ext" "path")))
     :initially-do
     (progn (mk:system-source-size :port :all)
            (mk:system-source-size :port :new-source-and-dependents)))

@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.11 2002/04/07 00:48:41 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.12 2002/04/08 02:19:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,7 +37,7 @@
            (fact (assert (query-fact (name ?name)))))
       (run)
       (retract fact)
-      (values *query-result*))))
+      (values *query-result* ?name))))
 
 (defun define-query (name body)
   (let ((rule (define-rule name body)))
@@ -50,12 +50,11 @@
 (defmacro retrieve ((&rest varlist) &body body)
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
-    (let ((query-name (gensym))
+    (let ((query-name (gentemp))
           (hash (gensym))
           (query (gensym)))
       `(let* ((,hash (sxhash (normalize-query ',body)))
-              (,query (find-query ,hash))
-              (,query-name (gensym)))
+              (,query (find-query ,hash)))
          (when (null ,query)
            (setf ,query
              (defquery ',query-name
@@ -72,6 +71,17 @@
 
 (defun forget-all-queries ()
   (clrhash *query-map*))
+
+(defun forget-query (name)
+  (flet ((remove-query (key name)
+           (remhash key *query-map*)
+           (undefrule name (current-engine))))
+    (block found
+      (with-hash-table-iterator (next-item *query-map*)
+        (multiple-value-bind (foundp key value) (next-item)
+          (when (and foundp (eq value name))
+            (return-from found
+              (remove-query key value))))))))
 
 (defun remember-query (hash query)
   (setf (gethash hash *query-map*) (get-name query)))

@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: proc.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: proc.lisp,v 1.5 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/proc.lisp,v $
 ;;;
 ;;; This is based on the code donated by Cycorp, Inc. to the public domain.
@@ -52,7 +52,7 @@
 ;;; WITH-LOCK ((lock) &rest body)
 
 (eval-when (compile load eval)
-  (require :ext (translate-logical-pathname "clocc:src;port;ext"))
+  (require :port-ext (translate-logical-pathname "clocc:src;port;ext"))
   #+CormanLisp (require 'THREADS))
 
 (in-package :port)
@@ -407,7 +407,7 @@ and reapply its initial function to its arguments."
 (defun get-lock (lock)
   "Claims a lock, blocking until the current process can get it."
   #+Allegro    (mp:process-lock lock)
-  #+CMU        (mp::lock-wait lock)
+  #+CMU        (mp::lock-wait lock (mp:process-whostate mp:*current-process*))
   #+CormanLisp FIXME
   #+Genera     FIXME
   #+LispWorks  (mp:claim-lock lock)
@@ -438,5 +438,5 @@ and reapply its initial function to its arguments."
   #+MCL        `(ccl:with-process-enqueued (,lock) ,@body)
   #-threads    `(progn ,@body))
 
-(provide :proc)
+(provide :port-proc)
 ;;; proc.lisp end here

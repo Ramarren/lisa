@@ -8,13 +8,13 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: gray.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: gray.lisp,v 1.5 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/gray.lisp,v $
 
 (eval-when (compile load eval)
-  #-(or allegro clisp cmu lispworks)
+  #-(or allegro clisp cmu lispworks sbcl)
   (error 'not-implemented :proc "Gray streams")
-  (require :ext (translate-logical-pathname "clocc:src;port;ext"))
+  (require :port-ext (translate-logical-pathname "clocc:src;port;ext"))
   #+cmu
   (unless (ignore-errors (find-class 'ext:fundamental-input-stream))
     (load "library:subsystems/gray-streams-library")))
@@ -23,9 +23,10 @@
             #+(and clisp      lisp=cl)  :ext
             #+(and clisp (not lisp=cl)) :lisp
             #+cmu :ext
-            #+lispworks :stream)
+            #+lispworks :stream
+            #+sbcl :sb-gray)
 
-(let ((gray-symbols
+(let ((cl-user::gray-symbols
        '(;; Classes
          FUNDAMENTAL-STREAM FUNDAMENTAL-INPUT-STREAM FUNDAMENTAL-OUTPUT-STREAM
          FUNDAMENTAL-CHARACTER-STREAM FUNDAMENTAL-BINARY-STREAM
@@ -41,8 +42,8 @@
          STREAM-ADVANCE-TO-COLUMN
          ;; Binary streams
          STREAM-READ-BYTE STREAM-WRITE-BYTE)))
-  (import gray-symbols :port)
-  (export gray-symbols :port))
+  (import cl-user::gray-symbols :port)
+  (export cl-user::gray-symbols :port))
 
-(provide :gray)
+(provide :port-gray)
 ;;; file gray.lisp ends here

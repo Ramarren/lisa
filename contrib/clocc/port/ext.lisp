@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: ext.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: ext.lisp,v 1.5 2002/04/08 02:19:52 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/ext.lisp,v $
 
 (defpackage "PORT"
@@ -65,14 +65,18 @@ This carries the function name which makes the error message more useful."))
   `(progn (declaim (inline ,name)) (defun ,name ,arglist ,@body)))
 
 (defmacro defcustom (name type init doc)
-  "Define a typed variable."
+  "Define a typed global variable."
   `(progn (declaim (type ,type ,name))
     (defvar ,name (the ,type ,init) ,doc)))
 
 (defmacro defconst (name type init doc)
   "Define a typed constant."
   `(progn (declaim (type ,type ,name))
-    (defconstant ,name (the ,type ,init) ,doc)))
+    ;; since constant redefinition must be the same under EQL, there
+    ;; can be no constants other than symbols, numbers and characters
+    ;; see ANSI CL spec 3.1.2.1.1.3 "Constant Variables"
+    (,(if (subtypep type '(or symbol number character)) 'defconstant 'defvar)
+     ,name (the ,type ,init) ,doc)))
 
 (defmacro mk-arr (type init &optional len)
   "Make array with elements of TYPE, initializing."
@@ -101,7 +105,8 @@ Inspired by Paul Graham, <On Lisp>, p. 145."
   #+gcl (si::gbc)
   #+lispworks (hcl:normal-gc)
   #+lucid (lcl:gc)
-  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid)
+  #+sbcl (sb-ext:gc)
+  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'gc)))
 
 (defun quit (&optional code)
@@ -112,17 +117,17 @@ Inspired by Paul Graham, <On Lisp>, p. 145."
   #+gcl (lisp:bye code)
   #+lispworks (lw:quit :status code)
   #+lucid (lcl:quit code)
-  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid)
+  #+sbcl (sb-ext:quit :unix-code (typecase code (number code) (null 0) (t 1)))
+  #-(or allegro clisp cmu cormanlisp gcl lispworks lucid sbcl)
   (error 'not-implemented :proc (list 'quit code)))
 
-(defconst +eof+ cons (cons nil nil)
+(defconst +eof+ cons (list '+eof+)
   "*The end-of-file object.
 To be passed as the third arg to `read' and checked against using `eq'.")
 
 (defun eof-p (stream)
   "Return T if the stream has no more data in it."
-  (let ((cc (read-char stream nil nil)))
-    (if cc (unread-char cc stream) t)))
+  (null (peek-char nil stream nil nil)))
 
 (defun string-tokens (string &key (start 0) max)
   "Read from STRING repeatedly, starting with START, up to MAX tokens.
@@ -130,7 +135,7 @@ Return the list of objects read and the final index in STRING.
 Binds `*package*' to the keyword package,
 so that the bare symbols are read as keywords."
   (declare (type (or null fixnum) max) (type fixnum start))
-  (let ((*package* (find-package "KEYWORD")))
+  (let ((*package* (find-package :keyword)))
     (if max
         (do ((beg start) obj res (num 0 (1+ num)))
             ((= max num) (values (nreverse res) beg))
@@ -144,8 +149,8 @@ so that the bare symbols are read as keywords."
                           t nil :start start))))
 
 #+cmu (progn
-        (import '(ext:required-argument) :port)
-        (export '(ext:required-argument) :port))
+        (import 'ext:required-argument :port)
+        (export 'ext:required-argument :port))
 #-cmu (progn
         (proclaim '(ftype (function () nil) required-argument))
         (defun required-argument ()
@@ -187,5 +192,5 @@ All the values from nth function are fed to the n-1th."
             (lambda (&rest args) (multiple-value-call f0 (apply f1 args))))
           functions :initial-value #'identity))
 
-(provide :ext)
+(provide :port-ext)
 ;;; file ext.lisp ends here

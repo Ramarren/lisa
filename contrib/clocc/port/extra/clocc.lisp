@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: clocc.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
+;;; $Id: clocc.lisp,v 1.5 2002/04/08 02:19:54 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/extra/Attic/clocc.lisp,v $
 
 (in-package :cl-user)
