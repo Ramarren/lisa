@@ -20,7 +20,7 @@
 ;;; File: test1.lisp
 ;;; Description: This class represents a single test in a conditional element.
 
-;;; $Id: test1.lisp,v 1.5 2000/12/06 00:36:20 youngde Exp $
+;;; $Id: test1.lisp,v 1.6 2000/12/23 02:21:16 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,5 +41,18 @@
 (defmethod equals ((self test1) (obj test1))
   (equal (get-value self) (get-value obj)))
 
-(defun make-test1 (value)
-  (make-instance 'test1 :value value))
+(defclass test1-eq (test1)
+  ()
+  (:documentation
+   "Represents a single equality test in a conditional element."))
+
+(defun make-test1-eq (value)
+  (make-instance 'test1-eq :value value))
+
+(defclass test1-neq (test1)
+  ()
+  (:documentation
+   "Represents a single negated equality test in a conditional element."))
+
+(defun make-test1-neq (value)
+  (make-instance 'test1-neq :value value))
