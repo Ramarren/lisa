@@ -20,7 +20,7 @@
 ;;; File: node1-teq.lisp
 ;;; Description: A one-input node that tests a slot's value.
 
-;;; $Id: node1-teq.lisp,v 1.5 2000/11/14 19:49:33 youngde Exp $
+;;; $Id: node1-teq.lisp,v 1.6 2001/01/05 20:12:25 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,6 +34,7 @@
   (:documentation
    "A one-input node that tests a slot's value."))
 
+#+ignore
 (defmethod call-node-right ((self node1-teq) token)
   (flet ((call-right (token)
            (with-accessors ((value get-value)
@@ -47,6 +48,17 @@
   (if (call-next-method self token)
       (values nil)
     (call-right token))))
+
+(defmethod call-node-right ((self node1-teq) token)
+  (with-accessors ((value get-value)
+                   (slot get-slot)) self
+    (cond ((call-next-method self token)
+           (values nil))
+          ((equal (get-slot-value (get-top-fact token) slot) value)
+           (pass-along self token)
+           (values t))
+          (t
+           (values nil)))))
 
 (defmethod equals ((self node1-teq) (obj node1-teq))
   (and (equal (get-slot self) (get-slot obj))
