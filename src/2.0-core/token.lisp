@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.17 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: token.lisp,v 1.18 2002/09/23 17:28:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,6 +35,7 @@
 
 (defclass add-token (token) ())
 (defclass remove-token (token) ())
+(defclass reset-token (token) ())
 
 (defun token-make-fact-list (token)
   (let ((facts (list))
@@ -92,3 +93,5 @@
 (defmethod make-remove-token ((token token))
   (replicate-token token :token-class 'remove-token))
 
+(defmethod make-reset-token ((fact t))
+  (token-push-fact (make-instance 'reset-token) t))

@@ -20,12 +20,14 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.1 2002/09/20 18:52:14 youngde Exp $
+;;; $Id: preamble.lisp,v 1.2 2002/09/23 17:28:26 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *active-rule* nil)
 (defvar *active-engine* nil)
+
+(defclass inference-engine-object () ())
 
 (defmacro starts-with-? (sym)
   `(eq (aref (symbol-name ,sym) 0) #\?))
