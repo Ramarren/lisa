@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.21 2002/12/02 16:21:34 youngde Exp $
+;;; $Id: lisa.system,v 1.22 2002/12/02 18:21:31 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -37,6 +37,7 @@
 (setf (logical-pathname-translations "lisa")
   `(("src;**;" ,(make-lisa-path "src/**/"))
     ("lib;**;*.*" ,(make-lisa-path "lib/**/"))
+    ("config;*.*" ,(make-lisa-path "config/"))
     ("debugger;*.*" ,(make-lisa-path "src/debugger/"))
     ("contrib;**;" ,(make-lisa-path "contrib/**/"))))
 
