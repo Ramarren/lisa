@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.2 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: bindings.lisp,v 1.3 2000/12/06 17:13:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -54,6 +54,11 @@
               :reader get-slot-name))
   (:documentation
    "Represents variable bindings that can occur within pattern slots."))
+
+(defmethod print-object ((self slot-binding) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(name = ~S ; location = ~D ; slot-name = ~S)"
+            (get-name self) (get-location self) (get-slot-name self))))
 
 (defun make-slot-binding (binding-name location slot-name)
   (make-instance 'slot-binding :name binding-name

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.17 2000/12/05 21:37:21 youngde Exp $
+;;; $Id: rule.lisp,v 1.18 2000/12/06 17:13:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,18 +60,25 @@
             (get-name self) (size token))
     (funcall (create-lexical-context self token))))
 
+(defmethod create-lexical-binding ((binding pattern-binding) token)
+  (let ((fact (find-fact token (get-location binding))))
+    (cl:assert (not (null fact)) ()
+      "No fact for location ~D." (get-location binding))
+    `(,(get-name binding) ,fact)))
+
+(defmethod create-lexical-binding ((binding slot-binding) token)
+  (let ((fact (find-fact token (get-location binding))))
+    (cl:assert (not (null fact)) ()
+      "No fact for location ~D." (get-location binding))
+    `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
+  
 (defun create-lexical-bindings (bindings token)
-  (flet ((create-binding (pb)
-           (let ((fact (find-fact token (get-location pb))))
-             (cl:assert (not (null fact)) ()
-                 "No fact for location ~D." (get-location pb))
-             `(,(get-name pb) ,fact))))
-    (let ((vars nil))
-      (maphash #'(lambda (key val)
-                   (declare (ignore key))
-                   (setf vars (nconc vars `(,(create-binding val)))))
-               bindings)
-      (values vars))))
+  (let ((vars nil))
+    (maphash #'(lambda (key val)
+                 (declare (ignore key))
+                 (setf vars (nconc vars `(,(create-lexical-binding val token)))))
+             bindings)
+    (values vars)))
   
 (defmethod create-lexical-context ((self rule) token)
   (flet ((make-context ()
