@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.11 2002/09/24 15:26:42 youngde Exp $
+;;; $Id: rete.lisp,v 1.12 2002/09/25 14:43:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -117,13 +117,12 @@
          (retract-fact self fact))))
 
 (defmethod modify-fact ((self rete) fact slot-changes)
-  (let ((network (rete-network self)))
-    (remove-fact-from-network network fact)
-    (mapc #'(lambda (slot)
-              (set-slot-value fact (first slot) (second slot)))
-          slot-changes)
-    (add-fact-to-network network fact)
-    fact))
+  (retract-fact self fact)
+  (mapc #'(lambda (slot)
+            (set-slot-value fact (first slot) (second slot)))
+        slot-changes)
+  (assert-fact self fact)
+  fact)
 
 (defun set-initial-state (rete)
   (forget-all-facts rete)

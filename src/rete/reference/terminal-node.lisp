@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.6 2002/09/24 23:48:04 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.7 2002/09/25 14:43:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,13 +28,12 @@
   ((rule :initarg :rule
          :initform nil
          :reader terminal-node-rule)
-   (rule-activations :initform (make-hash-table)
+   (rule-activations :initform (make-hash-table :test #'equal)
                      :accessor terminal-node-rule-activations)))
 
 (defmethod accept-token ((self terminal-node) (tokens add-token))
   (let* ((rule (terminal-node-rule self))
          (activation (make-activation rule tokens)))
-    (format t "addition activation for ~S~%" tokens)
     (add-activation (rule-engine rule) activation)
     (setf (gethash (hash-key tokens) (terminal-node-rule-activations self))
       activation)
@@ -42,7 +41,7 @@
 
 (defmethod accept-token ((self terminal-node) (tokens remove-token))
   (with-accessors ((activations terminal-node-rule-activations)) self
-    (let ((activation (gethash (hash-code tokens) activations)))
+    (let ((activation (gethash (hash-key tokens) activations)))
       (unless (null activation)
         (disable-activation (rule-engine (terminal-node-rule self)) activation)
         (remhash (hash-key tokens) activations)))

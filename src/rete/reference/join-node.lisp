@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.7 2002/09/24 23:48:04 youngde Exp $
+;;; $Id: join-node.lisp,v 1.8 2002/09/25 14:43:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,7 +35,7 @@
                  :reader join-node-right-memory)))
 
 (defun remember-token (memory token)
-  (setf (gethash (hash-key token) memory)))
+  (setf (gethash (hash-key token) memory) token))
 
 (defun forget-token (memory token)
   (remhash (hash-key token) memory))
@@ -58,10 +58,21 @@
 (defun right-memory-count (join-node)
   (hash-table-count (join-node-right-memory join-node)))
 
-(defmethod pass-tokens-to-successor ((self join-node) left-tokens fact)
-  (call-successor 
-   (join-node-successor self)
-   (token-push-fact (replicate-token left-tokens) fact)))
+(defmethod pass-tokens-to-successor ((self join-node) left-tokens)
+  (call-successor (join-node-successor self) left-tokens))
+
+(defmethod combine-tokens ((left-tokens add-token) (right-token token))
+  (token-push-fact 
+   (replicate-token left-tokens) (token-top-fact right-token)))
+
+(defmethod combine-tokens ((left-tokens add-token) (right-token t))
+  (token-push-fact (replicate-token left-tokens) t))
+
+(defmethod combine-tokens ((left-tokens token) (right-token token))
+  (token-push-fact left-tokens (token-top-fact right-token)))
+
+(defmethod combine-tokens ((left-tokens token) (right-token t))
+  (token-push-fact left-tokens t))
 
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)

@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.16 2002/09/24 23:48:04 youngde Exp $
+;;; $Id: node2.lisp,v 1.17 2002/09/25 14:43:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,34 +28,33 @@
 
 (defmethod test-tokens ((self node2) left-tokens right-token)
   (token-push-fact left-tokens (token-top-fact right-token))
-  (let ((test-results
-         (every #'(lambda (test)
-                    (funcall test left-tokens))
-                (join-node-tests self))))
-    (token-pop-fact left-tokens)
-    test-results))
+  (prog1
+      (every #'(lambda (test)
+                 (funcall test left-tokens))
+             (join-node-tests self))
+    (token-pop-fact left-tokens)))
 
 (defmethod test-against-right-memory ((self node2) left-tokens)
   (loop for right-token being the hash-value 
       of (join-node-right-memory self)
       do (when (test-tokens self left-tokens right-token)
-           (pass-tokens-to-successor self left-tokens 
-                                     (token-top-fact right-token)))))
+           (pass-tokens-to-successor 
+            self (combine-tokens left-tokens right-token)))))
 
 (defmethod test-against-left-memory ((self node2) (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
-           (pass-tokens-to-successor self left-tokens 
-                                     (token-top-fact right-token)))))
+           (pass-tokens-to-successor 
+            self (combine-tokens left-tokens right-token)))))
   
 (defmethod test-against-left-memory ((self node2) (right-token remove-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor
-            self (make-remove-token left-tokens) 
-            (token-top-fact right-token)))))
+            self (combine-tokens
+                  (make-remove-token left-tokens) right-token)))))
   
 (defmethod accept-tokens-from-left ((self node2) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
