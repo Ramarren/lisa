@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.2 2002/08/21 19:47:34 youngde Exp $
+;;; $Id: parser.lisp,v 1.3 2002/08/22 15:43:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,7 +42,7 @@
   (with-rule-components ((doc-string lhs rhs) body)
     (format t "LHS: ~S~%" lhs)
     (format t "RHS: ~S~%" rhs)
-    (values)))
+    nil))
 
 (defun redefine-defrule (name body &key (salience 0) (module nil))
   (add-rule (current-engine) (define-rule name body salience module)))
@@ -53,99 +53,101 @@
     (values nil body)))
 
 (defun parse-rulebody (body)
-  (labels ((parse-lhs (body patterns)
-             (let ((pattern (first body)))
-               (cond ((consp pattern)
-                      (parse-lhs (rest body)
-                                 (nconc patterns
-                                        (make-rule-pattern pattern))))
-                     ((null pattern)
-                      (values patterns))
-                     (t
-                      (pattern-error pattern "Incorrect structure.")))))
-           (parse-rhs (actions)
-             (values actions)))
-    (multiple-value-bind (lhs remains)
-        (utils:find-before *rule-separator* body :test #'eq)
-      (if (not (null remains))
-          (values (parse-lhs lhs nil)
-                  (parse-rhs (utils:find-after *rule-separator* remains :test #'eq)))
-        (parsing-error "Missing rule separator.")))))
+  (let ((location -1))
+    (labels ((parse-lhs (body patterns)
+               (let ((pattern (first body)))
+                 (cl:assert (listp pattern) nil
+                   "This pattern is malformed: ~S" pattern)
+                 (if (consp pattern)
+                     (parse-lhs 
+                      (rest body)
+                      (push
+                       (make-rule-pattern pattern (incf location)) patterns))
+                   (nreverse patterns))))
+             (parse-rhs (actions) actions))
+      (multiple-value-bind (lhs remains)
+          (utils:find-before *rule-separator* body :test #'eq)
+        (cl:assert (not (null remains)) nil "Missing rule separator")
+        (values (parse-lhs lhs nil)
+                (parse-rhs (utils:find-after *rule-separator*
+                                             remains :test #'eq)))))))
 
-(defun make-rule-pattern (template)
+(defun make-rule-pattern (template location)
   (labels ((parse-pattern (p binding)
              (let ((head (first p)))
-               (if (symbolp head)
-                   (cond ((eq head 'test)
-                          (make-parsed-pattern
-                           :pattern (parse-test-pattern p)
-                           :type :test))
-                         ((eq head 'not)
-                          (make-parsed-pattern
-                           :pattern `(,@(parse-default-pattern (second p)))
-                           :type :negated))
-                         ((variablep head)
-                          (cl:assert (null binding) nil
-                            "Too many pattern variables: ~S" head)
-                          (parse-pattern (first (rest p)) head))
-                         (t
-                          (make-parsed-pattern
-                           :pattern `(,@(parse-default-pattern p))
-                           :binding binding
-                           :type (if binding :bound :generic))))
-                 (pattern-error
-                  template "Patterns must begin with a symbol.")))))
-    `(,(parse-pattern template nil))))
+               (cl:assert (symbolp head) nil
+                 "A symbol doesn't start this pattern: ~S" p)
+               (cond ((eq head 'test)
+                      (make-parsed-pattern
+                       :pattern (parse-test-pattern p)
+                       :type :test
+                       :location location))
+                     ((eq head 'not)
+                      (make-parsed-pattern
+                       :pattern (list (parse-default-pattern (second p)))
+                       :type :negated
+                       :location location))
+                     ((variablep head)
+                      (cl:assert (null binding) nil
+                        "Too many pattern variables: ~S" head)
+                      (parse-pattern (first (rest p)) head))
+                     (t
+                      (make-parsed-pattern
+                       :pattern (list (parse-default-pattern p))
+                       :binding binding
+                       :type (if binding :bound :generic)
+                       :location location))))))
+    (parse-pattern template nil)))
+;;;    `(,(parse-pattern template nil))))
 
 (defun parse-test-pattern (pattern)
   (let ((form (rest pattern)))
-    (if (and (listp form)
-             (= (length form) 1))
-        (values (first form))
-    (pattern-error
-     pattern "The body of a TEST CE must be a single Lisp form"))))
+    (cl:assert (and (listp form)
+                    (= (length form) 1)) nil
+      "The body of a TEST CE must be a single Lisp form")
+    (first form)))
 
 (defun parse-default-pattern (pattern)
   (let* ((head (first pattern))
-         (meta (find-meta-fact head nil)))
-    (when (null meta)
-      (pattern-error
-       pattern "This pattern is not supported by any known class."))
+         (meta (find-meta-fact head nil))
+         (variables (list)))
+    (cl:assert (not (null meta)) nil
+      "This pattern has no meta data: ~S" pattern)
     (labels ((parse-slot (slot)
                (let ((name (first slot))
                      (field (second slot))
                      (constraint (third slot)))
-                 (cond ((and (symbolp name)
-                             (slot-valuep field)
-                             (constraintp constraint))
-                        `(,name ,field ,constraint))
-                       (t
-                        (cl:assert nil nil
-                            "There are type problems with this slot: ~S." slot)))))
+                 (cl:assert (and (symbolp name)
+                                 (slot-valuep field)
+                                 (constraintp constraint))
+                     nil "This pattern has a malformed slot: ~S" pattern)
+                 (when (variablep field)
+                   (pushnew field variables))
+                 (list name field constraint)))
              (parse-pattern-body (body slots)
                (let ((slot (first body)))
-                 (cond ((consp slot)
-                        (parse-pattern-body (rest body)
-                                            (nconc slots
-                                                   `(,(parse-slot slot)))))
-                       ((null slot)
-                        slots)
-                       (t
-                        (pattern-error
-                         pattern "Found one or more structural problems."))))))
-    `(,head ,(parse-pattern-body (rest pattern) nil)))))
+                 (cl:assert (listp slot) nil
+                   "This pattern has structural problems: ~S" body)
+                 (if (null slot)
+                     slots
+                   (parse-pattern-body
+                    (rest body)
+                    (nconc slots (list (parse-slot slot))))))))
+      (list
+       (nreverse variables)
+       head (parse-pattern-body (rest pattern) nil)))))
+
+;;; End of the rule parsing stuff
 
 (defun normalize-slots (slots)
   (flet ((normalize-slot (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
-             (cond ((symbolp slot-name)
-                    (if (quotablep slot-value)
-                        ``(,',slot-name ,',slot-value)
-                      ``(,',slot-name ,,slot-value)))
-                   (t
-                    (parsing-error
-                     "There's a type problem in this slot: ~S." slot))))))
+             (cl:assert (symbolp slot-name) nil
+               "A slot name must be a symbol: ~S" slot-name)
+             (if (quotablep slot-value)
+                 ``(,',slot-name ,',slot-value)
+               ``(,',slot-name ,,slot-value)))))
     `(list ,@(mapcar #'normalize-slot slots))))
 
 (defun canonicalize-slot-names (slots)
@@ -157,14 +159,12 @@
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
         (slots (rest body)))
-    (cond ((symbolp head)
-           `(assert-fact (current-engine)
-                         (make-fact ',head
-                                    (canonicalize-slot-names 
-                                     (,@(normalize-slots slots))))))
-          (t
-           (cl:assert nil nil
-             "A fact must begin with a symbol: ~S." head)))))
+    (cl:assert (symbolp head) nil
+      "A symbol must start a fact: ~S" body)
+    `(assert-fact (current-engine)
+                  (make-fact ',head
+                             (canonicalize-slot-names 
+                              (,@(normalize-slots slots)))))))
 
 (defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()

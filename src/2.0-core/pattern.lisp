@@ -20,18 +20,20 @@
 ;;; File: pattern.lisp
 ;;; Description: Base class for all types of patterns found on a rule LHS.
 
-;;; $Id: pattern.lisp,v 1.1 2002/08/21 19:57:05 youngde Exp $
+;;; $Id: pattern.lisp,v 1.2 2002/08/22 15:43:08 youngde Exp $
 
 (in-package "LISA")
 
 (defstruct (parsed-pattern
             (:constructor make-internal-parsed-pattern))
   (pattern nil :type list)
+  (location nil :type integer)
   (binding nil :type symbol)
   (type nil :type symbol))
 
-(defun make-parsed-pattern (&key pattern binding type)
+(defun make-parsed-pattern (&key pattern binding type location)
   (make-internal-parsed-pattern
    :pattern pattern
    :binding binding
-   :type type))
+   :type type
+   :location location))
