@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.1 2002/08/27 17:19:38 youngde Exp $
+;;; $Id: fact.lisp,v 1.2 2002/08/28 20:18:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,8 +47,8 @@
   "Assigns a new value to a slot in a fact and its associated CLOS
   instance. SLOT-NAME is a symbol; VALUE is the new value for the
   slot."
-  (let* ((meta (get-meta-data fact))
-         (instance (instance-of-fact fact))
+  (let* ((meta (fact-meta-data fact))
+         (instance (find-instance-of-fact fact))
          (effective-slot (find-effective-slot meta slot-name)))
     (setf (slot-value instance effective-slot) value)
     (initialize-slot-value fact slot-name value)))
@@ -126,7 +126,7 @@
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
     (let ((slots (get-slot-values self)))
-      (format strm "F-~D ; ~S" (get-fact-id self) (fact-name self))
+      (format strm "F-~D ; ~S" (fact-id self) (fact-name self))
       (unless (null slots)
         (format strm " ; ~S" slots)))))
 
@@ -141,7 +141,7 @@
     (setf meta-data (find-meta-fact (fact-name self)))
     (mapc #'(lambda (slot-name)
               (setf (gethash slot-name slot-table) nil))
-          (get-slot-list meta-fact))
+          (get-slot-list meta-data))
     (if (null instance)
         (initialize-fact-from-template self slots meta-data)
       (initialize-fact-from-instance self instance meta-data))

@@ -3,9 +3,15 @@
 
 (use-default-engine)
 
+#+ignore
 (deftemplate frodo ()
   (slot name (default frodo))
   (slot has-ring (default nil))
+  (slot age (default 0)))
+
+(deftemplate frodo ()
+  (slot name)
+  (slot has-ring)
   (slot age (default 0)))
 
 (deftemplate bilbo ()
