@@ -16,22 +16,18 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-;;;
-;;; File: language.lisp
-;;; Description: Code that implements the LISA programming language.
-;;;
-;;; $Id: language.lisp,v 1.11 2000/10/25 23:58:53 youngde Exp $
+
+;;; File: rete.lisp
+;;; Description: Class representing the inference engine itself.
+
+;;; $Id: rete.lisp,v 1.1 2000/10/25 23:58:53 youngde Exp $
 
 (in-package "LISA")
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(defrule import)))
-
-(defmacro defrule (name &body body)
-  "Creates or redefines a rule in the network."
-  `(redefine-defrule ',name ',body))
-
-(defmacro import (class))
-
-(defun halt ()
-  (values))
+(defclass rete ()
+  ((hash-index :initarg :hash-index
+               :initform 0
+               :accessor get-hash-index)))
+   
+(defun make-rete ()
+  (make-instance 'rete))

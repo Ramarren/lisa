@@ -20,7 +20,7 @@
 ;;; File: defrule.lisp
 ;;; Description: The DEFRULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.6 2000/10/25 15:18:29 youngde Exp $
+;;; $Id: defrule.lisp,v 1.7 2000/10/25 23:58:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,8 +46,11 @@
   (:documentation
    "This class represents LISA rules."))
 
-(defmethod compile-patterns ((rule defrule) plist)
-  (with-accessors ((patterns get-patterns)) rule
+(defmethod get-pattern-count ((self defrule))
+  (length (get-patterns self)))
+  
+(defmethod compile-patterns ((self defrule) plist)
+  (with-accessors ((patterns get-patterns)) self
     (mapc #'(lambda (p)
               (format t "compiling pattern: ~S~%" p)
               (setf patterns
