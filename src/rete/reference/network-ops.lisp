@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.1 2002/09/06 14:20:22 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.2 2002/09/08 23:51:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,3 +28,8 @@
   (loop for root-node being the hash-value
       of (rete-roots rete-network)
       do (accept-token root-node (make-add-token fact))))
+
+(defun remove-fact-from-network (rete-network fact)
+  (loop for root-node being the hash-value
+      of (rete-roots rete-network)
+      do (accept-token root-node (make-remove-token fact))))
