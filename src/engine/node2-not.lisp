@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.2 2000/12/11 21:22:59 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.3 2000/12/11 21:29:23 youngde Exp $
 
 (in-package :lisa)
 
@@ -62,7 +62,6 @@
                                        (get-null-fact engine))))
         (update-time token engine)
         (pass-along self token))))
-  (cl:assert (>= (get-negation-count left-token) 0))
   (values))
 
 (defmethod run-tests-vary-left ((self node2-not) right-token tree)
