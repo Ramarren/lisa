@@ -21,12 +21,12 @@
 ;;; Description: This class and its associated methods implement an MP-safe
 ;;; version of class RETE.
 
-;;; $Id: rete-mp.lisp,v 1.2 2001/05/05 17:46:42 youngde Exp $
+;;; $Id: rete-mp.lisp,v 1.3 2001/05/05 18:16:53 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete-mp (rete)
-  ((lock :initform (lmp:make-lock :name "Rete Lock")
+  ((lock :initform (lmp:make-lock :name "Rete MP Lock")
          :reader get-lock))
   (:documentation
    "This class and its associated methods implement an MP-safe version of
@@ -43,6 +43,11 @@
 (defmethod modify-fact ((self rete-mp) fact slot-changes)
   (lmp:with-lock ((get-lock self))
     (call-next-method self fact slot-changes)))
+
+(defmethod mark-clos-instance-as-changed ((self rete-mp) instance
+                                          &optional (slot-id nil))
+  (lmp:with-lock ((get-lock self))
+    (call-next-method self instance slot-id)))
 
 (defmethod run-engine ((self rete-mp) &optional (step t))
   (lmp:with-lock ((get-lock self))
