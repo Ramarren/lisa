@@ -1687,19 +1687,10 @@ for your convenience, a copy is included in the distribution. Building
 
 LISA should be straight-forward. First, either load "lisa:lisa.system"
 
-or change your working directory to the LISA root directory; then, evaluate
+or change your working directory to the LISA root directory; then, evaluate (mk:compile-system
+:lisa). Note that LISA uses logical pathnames in its defsystem, and translations that are suitable for a Linux environment are
 
-(mk:compile-system :lisa). Note that currently LISA includes a copy of
-
-the CLOCC package PORT; this will build automatically. If you already have
-
-PORT in your Lisp you'll have to edit lisa.system until I find a better
-
-way to manage this. One other thing. LISA uses logical pathnames in her
-
-defsystem, and translations that are suitable for a Linux environment are
-
-established there. They might work for you; perhaps not. Once again, until
+established there. They might work for you; perhaps not. Until
 
 I figure out how to correctly place default translations you might have
 
@@ -1789,7 +1780,7 @@ Allegro Common Lisp, versions 5.0.1 and 6.x, Linux and Windows 2000.</li>
 
 <li>
 
-Xanalys LispWorks, version 4.1.20, Linux and Windows 2000.</li>
+Xanalys LispWorks, versions 4.1.20 and 4.2, Linux and Windows 2000.</li>
 
 
 

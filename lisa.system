@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.14 2002/08/05 17:09:17 youngde Exp $
+;;; $Id: lisa.system,v 1.15 2002/08/06 22:40:53 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -112,7 +112,6 @@
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "deftemplate")
-                                       (:file "slot-name")
                                        (:file "meta")
                                        (:file "strategies")
                                        (:file "bindings")
