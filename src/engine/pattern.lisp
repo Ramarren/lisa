@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.31 2001/01/22 19:39:43 youngde Exp $
+;;; $Id: pattern.lisp,v 1.32 2001/01/22 20:38:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -76,12 +76,7 @@
              (make-lisa-defined-slot-variable
               (intern (make-symbol (format nil "?~A" (gensym))))))
            (add-local-binding (binding)
-             (pushnew binding (slot-value pattern 'bindings)
-                      :test-not #'(lambda (b)
-                                    (and (eql (get-location b)
-                                              (get-location binding))
-                                         (eql (get-slot-name b)
-                                              (get-slot-name binding))))))
+             (push binding (slot-value pattern 'bindings)))
            (new-slot-binding (var)
              (let ((binding (lookup-binding bindings var)))
                (when (null binding)
