@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.70 2001/04/25 15:50:16 youngde Exp $
+;;; $Id: parser.lisp,v 1.71 2001/05/08 20:37:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -149,6 +149,7 @@
                          pattern "Found one or more structural problems."))))))
     `(,head ,(parse-pattern-body (rest pattern) nil)))))
 
+#+ignore
 (defun normalize-slots (slots)
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
@@ -157,6 +158,19 @@
                          (or (literalp slot-value)
                              (multifieldp slot-value)
                              (variablep slot-value)))
+                    (if (quotablep slot-value)
+                        ``(,',slot-name ,',slot-value)
+                      ``(,',slot-name ,,slot-value)))
+                   (t
+                    (parsing-error
+                     "There's a type problem in this slot: ~S." slot))))))
+    `(list ,@(mapcar #'normalize slots))))
+
+(defun normalize-slots (slots)
+  (flet ((normalize (slot)
+           (let ((slot-name (first slot))
+                 (slot-value (second slot)))
+             (cond ((symbolp slot-name)
                     (if (quotablep slot-value)
                         ``(,',slot-name ,',slot-value)
                       ``(,',slot-name ,,slot-value)))

@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.28 2001/05/05 17:46:42 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.29 2001/05/08 20:37:46 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -38,7 +38,7 @@
   (:export "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS" "RULES"
            "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH" "UNWATCH"
            "WATCHING" "HALT" "ASSERT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
-           "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE"
+           "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
            "MAKE-INFERENCE-ENGINE" "ASSERT-FROM-STRING" "=>"))
 
@@ -51,7 +51,7 @@
                 "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
                 "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
                 "MARK-INSTANCE-AS-CHANGED" "TELL-LISA-MODIFIED-INSTANCE"
-                "SLOT" "TEST" "ENGINE" "WITH-INFERENCE-ENGINE"
+                "SLOT" "TEST" "ENGINE" "WITH-INFERENCE-ENGINE" "USE-ENGINE"
                 "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "ASSERT-FROM-STRING"
                 "MAKE-INFERENCE-ENGINE" "=>"))
 

@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.4 2001/05/07 17:48:12 youngde Exp $
+;;; $Id: pumps.lisp,v 1.5 2001/05/08 20:37:45 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -30,8 +30,10 @@
 
 (defclass tank ()
   ((level :initarg :level
-          :initform 0
+          :initform 500
           :accessor get-level)
+   (lock :initform (port:make-lock :name "Tank Lock")
+         :reader get-lock)
    (name :initarg :name
          :reader get-name)))
 
@@ -40,6 +42,8 @@
               :accessor get-flow-rate)
    (tank :initarg :tank
          :reader get-tank)
+   (lock :initform (port:make-lock :name "Pump Lock")
+         :reader get-lock)
    (name :initarg :name
          :reader get-name)))
 
@@ -47,6 +51,8 @@
   (declare (type pump self))
   (with-accessors ((rate get-flow-rate)) self
     (when (and (not (minusp new-rate)) (not (eql rate new-rate)))
+      (format t "Setting new flow rate for pump ~S to ~D.~%"
+              (get-name self) new-rate)
       (setf rate new-rate)
       (mark-instance-as-changed self 'flow-rate))))
 
@@ -65,6 +71,14 @@
 (defun make-pump (name tank)
   (make-instance 'pump :name name :tank tank))
 
+(defmethod get-level :around ((self tank))
+  (port:with-lock ((get-lock self))
+    (call-next-method self)))
+
+(defmethod (setf get-level) :around (new-value (self tank))
+  (port:with-lock ((get-lock self))
+    (call-next-method new-value self)))
+
 (defun high-p (self)
   (declare (type tank self))
   (> (get-level self) 750))
@@ -81,6 +95,8 @@
 (defun add-water (self amount)
   (declare (type tank self) (type integer amount))
   (unless (zerop amount)
+    (format t "Increasing level in tank ~S by ~D units.~%"
+            (get-name self) amount)
     (incf (get-level self) amount)
     (mark-instance-as-changed self 'level)))
 
@@ -98,6 +114,26 @@
     (port:make-process
      (concatenate 'string "Tank Process " (get-name self))
      #'adjust-tank-level)))
+
+(defun make-tank (name)
+  (make-instance 'tank :name name))
+
+(defvar *equipment* '())
+
+(defun start-run ()
+  (let* ((tank (make-tank "Tank Main"))
+         (pump (make-pump "Pump Main" tank)))
+    (setf *equipment* nil)
+    (push (cons tank (run-tank tank)) *equipment*)
+    (push (cons pump (run-pump pump)) *equipment*)
+    (assert-instance tank)
+    (assert-instance pump)
+    (values *equipment*)))
+
+(defun stop-run ()
+  (halt (current-engine))
+  (mapc #'port:kill-process :key #'rest *equipment*)
+  (values nil))
 
 (defimport pump (lisa-user::pump) ())
 (defimport tank (lisa-user::tank) ())
@@ -166,7 +202,9 @@
   =>
   (format t "*********************************************~%")
   (format t "* Tank ~S has run dry and caught fire.~%" ?name)
-  (format t "*********************************************~%"))
+  (format t "*********************************************~%")
+  (retract ?fact)
+  (halt (engine)))
 
 (defrule report-explosion ()
   (?fact (tank (name ?name) (:object ?tank)))
@@ -174,4 +212,11 @@
   =>
   (format t "*********************************************~%")
   (format t "* Tank ~S has overfilled and exploded.~%" ?name)
-  (format t "*********************************************~%"))
+  (format t "*********************************************~%")
+  (retract ?fact)
+  (halt (engine)))
+
+(defrule startup ()
+  =>
+  (assert (idle (count 0)))
+  (start-run))
