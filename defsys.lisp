@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.27 2001/03/10 20:10:27 youngde Exp $
+;;; $Id: defsys.lisp,v 1.28 2001/03/12 20:00:16 youngde Exp $
 
 (in-package :user)
 
@@ -155,7 +155,12 @@
       (mk:system-source-size :lisa :new-source-and-dependents)))
 
 (defun compile-lisa ()
-  (mk:compile-system :lisa))
+  (let ((*compile-print* nil))
+    (mk:compile-system :lisa)))
 
 (defun load-lisa ()
-  (mk:load-system :lisa))
+  (let ((*compile-print* nil))
+    (mk:load-system :lisa)))
+
+(defun clean-lisa ()
+  (mk:clean-system :lisa))
