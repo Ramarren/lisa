@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.49 2001/03/31 20:50:53 youngde Exp $
+;;; $Id: parser.lisp,v 1.50 2001/03/31 20:56:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -61,7 +61,7 @@
                       (if (null doc)
                           (extract-headers (rest headers) obj)
                         (parsing-error
-                         "Too many documentation strings: ~S" obj)))
+                         "Too many documentation strings: ~S." obj)))
                      ((consp obj)
                       (let ((decl (first obj)))
                         (if (and (symbolp decl)
@@ -105,7 +105,7 @@
                           (if (null binding)
                               (parse-pattern (first (rest p)) head)
                             (pattern-error
-                             template "Too many pattern variables: ~S" head)))
+                             template "Too many pattern variables: ~S." head)))
                          (t
                           (make-parsed-pattern
                            :pattern (make-default-pattern p)
@@ -134,7 +134,7 @@
                        (t
                         (pattern-error
                          pattern
-                         "There are type problems with this slot: ~S" slot)))))
+                         "There are type problems with this slot: ~S." slot)))))
              (parse-pattern-body (body slots)
                (let ((slot (first body)))
                  (cond ((consp slot)
@@ -163,7 +163,7 @@
                       ``(,',slot-name ,,slot-value)))
                    (t
                     (parsing-error
-                     "There's a type problem in this slot: ~S" slot))))))
+                     "There's a type problem in this slot: ~S." slot))))))
     `(list ,@(mapcar #'normalize slots))))
 
 (defun canonicalize-slot-names (meta-class slots)
@@ -184,7 +184,7 @@
                           (,@(normalize-slots slots)))))))
                    (t
                     (parsing-error
-                     "A fact must begin with a symbol: ~S" head))))))
+                     "A fact must begin with a symbol: ~S." head))))))
     (handler-case
         (generate-assert)
       (lisa-error (condition)
@@ -206,7 +206,7 @@
                         (not (eql (first slot) 'slot))
                         (not (= (length slot) 2)))
                     (parsing-error
-                     "This slot has a structural problem: ~S" slot))
+                     "This slot has a structural problem: ~S." slot))
                    (t (second slot))))
            (define-template ()
                (create-class-template name (mapcar #'extract-slot body))))

@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.6 2001/03/31 20:50:53 youngde Exp $
+;;; $Id: conditions.lisp,v 1.7 2001/03/31 20:56:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,9 +50,9 @@
   (:report
    (lambda (condition strm)
      (with-slots (rule-name element text) condition
-       (format strm "While compiling rule ~S:~%" rule-name)
+       (format strm "While compiling rule ~S~%" rule-name)
        (unless (null element)
-         (format strm "While parsing element ~S:~%" element))
+         (format strm "While parsing element ~S~%" element))
        (format strm text)))
    :documentation
    "This condition represents structural errors found while parsing DEFRULE
@@ -63,7 +63,7 @@
   (:report
    (lambda (condition strm)
      (with-slots (command-name text) condition
-       (format strm "While evaluating the LISA function ~S:~%" command-name)
+       (format strm "While evaluating the LISA function ~S~%" command-name)
        (format strm text)))
    :documentation
    "This condition represents structural errors found while parsing specific
