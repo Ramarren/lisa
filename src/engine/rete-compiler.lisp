@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.36 2001/01/17 21:40:00 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.37 2001/01/17 22:06:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -105,8 +105,8 @@
                      (make-test2-eval
                       (make-node-function-call slot pattern rule)))))
     (mapc #'(lambda (slot)
-              (unless (and (is-localized-patternp pattern)
-                           (not (has-constraintp slot)))
+              (unless (or (is-localized-patternp pattern)
+                          (not (has-constraintp slot)))
                 (add-constraint-test slot)))
           (get-slots pattern))
     (values node2)))

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.26 2001/01/13 21:00:29 youngde Exp $
+;;; $Id: pattern.lisp,v 1.27 2001/01/17 22:06:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -101,7 +101,8 @@
             ((negated-rewritable-constraintp slot-constraint)
              (rewrite-slot slot-value (second slot-constraint) t))
             ((variablep slot-value)
-             (new-slot-binding slot-value)))
+             (new-slot-binding slot-value))
+            (t (error "Funny slot format.")))
       (values))))
 
 (defun set-pattern-locality (pattern bindings)
