@@ -18,12 +18,11 @@
 ;;;(set-fact-duplication TRUE)
 ;;;(set-multithreaded-io TRUE)
 
-(watch facts)
-(watch activations)
-(watch rules)
+;;;(watch facts)
+;;;(watch activations)
+;;;(watch rules)
 
 (load-package jess.ViewFunctions)
-(load-function Schtum)
 
 ;;;*************
 ;;;* TEMPLATES *
@@ -182,7 +181,6 @@
   (printout t "Monkey grabs the " ?name "." crlf)
   (modify ?thing (location held) (on-top-of held))
   (modify ?monkey (holding ?name))
-;  (schtum)
   (retract ?goal))
 
 (defrule drop-object ""  
