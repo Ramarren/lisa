@@ -20,18 +20,21 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.1 2000/10/24 18:55:57 youngde Exp $
+;;; $Id: pattern.lisp,v 1.2 2000/10/27 20:06:46 youngde Exp $
 
 (in-package "LISA")
 
 (defclass pattern ()
   ((name :initarg :name
          :reader get-name)
-   (tests :initform nil
+   (tests :initform (make-hash-table)
           :accessor get-tests))
   (:documentation
-   "Base class for the two types of patterns found on a rule LHS."))
+   "Base class for all types of patterns found on a rule LHS."))
 
-(defmethod add-test ((self pattern) test)
+(defmethod add-test ((self pattern) slot-name test)
   (with-accessors ((tests get-tests)) self
-    (setf tests (nconc tests `(,test)))))
+    (setf (gethash slot-name tests) test)))
+
+(defmethod get-slot-count ((self pattern))
+  (hash-table-size (get-tests self)))

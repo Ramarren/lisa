@@ -17,14 +17,27 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File:
-;;; Description:
+;;; File: generic-pattern.lisp
+;;; Description: Class representing the default style of pattern found
+;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: unordered-pattern.lisp,v 1.1 2000/10/24 18:55:57 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.1 2000/10/27 20:06:46 youngde Exp $
+
 
 (in-package "LISA")
 
-(defclass unordered-pattern (pattern))
+(defclass generic-pattern (pattern)
+  ()
+  (:documentation
+   "Represents  the default style of pattern found on rule LHSs, as in
+   (fact (slot-0 1) (slot-1 blue))."))
 
-(defun make-unordered-pattern (name)
-  (make-instance 'unordered-pattern :name name))
+(defun make-generic-pattern (head body)
+  "Constructor for the GENERIC-PATTERN class."
+  (let ((pattern (make-instance 'generic-pattern :name head)))
+    (mapc #'(lambda (slot)
+              (add-test pattern (first slot)
+                        (make-test1 (second slot))))
+          body)
+    (values pattern)))
+

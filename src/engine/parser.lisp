@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.2 2000/10/25 15:18:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.3 2000/10/27 20:06:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -100,11 +100,11 @@
                           (make-negated-pattern
                            (parse-pattern (first (rest p)))))
                          (t
-                          (parse-fact p)))
+                          (make-default-pattern p)))
                  (error "Parse error at ~S~%" p)))))
     `(,(parse-pattern template))))
 
-(defun parse-ordered-fact (fact)
+(defun parse-ordered-pattern (pattern)
   (labels ((parse-fields (fields &optional (flist nil))
              (let ((field (first fields)))
                (cond ((null field)
@@ -120,29 +120,63 @@
                         (parse-fields (rest fields)
                                       (nconc flist `(,field)))))
                      (t
-                      (error "parse-ordered-fact: parse error for ~S~%"
-                             fact))))))
-    (list (first fact)
-          (parse-fields (rest fact)))))
+                      (error "parse-ordered-pattern: parse error for ~S~%"
+                             pattern))))))
+    `(,(canonicalize-pattern (first pattern)
+                             (parse-fields (rest pattern))))))
 
-(defun parse-unordered-fact (fact)
+(defun parse-unordered-pattern (pattern)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (list name field constraint)))
-           (parse-fact-body (body &optional (slots nil))
+           (parse-pattern-body (body &optional (slots nil))
              (let ((slot (first body)))
                (cond ((consp slot)
-                      (parse-fact-body (rest body)
-                                       (append slots
-                                               `(,(parse-slot slot)))))
+                      (parse-pattern-body (rest body)
+                                          (append slots
+                                                  `(,(parse-slot slot)))))
                      ((null slot)
                       (values slots))
                      (t
-                      (error "parse-unordered-fact: parse error at ~S~%" body))))))
-    (list (first fact)
-          (parse-fact-body (rest fact)))))
+                      (error "parse-unordered-pattern: parse error at ~S~%" body))))))
+    (list (first pattern)
+          (parse-pattern-body (rest pattern)))))
 
-(defun parse-fact (fact)
-  (if (unordered-factp fact)
-      (parse-unordered-fact fact)
-    (parse-ordered-fact fact)))
+(defun internalize-class (name slots)
+  "Creates an internal, LISA-specific class representing ordered
+  patterns that have been canonicalized to their unordered
+  equivalents."
+  (flet ((compose-slots (slot-list)
+           (mapcar #'(lambda (slot)
+                       `(,(first slot) :initform nil))
+                   slot-list)))
+    (let ((class (find-class name nil)))
+      (when (null class)
+        (setf class
+          (eval `(defclass ,name (lisa-kb-class)
+                   (,@(compose-slots slots))))))
+      (values class))))
+
+(defun canonicalize-pattern (head body)
+  (labels ((make-slot-id (id)
+             (intern
+              (make-symbol
+               (format nil "__SLOT-~D" id))))
+           (make-slot-list (body slot-id &optional (slots nil))
+             (if (null body)
+                 (values slots)
+               (make-slot-list (rest body)
+                               (1+ slot-id)
+                               (nconc slots
+                                      `(,(cons (make-slot-id slot-id)
+                                               (first body)))))))
+           (finalize-pattern (head slots)
+             (internalize-class head slots)
+             (values `(,head ,slots))))
+    (finalize-pattern head (make-slot-list body 0))))
+
+(defun make-default-pattern (p)
+  (if (unordered-patternp p)
+      (parse-unordered-pattern p)
+    (parse-ordered-pattern p)))
+

@@ -17,23 +17,13 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: ordered-pattern.lisp
-;;; Description:
+;;; File: lisa-kb-class.lisp
+;;; Description: Base class for internal KB entities that are created
+;;; to represent "ordered" facts.
 
-;;; $Id: ordered-pattern.lisp,v 1.2 2000/10/25 15:18:29 youngde Exp $
-
+;;; $Id: lisa-kb-class.lisp,v 1.1 2000/10/27 20:06:46 youngde Exp $
 
 (in-package "LISA")
 
-(defclass ordered-pattern (pattern)
-  ()
-  (:documentation
-   "Class representing ordered patterns on the rule LHS."))
-
-(defun make-ordered-pattern (head body)
-  (let ((pattern (make-instance 'ordered-pattern :name head)))
-    (mapc #'(lambda (field)
-              (add-test pattern (make-test1 field)))
-          body)
-    (values pattern)))
-
+(defclass lisa-kb-class ()
+  ())
