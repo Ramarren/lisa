@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.21 2001/04/10 20:35:52 youngde Exp $
+;;; $Id: meta.lisp,v 1.22 2001/04/10 20:50:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -181,4 +181,6 @@
     (values not-or-test-fact)))
 
 (defun find-class-slots (class)
+  (unless (reflect:class-finalized-p class)
+    (reflect:finalize-inheritance class))
   (mapcar #'reflect:slot-definition-name (reflect:class-slots class)))

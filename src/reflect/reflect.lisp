@@ -21,15 +21,15 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation details.
 
-;;; $Id: reflect.lisp,v 1.1 2001/04/10 20:22:24 youngde Exp $
+;;; $Id: reflect.lisp,v 1.2 2001/04/10 20:50:47 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
-#+(or CMUCL CLISP)
+#+CLISP
 (defun class-finalized-p (class)
   (values t))
 
-#+(or CMUCL CLISP)
+#+CLISP
 (defun finalize-inheritance (class)
   (values))
 
