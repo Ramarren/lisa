@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.21 2002/11/20 20:04:03 youngde Exp $
+;;; $Id: rule.lisp,v 1.22 2002/11/21 14:53:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,6 +111,9 @@
 
 (defun logical-rule-p (rule)
   (numberp (rule-logical-marker rule)))
+
+(defun auto-focus-p (rule)
+  (rule-auto-focus rule))
 
 (defun find-any-logical-boundaries (patterns)
   (flet ((ensure-logical-blocks-are-valid (addresses)

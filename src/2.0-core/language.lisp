@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.19 2002/11/20 20:04:03 youngde Exp $
+;;; $Id: language.lisp,v 1.20 2002/11/21 14:53:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,19 +49,22 @@
      (register-new-context (inference-engine) 
                            (make-context ,context-name))))
 
+(defmacro undefcontext (context-name)
+  `(forget-context (inference-engine) ,context-name))
+
 (defun focus-stack ()
   (rete-focus-stack (inference-engine)))
 
-(defmacro focus (&rest args)
-  `(if (null ',args)
-       (current-context (inference-engine))
-     (dolist (context-name (reverse ',args) (focus-stack))
-       (push-context 
-        (inference-engine) 
-        (find-context (inference-engine) context-name)))))
+(defun focus (&rest args)
+  (if (null args)
+      (current-context (inference-engine))
+    (dolist (context-name (reverse args) (focus-stack))
+      (push-context
+       (inference-engine) 
+       (find-context (inference-engine) context-name)))))
 
-(defmacro refocus ()
-  `(pop-context (inference-engine)))
+(defun refocus ()
+  (pop-context (inference-engine)))
 
 (defun contexts ()
   (let ((contexts (retrieve-contexts (inference-engine))))
@@ -118,35 +121,48 @@
 (defun assert-from-string (str)
   (eval (read-from-string str)))
 
-(defun facts (&optional (engine *active-engine*))
-  (print-fact-list engine))
+(defun facts ()
+  (let ((facts (get-fact-list (inference-engine))))
+    (dolist (fact facts)
+      (format t "~S~%" fact))
+    (format t "For a total of ~D fact~:P.~%" (length facts))
+    (values)))
 
-(defun rules (&optional (engine *active-engine*))
-  (print-rule-list engine))
+(defun rules (&optional (context-name nil))
+  (let ((rules (get-rule-list (inference-engine) context-name)))
+    (dolist (rule rules)
+      (format t "~S~%" rule))
+    (format t "For a total of ~D rule~:P.~%" (length rules))
+    (values)))
 
-(defun agenda (&optional (engine *active-engine*))
-  (print-activation-list engine))
+(defun agenda (&optional (context-name nil))
+  (let ((activations 
+         (get-activation-list (inference-engine) context-name)))
+    (dolist (activation activations)
+      (format t "~S~%" activation))
+    (format t "For a total of ~D activation~:P.~%" (length activations))
+    (values)))
 
-(defun reset (&optional (engine *active-engine*))
-  (reset-engine engine))
+(defun reset ()
+  (reset-engine (inference-engine)))
 
 (defun clear ()
   (clear-system-environment))
 
-(defun run (&optional (engine *active-engine*))
-  (run-engine engine))
+(defun run ()
+  (run-engine (inference-engine)))
 
-(defun walk (&optional (engine *active-engine*) (step 1))
-  (run-engine engine step))
+(defun walk (&optional (step 1))
+  (run-engine (inference-engine) step))
 
-(defmethod retract ((fact-object fact) &optional (engine *active-engine*))
-  (retract-fact engine fact-object))
+(defmethod retract ((fact-object fact))
+  (retract-fact (inference-engine) fact-object))
 
-(defmethod retract ((fact-object number) &optional (engine *active-engine*))
-  (retract-fact engine fact-object))
+(defmethod retract ((fact-object number))
+  (retract-fact (inference-engine) fact-object))
 
-(defmethod retract ((fact-object t) &optional (engine *active-engine*))
-  (parse-and-retract-instance fact-object engine))
+(defmethod retract ((fact-object t))
+  (parse-and-retract-instance fact-object (inference-engine)))
 
 (defmacro modify (fact &body body)
   `(modify-fact (inference-engine) ,fact ,@(expand-slots body)))
@@ -163,35 +179,8 @@
             (if watches watches "nothing"))
     (values)))
 
-(defun halt (&optional (engine *active-engine*))
-  (halt-engine engine))
+(defun halt ()
+  (halt-engine (inference-engine)))
 
-(defun mark-instance-as-changed (instance &key (engine *active-engine*)
-                                               (slot-id nil)) 
-  (mark-clos-instance-as-changed engine instance slot-id))
-
-(defun print-activation-list (engine)
-  (let ((activations (make-activation-list engine)))
-    (mapc #'(lambda (act)
-              (format t "~S~%" act))
-          activations)
-    (format t "For a total of ~D activation~:P.~%"
-            (length activations))
-    (values)))
-
-(defun print-rule-list (engine)
-  (let ((rules (make-rule-list engine)))
-    (mapc #'(lambda (rule)
-              (format t "~S~%" rule))
-          rules)
-    (format t "For a total of ~D rule~:P.~%" (length rules))
-    (values)))
-
-(defun print-fact-list (engine)
-  (let ((facts (make-fact-list engine)))
-    (mapc #'(lambda (fact)
-              (format t "~S~%" fact))
-          facts)
-    (format t "For a total of ~D fact~:P.~%" (length facts))
-    (values)))
-
+(defun mark-instance-as-changed (instance &key (slot-id nil)) 
+  (mark-clos-instance-as-changed (inference-engine) instance slot-id))

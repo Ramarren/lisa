@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.42 2002/11/20 20:04:03 youngde Exp $
+;;; $Id: rete.lisp,v 1.43 2002/11/21 14:53:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -121,7 +121,7 @@
 (defun forget-all-facts (rete)
   (clrhash (rete-fact-table rete)))
 
-(defun make-fact-list (rete)
+(defun get-fact-list (rete)
   (sort
    (loop for fact being the hash-value of (rete-fact-table rete)
        collect fact)
@@ -200,13 +200,17 @@
   (assert-autofacts self)
   t)
 
-(defun make-rule-list (rete)
-  (loop for context being the hash-value of (rete-contexts rete)
-      append (context-rule-list context)))
+(defun get-rule-list (rete &optional (context-name nil))
+  (if (null context-name)
+      (loop for context being the hash-value of (rete-contexts rete)
+          append (context-rule-list context))
+    (context-rule-list (find-context rete context-name))))
 
-(defun make-activation-list (rete)
-  (loop for context being the hash-value of (rete-contexts rete)
-      append (context-activation-list context)))
+(defun get-activation-list (rete &optional (context-name nil))
+  (if (null context-name)
+      (loop for context being the hash-value of (rete-contexts rete)
+          append (context-activation-list context))
+    (context-activation-list (find-context rete context-name))))
 
 (defun find-fact-using-instance (rete instance)
   (gethash instance (rete-instance-table rete)))
@@ -236,6 +240,13 @@
 (defun register-new-context (rete context)
   (setf (gethash (context-name context) (rete-contexts rete)) context))
 
+(defun forget-context (rete context-name)
+  (let ((context (find-context rete context-name)))
+    (dolist (rule (context-rule-list context))
+      (forget-rule rete rule))
+    (remhash context-name (rete-contexts rete))
+    context))
+
 (defun current-context (rete)
   (first (rete-focus-stack rete)))
 
@@ -259,13 +270,17 @@
       collect context))
 
 (defmethod add-activation ((self rete) activation)
-  (trace-enable-activation activation)
-  (add-activation (conflict-set) activation))
+  (let ((rule (activation-rule activation)))
+    (trace-enable-activation activation)
+    (add-activation (conflict-set) activation)
+    (when (auto-focus-p rule)
+      (push-context self (rule-context rule)))))
 
 (defmethod disable-activation ((self rete) activation)
   (when (eligible-p activation)
     (trace-disable-activation activation)
-    (setf (activation-eligible activation) nil)))
+    (setf (activation-eligible activation) nil))
+  activation)
 
 (defmethod run-engine ((self rete) &optional (step -1))
   (with-context (starting-context self)
