@@ -620,9 +620,15 @@ assertions. Instances associated with facts are accessible on rule LHSs via the
 
 
 
+  </dl>
+
+
+
 <p>Once bound, method and function calls can be made on this object from
 
 the rule's LHS and RHS.
+
+<dl>
 
 <p>When reasoning over CLOS objects, LISA is capable of considering an
 
@@ -1875,10 +1881,12 @@ LISA requires the Portable Defsystem as maintained by the CLOCC project;
 
 for your convenience, a copy is included in the distribution. Building
 
-LISA should be straight-forward. First, either load "lisa:lisa.system"
+LISA should be straight-forward. First, either load
+&quot;lisa:lisa2.system&quot;
 
 or change your working directory to the LISA root directory; then, evaluate (mk:compile-system
-:lisa). Note that LISA uses logical pathnames in its defsystem, and translations that are suitable for a Linux environment are
+:lisa2). Note that LISA uses logical pathnames in its defsystem, and translations that are suitable for a Linux
+(or Cygwin/Windows) environment are
 
 established there. They might work for you; perhaps not. Until
 
