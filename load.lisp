@@ -17,10 +17,10 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: load.lisp
+;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.2 2000/11/04 02:57:05 youngde Exp $
+;;; $Id: load.lisp,v 1.3 2000/11/07 01:57:49 youngde Exp $
 
 (in-package "USER")
 
@@ -36,16 +36,16 @@
                          '("src"))))
 
 (let ((files
-       '("packages/pkgdecl.lisp" "utils/utils.lisp" "utils/compose.lisp"
-         "engine/macros.lisp" "engine/rete" "engine/rete-compiler"
-         "engine/fact" "engine/token.lisp" "engine/add-token.lisp"
-         "engine/clear-token.lisp" "engine/node.lisp"
-         "engine/node1.lisp" "engine/node1-tect.lisp"
-         "engine/node1-teq.lisp" "engine/node1-rtl.lisp"
-         "engine/node-test.lisp" "engine/node2.lisp"
-         "engine/test1.lisp" "engine/factories.lisp"
-         "engine/generic-pattern.lisp" "engine/defrule.lisp"
-         "engine/parser.lisp" "engine/language.lisp")))
+       '("packages/pkgdecl" "utils/utils" "utils/compose"
+         "engine/macros" "engine/rete" "engine/rete-compiler"
+         "engine/fact" "engine/token" "engine/add-token"
+         "engine/clear-token" "engine/node"
+         "engine/node1" "engine/node1-tect"
+         "engine/node1-teq" "engine/node1-rtl"
+         "engine/node-test" "engine/node2"
+         "engine/test1" "engine/factories"
+         "engine/generic-pattern" "engine/defrule"
+         "engine/parser" "engine/language")))
   (dolist (file files)
     (load (concatenate 'string
             (directory-namestring *lisa-source-pathname*)

@@ -22,13 +22,48 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.1 2000/11/02 21:12:34 youngde Exp $
+;;; $Id: node2.lisp,v 1.3 2000/11/07 01:59:11 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass node2 (node-test)
-  ()
+  ((left-tree :initform (make-hash-table)
+              :accessor get-left-tree)
+   (right-tree :initform (make-hash-table)
+               :accessor get-right-tree)
+   (hashkey :initform nil
+            :accessor get-hashkey))
   (:documentation
    "Description: A non-negated, two-input node of the Rete network. Tests in
    this node compare slot values and types in facts from the left and right
    inputs."))
+
+(defmethod add-to-left-tree ((self node2) token)
+  (add-token (get-left-tree self) token))
+
+(defmethod add-to-right-tree ((self node2) token)
+  (add-token (get-right-tree self) token))
+
+(defmethod call-node-left ((self node2) (token add-token))
+  (add-to-left-tree self token)
+  (run-tests-vary-right self token (get-right-tree self)))
+
+(defmethod call-node-right ((self node2) (token add-token))
+  (add-to-right-tree self token)
+  (run-tests-vary-left self token (get-left-tree self)))
+
+(defmethod run-tests-vary-left ((self node2) right-token tree)
+  (labels ((eval-tests (left-token)
+             (when (map-until #'do-tests (get-tests self))
+               (pass-along self (make-token left-token right-token))))
+           (eval-tokens (tokens)
+             (mapcar #'eval-tests tokens)))
+    (maphash #'eval-tokens tree)))
+
+(defmethod run-tests-vary-right ((self node2) token tree)
+  (labels ((eval-right-tests (token tests)))
+    (maphash #'eval-right-tests tree)))
+
+(defun make-node2 (engine hash)
+  (make-instance 'node2 :engine engine :hashkey hash))
+

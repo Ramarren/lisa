@@ -20,9 +20,9 @@
 ;;; File: test1.lisp
 ;;; Description: This class represents a single test in a conditional element.
 
-;;; $Id: test1.lisp,v 1.1 2000/10/24 18:55:57 youngde Exp $
+;;; $Id: test1.lisp,v 1.2 2000/11/07 01:57:50 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass test1 ()
   ((value :initform nil
@@ -33,6 +33,9 @@
 
 (defmethod do-test ((test test1))
   (not (null (get-value test))))
+
+(defmethod equals ((self test1) (obj test1))
+  (equal (get-value self) (get-value obj)))
 
 (defun make-test1 (value)
   (make-instance 'test1 :value value))

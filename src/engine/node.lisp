@@ -20,9 +20,9 @@
 ;;; File: node.lisp
 ;;; Description: Parent class of all nodes in the Rete pattern network.
 
-;;; $Id: node.lisp,v 1.4 2000/11/03 21:36:51 youngde Exp $
+;;; $Id: node.lisp,v 1.5 2000/11/07 01:57:50 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass node ()
   ((use-count :initform 0

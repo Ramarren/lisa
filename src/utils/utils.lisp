@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.2 2000/11/06 22:37:38 youngde Exp $
+;;; $Id: utils.lisp,v 1.3 2000/11/07 01:57:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -63,3 +63,13 @@
          (if (apply predicate `(,(first lst1) ,(first lst2)))
              (compare2 predicate (rest lst1) (rest lst2))
            (values nil)))))
+
+(defun map-until (predicate args)
+  "Maps PREDICATE over the list ARGS. Returns T if all the
+  elements satisfy PREDICATE or NIL upon the first failure."
+  (declare (type list args))
+  (cond ((null args)
+         (values t))
+        ((funcall predicate (first args))
+         (map-until predicate (rest args)))
+        (t (values nil))))
