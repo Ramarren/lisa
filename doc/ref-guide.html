@@ -15,9 +15,16 @@ a treatise on production-rule technology; readers are assumed to have a
 working knowledge of rule-based systems and their development. This document
 also avoids any detailed description of LISA's implementation of the Rete
 algorithm; perhaps at some future date I'll make an attempt.
+<center>
+<h2>
+Abbreviated Table of Contents</h2></center>
+<a href="#The Programming Language">The Programming Language</a>.
+<br><a href="#The Environment">The Environment</a>.
+<br><a href="#Getting Started">Getting Started</a>.
+<br><a href="#Things Yet to Do">Things Yet to Do</a>.
 <br>&nbsp;
 <h3>
-I. The Programming Language</h3>
+I.&nbsp;<a NAME="The Programming Language"></a>The Programming Language</h3>
 This section describes the publicly-available operators in the LISA language,
 separated into various categories:
 <blockquote><a href="#Fact-Related Operators">Fact-Related Operators</a>
@@ -525,14 +532,14 @@ for <i>watch</i> to see the allowable event types.</blockquote>
 <blockquote>Displays the list of events currently being monitored.</blockquote>
 
 <h3>
-II. The Environment</h3>
+II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
 
 <p><br>For application developers, LISA makes available the LISA-USER package.
 Generally, all user-level work should be done in this package; see the
 various examples provided in "lisa:misc;".
 <br>&nbsp;
 <h3>
-III. Getting started.</h3>
+III.&nbsp;<a NAME="Getting Started"></a>Getting Started.</h3>
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 for your convenience, a copy is included in the distribution. Building
 LISA should be straight-forward; load "lisa:defsys.lisp" and evaluate (mk:compile-system
@@ -551,7 +558,7 @@ for the examples in "lisa:misc;".
 support enabled. Also, the baseline version with which LISA has been tested
 is 2.25.1. Earlier releases might work as well, but no guarantees.
 <h3>
-IV. Things Yet to Do.</h3>
+IV.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 This section is a list (albeit incomplete) of features that would improve
 LISA significantly.
 <ol>
