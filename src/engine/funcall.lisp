@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.17 2001/01/27 20:41:21 youngde Exp $
+;;; $Id: funcall.lisp,v 1.18 2001/01/28 20:50:55 youngde Exp $
 
 (in-package :lisa)
 
@@ -76,15 +76,16 @@
           "No fact for location ~D." (get-location ,binding))
         (values fact)))))
 
-#+ignore
 (defun evaluate (func context)
   (declare (type function-call func)
            (type function-call-context context))
+  (declare (optimize (speed 3) (debug 0) (safety 1)))
   (apply (get-function func)
          (mapcar #'(lambda (binding)
                      (make-lexical-binding binding context))
                  (get-bindings func))))
 
+#+ignore
 (defun evaluate (func context)
   (declare (type function-call func)
            (type function-call-context context))
