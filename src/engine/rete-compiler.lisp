@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.47 2001/02/01 21:05:40 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.48 2001/02/02 18:20:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,7 @@
   (setf (slot-value self 'root-node) (make-root-node)))
 
 (defmacro simple-slotp (slot)
-  `(or (typep ,slot 'optimisable-literal-slot)
+  `(or (typep ,slot 'optimisable-slot)
        (and (has-complex-constraintp ,slot)
             (localized-slotp ,slot))))
 

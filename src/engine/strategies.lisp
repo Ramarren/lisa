@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.17 2001/01/23 21:34:29 youngde Exp $
+;;; $Id: strategies.lisp,v 1.18 2001/02/02 18:20:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,7 @@
    resolution strategies."))
 
 (defgeneric add-activation (strategy activation))
-(defgeneric find-activation (strategy token))
+(defgeneric find-activation (strategy rule token))
 (defgeneric next-activation (strategy))
 (defgeneric remove-activations (strategy))
 (defgeneric list-activations (strategy))
@@ -45,9 +45,7 @@
            :accessor get-inodes)
    (delta :accessor get-delta)
    (insertion-function :initarg :insertion-function
-                       :reader get-insertion-function)
-   (activations :initform (make-hash-table)
-                :reader get-activations))
+                       :reader get-insertion-function))
   (:documentation
    "Utility class that implements an indexed priority 'queue' to manage
    activations. Employed by various types of conflict resolution strategies,
@@ -76,18 +74,19 @@
         (index-salience inode))
       (setf (aref vector inode)
         (apply (get-insertion-function plist)
-               `(,activation ,queue)))
-      (setf (gethash (hash-code activation) activations) activation)))))
+               `(,activation ,queue)))))))
 
-(defun lookup-activation (plist token)
-  (declare (type indexed-priority-list plist))
-  (gethash (hash-code token) (get-activations plist)))
+(defun lookup-activation (plist rule token)
+  (find-if #'(lambda (act)
+               (and (= (hash-code act) (hash-code token))
+                    (eq (get-rule act) rule)))
+           (aref (get-priority-vector plist)
+                 (+ (get-salience rule) (get-delta plist)))))
 
 (defun get-next-activation (plist)
   (declare (type indexed-priority-list plist))
   (with-accessors ((inodes get-inodes)
-                   (vector get-priority-vector)
-                   (activations get-activations)) plist
+                   (vector get-priority-vector)) plist
     (let ((inode (first inodes)))
       (cond ((null inode)
              (values nil))
@@ -95,18 +94,18 @@
              (let ((activation (pop (aref vector inode))))
                (when (null (aref vector inode))
                  (pop inodes))
-               (remhash (hash-code activation) activations)
                (values activation)))))))
 
 (defun get-all-activations (plist)
-  (declare (type indexed-priority-list plist))
-  (let ((list nil))
-    (maphash #'(lambda (key activation)
-                 (declare (ignore key))
-                 (when (eligible-p activation)
-                   (setf list (nconc list `(,activation)))))
-             (get-activations plist))
-    (values list)))
+  (let ((activations (list)))
+    (with-accessors ((queue get-priority-vector)) plist
+      (mapc #'(lambda (inode)
+                (mapc #'(lambda (act)
+                          (when (eligible-p act)
+                            (push act activations)))
+                      (aref queue inode)))
+            (get-inodes plist)))
+    (values activations)))
 
 (defun make-indexed-priority-list (func)
   (make-instance 'indexed-priority-list :insertion-function func))
@@ -119,8 +118,8 @@
 (defmethod add-activation ((self depth-first-strategy) activation)
   (insert-activation (get-priority-queue self) activation))
 
-(defmethod find-activation ((self depth-first-strategy) token)
-  (lookup-activation (get-priority-queue self) token))
+(defmethod find-activation ((self depth-first-strategy) rule token)
+  (lookup-activation (get-priority-queue self) rule token))
 
 (defmethod next-activation ((self depth-first-strategy))
   (get-next-activation (get-priority-queue self)))

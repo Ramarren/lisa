@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.5 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: watch.lisp,v 1.6 2001/02/02 18:20:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,7 +55,7 @@
           (get-name (get-rule activation))
           (activation-fact-list activation)))
   
-(defmethod add-activation :after ((s strategy) (act activation))
+(defmethod add-activation :before ((s strategy) (act activation))
   (when (watching-p :activations)
     (show-activation "==>" act))
   (values))
@@ -65,7 +65,7 @@
     (show-activation "<==" activation))
   (values))
 
-(defmethod disable-activation :after ((engine rete) (act activation))
+(defmethod disable-activation :before ((engine rete) (act activation))
   (show-activation-maybe act))
 
 (defmethod fire-rule :before ((act activation))
@@ -77,10 +77,10 @@
   (format t "~A f-~D ~S~%" direction (get-fact-id fact)
           (reconstruct-fact fact)))
 
-(defmethod assert-fact :after ((engine rete) (fact fact))
+(defmethod insert-token :before ((engine rete) (token add-token))
   (when (watching-p :facts)
-    (show-fact-detail "==>" fact)))
+    (show-fact-detail "==>" (get-top-fact token))))
 
-(defmethod retract-fact :after ((engine rete) (fact fact))
+(defmethod insert-token :before ((engine rete) (token remove-token))
   (when (watching-p :facts)
-    (show-fact-detail "<==" fact)))
+    (show-fact-detail "<==" (get-top-fact token))))
