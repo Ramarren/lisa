@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.8 2002/09/14 21:06:44 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.9 2002/09/17 14:42:43 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,9 +38,14 @@
 (defun make-class-test (class)
   (find-test class
              #'(lambda ()
-                 (function
-                  (lambda (token)
-                    (eq class (fact-name (token-top-fact token))))))))
+                 (if (eq class 'unconditional-fact)
+                     (function
+                      (lambda (token)
+                        (declare (ignore token))
+                        t))
+                   (function
+                    (lambda (token)
+                      (eq class (fact-name (token-top-fact token)))))))))
 
 (defun make-simple-slot-test-aux (slot-name value negated-p)
   (find-test 

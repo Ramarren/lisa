@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.4 2002/08/28 20:18:34 youngde Exp $
+;;; $Id: rete.lisp,v 1.5 2002/09/17 14:42:43 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,15 @@
                :reader get-rule-table)
    (strategy :initarg :strategy
              :initform nil)))
+
+(defmethod initialize-instance :after ((self rete) &rest args)
+  (initialize-internal-concepts self))
+
+(defun initialize-internal-concepts (rete)
+  (with-inference-engine (rete)
+    (deftemplate initial-fact ())
+    (deftemplate unconditional-fact ())
+    rete))
 
 (defun meta-fact-map (rete)
   (meta-data-fact-map (get-meta-data rete)))

@@ -24,6 +24,12 @@
   (slot friend)
   (slot age))
 
+(defrule special-pattern ()
+  (bilbo (name ?name) (relative ?name))
+  =>
+  )
+
+#+ignore
 (defrule negated-slot-rule ()
   (frodo (name (not frodo)))
   =>

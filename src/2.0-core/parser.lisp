@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.19 2002/09/16 17:35:25 youngde Exp $
+;;; $Id: parser.lisp,v 1.20 2002/09/17 14:42:43 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,7 +103,7 @@
                       collect obj)))
              (if (equal bindings (remove-duplicates bindings))
                  lhs
-               (push lhs (list :unconditional))))))
+               (push (list 'unconditional-fact) lhs)))))
     (cond ((null lhs)
            (push (list 'initial-fact) lhs))
           (t
