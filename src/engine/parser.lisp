@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.16 2000/12/08 02:25:49 youngde Exp $
+;;; $Id: parser.lisp,v 1.17 2000/12/09 21:41:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -224,6 +224,48 @@
                                        (parse-fact-body (rest body)))))))
           (t
            (error "PARSE-FACT: parse error at ~S." body)))))
+
+(defun normalize-slots (&rest args)
+  (labels ((compose-slots (pairs slot-name slots)
+             (cond ((null pairs)
+                    (values slots))
+                   ((null slot-name)
+                    (compose-slots (rest pairs) (first pairs) slots))
+                   (t
+                    (compose-slots (rest pairs) nil
+                                   (nconc slots
+                                          `((,slot-name 
+                                             ,(first pairs)))))))))
+    (compose-slots args nil nil)))
+
+(defun expand-slot-variables (slots)
+  (labels ((validate-slot-structure (slot)
+             (if (consp slot)
+                 (let ((name (first slot))
+                       (value (second slot)))
+                   (cond ((and (symbolp name)
+                               (or (literalp value)
+                                   (variablep value)))
+                          (values name value))
+                         (t
+                          (error "EXPAND-SLOT-VARIABLES: malformed slot ~S." slot))))
+               (error "EXPAND-SLOT-VARIABLES: parse error at ~S." slot)))
+           (expand-slots (slots bindings)
+             (let ((slot (first slots)))
+               (if (null slot)
+                   (values bindings)
+                 (multiple-value-bind (name value)
+                     (validate-slot-structure slot)
+                   (expand-slots (rest slots)
+                                 (nconc bindings `(',name ,value))))))))
+    (expand-slots slots nil)))
+
+(defun insert-new-fact (head slots)
+  (format t "inserting fact: ~S ~S~%" head slots))
+
+(defun parse-and-insert-fact (body)
+  `(insert-new-fact ',(first body)
+                    (normalize-slots ,@(expand-slot-variables (rest body)))))
 
 (defun parse-and-modify-fact (fact body)
   (format t "modify ~S, ~S~%" fact (parse-fact-body body)))
