@@ -20,39 +20,46 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.5 2002/09/11 23:56:36 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.6 2002/09/12 19:52:54 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-not (join-node) ())
 
-(defun pass-tokens-to-successor (node2-not left-tokens)
+(defmethod pass-tokens-to-successor ((self node2-not) left-tokens)
   (call-successor 
-   (join-node-successor node2-not)
+   (join-node-successor self)
    (token-push-fact left-tokens t)))
 
-(defun test-tokens ((self node2-not) left-tokens right-token)
-  (let ((tests (join-node-tests self)))
-    (token-push-fact left-tokens (token-top-fact right-token))
-    (when (some #'(lambda (test)
-                    (funcall test left-tokens)) tests)
-      (incf (token-not-counter left-tokens)))
-    (token-pop-fact left-tokens)
-    left-tokens))
+(defmethod test-tokens ((self node2-not) left-tokens right-token)
+  (setf (token-not-counter left-tokens) 0)
+  (token-push-fact left-tokens (token-top-fact right-token))
+  (when (some #'(lambda (test)
+                  (funcall test left-tokens))
+              (join-node-tests self))
+    (incf (token-not-counter left-tokens)))
+  (token-pop-fact left-tokens)
+  (zerop (token-not-counter left-tokens)))
 
 (defmethod test-against-right-memory ((self node2-not) left-tokens)
   (loop for right-token being the hash-value 
       of (join-node-right-memory self)
-      do (test-tokens self left-tokens right-token)
-         (when (zerop (token-not-counter left-tokens))
+      do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor self left-tokens))))
 
-(defmethod test-against-left-memory ((self node2-not) right-token)
+(defmethod test-against-left-memory ((self node2-not) 
+                                     (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
-      do (test-tokens self left-tokens right-token)
-         (when (zerop (token-not-counter left-tokens))
+      do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor self left-tokens))))
+  
+(defmethod test-against-left-memory ((self node2-not) 
+                                     (right-token remove-token))
+  (loop for left-tokens being the hash-value 
+      of (join-node-left-memory self)
+      do (when (test-tokens self left-tokens right-token)
+           (pass-tokens-to-successor self (make-remove-token left-tokens)))))
   
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)

@@ -20,35 +20,40 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.12 2002/09/11 23:56:36 youngde Exp $
+;;; $Id: node2.lisp,v 1.13 2002/09/12 19:52:55 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2 (join-node) ())
 
-(defmethod test-and-pass-tokens ((self node2) left-tokens right-token)
+(defmethod pass-tokens-to-successor ((self node2) left-tokens)
+  (call-successor (join-node-successor self) left-tokens))
+
+(defmethod test-tokens ((self node2) left-tokens right-token)
   (token-push-fact left-tokens (token-top-fact right-token))
-  (if (every #'(lambda (test)
-                 (funcall test left-tokens))
-             (join-node-tests self))
-      (call-successor (join-node-successor self) left-tokens)
+  (unless (every #'(lambda (test)
+                     (funcall test left-tokens))
+                 (join-node-tests self))
     (token-pop-fact left-tokens)))
 
 (defmethod test-against-right-memory ((self node2) left-tokens)
   (loop for right-token being the hash-value 
       of (join-node-right-memory self)
-      do (test-and-pass-tokens self left-tokens right-token)))
+      do (when (test-tokens self left-tokens right-token)
+           (pass-tokens-to-successor self left-tokens))))
 
 (defmethod test-against-left-memory ((self node2) (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
-      do (test-and-pass-tokens self left-tokens right-token)))
+      do (when (test-tokens self left-tokens right-token)
+           (pass-tokens-to-successor self left-tokens))))
   
 (defmethod test-against-left-memory ((self node2) (right-token remove-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
-      do (test-and-pass-tokens 
-          self (make-remove-token left-tokens) right-token)))
+      do (when (test-tokens self left-tokens right-token)
+           (pass-tokens-to-successor
+            self (make-remove-token left-tokens)))))
   
 (defmethod accept-tokens-from-left ((self node2) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
