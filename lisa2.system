@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.33 2002/11/07 17:46:39 youngde Exp $
+;;; $Id: lisa2.system,v 1.34 2002/11/13 18:25:42 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -125,8 +125,9 @@
                                        (:file "activation")
                                        (:file "strategies")
                                        (:file "rule")
+                                       (:file "tms-support")
                                        (:file "rete"
-                                              :depends-on (language))
+                                              :depends-on (language tms-support))
                                        (:file "meta")
                                        (:file "binding")
                                        (:file "pattern")
