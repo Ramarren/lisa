@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.10 2000/12/06 00:36:20 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.11 2000/12/06 01:55:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -66,9 +66,9 @@
   specified results."
   (let ((generator (gensym))
         (foundp (gensym)))
-    `(with-hash-table-iterator (,generator ,tree)
+    `(with-hash-table-iterator (,generator (get-table ,tree))
        (loop
-         (multiple-value-bind (,foundp ,key ,val)
+         (multiple-value-bind (,foundp ,key ,value)
              (,generator)
            (if ,foundp
                (progn ,@body)
