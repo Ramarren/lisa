@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.3 2002/08/22 15:43:08 youngde Exp $
+;;; $Id: parser.lisp,v 1.4 2002/08/22 19:12:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -73,45 +73,49 @@
                                              remains :test #'eq)))))))
 
 (defun make-rule-pattern (template location)
-  (labels ((parse-pattern (p binding)
+  (labels ((build-parsed-pattern (variables form type &optional (binding nil))
+             (make-parsed-pattern
+              :variables variables
+              :pattern form
+              :type type
+              :binding binding
+              :location location))
+           (parse-pattern (p binding)
              (let ((head (first p)))
                (cl:assert (symbolp head) nil
                  "A symbol doesn't start this pattern: ~S" p)
                (cond ((eq head 'test)
-                      (make-parsed-pattern
-                       :pattern (parse-test-pattern p)
-                       :type :test
-                       :location location))
+                      (multiple-value-call
+                          #'build-parsed-pattern
+                        (parse-test-pattern p) :test))
                      ((eq head 'not)
-                      (make-parsed-pattern
-                       :pattern (list (parse-default-pattern (second p)))
-                       :type :negated
-                       :location location))
+                      (multiple-value-call
+                          #'build-parsed-pattern
+                        (parse-default-pattern (second p)) :negated))
                      ((variablep head)
                       (cl:assert (null binding) nil
                         "Too many pattern variables: ~S" head)
                       (parse-pattern (first (rest p)) head))
                      (t
-                      (make-parsed-pattern
-                       :pattern (list (parse-default-pattern p))
-                       :binding binding
-                       :type (if binding :bound :generic)
-                       :location location))))))
+                      (multiple-value-call
+                          #'build-parsed-pattern
+                        (parse-default-pattern p) :generic binding))))))
     (parse-pattern template nil)))
-;;;    `(,(parse-pattern template nil))))
 
 (defun parse-test-pattern (pattern)
   (let ((form (rest pattern)))
     (cl:assert (and (listp form)
                     (= (length form) 1)) nil
       "The body of a TEST CE must be a single Lisp form")
-    (first form)))
+    (values
+     (utils:collect #'(lambda (obj) (variablep obj))
+                    (utils:flatten form))
+     (first form))))
 
 (defun parse-default-pattern (pattern)
-  (let* ((head (first pattern))
-         (meta (find-meta-fact head nil))
-         (variables (list)))
-    (cl:assert (not (null meta)) nil
+  (let ((head (first pattern))
+        (variables (list)))
+    (cl:assert (find-meta-fact head nil) nil
       "This pattern has no meta data: ~S" pattern)
     (labels ((parse-slot (slot)
                (let ((name (first slot))
@@ -129,13 +133,13 @@
                  (cl:assert (listp slot) nil
                    "This pattern has structural problems: ~S" body)
                  (if (null slot)
-                     slots
+                     (nreverse slots)
                    (parse-pattern-body
                     (rest body)
-                    (nconc slots (list (parse-slot slot))))))))
-      (list
-       (nreverse variables)
-       head (parse-pattern-body (rest pattern) nil)))))
+                    (push (parse-slot slot) slots))))))
+      (let ((cleaned-pattern
+             (parse-pattern-body (rest pattern) nil)))
+        (values (nreverse variables) `(,head ,@cleaned-pattern))))))
 
 ;;; End of the rule parsing stuff
 
