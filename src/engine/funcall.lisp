@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.8 2001/01/13 02:18:34 youngde Exp $
+;;; $Id: funcall.lisp,v 1.9 2001/01/13 02:43:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,11 +53,15 @@
   (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
-    `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
+    (let ((name (get-name binding))
+          (value (get-slot-value fact (get-slot-name binding))))
+      `(,name ,@(if (symbolp value) `(',value) `(,value))))))
   
 (defmethod make-lexical-binding ((binding local-slot-binding) context)
-  `(,(get-name binding) ,(get-slot-value (get-fact context)
-                                         (get-slot-name binding))))
+  (let ((name (get-name binding))
+        (value (get-slot-value (get-fact context)
+                               (get-slot-name binding))))
+    `(,name ,@(if (symbolp value) `(',value) `(,value)))))
 
 (defun create-lexical-context (funcall context)
   (flet ((make-context ()
@@ -66,6 +70,7 @@
                                   (make-lexical-binding binding context))
                               (get-bindings funcall)))
                 ,@(get-forms funcall)))))
+    (format t "~S~%" (make-context))
     (eval (make-context))))
 
 (defmethod evaluate ((self function-call) context)
