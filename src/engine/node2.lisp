@@ -22,14 +22,14 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.4 2000/11/07 18:18:08 youngde Exp $
+;;; $Id: node2.lisp,v 1.5 2000/11/08 00:58:55 youngde Exp $
 
 (in-package :lisa)
 
 (defclass node2 (node-test)
-  ((left-tree :initform (make-hash-table)
+  ((left-tree :initform (make-token-tree)
               :accessor get-left-tree)
-   (right-tree :initform (make-hash-table)
+   (right-tree :initform (make-token-tree)
                :accessor get-right-tree)
    (hashkey :initform nil
             :accessor get-hashkey))
@@ -39,10 +39,10 @@
    inputs."))
 
 (defmethod add-to-left-tree ((self node2) token)
-  (add-token self (get-left-tree self) token))
+  (add-token (get-left-tree self) token))
 
 (defmethod add-to-right-tree ((self node2) token)
-  (add-token self (get-right-tree self) token))
+  (add-token (get-right-tree self) token))
 
 (defmethod call-node-left ((self node2) (token add-token))
   (add-to-left-tree self token)
@@ -55,7 +55,8 @@
 (defmethod run-tests-vary-left ((self node2) right-token tree)
   (labels ((eval-tests (left-token)
              (when (map-until #'do-tests (get-tests self))
-               (pass-along self (make-token left-token right-token))))
+               (pass-along self (make-token left-token right-token))
+               (values t)))
            (eval-tokens (tokens)
              (mapcar #'eval-tests tokens)))
     (maphash #'eval-tokens tree)))

@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.1 2000/11/07 18:18:08 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.2 2000/11/08 00:58:55 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,12 +46,12 @@
            (slot (gethash key table)))
       (setf (gethash key table)
         (delete tok slot :test #'equals)))))
-  
+
 (defmethod clear-tree ((self token-tree))
   (clrhash (get-table self)))
 
 (defmethod make-hash-code ((self token-tree) token)
   (abs (mod (get-sort-code token) (get-hash-code self))))
-        
+
 (defun make-token-tree (hash-code)
   (make-instance 'token-tree :hash-code hash-code))

@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.3 2000/11/07 01:57:50 youngde Exp $
+;;; $Id: utils.lisp,v 1.4 2000/11/08 00:58:56 youngde Exp $
 
 (in-package :lisa)
 
@@ -64,12 +64,27 @@
              (compare2 predicate (rest lst1) (rest lst2))
            (values nil)))))
 
-(defun map-until (predicate args)
-  "Maps PREDICATE over the list ARGS. Returns T if all the
-  elements satisfy PREDICATE or NIL upon the first failure."
+(defun map-while (predicate args &key (condition t) (empty-p nil))
+  "Maps PREDICATE over the list ARGS. Returns T if PREDICATE evaluates
+  to CONDITION for each element, or NIL upon the first failure. If
+  ARGS is NIL, then EMPTY-P is returned."
   (declare (type list args))
-  (cond ((null args)
-         (values t))
-        ((funcall predicate (first args))
-         (map-until predicate (rest args)))
-        (t (values nil))))
+  (labels ((map-while-aux (pred args condition)
+             (cond ((null args)
+                    (values t))
+                   ((eql (funcall pred (first args)) condition)
+                    (map-while-aux pred (rest args) condition))
+                   (t (values nil)))))
+    (if (null args)
+        (values empty-p)
+      (map-while-aux pred args condition))))
+
+(defun map-until-fail (predicate args &key (empty-p nil))
+  "Maps PREDICATE over the list ARGS as long as PREDICATE remains
+  true."
+  (map-while predicate args :condition t :empty-p empty-p))
+
+(defun map-while-fail (predicate args &key (empty-p nil))
+  "Maps PREDICATE over the list ARTS as long as PREDICATE remains
+  false."
+  (map-while predicate args :condition nil :empty-p empty-p))
