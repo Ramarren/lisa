@@ -20,7 +20,7 @@
 ;;; File: retrieve.lisp
 ;;; Description:
 
-;;; $Id: retrieve.lisp,v 1.4 2002/12/20 00:13:18 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.5 2004/06/07 19:24:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,7 @@
 (defun run-query (query-rule)
   "Runs a query (RULE instance), and returns both the value of *QUERY-RESULT*
   and the query name itself."
+  (declare (ignorable query-rule))
   (let ((*query-result* (list)))
     (assert (query-fact))
     (run)
@@ -75,6 +76,23 @@
                    =>
                    (push (list ,@(mapcar #'make-query-binding varlist))
                          *query-result*))))
+           (run-query ,query))))))
+
+(defmacro retrieve2 ((&rest varlist) &body body)
+  (flet ((make-query-binding (var)
+           `(cons ',var ,var))) ;; just ,var instead of ,(find-instance-of var)
+    (let ((query-name (gensym))
+          (query (gensym)))
+      `(with-inference-engine
+          ((make-query-engine (inference-engine)))
+         (let* ((,query-name (gensym))
+                (,query
+                 (defquery ',query-name
+                           (query-fact)
+                           ,@body
+                           =>
+                           (push (list ,@(mapcar #'make-query-binding varlist))
+                                 *query-result*))))
            (run-query ,query))))))
 
 (defmacro with-simple-query ((var value) query &body body)
