@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.48 2001/03/16 21:07:28 youngde Exp $
+;;; $Id: rete.lisp,v 1.49 2001/04/18 20:50:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,6 +42,8 @@
               :reader get-null-fact)
    (fact-list :initform (make-hash-table)
               :accessor get-facts)
+   (instance-list :initform (make-hash-table)
+                  :reader get-instance-list)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id)
    (fired-rule-count :initform 0
@@ -49,12 +51,14 @@
   (:documentation
    "Represents the inference engine itself."))
 
-(defmethod add-rule ((self rete) rule)
+(defun add-rule (self rule)
+  (declare (type rete self) (type rule rule))
   (with-accessors ((rules get-rules)) self
     (add-rule-to-network (get-compiler self) rule)
     (setf (gethash (get-name rule) rules) rule)))
 
-(defmethod remove-rules ((self rete))
+(defun remove-rules (self)
+  (declare (type rete self))
   (clrhash (get-rules self)))
 
 (defmethod add-activation ((self rete) activation)
@@ -69,26 +73,33 @@
 (defmethod find-activation ((self rete) rule token)
   (find-activation (get-strategy self) rule token))
 
-(defmethod increment-time ((self rete))
+(defun increment-time (self)
+  (declare (type rete self))
   (incf (get-clock self)))
 
-(defmethod get-engine-time ((self rete))
+(defun get-engine-time (self)
+  (declare (type rete self))
   (get-clock self))
 
-(defmethod record-fact ((self rete) fact)
+(defun record-fact (self fact)
+  (declare (type rete self) (type fact fact))
   (with-accessors ((facts get-facts)) self
     (setf (gethash (get-fact-id fact) facts) fact)))
 
-(defmethod lookup-fact ((self rete) (id integer))
+(defun lookup-fact (self id)
+  (declare (type rete self) (type integer id))
   (gethash id (get-facts self)))
 
-(defmethod remove-fact ((self rete) fact)
+(defun remove-fact (self fact)
+  (declare (type rete self) (type fact fact))
   (remhash (get-fact-id fact) (get-facts self)))
 
-(defmethod remove-facts ((self rete))
+(defun remove-facts (self)
+  (declare (type rete self))
   (clrhash (get-facts self)))
 
-(defmethod get-fact-list ((self rete))
+(defun get-fact-list (self)
+  (declare (type rete self))
   (flet ((retrieve-value (key val)
            (declare (ignore key))
            (values val)))
@@ -96,23 +107,27 @@
           #'(lambda (f1 f2)
               (< (get-fact-id f1) (get-fact-id f2))))))
 
-(defmethod save-facts ((self rete) strm)
+#+ignore ; What do we do about shadow-facts?
+(defun save-facts (self strm)
+  (declare (type rete self))
   (mapc #'(lambda (fact)
             (write-fact fact strm))
         (get-fact-list self))
   (values))
 
-(defmethod next-fact-id ((self rete))
+(defun next-fact-id (self)
+  (declare (type rete self))
   (with-accessors ((next-fact-id get-next-fact-id)) self
     (prog1
         (values next-fact-id)
       (incf next-fact-id))))
 
-(defmethod insert-token ((self rete) token)
+(defun insert-token (self token)
+  (declare (type rete self) (type token token))
   (update-time (get-top-fact token) self)
   (call-node-right (get-root-node (get-compiler self)) token))
 
-(defmethod assert-fact ((self rete) fact)
+(defmethod assert-fact ((self rete) (fact fact))
   (set-fact-id fact (next-fact-id self))
   (increment-time self)
   (record-fact self fact)
@@ -120,12 +135,22 @@
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
 
+(defmethod assert-fact ((self rete) (fact shadow-fact))
+  (setf (gethash (instance-of-shadow-fact fact)
+                 (get-instance-list self)) fact)
+  (call-next-method self fact))
+
 (defmethod retract-fact ((self rete) (fact fact))
   (remove-fact self fact)
   (increment-time self)
   (watchpoint 'retract fact)
   (insert-token self (make-remove-token :initial-fact fact))
   (values fact))
+  
+(defmethod retract-fact ((self rete) (fact shadow-fact))
+  (remhash (instance-of-shadow-fact fact)
+           (get-instance-list self))
+  (call-next-method self fact))
   
 (defmethod retract-fact ((self rete) (fact-id integer))
   (let ((fact (lookup-fact self fact-id)))
@@ -140,8 +165,24 @@
         slot-changes)
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
-  
-(defmethod set-initial-state ((self rete))
+
+(defun find-shadow-fact (self instance)
+  (declare (type rete self))
+  (gethash instance (get-instance-list self)))
+
+(defun tell-externally-modified (self instance)
+  (declare (type rete self))
+  (let ((shadow-fact (find-shadow-fact self instance)))
+    (cond ((null shadow-fact)
+           (warn "This instance is not known to LISA: ~S." instance))
+          (t
+           (insert-token self (make-remove-token :initial-fact shadow-fact))
+           (synchronize-with-instance shadow-fact)
+           (insert-token self (make-add-token :initial-fact shadow-fact))))
+    (values instance)))
+
+(defun set-initial-state (self)
+  (declare (type rete self))
   (remove-facts self)
   (remove-activations (get-strategy self))
   (setf (get-next-fact-id self) 0)
@@ -149,20 +190,23 @@
   (setf (slot-value self 'fired-rule-count) 0)
   (values t))
 
-(defmethod reset-engine ((self rete))
+(defun reset-engine (self)
+  (declare (type rete self))
   (insert-token self (make-clear-token
                       :initial-fact (get-clear-fact self)))
   (set-initial-state self)
   (assert-fact self (get-initial-fact self))
   (values t))
 
-(defmethod clear-engine ((self rete))
+(defun clear-engine (self)
+  (declare (type rete self))
   (set-initial-state self)
   (remove-rules self)
   (setf (slot-value self 'compiler) (make-rete-compiler))
   (values t))
 
-(defmethod get-rule-list ((self rete))
+(defun get-rule-list (self)
+  (declare (type rete self))
   (let ((rules (list)))
     (maphash #'(lambda (key val)
                  (declare (ignore key))
@@ -170,7 +214,8 @@
              (get-rules self))
     (values rules)))
 
-(defmethod get-activation-list ((self rete))
+(defun get-activation-list (self)
+  (declare (type rete self))
   (list-activations (get-strategy self)))
 
 (defun run-engine (self &optional (step t))

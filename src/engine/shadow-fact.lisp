@@ -21,7 +21,7 @@
 ;;; Description: This class represents LISA facts that are actually CLOS
 ;;; instances.
 
-;;; $Id: shadow-fact.lisp,v 1.4 2001/04/17 20:01:25 youngde Exp $
+;;; $Id: shadow-fact.lisp,v 1.5 2001/04/18 20:50:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,21 +32,33 @@
 
 (defmethod initialize-instance :after ((self shadow-fact) &key instance)
   (let ((meta (get-meta-fact self)))
-    (flet ((set-slot-from-instance (slot-name)
-             (initialize-slot-value
-              self slot-name
-              (slot-value
-               instance (find-effective-slot meta slot-name)))))
-      (maphash #'(lambda (key slot)
-                   (declare (ignore key))
-                   (if (eq (slot-name-name slot) :object)
-                       (initialize-slot-value self slot instance)
-                     (set-slot-from-instance slot)))
-               (get-slots meta)))))
+    (maphash #'(lambda (key slot)
+                 (declare (ignore key))
+                 (if (eq (slot-name-name slot) :object)
+                     (initialize-slot-value self slot instance)
+                   (set-slot-from-instance self meta instance slot)))
+             (get-slots meta))))
+
+(defun set-slot-from-instance (self meta instance slot-name)
+  (declare (type shadow-fact self) (type slot-name slot-name))
+  (initialize-slot-value
+   self slot-name
+   (slot-value instance (find-effective-slot meta slot-name))))
 
 (defun instance-of-shadow-fact (self)
   (declare (type shadow-fact self))
   (get-slot-value self (find-meta-slot (get-meta-fact self) :object)))
+
+(defun synchronize-with-instance (self)
+  (declare (type shadow-fact self))
+  (let ((instance (instance-of-shadow-fact self))
+        (meta (get-meta-fact self)))
+    (maphash #'(lambda (key slot)
+                 (declare (ignore key))
+                 (unless (eq (slot-name-name slot) :object)
+                   (set-slot-from-instance self meta instance slot)))
+             (get-slots meta))
+    (values)))
 
 (defmethod set-slot-value :after ((self shadow-fact) slot-name value)
   (let ((meta (get-meta-fact self)))
