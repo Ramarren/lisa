@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.1 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: rule.lisp,v 1.2 2000/11/09 21:22:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -50,7 +50,8 @@
 
 (defmethod add-node ((self rule) node)
   (with-accessors ((nodes get-nodes)) self
-    (setf nodes (nconc nodes `(,node)))))
+    (setf nodes (nconc nodes `(,node)))
+    (increase-use-count node)))
 
 (defmethod get-pattern-count ((self rule))
   (length (get-patterns self)))

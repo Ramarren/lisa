@@ -20,9 +20,9 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.7 2000/11/04 02:57:05 youngde Exp $
+;;; $Id: parser.lisp,v 1.8 2000/11/09 21:22:42 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(defrule)))
@@ -48,7 +48,7 @@
 (defun redefine-defrule (name body)
   (with-rule-components ((doc-string decls lhs rhs) body)
     (finalize-rule-definition
-     (make-defrule name :doc-string doc-string :source body)
+     (make-rule name :doc-string doc-string :source body)
      lhs rhs)))
     
 (defun extract-rule-headers (body)

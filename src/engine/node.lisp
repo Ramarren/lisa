@@ -20,7 +20,7 @@
 ;;; File: node.lisp
 ;;; Description: Parent class of all nodes in the Rete pattern network.
 
-;;; $Id: node.lisp,v 1.6 2000/11/09 19:26:04 youngde Exp $
+;;; $Id: node.lisp,v 1.7 2000/11/09 21:22:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,6 +31,12 @@
                :accessor get-successors))
   (:documentation
    "Parent class of all nodes in the Rete pattern network."))
+
+(defmethod increase-use-count ((self node))
+  (incf (get-use-count self)))
+
+(defmethod decrease-use-count ((self node))
+  (decf (get-use-count self)))
 
 (defmethod add-successor ((self node) node rule)
   "Adds a node to the list of successors."

@@ -20,9 +20,9 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.12 2000/10/27 21:38:38 youngde Exp $
+;;; $Id: language.lisp,v 1.13 2000/11/09 21:22:42 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(defrule)))

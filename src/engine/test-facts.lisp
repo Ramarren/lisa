@@ -20,7 +20,7 @@
 ;;; File: test-facts.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: test-facts.lisp,v 1.1 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: test-facts.lisp,v 1.2 2000/11/09 21:22:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -40,6 +40,8 @@
 (defun make-boris (name)
   (make-instance 'boris :name name))
 
-  
+(defparameter *root* (make-root-node))
+(defparameter *rule* (make-rule 'schtum))
+
   
   
