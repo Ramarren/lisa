@@ -20,12 +20,29 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: debugger.lisp,v 1.1 2002/10/23 14:56:45 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.1 2002/10/23 18:30:29 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *breakpoints* nil)
+(defvar *read-eval-print* nil)
+(defvar *current-rule* nil)
 
-(defmethod fire-rule :around ((self rule) tokens))
+(defun resume ()
+  (setf *read-eval-print* nil))
 
-(provide 'lisa-debug)
+(defun read-eval-print ()
+  (unwind-protect
+      (do ((*read-eval-print* t))
+          ((not *read-eval-print*))
+        (format t "(LISA-DEBUG): ")
+        (print (eval (read)))
+        (terpri))
+    (resume)))
+
+(defmethod fire-rule :around ((self rule) tokens)
+  (let ((*current-rule* self))
+    (read-eval-print)
+    (call-next-method)))
+
+(provide 'lisa-debugger)
