@@ -21,19 +21,30 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.33 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: mab.lisp,v 1.34 2001/03/14 21:26:35 youngde Exp $
 
 (in-package :lisa)
 
-(defclass monkey ()())
-(defclass thing ()())
-(defclass chest ()())
-(defclass goal-is-to ()())
+(deftemplate monkey
+  (slot location)
+  (slot on-top-of)
+  (slot holding))
 
-(defimport monkey lisa::monkey)
-(defimport thing lisa::thing)
-(defimport chest lisa::chest)
-(defimport goal-is-to lisa::goal-is-to)
+(deftemplate thing
+  (slot name)
+  (slot location)
+  (slot on-top-of)
+  (slot weight))
+
+(deftemplate chest
+  (slot name)
+  (slot contents)
+  (slot unlocked-by))
+
+(deftemplate goal-is-to
+  (slot action)
+  (slot argument-1)
+  (slot argument-2))
 
 ;;;(watch :activations)
 ;;;(watch :facts)

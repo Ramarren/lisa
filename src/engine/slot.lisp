@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.19 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: slot.lisp,v 1.20 2001/03/14 21:26:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -74,15 +74,27 @@
             (get-constraint self)
             (get-negated self))))
 
-(defclass simple-slot (slot)
+(defclass optimisable () ())
+
+(defclass literal-slot (slot optimisable)
   ()
   (:documentation
-   "A subclass of SLOT describing instances that might be eligible for certain
-   optimisations."))
+   "A subclass of SLOT describing instances that contain no variables."))
 
-(defclass literal-slot (simple-slot) ())
-(defclass simple-variable-slot (simple-slot) ())
-(defclass simple-constraint-slot (simple-slot) ())
+(defclass variable-slot (slot)
+  ()
+  (:documentation
+   "A subclass of SLOT describing instances that contain variables."))
+
+(defclass constraint-slot (slot)
+  ()
+  (:documentation
+   "A subclass of SLOT describing instances that have constraints. Possession
+   of a constraint implies a variable value."))
+
+(defclass simple-variable-slot (variable-slot) ())
+(defclass simple-constraint-slot (constraint-slot optimisable) ())
+(defclass complex-slot (slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
@@ -128,16 +140,14 @@
              :name name :value value 
              :constraint (second constraint) :negated t))
           ((variablep constraint)
-           (make-instance 'slot :name name :value value
-                          :constraint
-                          (generate-test value constraint nil)))
+           (make-instance 'complex-slot :name name :value value
+                          :constraint (generate-test value constraint nil)))
           ((negated-variablep constraint)
-           (make-instance 'slot :name name :value value
-                          :constraint 
-                          (generate-test value (second constraint) t)
+           (make-instance 'complex-slot :name name :value value
+                          :constraint (generate-test value (second constraint) t)
                           :negated t))
           ;; This must be a complex slot with user-written Lisp code as the
           ;; constraint...
           (t
-           (make-instance 'slot :name name :value value
+           (make-instance 'complex-slot :name name :value value
                           :constraint constraint)))))
