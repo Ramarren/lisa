@@ -718,8 +718,8 @@ ancestry. The following code fragment provides an example:
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
 
 and <i>boris</i> in the knowledge base, retracting each in turn. Note that
-taxonomic reasoning is disabled by default. To use the feature, evaluate
-(lisa:consider-taxonomy).</dl>
+taxonomic reasoning is disabled by default. To use the feature, evaluate (setf
+(lisa:consider-taxonomy) t).</dl>
 
 </blockquote>
 
@@ -749,7 +749,7 @@ by LISA for each firing.</blockquote>
 
 <tr>
 
-<td WIDTH="80%">(undefrule <i>qualified-name</i>)</td>
+<td WIDTH="80%">(undefrule <i>rule-name</i>)</td>
 
 
 
@@ -761,10 +761,10 @@ by LISA for each firing.</blockquote>
 
 
 
-<blockquote>Undefines, or removes, a rule from the Rete network. <i>Qualified-name</i>
-  is a symbol representing the fully qualified name of the rule (<i>context.rulename</i>).
-  For example, <i>wizards.frodo</i> evaluates to the rule named <i>frodo</i>
-  found in the <i>wizards</i> context.</blockquote>
+<blockquote>Undefines, or removes, a rule from the Rete network. <i>Rule-name</i>
+  is a symbol representing the name of the rule. If <i>rule-name</i> is not
+  qualified with a context name (e.g. <i>context.rulename</i>), then the Initial
+  Context is assumed.</blockquote>
 
 
 
@@ -778,34 +778,13 @@ managing CLOS instances within the knowledge base.
 
 <br>&nbsp;
 
-<table WIDTH="100%" NOSAVE >
-
-<tr NOSAVE>
-
-<td WIDTH="80%" NOSAVE>(engine)</td>
-
-
-
-<td>Macro</td>
-
-</tr>
-
-</table>
-
-
-
-<blockquote>Returns the inference engine associated with a particular rule.
-
-Use of this macro only makes sense from within a rule's RHS.</blockquote>
-
 
 
 <table WIDTH="100%" NOSAVE >
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance </i>&amp;key <i>engine
-  slot-id</i>)</td>
+<td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance </i>&amp;key <i>slot-name</i>)</td>
 
 
 
@@ -821,8 +800,7 @@ Use of this macro only makes sense from within a rule's RHS.</blockquote>
 
 outside of the knowledge-base (i.e. not via the <i>modify</i> operator),
 
-and synchronizes the instance with its associated fact. If <i>engine</i> is not
-  specified it defaults to the value of (CURRENT-ENGINE); <i>slot-id</i> is
+and synchronizes the instance with its associated fact. <i>Slot-name</i> is
   either the symbolic name of a slot belonging to <i>instance</i> that has
   changed value, or NIL (the default), in which case all slots are synchronized.
   An application <i>must</i> call this method whenever a slot change occurs
@@ -837,9 +815,16 @@ outside of LISA's control.</blockquote>
 
 These operators provide an interface to instances of the inference engine
 
-itself.
-
-<br>&nbsp;
+itself.<br>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(inference-engine)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Evaluates to the currently active instance of the inference engine.</p>
+</blockquote>
 
 <table WIDTH="100%" NOSAVE >
 
@@ -857,11 +842,9 @@ itself.
 
 
 
-<blockquote>Re-initializes the knowledge base of <i>engine;</i> removing
+<blockquote>Re-initializes the knowledge base, removing
 
-facts, clearing the agenda, and asserting the <i>initial-fact</i>. By default,
-
-operates on the <i>current-engine</i>.</blockquote>
+facts, clearing all context agendas, and asserting the <i>initial-fact</i>.</blockquote>
 
 
 
@@ -881,9 +864,8 @@ operates on the <i>current-engine</i>.</blockquote>
 
 
 
-<blockquote>Re-initializes <i>engine</i> itself; forgetting the rulebase,
-
-facts and agenda. By default, operates on the <i>current-engine</i>.</blockquote>
+<blockquote>Re-initializes most of the LISA environment, mostly by creating a
+  new instance of the default inference engine.</blockquote>
 
 
 
@@ -903,13 +885,10 @@ facts and agenda. By default, operates on the <i>current-engine</i>.</blockquote
 
 
 
-<blockquote>Runs the inference engine bound to <i>engine</i>. Execution
+<blockquote>Runs the inference engine, optionally pushing the contexts on <i>focus-list</i>
+  onto the focus stack before doing so. Execution
 
-will continue until either the agenda is empty or the number of fired rules
-
-exceeds the value of <i>step</i>. By default, <i>step</i> is bound to a
-
-value that will cause the engine to run until the agenda is exhausted.</blockquote>
+will continue until either all agendas are exhausted or a rule calls (halt).</blockquote>
 
 
 
@@ -951,9 +930,9 @@ by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 
 
 
-<blockquote>Halts the inference engine, even if the agenda
+<blockquote>Halts the inference engine, even if the agendas
 
-still has activations. Typically used only on rule RHSs.</blockquote>
+still have activations. Typically used only on rule RHSs.</blockquote>
 
 
 
@@ -963,37 +942,8 @@ still has activations. Typically used only on rule RHSs.</blockquote>
 
 
 
-<blockquote>These operators are used to establish one or more LISA environments.</blockquote>
-
-
-
-<table WIDTH="100%" NOSAVE >
-
-<tr NOSAVE>
-
-<td WIDTH="80%" NOSAVE>(use-default-engine)</td>
-
-
-
-<td>Function</td>
-
-</tr>
-
-</table>
-
-
-
-<blockquote><i>Deprecated</i>. Create and make available a default instance of the inference
-
-engine. Use this function when you want a basic, single-threaded LISA environment.
-
-Typically, this form will appear near the beginning of a file of LISA constructs
-
-(rules, templates, etc.). It is idempotent; that is, subsequent calls to
-
-the function will <i>not</i> create a new inference engine unless LISA
-
-is completely re-initialized.</blockquote>
+<blockquote>These operators are used to manipulate and inspect the LISA
+  environment.</blockquote>
 
 
 
@@ -1018,28 +968,6 @@ is completely re-initialized.</blockquote>
 engine <i>engine</i>. Under most circumstances, use this macro in a multi-processing
 
 environment to safely load a knowledge base into <i>engine</i>.</blockquote>
-
-
-
-<table WIDTH="100%" NOSAVE >
-
-<tr NOSAVE>
-
-<td WIDTH="80%" NOSAVE>(current-engine)</td>
-
-
-
-<td>Function</td>
-
-</tr>
-
-</table>
-
-
-
-<blockquote>Returns the currently-active inference engine. Usually only
-
-invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
 
 
@@ -1071,7 +999,7 @@ invoked by code running within the context of <i>with-inference-engine</i>.</blo
 
 
 
-<td>Macro</td>
+<td>Function</td>
 
 </tr>
 
@@ -1082,26 +1010,6 @@ invoked by code running within the context of <i>with-inference-engine</i>.</blo
 <blockquote>Within the context of an executing rule, returns the CLOS object
 
 representing that rule.</blockquote>
-
-
-
-<table BORDER=0 WIDTH="100%" >
-
-<tr>
-
-<td WIDTH="80%">(rule-name <i>rule</i>)</td>
-
-
-
-<td>Generic function</td>
-
-</tr>
-
-</table>
-
-
-
-<blockquote>Returns the fully qualified symbolic name associated with rule instance <i>rule</i>.</blockquote>
 
 
 
@@ -1117,8 +1025,30 @@ representing that rule.</blockquote>
 
 <p>
 
-Tells LISA to consider an object's taxonomy, or ancestors, during pattern
-matching.</p>
+Returns the current setting for taxonomic reasoning. Use (setf
+(consider-taxonomy) <i>value</i>) to change the setting. The default (NIL) means
+LISA ignores class taxonomy during pattern matching.</p>
+
+</blockquote>
+
+
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(allow-duplicate-facts)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+
+
+
+<p>
+
+Returns the current setting for duplicate fact checking. Use (setf
+(allow-duplicate-facts) <i>value</i>) to change the setting. By default, LISA
+allows duplicate facts to be asserted. If checking is enabled and an application
+attempts to assert a duplicate fact, LISA signals a DUPLICATE-FACT error.</p>
 
 </blockquote>
 
@@ -1152,7 +1082,7 @@ need further work.
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the active
+<blockquote>Prints on <i>trace output</i> the contents of the active
   inference engine's fact base.</blockquote>
 
 
@@ -1173,7 +1103,7 @@ need further work.
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the active
+<blockquote>Prints on <i>trace output</i> the contents of the active
   inference engine's rule base. By default, all rules and all contexts will be
   printed. If <i>context-name</i> is provided, then only those rules in that
   context are printed.</blockquote>
@@ -1196,7 +1126,7 @@ need further work.
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the active
+<blockquote>Prints on <i>trace output</i> the contents of the active
   inference engine's agenda. By default, the agendas for all contexts will be
   printed, unless <i>context-name</i> is supplied.</blockquote>
 
@@ -2012,10 +1942,10 @@ LISA requires the Portable Defsystem as maintained by the CLOCC project;
 for your convenience, a copy is included in the distribution. Building
 
 LISA should be straight-forward. First, either load
-&quot;lisa:lisa2.system&quot;
+&quot;lisa:lisa.system&quot;
 
 or change your working directory to the LISA root directory; then, evaluate (mk:compile-system
-:lisa2). Note that LISA uses logical pathnames in its defsystem, and translations that are suitable for a Linux
+:lisa). Note that LISA uses logical pathnames in its defsystem, and translations that are suitable for a Linux
 (or Cygwin/Windows) environment are
 
 established there. They might work for you; perhaps not. Until

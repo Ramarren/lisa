@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.14 2002/11/22 15:22:19 youngde Exp $
+;;; $Id: fact.lisp,v 1.15 2002/11/23 00:48:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -74,10 +74,13 @@
              (fact-slot-table fact))
     slots))
 
-(defun get-slot-value (fact slot-name)
+(defmethod get-slot-value ((self fact) (slot-name symbol))
   "Returns the value associated with a slot name. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance."
-  (gethash slot-name (fact-slot-table fact)))
+  (gethash slot-name (fact-slot-table self)))
+
+(defmethod get-slot-value ((self fact) (slot-name (eql :object)))
+  (fact-clos-instance self))
 
 (defun find-instance-of-fact (fact)
   "Retrieves the CLOS instance associated with a fact. FACT is a FACT
