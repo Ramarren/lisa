@@ -17,17 +17,15 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: plus-token.lisp
-;;; Description: Represents TOKENs used for add operations on the
+;;; File: clear-token.lisp
+;;; Description: Represents TOKENs used for clear operations on the
 ;;; network.
 
-;;; $Id: add-token.lisp,v 1.2 2000/11/04 02:52:37 youngde Exp $
+;;; $Id: clear-token.lisp,v 1.1 2000/11/04 02:52:37 youngde Exp $
 
 (in-package "LISA")
 
-(defclass add-token (token)
+(defclass clear-token (token)
   ()
   (:documentation
-   "Represents TOKENs used for add operations on the network."))
-
-(defun make-add-token ())
+   "Represents TOKENs used for clear operations on the network."))

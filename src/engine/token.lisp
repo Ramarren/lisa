@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.1 2000/11/03 21:36:51 youngde Exp $
+;;; $Id: token.lisp,v 1.2 2000/11/04 02:48:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -71,31 +71,34 @@
 
 ;;; various constructors for making TOKEN instances...
 
-(defmethod make-token ((top-fact fact))
-  (make-instance 'token
-    :fact fact
-    :depth 1
-    :clock (get-time top-fact)
-    :sort-code (get-fact-id top-fact)))
+(defun make-token (&rest args)
+  (apply #'make-instance 'token args))
 
-(defmethod make-token ((tok token) (new-fact fact))
-  (make-instance 'token
-    :fact new-fact
-    :parent tok
-    :depth (1+ (get-depth tok))
-    :sort-code (+ (ash (get-sort-code tok) 3)
-                  (get-fact-id new-fact))
-    :clock (+ (get-time new-fact) (get-clock tok))))
+(defun make-new-token (initial-fact)
+  (make-token
+   :fact initial-fact
+   :depth 1
+   :clock (get-time top-fact)
+   :sort-code (get-fact-id top-fact)))
 
-(defmethod make-token ((left token) (right token))
+(defun make-derived-token (token fact)
+  (make-token
+   :fact fact
+   :parent token
+   :depth (1+ (get-depth token))
+   :sort-code (+ (ash (get-sort-code token) 3)
+                 (get-fact-id fact))
+   :clock (+ (get-time fact) (get-clock token))))
+
+(defun make-duplicate-token (left right)
   (make-token left (get-top-fact right)))
 
-(defmethod make-token ((tok token))
-  (make-instance 'token
-    :fact (get-top-fact tok)
-    :parent (get-parent tok)
-    :depth (get-depth tok)
-    :sort-code (get-sort-code tok)
-    :clock (get-clock tok)
-    :neg-count (get-neg-count tok)))
+(defun make-identical-token (token)
+  (make-token 
+   :fact (get-top-fact token)
+    :parent (get-parent token)
+    :depth (get-depth token)
+    :sort-code (get-sort-code token)
+    :clock (get-clock token)
+    :neg-count (get-neg-count token)))
 

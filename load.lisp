@@ -20,7 +20,7 @@
 ;;; File: load.lisp
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.1 2000/11/04 02:28:28 youngde Exp $
+;;; $Id: load.lisp,v 1.2 2000/11/04 02:57:05 youngde Exp $
 
 (in-package "USER")
 
@@ -38,7 +38,8 @@
 (let ((files
        '("packages/pkgdecl.lisp" "utils/utils.lisp" "utils/compose.lisp"
          "engine/macros.lisp" "engine/rete" "engine/rete-compiler"
-         "engine/fact" "engine/token.lisp" "engine/node.lisp"
+         "engine/fact" "engine/token.lisp" "engine/add-token.lisp"
+         "engine/clear-token.lisp" "engine/node.lisp"
          "engine/node1.lisp" "engine/node1-tect.lisp"
          "engine/node1-teq.lisp" "engine/node1-rtl.lisp"
          "engine/node-test.lisp" "engine/node2.lisp"

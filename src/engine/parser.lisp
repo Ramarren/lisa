@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.6 2000/11/02 20:40:14 youngde Exp $
+;;; $Id: parser.lisp,v 1.7 2000/11/04 02:57:05 youngde Exp $
 
 (in-package "LISA")
 
@@ -141,36 +141,6 @@
                       (error "parse-unordered-pattern: parse error at ~S~%" body))))))
     (list (first pattern)
           (parse-pattern-body (rest pattern)))))
-
-(defun internalize-class (name slots)
-  (flet ((compose-slots (slot-list)
-           (mapcar #'(lambda (slot)
-                       `(,(first slot) :initform nil))
-                   slot-list)))
-    (let ((class (find-class name nil)))
-      (when (null class)
-        (setf class
-          (eval `(defclass ,name (internal-kb-class)
-                   (,@(compose-slots slots))))))
-      (values class))))
-
-(defun canonicalize-pattern (head body)
-  (labels ((make-slot-id (id)
-             (intern
-              (make-symbol
-               (format nil "__SLOT-~D" id))))
-           (make-slot-list (body slot-id &optional (slots nil))
-             (if (null body)
-                 (values slots)
-               (make-slot-list (rest body)
-                               (1+ slot-id)
-                               (nconc slots
-                                      `(,(cons (make-slot-id slot-id)
-                                               (first body)))))))
-           (finalize-pattern (head slots)
-             (internalize-class head slots)
-             (values `(,head ,slots))))
-    (finalize-pattern head (make-slot-list body 0))))
 
 (defun internalize-class (name slots)
   "Creates an internal, LISA-specific class representing ordered
