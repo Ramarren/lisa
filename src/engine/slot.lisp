@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.17 2001/02/02 19:29:47 youngde Exp $
+;;; $Id: slot.lisp,v 1.18 2001/03/13 21:56:13 youngde Exp $
 
 (in-package :lisa)
 
@@ -44,6 +44,10 @@
 (defun is-literal-slotp (self)
   (declare (type slot self))
   (literalp (get-value self)))
+
+(defun is-variable-slotp (self)
+  (declare (type slot self))
+  (variablep (get-value self)))
 
 (defun is-negatedp (self)
   (declare (type slot self))
@@ -76,9 +80,10 @@
    "A subclass of SLOT describing a slot instance that's eligible for
    certain optimisations."))
 
-(defclass optimisable-literal-slot (optimisable-slot) ())
+(defclass simple-slot () ())
+(defclass optimisable-literal-slot (optimisable-slot simple-slot) ())
 (defclass optimisable-variable-slot (optimisable-slot) ())
-(defclass optimisable-simple-constraint-slot (optimisable-slot) ())
+(defclass optimisable-simple-constraint-slot (optimisable-slot simple-slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
