@@ -19,9 +19,9 @@
 
 ;;; File: funcall.lisp
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
-;;; code.
+;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.4 2001/01/04 22:45:09 youngde Exp $
+;;; $Id: funcall.lisp,v 1.5 2001/01/05 17:38:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,7 +31,8 @@
    (bindings :initarg :bindings
              :reader get-bindings))
   (:documentation
-   "This class manages the mechanics of executing arbitrary Lisp code."))
+   "This class manages the mechanics of executing arbitrary Lisp code from
+   conditional elements and rule RHSs."))
 
 (defmethod make-lexical-binding ((binding pattern-binding) token)
   (let ((fact (find-fact token (get-location binding))))
