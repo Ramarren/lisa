@@ -23,11 +23,11 @@
 ;;; find and eat some bananas. This iteration also illustrates the use of
 ;;; pattern matching on an object hierarchy.
 
-;;; $Id: mab-clos.lisp,v 1.10 2002/11/07 19:21:59 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.11 2002/11/08 20:14:26 youngde Exp $
 
 (in-package "LISA-USER")
 
-(use-default-engine)
+(lisa:consider-taxonomy)
 
 (defclass mab-fundamental () ())
 
@@ -72,8 +72,7 @@
   (monkey (holding (not ?chest)))
   (not (goal-is-to (action hold) (argument-1 ?chest)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold :argument-1 ?chest)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 ?chest))))
 
 (defrule put-chest-on-floor ()
   (goal-is-to (action unlock) (argument-1 ?chest))
@@ -91,9 +90,7 @@
   (monkey (holding (not ?key)))
   (not (goal-is-to (action hold) (argument-1 ?key)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold
-                  :argument-1 ?key)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 ?key))))
 
 (defrule move-to-chest-with-key ()
   (goal-is-to (action unlock) (argument-1 ?chest))
@@ -102,9 +99,7 @@
   (chest (name ?chest) (unlocked-by ?key))
   (not (goal-is-to (action walk-to) (argument-1 ?cplace)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'walk-to
-                  :argument-1 ?cplace)))
+  (assert ((make-instance 'goal-is-to :action 'walk-to :argument-1 ?cplace))))
 
 (defrule unlock-chest-with-key ()
   (?goal (goal-is-to (action unlock) (argument-1 ?name)))
@@ -115,9 +110,8 @@
   (format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
           ?name ?key ?contents)
   (modify ?chest (contents nothing))
-  (assert-instance
-   (make-instance 'thing :name ?contents :location ?place
-                  :weight 'light :on-top-of ?name))
+  (assert ((make-instance 'thing :name ?contents :location ?place
+                          :weight 'light :on-top-of ?name)))
   (retract ?goal))
 
 ;;; Hold-object rules...
@@ -127,9 +121,7 @@
   (chest (name ?chest) (contents ?obj))
   (not (goal-is-to (action unlock) (argument-1 ?chest)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'unlock
-                  :argument-1 ?chest)))
+  (assert ((make-instance 'goal-is-to :action 'unlock :argument-1 ?chest))))
 
 (defrule use-ladder-to-hold ()
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -137,10 +129,9 @@
   (not (thing (name ladder) (location ?place)))
   (not (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'move
-                  :argument-1 'ladder
-                  :argument-2 ?place)))
+  (assert ((make-instance 'goal-is-to :action 'move
+                          :argument-1 'ladder
+                          :argument-2 ?place))))
 
 (defrule climb-ladder-to-hold ()
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -149,9 +140,7 @@
   (monkey (on-top-of (not ladder)))
   (not (goal-is-to (action on) (argument-1 ladder)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'on
-                  :argument-1 'ladder)))
+  (assert ((make-instance 'goal-is-to :action 'on :argument-1 'ladder))))
 
 (defrule grab-object-from-ladder ()
   (?goal (goal-is-to (action hold) (argument-1 ?name)))
@@ -172,9 +161,7 @@
   (monkey (location ?place) (on-top-of (not ?on)))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'on
-                  :argument-1 ?on)))
+  (assert ((make-instance 'goal-is-to :action 'on :argument-1 ?on))))
 
 (defrule walk-to-hold ()
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -183,9 +170,7 @@
   (monkey (location (not ?place)))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'walk-to
-                  :argument-1 ?place)))
+  (assert ((make-instance 'goal-is-to :action 'walk-to :argument-1 ?place))))
 
 (defrule drop-to-hold ()
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -193,9 +178,7 @@
   (monkey (location ?place) (on-top-of ?on) (holding (not blank)))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold
-                  :argument-1 'blank)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 'blank))))
 
 (defrule grab-object ()
   (?goal (goal-is-to (action hold) (argument-1 ?name)))
@@ -226,9 +209,7 @@
   (chest (name ?chest) (contents ?obj))
   (not (goal-is-to (action unlock) (argument-1 ?chest)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'unlock
-                  :argument-1 ?chest)))
+  (assert ((make-instance 'goal-is-to :action 'unlock :argument-1 ?chest))))
 
 (defrule hold-object-to-move ()
   (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
@@ -236,18 +217,14 @@
   (monkey (holding (not ?obj)))
   (not (goal-is-to (action hold) (argument-1  ?obj)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold
-                  :argument-1 ?obj)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 ?obj))))
 
 (defrule move-object-to-place ()
   (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
   (monkey (location (not ?place)) (holding ?obj))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'walk-to
-                  :argument-1 ?place)))
+  (assert ((make-instance 'goal-is-to :action 'walk-to :argument-1 ?place))))
 
 (defrule drop-object-once-moved ()
   (?goal (goal-is-to (action move) (argument-1 ?name) (argument-2 ?place)))
@@ -278,9 +255,7 @@
   (monkey (location (not ?place)) (on-top-of (not floor)))
   (not (goal-is-to (action on) (argument-1 floor)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'on
-                  :argument-1 'floor)))
+  (assert ((make-instance 'goal-is-to :action 'on :argument-1 'floor))))
 
 (defrule walk-holding-nothing ()
   (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
@@ -315,9 +290,7 @@
   (monkey (location (not ?place)))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'walk-to
-                  :argument-1 ?place)))
+  (assert ((make-instance 'goal-is-to :action 'walk-to :argument-1 ?place))))
 
 (defrule drop-to-climb ()
   (goal-is-to (action on) (argument-1 ?obj))
@@ -325,9 +298,7 @@
   (monkey (location ?place) (holding (not blank)))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold
-                  :argument-1 'blank)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 'blank))))
 
 (defrule climb-indirectly ()
   (goal-is-to (action on) (argument-1 ?obj))
@@ -338,9 +309,7 @@
           (holding blank))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'on
-                  :argument-1 ?on)))
+  (assert ((make-instance 'goal-is-to :action 'on :argument-1 ?on))))
 
 (defrule climb-directly ()
   (?goal (goal-is-to (action on) (argument-1 ?obj)))
@@ -364,9 +333,7 @@
   (monkey (holding (not ?obj)))
   (not (goal-is-to (action hold) (argument-1 ?obj)))
   =>
-  (assert-instance
-   (make-instance 'goal-is-to :action 'hold
-                  :argument-1 ?obj)))
+  (assert ((make-instance 'goal-is-to :action 'hold :argument-1 ?obj))))
 
 (defrule satisfy-hunger ()
   (?goal (goal-is-to (action eat) (argument-1 ?name)))
@@ -394,71 +361,71 @@
 
 (defrule startup ()
   =>
-  (assert-instance
-   (make-instance 'monkey :location 't5-7
+  (assert
+   ((make-instance 'monkey :location 't5-7
                   :on-top-of 'green-couch
                   :location 'green-couch
-                  :holding 'blank))
-  (assert-instance
-   (make-instance 'thing :name 'green-couch
+                  :holding 'blank)))
+  (assert
+   ((make-instance 'thing :name 'green-couch
                   :location 't5-7
                   :weight 'heavy
-                  :on-top-of 'floor))
-  (assert-instance
-   (make-instance 'thing :name 'red-couch
+                  :on-top-of 'floor)))
+  (assert
+   ((make-instance 'thing :name 'red-couch
                   :location 't2-2
                   :weight 'heavy
-                  :on-top-of 'floor))
-  (assert-instance
-   (make-instance 'thing :name 'big-pillow
+                  :on-top-of 'floor)))
+  (assert
+   ((make-instance 'thing :name 'big-pillow
                   :location 't2-2
                   :weight 'light
-                  :on-top-of 'red-couch))
-  (assert-instance
-   (make-instance 'thing :name 'red-chest
+                  :on-top-of 'red-couch)))
+  (assert
+   ((make-instance 'thing :name 'red-chest
                   :location 't2-2
                   :weight 'light
-                  :on-top-of 'big-pillow))
-  (assert-instance
-   (make-instance 'chest :name 'red-chest
+                  :on-top-of 'big-pillow)))
+  (assert
+   ((make-instance 'chest :name 'red-chest
                   :contents 'ladder
-                  :unlocked-by 'red-key))
-  (assert-instance
-   (make-instance 'thing :name 'blue-chest
+                  :unlocked-by 'red-key)))
+  (assert
+   ((make-instance 'thing :name 'blue-chest
                   :location 't7-7
                   :weight 'light
-                  :on-top-of 'ceiling))
-  (assert-instance
-   (make-instance 'thing :name 'grapes
+                  :on-top-of 'ceiling)))
+  (assert
+   ((make-instance 'thing :name 'grapes
                   :location 't7-8
                   :weight 'light
-                  :on-top-of 'ceiling))
-  (assert-instance
-   (make-instance 'chest :name 'blue-chest
+                  :on-top-of 'ceiling)))
+  (assert
+   ((make-instance 'chest :name 'blue-chest
                   :contents 'bananas
-                  :unlocked-by 'blue-key))
-  (assert-instance
-   (make-instance 'thing :name 'blue-couch
+                  :unlocked-by 'blue-key)))
+  (assert
+   ((make-instance 'thing :name 'blue-couch
                   :location 't8-8
                   :weight 'heavy
-                  :on-top-of 'floor))
-  (assert-instance
-   (make-instance 'thing :name 'green-chest
+                  :on-top-of 'floor)))
+  (assert
+   ((make-instance 'thing :name 'green-chest
                   :location 't8-8
                   :weight 'light
-                  :on-top-of 'ceiling))
-  (assert-instance
-   (make-instance 'chest :name 'green-chest
+                  :on-top-of 'ceiling)))
+  (assert
+   ((make-instance 'chest :name 'green-chest
                   :contents 'blue-key
-                  :unlocked-by 'red-key))
-  (assert-instance
-   (make-instance 'thing :name 'red-key
+                  :unlocked-by 'red-key)))
+  (assert
+   ((make-instance 'thing :name 'red-key
                   :location 't1-3
                   :weight 'light
-                  :on-top-of 'floor))
-  (assert-instance
-   (make-instance 'goal-is-to :action 'eat
-                  :argument-1 'bananas)))
+                  :on-top-of 'floor)))
+  (assert
+   ((make-instance 'goal-is-to :action 'eat
+                  :argument-1 'bananas))))
 
 #+ignore
 (defun run-mab (&optional (ntimes 1))
