@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.16 2002/09/27 20:51:00 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.17 2002/09/28 20:32:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,17 +85,6 @@
                      (binding-slot-name binding)))))))
     (if (negated-slot-p slot) (complement test) test)))
 
-(defun make-intra-pattern-test (slot)
-  (let ((test
-         (function
-          (lambda (tokens)
-            (equal (get-slot-value (token-top-fact tokens)
-                                   (pattern-slot-name slot))
-                   (get-slot-value (token-top-fact tokens)
-                                   (binding-slot-name 
-                                    (pattern-slot-slot-binding slot))))))))
-    (if (negated-slot-p slot) (complement test) test)))
-
 (defun make-predicate-test (forms bindings &optional (negated-p nil))
   (let* ((special-vars
           (mapcar #'binding-variable bindings))
@@ -110,31 +99,21 @@
          (test
           (function
            (lambda (tokens)
-             (handler-case
-                 (progv
-                     `(,@special-vars)
-                     `(,@(mapcar #'(lambda (binding)
-                                     (if (pattern-binding-p binding)
-                                         (token-find-fact 
-                                          tokens (binding-address binding))
-                                       (get-slot-value
-                                        (token-find-fact 
-                                         tokens (binding-address binding))
-                                        (binding-slot-name binding))))
-                                 bindings))
-                   (funcall predicate))
-               (error (e)
-                 (progn
-                   (format t "forms: ~S~%" forms)
-                   (format t "negated-p: ~S~%" negated-p)
-                   (format t "bindings: ~S~%" bindings)
-                   (format t "token: ~S~%" tokens)
-                   (format t "token stack: ~S~%" (token-facts tokens))
-                   (break))))))))
+             (progv
+                 `(,@special-vars)
+                 `(,@(mapcar #'(lambda (binding)
+                                 (if (pattern-binding-p binding)
+                                     (token-find-fact 
+                                      tokens (binding-address binding))
+                                   (get-slot-value
+                                    (token-find-fact 
+                                     tokens (binding-address binding))
+                                    (binding-slot-name binding))))
+                             bindings))
+               (funcall predicate))))))
     (if negated-p (complement test) test)))
 
-(defun make-intra-pattern-predicate-test (forms bindings 
-                                          &optional (negated-p nil))
+(defun make-intra-pattern-predicate (forms bindings negated-p)
   (let* ((special-vars
           (mapcar #'binding-variable bindings))
          (body
@@ -148,28 +127,36 @@
          (test
           (function
            (lambda (tokens)
-             (handler-case
-                 (progv
-                     `(,@special-vars)
-                     `(,@(mapcar #'(lambda (binding)
-                                     (if (pattern-binding-p binding)
-                                         (token-find-fact 
-                                          tokens (binding-address binding))
-                                       (get-slot-value
-                                        (token-top-fact tokens)
-                                        (binding-slot-name binding))))
-                                 bindings))
-                   (funcall predicate))
-               (error (e)
-                 (progn
-                   (format t "forms: ~S~%" forms)
-                   (format t "negated-p: ~S~%" negated-p)
-                   (format t "bindings: ~S~%" bindings)
-                   (format t "token: ~S~%" tokens)
-                   (format t "token stack: ~S~%" (token-facts tokens))
-                   (break))))))))
+             (progv
+                 `(,@special-vars)
+                 `(,@(mapcar #'(lambda (binding)
+                                 (if (pattern-binding-p binding)
+                                     (token-find-fact 
+                                      tokens (binding-address binding))
+                                   (get-slot-value
+                                    (token-top-fact tokens)
+                                    (binding-slot-name binding))))
+                             bindings))
+               (funcall predicate))))))
     (if negated-p (complement test) test)))
          
+(defun make-intra-pattern-constraint-test (slot)
+  (make-intra-pattern-predicate
+   (pattern-slot-constraint slot)
+   (pattern-slot-constraint-bindings slot)
+   (negated-slot-p slot)))
+
+(defun make-intra-pattern-test (slot)
+  (let ((test
+         (function
+          (lambda (tokens)
+            (equal (get-slot-value (token-top-fact tokens)
+                                   (pattern-slot-name slot))
+                   (get-slot-value (token-top-fact tokens)
+                                   (binding-slot-name 
+                                    (pattern-slot-slot-binding slot))))))))
+    (if (negated-slot-p slot) (complement test) test)))
+
 (defun make-behavior (function bindings)
   (make-predicate-test function bindings))
 

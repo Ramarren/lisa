@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.33 2002/09/27 20:50:56 youngde Exp $
+;;; $Id: parser.lisp,v 1.34 2002/09/28 20:32:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -192,8 +192,9 @@
                               ,bindings)))
                (make-equality-predicate (var value)
                  `(progn
-                    `(equal ,,var ,@(if (symbolp ,value) `(',,value) `(,,value))))))
-      (labels ((parse-constraint (var constraint)
+                    `(equal ,,var ,@(if (symbolp ,value) 
+                                        `(',,value) `(,,value))))))
+            (labels ((parse-constraint (var constraint)
                  (let ((bindings (list)))
                    (cond ((simple-form-p constraint)
                           (values (make-equality-predicate var constraint)
