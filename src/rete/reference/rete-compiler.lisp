@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.18 2002/09/10 19:34:49 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.19 2002/09/13 20:23:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,6 +50,10 @@
                   (make-class-test class)))
       (setf (gethash class *root-nodes*) root))
     root))
+
+(defmethod add-successor ((self t) new-node connector)
+  (declare (ignore new-node connector))
+  self)
 
 (defun make-intra-pattern-node (slot)
   (make-node1
@@ -92,17 +96,19 @@
 
 (defun add-intra-pattern-nodes (patterns)
   (dolist (pattern patterns)
-    (unless (test-pattern-p pattern)
-      (let ((node
-             (add-root-node (parsed-pattern-class pattern)))
-            (address (parsed-pattern-address pattern)))
-        (set-leaf-node node address)
-        (dolist (slot (parsed-pattern-slots pattern))
-          (when (simple-slot-p slot)
-            (setf node
-              (add-successor node (make-intra-pattern-node slot)
-                             #'pass-token))
-            (set-leaf-node node address)))))))
+    (cond ((test-pattern-p pattern)
+           (set-leaf-node t (parsed-pattern-address pattern)))
+          (t
+           (let ((node
+                  (add-root-node (parsed-pattern-class pattern)))
+                 (address (parsed-pattern-address pattern)))
+             (set-leaf-node node address)
+             (dolist (slot (parsed-pattern-slots pattern))
+               (when (simple-slot-p slot)
+                 (setf node
+                   (add-successor node (make-intra-pattern-node slot)
+                                  #'pass-token))
+                 (set-leaf-node node address))))))))
 
 (defun add-join-node-tests (join-node pattern)
   (labels ((add-simple-join-node-test (slot)
