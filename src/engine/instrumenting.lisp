@@ -22,20 +22,21 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.6 2001/03/01 16:31:51 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.7 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
-(defun instrument (obj)
-  (setf (get-instrumented obj) t))
+(let ((instruments (make-hash-table)))
+  (defun instrument (obj)
+    (setf (gethash obj instruments) obj))
 
-(defun instrumentedp (obj)
-  (get-instrumented obj))
+  (defun instrumentedp (obj)
+    (gethash obj instruments))
 
-(defun uninstrument (obj)
-  (setf (get-instrumented obj) nil))
+  (defun uninstrument (obj)
+    (remhash obj instruments)))
 
-(defun maprule (func rule-name)
+(defun mappaths (func rule-name)
   (mapc #'(lambda (path)
             (mapc func path))
         (find-paths-to-rule rule-name)))
@@ -43,27 +44,25 @@
 (defun instrument-rule (rule-name)
   "Instruments each node in the network that leads to the rule
   identified by RULE-NAME."
-  (maprule #'instrument rule-name)
+  (mappaths #'instrument rule-name)
   (values))
 
-(defun un-instrument-rule (rule-name)
+(defun uninstrument-rule (rule-name)
   "Deactivates instrumenting of the rule identified by RULE-NAME."
-  (maprule #'uninstrument rule-name)
+  (mappaths #'uninstrument rule-name)
   (values))
 
 (defun instrument-path (path)
+  "Instruments each node in a particular activation path."
   (mapc #'instrument path)
   (values))
 
-(defun un-instrument-path (path)
+(defun uninstrument-path (path)
+  "Deactivates instrumenting of an activation path."
   (mapc #'uninstrument path)
   (values))
 
 (defun ibreak (obj &rest args)
+  "Breaks if OBJ is instrumented."
   (when (instrumentedp obj)
-    (apply #'break args)))
-  
-#+ignore
-(defmacro ibreak(obj &rest args)
-  `(when (instrumentedp ,obj)
-    (funcall #'break ,@args)))
+    (apply #'break "Breaking on instrumented object" args)))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.43 2001/03/01 16:31:51 youngde Exp $
+;;; $Id: rete.lisp,v 1.44 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -137,9 +137,7 @@
     (values fact)))
 
 (defmethod modify-fact ((self rete) fact slot-changes)
-;  (break "modify, before remove")
   (insert-token self (make-remove-token :initial-fact fact))
-;  (break "modify, after remove")
   (mapc #'(lambda (slot)
             (set-slot-value fact (first slot) (second slot)))
         slot-changes)
@@ -177,15 +175,6 @@
 
 (defmethod get-activation-list ((self rete))
   (list-activations (get-strategy self)))
-
-#+ignore
-(defmethod run-engine ((self rete))
-  (let ((strategy (get-strategy self)))
-    (do ((activation (next-activation strategy)
-                     (next-activation strategy)))
-        ((null activation) t)
-      (when (eligible-p activation)
-        (fire-rule activation)))))
 
 (defun run-engine (self &optional (step t))
   (let ((strategy (get-strategy self))

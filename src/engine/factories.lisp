@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.24 2001/02/09 22:11:30 youngde Exp $
+;;; $Id: factories.lisp,v 1.25 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,7 +35,7 @@
       (:negated
        (make-not-pattern head body location))
       (otherwise
-       (error "The Pattern factory doesn't this raw pattern type ~S."
+       (error "The Pattern factory doesn't recognize this raw pattern type ~S."
               (parsed-pattern-type pp))))))
 
 (defmethod make-join-node ((pattern generic-pattern) engine)

@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.27 2001/03/01 16:31:51 youngde Exp $
+;;; $Id: node2.lisp,v 1.28 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -30,10 +30,7 @@
   ((left-tree :initform (make-token-tree :use-sortcode-p t)
               :accessor get-left-tree)
    (right-tree :initform (make-token-tree)
-               :accessor get-right-tree)
-   (engine :initform nil
-           :initarg :engine
-           :reader get-engine))
+               :accessor get-right-tree))
   (:documentation
    "Description: A non-negated, two-input node of the Rete network. Tests in
    this node compare slot values and types in facts from the left and right
@@ -56,7 +53,6 @@
   (values nil))
 
 (defmethod call-node-left ((self node2) (token remove-token))
-  (ibreak self "call-node-left for ~S" self)
   (when (remove-token (get-left-tree self) token)
     (run-tests-vary-right self token (get-right-tree self)))
   (values t))
@@ -69,13 +65,11 @@
   (values nil))
 
 (defmethod call-node-right ((self node2) (token remove-token))
-  (ibreak self "call-node-right")
   (when (remove-token (get-right-tree self) token)
     (run-tests-vary-left self token (get-left-tree self)))
   (values t))
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
-  (ibreak self "run-tests")
   (with-tree-iterator (key left-token tree)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))

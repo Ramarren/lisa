@@ -20,9 +20,9 @@
 ;;; File: bindings.lisp
 ;;; Description: Classes in this file represent various types of
 ;;; variable bindings that form the lexical environment of rule
-;;; right-hand-sides.
+;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.9 2001/01/25 22:14:33 youngde Exp $
+;;; $Id: bindings.lisp,v 1.10 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 

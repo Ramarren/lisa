@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.20 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: funcall.lisp,v 1.21 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -68,18 +68,6 @@
          (mapcar #'(lambda (binding)
                      (make-lexical-binding binding context))
                  (get-bindings func))))
-
-#+ignore
-(defun evaluate (func context)
-  (declare (type function-call func)
-           (type function-call-context context))
-  (declare (optimize (speed 3) (debug 0) (safety 1)))
-  (let ((bindings nil))
-    (apply (get-function func)
-           (dolist (binding (get-bindings func) bindings)
-             (setf bindings
-               (nconc bindings
-                      `(,(make-lexical-binding binding context))))))))
 
 (defmethod equals ((self function-call) (obj function-call))
   (eq self obj))

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.18 2001/03/01 16:31:51 youngde Exp $
+;;; $Id: defsys.lisp,v 1.19 2001/03/02 21:50:48 youngde Exp $
 
 (in-package :user)
 
@@ -110,9 +110,7 @@
                                        (:file "clear-token")
                                        (:file "remove-token")
                                        (:file "token-tree")
-                                       (:file "instrumentable")
-                                       (:file "node"
-                                              :depends-on (instrumentable))
+                                       (:file "node")
                                        (:file "node1"
                                               :depends-on (node))
                                        (:file "rete-compiler")

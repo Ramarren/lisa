@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.19 2001/03/01 16:31:51 youngde Exp $
+;;; $Id: fact.lisp,v 1.20 2001/03/02 21:50:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,26 +69,6 @@
   (declare (type fact fact)
            (type symbol slot))
   (cdr (assoc slot (get-slot-table fact))))
-
-#|
-(defun set-slot-value (fact slot value)
-  (declare (type fact fact) (type symbol slot))
-  (with-accessors ((slot-table get-slot-table)) fact
-    (setf (gethash slot slot-table) value)))
-
-(defun get-slot-values (fact)
-  (declare (type fact fact))
-  (let ((slots nil))
-    (maphash #'(lambda (key val)
-                 (push slots `(,key ,val)))
-             (get-slot-table fact))
-    (values slots)))
-
-(defun get-slot-value (fact slot)
-  (declare (type fact fact)
-           (type symbol slot))
-  (gethash slot (get-slot-table fact)))
-|#
 
 (defmethod get-time ((self fact))
   (get-clock self))
