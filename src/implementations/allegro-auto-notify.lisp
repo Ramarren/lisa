@@ -23,7 +23,7 @@
 ;;; of LISA's control, are picked up via the MOP protocol and synchronized
 ;;; with KB facts.
 
-;;; $Id: auto-notify.lisp,v 1.4 2002/11/25 19:48:27 youngde Exp $
+;;; $Id: allegro-auto-notify.lisp,v 1.1 2002/12/03 15:26:00 youngde Exp $
 
 (in-package "LISA")
 
