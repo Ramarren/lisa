@@ -20,14 +20,20 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.4 2002/10/25 14:43:56 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.5 2002/10/28 15:59:20 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *breakpoints* (list))
-(defvar *read-eval-print* nil)
-(defvar *tokens* nil)
 (defvar *stepping* nil)
+
+(defvar *read-eval-print*)
+(defvar *suspended-rule*)
+(defvar *tokens*)
+
+(defmacro in-debugger-p ()
+  `(cl:assert (boundp '*suspended-rule*) nil
+     "The debugger must be running to use this function."))
 
 (defun leave-debugger ()
   (setf *stepping* nil))
@@ -57,16 +63,19 @@
   (values))
 
 (defun next ()
+  (in-debugger-p)
   (setf *stepping* t)
   (setf *read-eval-print* nil)
   (values))
 
 (defun resume ()
+  (in-debugger-p)
   (setf *read-eval-print* nil)
   (setf *stepping* nil)
   (values))
 
 (defun tokens (&key (verbose nil))
+  (in-debugger-p)
   (format t "Token stack for ~A:~%" (rule-name (rule)))
   (dolist (fact (token-make-fact-list *tokens*))
     (if verbose
@@ -80,6 +89,7 @@
   (find-fact-by-id (inference-engine) fact-id))
 
 (defun bindings ()
+  (in-debugger-p)
   (format t "Effective bindings for ~A:~%" (rule-name (rule)))
   (dolist (binding (rule-binding-set (rule)))
     (format t "  ~A: ~S~%"
@@ -113,6 +123,7 @@
   (when (or *stepping*
             (has-breakpoint-p self))
     (let ((*active-rule* self)
+          (*suspended-rule* self)
           (*tokens* tokens))
       (format t "Stopping in rule ~S~%" (rule-name self))
       (debugger-read-eval-print)))

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.29 2002/10/23 18:31:58 youngde Exp $
+;;; $Id: lisa2.system,v 1.30 2002/10/28 15:59:14 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -58,11 +58,18 @@
 (defun lisa-debugger ()
   (translate-logical-pathname "lisa:debugger;lisa-debugger.lisp"))
 
+;;; Sets up the environment so folks can use the non-portable form of REQUIRE
+;;; with some implementations...
+
 #+Allegro
 (setf system:*require-search-list*
   (append system:*require-search-list*
           `(:newest ,(lisa-debugger))))
 
+#+clisp
+(setf custom:*load-paths*
+  (append custom:*load-paths* `(,(lisa-debugger))))
+          
 ;;; Make sure the binary directory structure exists...
 
 (let ((lisa-binary-directories
