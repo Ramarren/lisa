@@ -17,20 +17,19 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: initial-fact.lisp
-;;; Description: Class that represents the special fact INITIAL-FACT.
+;;; File: remove-token.lisp
+;;; Description: Represents tokens used for remove operations on the
+;;; network.
 
-;;; $Id: initial-fact.lisp,v 1.2 2000/11/18 02:42:11 youngde Exp $
+;;; $Id: remove-token.lisp,v 1.1 2000/11/19 21:13:09 youngde Exp $
 
 (in-package :lisa)
 
-(defclass initial-fact (lisa-kb-class)
+(defclass remove-token (token)
   ()
   (:documentation
-   "Represents the special fact INITIAL-FACT."))
+   "Represents tokens used for remove operations on the network."))
 
-(defclass clear-fact (lisa-kb-class)
-  ()
-  (:documentation
-   "Represents the special fact CLEAR-FACT."))
+(defun make-remove-token (&rest args)
+  (apply #'make-token (find-class 'remove-token) args))
 

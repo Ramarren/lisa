@@ -17,20 +17,26 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: add-token.lisp
-;;; Description: Represents TOKENs used for add operations on the
-;;; network.
+;;; File: special-facts.lisp
+;;; Description: Classes that represents special facts internal to
+;;; LISA.
 
-;;; $Id: add-token.lisp,v 1.6 2000/11/19 21:13:09 youngde Exp $
+;;; $Id: special-facts.lisp,v 1.1 2000/11/19 21:13:09 youngde Exp $
 
 (in-package :lisa)
 
-(defclass add-token (token)
+(defclass initial-fact (lisa-kb-class)
   ()
   (:documentation
-   "Represents TOKENs used for add operations on the network."))
+   "Represents the special fact INITIAL-FACT."))
 
-(defun make-add-token (&rest args)
-  (apply #'make-token (find-class 'add-token) args))
+(defclass clear-fact (lisa-kb-class)
+  ()
+  (:documentation
+   "Represents the special fact CLEAR-FACT."))
 
+(defclass not-or-clear-fact (lisa-kb-class)
+  ()
+  (:documentation
+   "Represents the special fact NOT-OR-CLEAR."))
 

@@ -20,7 +20,7 @@
 ;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.12 2000/11/17 21:45:21 youngde Exp $
+;;; $Id: load.lisp,v 1.13 2000/11/19 21:13:08 youngde Exp $
 
 (in-package :user)
 
@@ -38,14 +38,14 @@
 (let ((files
        '(("packages" ("pkgdecl"))
          ("utils" ("utils" "compose"))
-         ("engine" ("macros" "utils" "lisa-kb-class" "initial-fact"
+         ("engine" ("macros" "utils" "lisa-kb-class" "special-facts"
                     "strategies" "token" "add-token" "rete" "fact"
-                    "rete-compiler" "fact" "clear-token" "token-tree"
-                    "node" "node1" "node1-tect" "node1-teq"
-                    "node1-rtl" "node-test" "node2" "terminal-node"
-                    "test1" "factories" "slot" "pattern"
-                    "generic-pattern" "rule" "parser" "language"
-                    "activation" "environment" "debug")))))
+                    "rete-compiler" "fact" "clear-token"
+                    "remove-token" "token-tree" "node" "node1"
+                    "node1-tect" "node1-teq" "node1-rtl" "node-test"
+                    "node2" "terminal-node" "test1" "factories" "slot"
+                    "pattern" "generic-pattern" "rule" "parser"
+                    "language" "activation" "environment" "debug")))))
   (labels ((load-files (path files)
              (cond ((null files)
                     (values t))
