@@ -8,6 +8,19 @@
 
 <h1>Release Notes for LISA 2.0</h1>
 <h2>The LISA Project</h2>
+<h3><b>10 December, 2002</b></h3>
+<p>Release 2.0.1, a bug-fix release to correct a problem reported in the Rete
+network that prevented rules such as the following from activating:</p>
+<blockquote>
+<p>(defrule frodo ()<br>
+&nbsp; (?a (relation))<br>
+&nbsp; (?b (relation))<br>
+&nbsp; (test (not (eq ?a ?b)))<br>
+&nbsp; =&gt;)</p>
+</blockquote>
+<p>As a consequence, there's a semantic change. If the first two patterns of a
+rule have the same class (i.e. are matching the same template or class name),
+then a RESET must&nbsp; have been issued prior to running the engine.</p>
 <h3>9 December, 2002</h3>
 <p>The first production release for LISA 2.0. One major new feature, and some
 small enhancements:</p>
