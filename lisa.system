@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.2 2001/08/23 23:53:26 youngde Exp $
+;;; $Id: lisa.system,v 1.3 2001/08/24 15:50:00 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -72,7 +72,9 @@
 (push (translate-logical-pathname "clocc:src;port;")
       mk:*central-registry*)
 
-#+MSWindows
+;;; The CLOCC Port module requires OLE when on ACL and Windows...
+
+#+(and Allegro MSWindows)
 (require 'ole)
 
 (mk:defsystem :lisa
