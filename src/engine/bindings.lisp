@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.16 2001/09/13 13:54:09 youngde Exp $
+;;; $Id: bindings.lisp,v 1.17 2001/09/15 00:09:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -144,7 +144,7 @@
              (declare (optimize (speed 3) (debug 1) (safety 1)))
              (let* ((token (first part))
                     (new-token token))
-               (cond ((null token)
+               (cond ((null part)
                       (return-from fixup-bindings (nreverse result)))
                      ((and (variablep token)
                            (boundp token))
@@ -152,7 +152,7 @@
                      ((variablep token)
                       (unless (null unbound-handler)
                         (funcall unbound-handler token)))
-                     ((listp token)
+                     ((consp token)
                       (setf new-token (fixup-bindings token nil))))
                (fixup-bindings (rest part) (push new-token result)))))
     (fixup-bindings pattern nil)))
