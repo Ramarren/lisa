@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.50 2001/03/31 20:56:30 youngde Exp $
+;;; $Id: parser.lisp,v 1.51 2001/04/01 00:57:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -173,22 +173,18 @@
           slots))
 
 (defun parse-and-insert-fact (body)
-  (flet ((generate-assert ()
-           (let ((head (first body))
-                 (slots (rest body)))
-             (cond ((symbolp head)
-                    (let ((class (find-meta-class head)))
-                      `(assert-fact (current-engine)
-                        (make-fact ',(get-name class)
-                         (canonicalize-slot-names ,class
-                          (,@(normalize-slots slots)))))))
-                   (t
-                    (parsing-error
-                     "A fact must begin with a symbol: ~S." head))))))
-    (handler-case
-        (generate-assert)
-      (lisa-error (condition)
-        (command-structure-error 'assert-fact condition)))))
+  (let ((head (first body))
+        (slots (rest body)))
+    (cond ((symbolp head)
+           (let ((class (find-meta-class head)))
+             `(assert-fact
+               (current-engine)
+               (make-fact ',(get-name class)
+                (canonicalize-slot-names
+                 ,class (,@(normalize-slots slots)))))))
+          (t
+           (parsing-error
+            "A fact must begin with a symbol: ~S." head)))))
 
 (defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()

@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.7 2001/03/31 20:56:30 youngde Exp $
+;;; $Id: conditions.lisp,v 1.8 2001/04/01 00:57:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,7 +40,11 @@
 
 (define-condition environment-error (lisa-error)
   ()
-  (:documentation
+  (:report
+   (lambda (condition strm)
+     (with-slots (text) condition
+       (format strm "~S~%" text)))
+   :documentation
    "This condition represents LISA environmental errors."))
 
 (define-condition rule-structure-error (lisa-error)
@@ -58,12 +62,27 @@
    "This condition represents structural errors found while parsing DEFRULE
    forms."))
 
-(define-condition command-structure-error (lisa-error)
-  ((command-name :initarg :command-name))
+(define-condition rule-evaluation-error (lisa-error)
+  ((rule :initarg :rule)
+   (condition :initarg :condition))
   (:report
    (lambda (condition strm)
-     (with-slots (command-name text) condition
-       (format strm "While evaluating the LISA function ~S~%" command-name)
+     (with-slots (rule condition) condition
+       (format strm "While executing rule ~S~%" (get-name rule))
+       (format strm "On the RHS the following error occurred:~%")
+       (format strm "~S~%" condition)))
+   :documentation
+   "This condition represents runtime errors that occur during rule
+   execution."))
+
+(define-condition command-structure-error (lisa-error)
+  ((form :initarg :form
+         :initform nil))
+  (:report
+   (lambda (condition strm)
+     (with-slots (form text) condition
+       (format strm "While evaluating the form:")
+       (format strm "~S" form)
        (format strm text)))
    :documentation
    "This condition represents structural errors found while parsing specific
@@ -72,22 +91,25 @@
 (defmacro pattern-error (pattern format-string &rest args)
   `(error 'syntactical-error
     :element ,pattern
-    :text (apply #'format nil ,format-string `(,,@args))))
+    :text (format nil ,format-string ,@args)))
 
 (defmacro parsing-error (format-string &rest args)
   `(error 'syntactical-error
-    :text (apply #'format nil ,format-string `(,,@args))))
+    :text (format nil ,format-string ,@args)))
 
 (defmacro rule-structure-error (rule-name parse-condition)
   `(with-slots (text element) ,parse-condition
     (error 'rule-structure-error
      :rule-name ,rule-name :element element :text text)))
 
-(defmacro command-structure-error (command-name parse-condition)
+(defmacro rule-evaluation-error (rule condition)
+  `(error 'rule-evaluation-error :rule ,rule :condition ,condition))
+
+(defmacro command-structure-error (form parse-condition)
   `(with-slots (text) ,parse-condition
     (error 'command-structure-error
-     :command-name ,command-name :text text)))
+     :form ,form :text text)))
 
 (defmacro environment-error (format-string &rest args)
   `(error 'environment-error
-    :text (apply #'format nil ,format-string `(,,@args))))
+    :text (format nil ,format-string ,@args)))
