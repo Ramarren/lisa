@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,9 +20,9 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.75 2003/06/02 15:02:57 youngde Exp $
+;;; $Id: parser.lisp,v 1.76 2004/09/13 19:27:47 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defconstant *rule-separator* '=>)
 
@@ -67,7 +67,8 @@
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
     `(let ((*binding-table* (make-hash-table))
-           (*compound-patterns-p* nil))
+           (*compound-patterns-p* nil)
+           (*cf-list* (list)))
        (multiple-value-bind (,doc-string ,remains)
            (extract-rule-headers ,rule-form)
          (multiple-value-bind (,lhs ,rhs)
@@ -94,9 +95,8 @@
       (build-ruleset patterns nil)
       (nreverse rulesets))))
 
-(defun define-rule (name body &optional (salience 0) 
-                                        (context nil)
-                                        (auto-focus nil))
+(defun define-rule (name body &key (salience 0) (context nil)
+                                   (auto-focus nil) (cf 0.0))
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
@@ -112,12 +112,17 @@
                  :doc-string doc-string
                  :salience salience
                  :context context
+                 :cf cf
                  :auto-focus auto-focus))))
 
 (defun redefine-defrule (name body &key (salience 0)
                                         (context nil)
+                                        (cf 0.0)
                                         (auto-focus nil))
-  (define-rule name body salience context auto-focus))
+  (define-rule name body :salience salience
+               :context context
+               :cf cf
+               :auto-focus auto-focus))
 
 (defun extract-rule-headers (body)
   (if (stringp (first body))

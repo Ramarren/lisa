@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,9 +20,9 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.11 2002/11/05 18:10:41 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.12 2004/09/13 19:27:53 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass terminal-node ()
   ((rule :initarg :rule

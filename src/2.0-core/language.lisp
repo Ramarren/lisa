@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,12 +20,13 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.25 2002/12/03 18:28:16 youngde Exp $
+;;; $Id: language.lisp,v 1.26 2004/09/13 19:27:47 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defmacro defrule (name (&key (salience 0) 
                               (context nil)
+                              (cf 0.0)
                               (auto-focus nil))
                    &body body)
   (let ((rule-name (gensym)))
@@ -36,6 +37,7 @@
                          ',body
                          :salience ,salience
                          :context ,context
+                         :cf ,cf
                          :auto-focus ,auto-focus))))
 
 (defun undefrule (rule-name)

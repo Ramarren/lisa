@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.29 2004/06/07 17:43:03 youngde Exp $
+;;; $Id: rule.lisp,v 1.30 2004/09/13 19:27:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -63,6 +63,9 @@
    (logical-marker :initform nil
                    :initarg :logical-marker
                    :reader rule-logical-marker)
+   (cf :initarg :cf
+       :initform 0.0
+       :reader cf)
    (active-dependencies :initform (make-hash-table :test #'equal)
                         :reader rule-active-dependencies)
    (engine :initarg :engine
@@ -171,6 +174,7 @@
                        (salience 0) 
                        (context (active-context))
                        (auto-focus nil)
+                       (cf 0.0)
                        (compiled-behavior nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
@@ -184,6 +188,7 @@
        :actions actions
        :behavior compiled-behavior
        :comment doc-string
+       :cf cf
        :salience salience
        :context (if (null context)
                     (find-context (inference-engine) :initial-context)

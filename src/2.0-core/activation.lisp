@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.9 2002/11/05 18:14:20 youngde Exp $
+;;; $Id: activation.lisp,v 1.10 2004/09/13 19:27:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,9 @@
    (tokens :initarg :tokens
            :initform nil
            :reader activation-tokens)
+   (cf :initarg :cf
+       :initform nil
+       :accessor cf)
    (eligible :initform t
              :accessor activation-eligible))
   (:documentation
@@ -62,6 +65,17 @@
 (defmethod hash-key ((self activation))
   (hash-key (activation-tokens self)))
 
+(defun calculate-certainty-factor (rule facts)
+  (let ((cfs
+         (loop for fact across facts do
+               if (cf fact) collect (cf fact))))
+    (cond ((null cfs)
+           nil)
+          ((= (length cfs) 1)
+           (first cfs))
+          (t (apply #'min cfs)))))
+
 (defun make-activation (rule tokens)
-  (make-instance 'activation :rule rule :tokens tokens))
+  (make-instance 'activation :rule rule :tokens tokens
+                 :cf (calculate-certainty-factor rule (fact-list tokens))))
 

@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.72 2002/12/12 20:59:19 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.73 2004/09/13 19:27:53 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -100,6 +100,10 @@
            "CLASS-FINALIZED-P"
            "FIND-DIRECT-SUPERCLASSES"
            "CLASS-ALL-SUPERCLASSES"))
+
+(defpackage "LISA.CF"
+  (:use "COMMON-LISP")
+  (:export "CF-P" "CF-AND" "CF-OR" "CF-FLOOR" "+TRUE+" "+FALSE+" "COMBINE"))
 
 (defpackage "LISA.UTILS"
   (:use "COMMON-LISP")

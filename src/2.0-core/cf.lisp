@@ -20,11 +20,23 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.1 2004/09/13 15:03:52 youngde Exp $
+;;; $Id: cf.lisp,v 1.2 2004/09/13 19:27:47 youngde Exp $
 
-(in-package :lisa)
+(in-package :lisa.cf)
 
-(defun cf-or (a b)
+(defconstant +true+ 1.0)
+
+(defconstant +false+ -1.0)
+
+(defgeneric cf-or (a b)
+  (:method ((a t) (b t))
+   (error "Either one or both arguments is not a legal certainty factor: ~A, ~A." a b)))
+
+(defgeneric cf-and (a b)
+  (:method ((a t) (b t))
+   (error "Either one or both arguments is not a legal certainty factor: ~A, ~A." a b)))
+
+(defmethod cf-or ((a number) (b number))
   (cond ((and (plusp a)
               (plusp b))
          (+ a b (* -1 a b)))
@@ -34,6 +46,11 @@
         (t (/ (+ a b)
               (- 1 (min (abs a) (abs b)))))))
 
-(defun cf-and (a b)
+(defmethod cf-and ((a number) (b number))
   (min a b))
 
+(defmethod cf-p ((cf number))
+  (<= +false+ cf +true+))
+
+(defmethod combine (a b)
+  (cf-or a b))
