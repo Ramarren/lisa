@@ -550,6 +550,44 @@ for the examples in "lisa:misc;".
 <p>A note to CLISP users. LISA requires that CLISP be run with full ANSI
 support enabled. Also, the baseline version with which LISA has been tested
 is 2.25.1. Earlier releases might work as well, but no guarantees.
+<h3>
+IV. Things Yet to Do.</h3>
+This section is a list (albeit incomplete) of features that would improve
+LISA significantly.
+<ol>
+<li>
+<i>Rule redefinition</i>: LISA doesn't yet support dynamic redefinition
+of rules. Before reloading an existing knowledge base one must first CLEAR
+the inference engine. Failing to do this will hose the Rete network pretty
+good.</li>
+
 <br>&nbsp;
+<li>
+<i>Ruleset partitioning</i>: LISA doesn't yet support the notion of rule
+"modules" or "packets".<br>
+<BR></li>
+
+<li>
+<i>Better language/engine interface</i>: This is a sore point that I intend
+to address soon. I really want LISA to have clean separation between the
+rule language implementation and the inference engine. In other words,
+I'd like to have a "generic" Rete implementation upon which one can attach
+different rule programming languages. If you don't like the language that
+comes with LISA, write a new one. That sort of thing.<br>
+<BR></li>
+
+<li>
+<i>Query language</i>: There should be a way to query the knowlege base
+for information. Something similar to Loom's query language would be very
+nice.<br>
+<BR></li>
+
+<li>
+<i>Better CLOS pattern matching</i>: LISA needs to offer better support
+for matching on a class's hierarchy, rather than just the class itself.
+Currently, LISA doesn't consider the object hierarchy when performing pattern
+matching.</li>
+</ol>
+
 </body>
 </html>
