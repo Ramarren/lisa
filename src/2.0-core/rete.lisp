@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.21 2002/10/17 14:47:38 youngde Exp $
+;;; $Id: rete.lisp,v 1.22 2002/10/18 16:54:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -119,11 +119,13 @@
 (defmethod assert-fact ((self rete) fact)
   (setf (fact-id fact) (next-fact-id self))
   (remember-fact self fact)
+  (trace-assert fact)
   (add-fact-to-network (rete-network self) fact)
   fact)
 
 (defmethod retract-fact ((self rete) (fact fact))
   (forget-fact self fact)
+  (trace-retract fact)
   (remove-fact-from-network (rete-network self) fact)
   fact)
 
@@ -180,10 +182,12 @@
     instance))
 
 (defmethod add-activation ((self rete) activation)
+  (trace-enable-activation activation)
   (add-activation (rete-strategy self) activation))
 
 (defmethod disable-activation ((self rete) activation)
   (when (eligible-p activation)
+    (trace-disable-activation activation)
     (setf (activation-eligible activation) nil)))
 
 (defmethod run-engine ((self rete) &optional (step -1))

@@ -20,7 +20,7 @@
 ;;; File: watches.lisp
 ;;; Description:
 
-;;; $Id: watches.lisp,v 1.1 2002/10/18 15:02:04 youngde Exp $
+;;; $Id: watches.lisp,v 1.2 2002/10/18 16:54:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,6 +29,7 @@
 (defvar *enable-activation* nil)
 (defvar *disable-activation* nil)
 (defvar *fire-rule* nil)
+(defvar *watches* nil)
 
 (defun watch-activation-detail (activation direction)
   (format *trace-output* "~A Activation: ~A : ~A~%"
@@ -73,6 +74,8 @@
     (:all (watch-event :facts)
           (watch-event :activations)
           (watch-event :rules)))
+  (unless (eq event :all)
+    (pushnew event *watches*))
   event)
 
 (defun unwatch-event (event)
@@ -84,7 +87,14 @@
     (:rules (setf *fire-rule* nil))
     (:all (unwatch-event :facts)
           (unwatch-event :activations)
-          (unwatch-event :rules))))
+          (unwatch-event :rules)))
+  (unless (eq event :all)
+    (setf *watches*
+      (delete event *watches*)))
+  event)
+
+(defun watches ()
+  *watches*)
 
 (defmacro trace-assert (fact)
   `(unless (null *assert-fact*)

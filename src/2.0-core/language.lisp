@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.8 2002/10/17 18:11:06 youngde Exp $
+;;; $Id: language.lisp,v 1.9 2002/10/18 16:54:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -106,7 +106,10 @@
   (unwatch-event event))
 
 (defun watching ()
-  (format t "Watching: ~S~%" (get-watches)))
+  (let ((watches (watches)))
+    (format *trace-output* "Watching ~A~%"
+            (if watches watches "nothing"))
+    (values)))
 
 (defun halt (&optional (engine *active-engine*))
   (halt-engine engine))
