@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.38 2002/08/04 23:45:40 youngde Exp $
+;;; $Id: meta.lisp,v 1.39 2002/08/06 01:17:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -43,16 +43,10 @@
                :reader get-class-name
                :documentation
                "A symbol representing the fully qualified CLOS class name.")
-   (slots :initform (make-hash-table)
-          :reader get-slots
-          :documentation
-          "A hash table mapping symbolic slot names to their LISA
-          representations, as implemented by class SLOT-NAME.")
-   (effective-slots :reader get-effective-slots
-                    :initform (make-hash-table)
-                    :documentation
-                    "A list of symbols representing the names of the slots
-                    found in the class representing the fact.")
+   (slot-table :reader get-slot-table
+               :initform (make-hash-table))
+   (slot-list :reader get-slot-list
+              :initform (list))
    (superclasses :initarg :superclasses
                  :initform '()
                  :reader get-superclasses
@@ -65,58 +59,19 @@
   symbolic fact names to actual class names, slot names to their underlying
   SLOT-NAME representation, etc."))
 
-(defun find-meta-slot (meta-fact slot-name &optional (errorp t))
-  "Locates in META-FACT the SLOT-NAME instance bound to the symbolic name
-  SLOT-NAME. If ERRORP is non-nil, signals an error if the SLOT-NAME instance
-  is not present (the default is T)."
-  (let ((slot (gethash slot-name (get-slots meta-fact))))
-    (when errorp
-      (cl:assert (not (null slot)) nil
-        "The class ~S has no meta slot named ~S."
-        (get-class-name meta-fact) slot-name))
-    slot))
-
-(defun has-meta-slot-p (meta-fact slot-name)
-  "Indicates whether or not META-FACT contains a SLOT-NAME instance bound to
-  the symbolic name SLOT-NAME."
-  (find-meta-slot meta-fact slot-name nil))
-  
-(defun meta-slot-count (meta-fact)
-  "Returns the number of symbolic slots in META-FACT."
-  (hash-table-count (get-slots meta-fact)))
-
-(defun meta-slot-list (meta-fact &optional (include-hidden-slotsp nil))
-  "Returns a list of all SLOT-NAME instances found in META-FACT. If
-  INCLUDE-HIDDEN-SLOTSP is non-NIL, then include in the list any special slots
-  (like :OBJECT) LISA has created."
-  (let ((slots (list)))
-    (maphash #'(lambda (key slot-name)
-                 (declare (ignore key))
-                 (push slot-name slots))
-             (get-slots meta-fact))
-    (if include-hidden-slotsp
-        slots
-      (delete-if #'(lambda (slot)
-                     (eq (slot-name-name slot) :object))
-                 slots :count 1))))
-
 (defmethod initialize-instance :after ((self meta-fact) 
-                                       &key slots effective-slots)
+                                       &key effective-slots)
   "Initializes instances of class META-FACT. SLOTS is a list of symbolic slot
   names; EFFECTIVE-SLOTS is a list of actual slot names."
-  (let ((slot-table (get-slots self))
-        (position 0)
-        (effective-slot-table (slot-value self 'effective-slots)))
-    (mapc #'(lambda (slot-name)
-              (setf (gethash slot-name slot-table)
-                (make-slot-name slot-name (incf position))))
-          slots)
-    (mapc #'(lambda (slot)
-              (setf (gethash (intern (symbol-name slot)) 
-                             effective-slot-table) slot))
+  (with-slots ((table slot-table) (slot-list slot-list)) self
+    (mapc #'(lambda (slot-pair)
+              (setf (gethash (car slot-pair) table) (cdr slot-pair)))
           effective-slots)
-    (setf (gethash :object slot-table)
-      (make-slot-name :object 0))
+    ;;(setf (gethash :object table) :object)
+    (maphash #'(lambda (slot eslot)
+                 (declare (ignore eslot))
+                 (push slot slot-list))
+             table)
     self))
 
 (defun make-meta-fact (name class-name superclasses slots)
@@ -131,23 +86,21 @@
     (mapcar #'(lambda (superclass)
                 (intern (symbol-name (class-name superclass))))
             superclasses)
-    :slots
-    (mapcar #'(lambda (slot)
-                (intern (symbol-name slot))) slots)
-    :effective-slots slots))
+    :effective-slots
+    (mapcar #'(lambda (slot-name)
+                (cons (intern (symbol-name slot-name)) slot-name))
+            slots)))
 
-(defmethod find-effective-slot ((self meta-fact) (slot-name symbol))
+(defun get-slots-for-fact (meta-fact)
+  (get-slot-list meta-fact))
+
+(defun find-effective-slot (meta-fact slot-name)
   "Finds the actual CLOS slot name as identified by the symbolic name
   SLOT-NAME."
-  (let ((effective-slot (gethash slot-name (get-effective-slots self))))
+  (let ((effective-slot (gethash slot-name (get-slot-table meta-fact))))
     (cl:assert (not (null effective-slot)) ()
       "No effective slot for symbol ~S." slot-name)
     effective-slot))
-
-(defmethod find-effective-slot ((self meta-fact) (slot slot-name))
-  "Finds the actual CLOS slot name as identified by the symbolic name carried
-  in the SLOT-NAME instance SLOT."
-  (find-effective-slot self (slot-name-name slot)))
 
 (defparameter *class-map* (make-hash-table)
   "A hash table mapping a symbolic name to its associated effective class

@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.84 2002/07/29 17:24:55 youngde Exp $
+;;; $Id: parser.lisp,v 1.85 2002/08/06 01:17:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -125,8 +125,6 @@
                  (cond ((and (symbolp name)
                              (slot-valuep field)
                              (constraintp constraint))
-                        (cl:assert (has-meta-slot-p meta name) nil
-                          "This slot has no meta data: ~S." slot)
                         `(,name ,field ,constraint))
                        (t
                         (cl:assert nil nil
@@ -157,9 +155,9 @@
                      "There's a type problem in this slot: ~S." slot))))))
     `(list ,@(mapcar #'normalize-slot slots))))
 
-(defun canonicalize-slot-names (meta-class slots)
+(defun canonicalize-slot-names (slots)
   (mapcar #'(lambda (slot)
-              `(,(find-meta-slot meta-class (first slot))
+              `(,(first slot)
                 ,(second slot)))
           slots))
 
@@ -167,23 +165,19 @@
   (let ((head (first body))
         (slots (rest body)))
     (cond ((symbolp head)
-           (let ((meta-class (gensym)))
-             `(let ((,meta-class (find-meta-fact ',head)))
-               (assert-fact (current-engine)
-                (make-fact ',head
-                 (canonicalize-slot-names
-                  ,meta-class (,@(normalize-slots slots))))))))
+           `(assert-fact (current-engine)
+                         (make-fact ',head
+                                    (canonicalize-slot-names 
+                                     (,@(normalize-slots slots))))))
           (t
            (cl:assert nil nil
              "A fact must begin with a symbol: ~S." head)))))
 
 (defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()
-           (let ((meta-class (gensym)))
-             `(let ((,meta-class (find-meta-fact (fact-name ,fact))))
-               (modify-fact (current-engine) ,fact
-                (canonicalize-slot-names ,meta-class
-                 (,@(normalize-slots body))))))))
+           `(modify-fact (current-engine) ,fact
+                         (canonicalize-slot-names 
+                          (,@(normalize-slots body))))))
     (handler-case
         (generate-modify)
       (lisa-error (condition)
@@ -238,7 +232,7 @@
        (let* ((head (first fact))
               (meta-class (find-meta-fact head)))
          (push (make-fact 
-                head (canonicalize-slot-names meta-class (rest fact)))
+                head (canonicalize-slot-names (rest fact)))
                deffacts)))
      (add-autofact (current-engine)
                    (make-deffacts ',name (nreverse deffacts)))))

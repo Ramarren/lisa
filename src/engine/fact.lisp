@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.39 2002/08/05 18:17:08 youngde Exp $
+;;; $Id: fact.lisp,v 1.40 2002/08/06 01:16:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,9 +38,11 @@
                 :documentation
                 "A printable identifier used when a fact is 'printed'.")
    (slot-table :reader get-slot-table
+               :initform (make-hash-table)
                :documentation
-               "An array instance used for fast slot value lookup.")
+               "A hashtable holding the slots for this fact.")
    (meta-fact :reader get-meta-fact
+              :initform nil
               :documentation
               "The META-FACT instance associated with this fact.")
    (clock :initform 0
@@ -55,7 +57,7 @@
   
 (defmethod set-slot-value ((self fact) slot-name value)
   "Assigns a new value to a slot in a fact and its associated CLOS
-  instance. SLOT-NAME is a SLOT-NAME instance; VALUE is the new value for the
+  instance. SLOT-NAME is a symbol; VALUE is the new value for the
   slot."
   (let* ((meta (get-meta-fact self))
          (instance (instance-of-fact self))
@@ -66,8 +68,8 @@
 (defun initialize-slot-value (fact slot-name value)
   "Sets the value of a slot in a fact's slot table. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance; VALUE is the slot's new value."
-  (setf (gethash (slot-name-name slot-name) (get-slot-table fact))
-    value))
+  (setf (gethash slot-name (get-slot-table fact)) value)
+  fact)
 
 (defun set-slot-from-instance (fact meta-fact instance slot-name)
   "Assigns to a slot the value from the corresponding slot in the fact's CLOS
@@ -91,19 +93,18 @@
 (defun get-slot-values (fact)
   "Returns a list of slot name / value pairs for every slot in a fact. FACT is
   a fact instance."
-  (let ((table (get-slot-table fact)))
-    (mapcar #'(lambda (meta-slot)
-                (declare (type slot-name meta-slot))
-                `(,(slot-name-name meta-slot)
-                  ,(gethash (slot-name-name meta-slot) table)))
-            (meta-slot-list (get-meta-fact fact)))))
+  (let ((slots (list)))
+    (maphash #'(lambda (slot value)
+                 (push `(,slot ,value) slots))
+             (get-slot-table fact))
+    slots))
 
 (defun get-slot-value (fact slot-name)
   "Returns the value associated with a slot name. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance."
-  (gethash (slot-name-name slot-name) (get-slot-table fact)))
+  (gethash slot-name (get-slot-table fact)))
 
-(defun effective-slot->meta-slot (fact effective-slot-id)
+(defun effective-slot->slot-name (effective-slot-id)
   "Retrieves the SLOT-NAME instance associated with a CLOS instance's
   slot. FACT is a FACT instance; EFFECTIVE-SLOT-ID is a symbol representing
   the effective name of a CLOS instance's slot."
@@ -111,12 +112,12 @@
          (find-symbol (symbol-name effective-slot-id))))
     (cl:assert (not (null symbolic-slot-name)) nil
       "Slot name ~S has never been seen!" effective-slot-id)
-    (find-meta-slot (get-meta-fact fact) symbolic-slot-name)))
+    symbolic-slot-name))
 
 (defun instance-of-fact (fact)
   "Retrieves the CLOS instance associated with a fact. FACT is a FACT
   instance."
-  (get-slot-value fact (find-meta-slot (get-meta-fact fact) :object)))
+  (get-slot-value fact :object))
 
 (defun has-superclass (fact symbolic-name)
   (find symbolic-name (get-superclasses (get-meta-fact fact))))
@@ -129,14 +130,14 @@
   (let ((instance (instance-of-fact fact))
         (meta (get-meta-fact fact)))
     (flet ((synchronize-all-slots ()
-             (maphash #'(lambda (key slot)
+             (maphash #'(lambda (key slot-name)
                           (declare (ignore key))
-                          (unless (eq (slot-name-name slot) :object)
-                            (set-slot-from-instance fact meta instance slot)))
-                      (get-slots meta)))
-           (synchronize-this-slot (slot)
+                          (set-slot-from-instance 
+                           fact meta instance slot-name))
+                      (get-slots-for-fact meta)))
+           (synchronize-this-slot (eslot)
              (set-slot-from-instance
-              fact meta instance (effective-slot->meta-slot fact slot))))
+              fact meta instance (effective-slot->slot-name eslot))))
       (if (null slot-id)
           (synchronize-all-slots)
         (synchronize-this-slot slot-id)))
@@ -170,13 +171,15 @@
   value. INSTANCE is the CLOS instance to be associated with this FACT; if
   INSTANCE is NIL then FACT is associated with a template and a suitable
   instance must be created; otherwise FACT is bound to a user-defined class."
-  (let ((meta (find-meta-fact (fact-name self))))
-    (setf (slot-value self 'meta-fact) meta)
-    (setf (slot-value self 'slot-table)
-      (make-hash-table))
+  (with-slots ((slot-table slot-table) (meta-fact meta-fact)) self
+    (setf meta-fact (find-meta-fact (fact-name self)))
+    (mapc #'(lambda (slot-name)
+              (setf (gethash slot-name slot-table) nil))
+          (get-slots-for-fact meta-fact))
     (if (null instance)
         (initialize-fact-from-template self slots)
-      (initialize-fact-from-instance self instance))))
+      (initialize-fact-from-instance self instance))
+    self))
 
 (defun initialize-fact-from-template (fact slots)
   "Initializes a template-bound FACT. An instance of the FACT's associated
@@ -190,24 +193,24 @@
     (cl:assert (not (null instance)) nil
       "No class was found corresponding to fact id ~S."
       (fact-name fact))
-    (initialize-slot-value fact (find-meta-slot meta :object) instance)
+    (initialize-slot-value fact :object instance)
     (mapc #'(lambda (slot-spec)
               (let ((slot-name (first slot-spec))
                     (slot-value (second slot-spec)))
                 (set-slot-value fact slot-name slot-value)))
-          slots)))
+          slots)
+    fact))
 
 (defun initialize-fact-from-instance (fact instance)
   "Initializes a fact associated with a user-created CLOS instance. The fact's
   slot values are taken from the CLOS instance. FACT is a FACT instance;
   INSTANCE is the CLOS instance associated with this fact."
   (let ((meta (get-meta-fact fact)))
-    (maphash #'(lambda (key slot)
-                 (declare (ignore key))
-                 (if (eq (slot-name-name slot) :object)
-                     (initialize-slot-value fact slot instance)
-                   (set-slot-from-instance fact meta instance slot)))
-             (get-slots meta))))
+    (mapc #'(lambda (slot-name)
+                 (set-slot-from-instance fact meta instance slot-name))
+             (get-slots-for-fact meta))
+    (initialize-slot-value fact :object instance)
+    fact))
 
 (defun make-fact (name slots)
   "The default constructor for class FACT. NAME is the symbolic fact name as
@@ -227,4 +230,4 @@
   (make-fact (fact-name fact)
              (mapcar #'(lambda (slot-name)
                          (list slot-name (get-slot-value fact slot-name)))
-                     (meta-slot-list (get-meta-fact fact)))))
+                     (get-slots-for-fact (get-meta-fact fact)))))

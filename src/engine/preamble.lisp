@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.11 2002/05/31 02:51:21 youngde Exp $
+;;; $Id: preamble.lisp,v 1.12 2002/08/06 01:17:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,12 +42,5 @@
 
 (defgeneric equals (object-1 object-2))
 
-(defgeneric tell-lisa-modified-instance (instance slot)
-  (:method ((instance t) slot)
-           (declare (ignore slot))
-           t)
-  (:documentation
-   "This generic function serves as a notification protocol, whereby LISA
-   informs an application whenever a rule firing modifies an instance
-   slot. Interested code should provide its own specialized method(s)."))
-
+(defmethod equals ((a symbol) (b symbol))
+  (eq a b))
