@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.37 2002/10/09 18:24:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.38 2002/10/16 19:53:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -286,6 +286,34 @@
   `(modify-fact (current-engine) ,fact
                 (canonicalize-slot-names 
                  (,@(normalize-slots body)))))
+
+(defun show-modify (engine fact slots)
+  (print fact)
+  (print slots)
+  (terpri)
+  (values))
+
+#+ignore
+(defmacro update (fact &body body)
+  (flet ((expand-pair (pair)
+           (let ((slot-name (first pair))
+                 (slot-value (second pair)))
+             `(',slot-name
+               ,@(if (quotablep slot-value) 
+                     (quote slot-value)
+                   slot-value)))))
+    `(show-modify
+      (inference-engine) ,fact
+      (list ,@(mapcar #'expand-pair body)))))
+
+(defmacro update (fact &body body)
+  `(list ,fact ,@(mapcar #'(lambda (pair)
+                             (destructuring-bind (name value) pair
+                               `(list (identity ',name) 
+                                      (identity 
+                                       ,@(if (quotablep value)
+                                             `(',value) `(,value))))))
+                         body)))
 
 (defun create-template-class-slots (class-name slot-list)
   (labels ((determine-default (default-form)
