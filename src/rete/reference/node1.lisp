@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.13 2002/10/03 14:47:45 youngde Exp $
+;;; $Id: node1.lisp,v 1.14 2002/10/03 18:04:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,8 +42,13 @@
     (make-successor new-node connector))
   new-node)
 
-(defmethod remove-successor ((self node1) (successor-node node1))
-  (remhash (node1-test successor-node) (shared-node-successors self)))
+(defmethod remove-successor ((self node1) successor-node)
+  (let ((successors (shared-node-successors self)))
+    (maphash #'(lambda (key successor)
+                 (when (eq successor-node (successor-node successor))
+                   (remhash key successors)))
+             successors)
+    successor-node))
 
 (defmethod accept-token ((self node1) token)
   (if (funcall (node1-test self) token)

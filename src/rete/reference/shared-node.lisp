@@ -20,7 +20,7 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.9 2002/10/03 14:47:45 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.10 2002/10/03 18:04:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,17 +30,17 @@
    (refcnt :initform 0
            :accessor shared-node-refcnt)))
 
-(defun increment-use-count (shared-node)
-  (incf (shared-node-refcnt shared-node)))
+(defmethod increment-use-count ((self shared-node))
+  (incf (shared-node-refcnt self)))
 
-(defun decrement-use-count (shared-node)
-  (decf (shared-node-refcnt shared-node)))
+(defmethod decrement-use-count ((self shared-node))
+  (decf (shared-node-refcnt self)))
 
-(defun node-use-count (shared-node)
-  (shared-node-refcnt shared-node))
+(defmethod node-use-count ((self shared-node))
+  (shared-node-refcnt self))
 
-(defun node-referenced-p (shared-node)
-  (plusp (node-use-count shared-node)))
+(defmethod node-referenced-p ((self shared-node))
+  (plusp (node-use-count self)))
 
 (defmethod pass-token-to-successors ((self shared-node) token)
   (loop for successor being the hash-value
