@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.7 2004/09/16 19:43:47 youngde Exp $
+;;; $Id: cf.lisp,v 1.8 2004/09/17 14:24:38 youngde Exp $
 
 (in-package :lisa.cf)
 
@@ -64,6 +64,21 @@
         cf
       (* cf rule-cf))))
 
+#+ignore
+(defmethod conjunct-cf (facts)
+  (let ((conjuncts
+         (let ((list (list)))
+           (map 'list #'(lambda (fact)
+                          (let ((cf (lisa:cf fact)))
+                            (when (plusp cf)
+                              (push cf list))))
+                facts)
+           list)))
+    (case (length conjuncts)
+      (0 (values nil nil))
+      (1 (values (first conjuncts) nil))
+      (t (values (apply #'min conjuncts) t)))))
+
 (defmethod conjunct-cf (facts)
   (let ((conjuncts
          (let ((list (list)))
@@ -77,4 +92,4 @@
            (if (= (length conjuncts) 1)
                (first conjuncts)
              (apply #'min conjuncts)))
-          (t 0.0))))
+          (t nil))))

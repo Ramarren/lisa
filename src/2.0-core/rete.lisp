@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.66 2004/09/16 20:30:37 youngde Exp $
+;;; $Id: rete.lisp,v 1.67 2004/09/17 14:24:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -199,40 +199,31 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
-(defmethod recalculate-fact-cf (rete fact (fact-cf number))
+(defmethod recalculate-cf (rete fact (fact-cf number))
    (cl:assert (cf:cf-p fact-cf) nil
      "This is not a legal certainty factor: ~S" fact-cf)
    (with-unique-fact (rete fact)
      (setf (cf fact) fact-cf))
    t)
 
-(defmethod recalculate-fact-cf (rete fact (fact-cf t))
-  (flet ((set-fact-cf (fact cf)
-           (let ((rule-cf (cf (active-rule))))
-             (cond ((and (plusp rule-cf)
-                       (zerop cf))
-                    (setf (cf fact) rule-cf))
-                   ((and (plusp rule-cf)
-                         (plusp cf))
-                    (setf (cf fact) (* cf rule-cf)))
-                   ((plusp cf)
-                    (setf (cf fact) cf))
-                   (t nil)))))
-    (cl:assert (null fact-cf) nil
+(defmethod recalculate-cf (rete fact (fact-cf t))
+  (cl:assert (null fact-cf) nil
       "This is not a legal certainty factor: ~S" fact-cf)
-    (unless *active-tokens*
-      (return-from  recalculate-fact-cf t))
-    (let ((conjunct-cf (cf:conjunct-cf (token-facts *active-tokens*)))
-          (dup (duplicate-fact-p rete fact)))
-      (cond (dup
-             (set-fact-cf dup (cf:combine conjunct-cf (cf dup)))
-             nil)
-            (t
-             (set-fact-cf fact (cf:combine conjunct-cf (cf fact)))
-             t)))))
+  (unless *active-tokens*
+      (return-from  recalculate-cf t))
+  (let ((rule-cf (cf (active-rule)))
+        (dup (duplicate-fact-p rete fact))
+        (cf (cf:conjunct-cf (token-facts *active-tokens*))))
+    (if dup
+        (setf (cf dup)
+          (the float (* (cf:combine (cf dup) (if cf cf rule-cf))
+                        (if (and rule-cf cf) rule-cf 1.0))))
+      (setf (cf fact)
+        (the float (* (if cf cf rule-cf)
+                      (if (and cf rule-cf) rule-cf 1.0)))))))
 
 (defmethod assert-fact ((self rete) fact &key cf)
-  (when (recalculate-fact-cf self fact cf)
+  (when (recalculate-cf self fact cf)
     (assert-fact-aux self fact))
   fact)
 
