@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.30 2002/10/30 20:34:25 youngde Exp $
+;;; $Id: token.lisp,v 1.31 2002/11/18 15:59:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,6 +30,8 @@
           :reader token-facts)
    (not-counter :initform 0
                 :accessor token-not-counter)
+   (exists-counter :initform 0
+                   :accessor token-exists-counter)
    (hash-code :initform nil)
    (contents :initform nil
              :reader token-contents)))
@@ -37,6 +39,14 @@
 (defclass add-token (token) ())
 (defclass remove-token (token) ())
 (defclass reset-token (token) ())
+
+(defun token-increment-exists-counter (token)
+  (incf (token-exists-counter token)))
+
+(defun token-decrement-exists-counter (token)
+  (cl:assert (plusp (token-exists-counter token)) nil
+    "The EXISTS join node logic is busted.")
+  (decf (token-exists-counter token)))
 
 (defun token-increment-not-counter (token)
   (values token (incf (token-not-counter token))))
