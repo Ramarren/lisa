@@ -20,7 +20,7 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.9 2003/05/20 19:19:32 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.10 2003/05/28 14:32:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,6 +35,20 @@
 (defmacro in-debugger-p ()
   `(cl:assert (boundp '*suspended-rule*) nil
      "The debugger must be running to use this function."))
+
+#+LispWorks
+(defmacro with-debugger-streams (&body body)
+  `(let ((*standard-input* *standard-input*)
+         (*standard-output* *standard-output*)
+         (*terminal-io* *terminal-io*))
+     (progn ,@body)))
+
+#-LispWorks
+(defmacro with-debugger-streams (&body body)
+  `(let ((*terminal-io* *terminal-io*)
+         (*standard-input* *terminal-io*)
+         (*standard-output* *terminal-io*))
+     (progn ,@body)))
 
 (defun leave-debugger ()
   (setf *stepping* nil))
@@ -53,7 +67,7 @@
     (cond ((null rule)
            (format t "There's no rule by this name (~A)~%" rule-name))
           (t
-           (funcall op rule-name)
+           (funcall op (rule-name rule))
            (when (and (composite-rule-p rule)
                       *break-on-subrules*)
              (dolist (subrule (rule-subrules rule))
@@ -133,24 +147,22 @@
                (binding-slot-name binding)))))
   (values))
 
-(defun debugger-read-eval-print ()
-  (let ((*terminal-io* *terminal-io*)
-        (*standard-input* *terminal-io*)
-        (*standard-output* *terminal-io*))
-    (do ((*read-eval-print* t)
-         (count 0 (incf count)))
-        ((not *read-eval-print*) count)
-      (handler-case
-          (progn
-            (format t "LISA-DEBUG[~D]: " count)
-            (force-output)
-            (print (eval (read)))
-            (terpri))
-        (error (e)
-          (cerror "Remain in the LISA debugger." e)
-          (unless (yes-or-no-p "Remain in the debugger? ")
-            (leave-debugger)
-            (setf *read-eval-print* nil)))))))
+(defun debugger-repl ()
+  (with-debugger-streams
+   (do ((*read-eval-print* t)
+        (count 0 (incf count)))
+       ((not *read-eval-print*) count)
+     (handler-case
+         (progn
+           (format t "LISA-DEBUG[~D]: " count)
+           (force-output)
+           (print (eval (read-from-string (read-line))))
+           (terpri))
+       (error (e)
+              (cerror "Remain in the LISA debugger." e)
+              (unless (yes-or-no-p "Remain in the debugger? ")
+                (leave-debugger)
+                (setf *read-eval-print* nil)))))))
 
 (defmethod fire-rule :around ((self rule) tokens)
   (when (or *stepping*
@@ -159,7 +171,7 @@
           (*suspended-rule* self)
           (*tokens* tokens))
       (format t "Stopping in rule ~S~%" (rule-name self))
-      (debugger-read-eval-print)))
+      (debugger-repl)))
   (call-next-method))
 
 (defmethod run-engine :after ((self rete) &optional step)
