@@ -17,26 +17,18 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: shared-node.lisp
+;;; File: successor.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.1 2002/08/29 22:59:56 youngde Exp $
+;;; $Id: successor.lisp,v 1.1 2002/08/30 01:41:20 youngde Exp $
 
 (in-package "LISA")
 
-(defclass shared-node ()
-  ((successors :initform (make-hash-table)
-               :reader shared-node-successors)))
+(defun make-successor (node connector)
+  (cons node connector))
 
-(defmethod add-successor ((self shared-node) successor-node connector)
-  (with-slots ((successor-table successors)) self
-    (unless (gethash successor-node successor-table)
-      (setf (gethash successor-node successor-table) connector))
-    successor-node))
+(defun successor-node (successor)
+  (car successor))
 
-(defmethod pass-token-to-successors ((self shared-node) token)
-  (maphash #'(lambda (successor-node connector)
-               (funcall connector successor-node token))
-           (shared-node-successors self)))
-
-
+(defun successor-connector (successor)
+  (cdr successor))

@@ -20,45 +20,37 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.7 2002/08/29 23:16:26 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.8 2002/08/30 01:41:20 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *root-nodes* nil)
 (defvar *terminals* nil)
-(defvar *shared-nodes* nil)
 
 (defmacro add-new-terminal (node)
   `(vector-push-extend ,node *terminals*))
 
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table :test #'equal)
-               :reader rete-roots)
-   (shared-nodes :initform (make-hash-table :test #'equal)
-                 :reader rete-shared-nodes)))
+               :reader rete-roots)))
 
 (defun add-root-node (class)
   (let* ((key `(:class ,class))
          (root (gethash key *shared-nodes*)))
     (when (null root)
       (setf root (make-root-node class))
-      (setf (gethash key *root-nodes*) root)
-      (setf (gethash key *shared-nodes*) root))
+      (setf (gethash key *root-nodes*) root))
     root))
 
 (defun find-root-for-token (rete-network token)
   (gethash `(:class ,(fact-name (token-peek-fact token)))
            (rete-roots rete-network)))
 
-(defun add-intra-pattern-node (slot)
-  (let* ((key `(,(pattern-slot-name slot)
-                ,(pattern-slot-value slot)))
-         (node (gethash key *shared-nodes*)))
-    (when (null node)
-      (setf node (make-node1
-                  (make-simple-slot-test (first key) (second key))))
-      (setf (gethash key *shared-nodes*) node))
-    node))
+(defun make-intra-pattern-node (slot)
+  (make-node1
+   (make-simple-slot-test
+    (pattern-slot-name slot)
+    (pattern-slot-value slot))))
 
 (defun distribute-token (rete-network token)
   (let ((root (find-root-for-token rete-network token)))
@@ -94,7 +86,7 @@
       (dolist (slot (parsed-pattern-slots pattern))
         (setf node
           (add-successor 
-           node (add-intra-pattern-node slot)
+           node (make-intra-pattern-node slot)
            #'pass-token)))
       (add-new-terminal node))))
 
@@ -102,8 +94,7 @@
     
 (defun compile-rule-into-network (rete-network patterns)
   (let ((*root-nodes* (rete-roots rete-network))
-        (*terminals* (make-array 0 :adjustable t :fill-pointer t))
-        (*shared-nodes* (rete-shared-nodes rete-network)))
+        (*terminals* (make-array 0 :adjustable t :fill-pointer t)))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)
