@@ -1,6 +1,14 @@
-;;; File:        defsys.lisp
+;;; File: defsys.lisp
 ;;; Description: System definition file for ZEBU, adapted for MK:DEFSYSTEM.
-;;; $Id: defsys.lisp,v 1.1 2000/10/12 02:39:44 youngde Exp $
+;;;
+;;; NB: This file probably requires DEFSYSTEM release 3.2i, as found in the
+;;; Common Lisp Open Code Collection (CLOCC). At least, that's the only version
+;;; against which I've tested. Currently, the CLOCC project resides at
+;;; http://clocc.sourceforge.net.
+;;;
+;;; Adaptation by David E. Young (de.young@computer.org)
+;;;
+;;; $Id: defsys.lisp,v 1.2 2000/10/12 20:23:18 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -45,8 +53,6 @@
   #+MCL
   (create-file *ZEBU-binary-directory* :if-exists nil))
 
-(declaim (optimize (speed 3) (safety 1) (compilation-speed 0)))
-
 (load (merge-pathnames "zebu-package.lisp" *ZEBU-directory*))
 
 (defparameter zb:*zebu-version*
@@ -61,7 +67,7 @@
 (mk:define-language :zebu
     :compiler #'(lambda (file &key output-file error-file)
                   (declare (ignore error-file))
-                  (apply #'zb:zebu-compile-file `(,file :output-file ,output-file)))
+                  (apply #'zb:zebu-compile-file file `(:output-file ,output-file)))
     :loader #'(lambda (&rest args)
                 (apply #'zb:zebu-load-file args))
     :source-extension "zb"
@@ -163,5 +169,7 @@
 (mk:defsystem "zebu-rr"
     :source-pathname *ZEBU-directory*
     :binary-pathname *ZEBU-binary-directory*
+    :source-extension "lisp"
+    :binary-extension "fasl"
     :depends-on (zebu-compiler zebu)
     :components ((:file "zebu-tree-attributes")))
