@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: network-management.lisp,v 1.2 2001/08/23 23:53:27 youngde Exp $
+;;; $Id: network-management.lisp,v 1.3 2001/08/24 14:23:32 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,4 +42,17 @@
       (trace-graph (get-successors root) (list root)))
     (values paths)))
 
-
+(defun remove-rule-from-network (engine rule-name)
+  (labels ((remove-rule (root-node nodes)
+             (cond ((null nodes) t)
+                   (t
+                    (let ((node (first nodes)))
+                      (when (= 0 (decrease-use-count node))
+                        (remove-successor root-node node))
+                      (remove-rule node (rest nodes)))))))
+    (let ((paths (find-paths-to-rule engine rule-name)))
+      (cl:assert (not (null paths)) ()
+        "No path(s) found for rule ~A~%" rule-name)
+      (mapc #'(lambda (path)
+                (remove-rule (first path) (rest path)))
+            paths))))

@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.18 2001/08/23 23:53:27 youngde Exp $
+;;; $Id: debug.lisp,v 1.19 2001/08/24 14:23:32 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,7 +55,8 @@
       (format strm "~S~%" (class-name (class-of root-node)))
       (trace-nodes (get-successors root-node) 3))))
 
-(defun find-rule (name &optional (engine (current-engine)))
+#+ignore
+(defun find-rule-from-list (name &optional (engine (current-engine)))
   (find-if #'(lambda (rule) (eq name (get-name rule)))
            (get-rule-list engine)))
   
