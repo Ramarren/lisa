@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.4 2000/11/19 02:37:05 youngde Exp $
+;;; $Id: sample.lisp,v 1.5 2000/11/27 21:28:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,6 +55,7 @@
 (defimport boris lisa::boris)
 (defimport natasha lisa::natasha)
 
+#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis "bullwinkle"))
   =>

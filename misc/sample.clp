@@ -8,16 +8,16 @@
   (slot name)
   (slot nemesis))
 
-(defrule nemesis
-  (natasha (name "natasha") (nemesis "bullwinkle"))
-  =>
-  (printout t "nemesis fired!" crlf))
+;(defrule nemesis
+;  (natasha (name "natasha") (nemesis "bullwinkle"))
+;  =>
+;  (printout t "nemesis fired!" crlf))
 
-; (defrule schtum
-;   (rocky (name "rocky"))
-;   (boris (name "boris"))
-;   =>
-;   (printout t "schtum!" crlf))
+ (defrule schtum
+   (rocky (name "rocky"))
+   (boris (name "boris"))
+   =>
+   (printout t "schtum!" crlf))
 
 ; (defrule schtum-shared
 ;   (boris (name "boris"))
@@ -33,6 +33,9 @@
   =>
   (printout t "no-patterns!" crlf))
 
-;;;(reset)
-;;;(assert (rocky (name "rocky")))
-;;;(assert (boris (name "boris")))
+(reset)
+;(assert (natasha (name "natasha") (nemesis "bullwinkle")))
+;(retract (fact-id 1))
+(assert (rocky (name "rocky")))
+(assert (boris (name "boris")))
+(retract (fact-id 2))

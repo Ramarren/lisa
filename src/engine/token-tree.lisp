@@ -21,7 +21,7 @@
 ;;; Description: Maintains a collection of tokens. Each hash location
 ;;; yields a LIST of tokens.
 
-;;; $Id: token-tree.lisp,v 1.5 2000/11/18 02:42:11 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.6 2000/11/27 21:28:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,34 +33,26 @@
    a LIST of tokens."))
 
 (defmethod add-token ((self token-tree) (tok token))
-  (with-accessors ((table get-table)) self
-    (let* ((key (make-hash-code self tok))
-           (slot (gethash key table)))
-      (setf (gethash key table)
-        (nconc slot `(,tok))))))
+  (setf (gethash (hash-code tok) (get-table self)) tok))
 
 (defmethod remove-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self
-    (let* ((key (make-hash-code self tok))
-           (slot (gethash key table)))
-      (setf (gethash key table)
-        (delete tok slot :test #'equals)))))
+    (let* ((key (hash-code tok))
+           (obj (gethash key table)))
+      (unless (null obj)
+        (remhash key table))
+      (values obj))))
 
 (defmethod clear-tree ((self token-tree))
   (clrhash (get-table self)))
 
-(defmethod make-hash-code ((self token-tree) token)
-  (sxhash (get-sort-code token)))
-
 (defmethod token-tree-count ((self token-tree))
   (hash-table-count (get-table self)))
 
-(defmacro with-token-tree-iterator ((mname tree) &body body)
-  `(with-hash-table-iterator (,mname (get-table tree))
-     ,@body))
-
 (defun maptree (function tree)
-  (maphash function (get-table tree)))
+  (maphash #'(lambda (key val)
+               (funcall function val))
+           (get-table tree)))
 
 (defun make-token-tree ()
   (make-instance 'token-tree))
