@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.9 2001/01/21 00:32:35 youngde Exp $
+;;; $Id: mab.lisp,v 1.10 2001/01/21 03:06:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -120,6 +120,7 @@
   =>
   (assert (goal-is-to (action on) (argument-1 ladder))))
 
+#+ignore
 (defrule grab-object-from-ladder
   (?goal (goal-is-to (action hold) (argument-1 ?name)))
   (?thing (thing (name ?name) (location ?place) 
@@ -340,7 +341,8 @@
   =>
   (format t "Monkey eats the ~A.~%" ?name)
   (modify ?monkey (holding blank))
-  (retract ?goal ?thing))
+  (retract ?goal)
+  (retract ?thing))
 
 ;;; startup rule...
 
