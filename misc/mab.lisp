@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.4 2001/01/13 21:00:28 youngde Exp $
+;;; $Id: mab.lisp,v 1.5 2001/01/15 22:06:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -45,6 +45,33 @@
   =>
   (retract ?goal)
   (assert (goal-is-to (action hold) (argument-1 ?chest))))
+
+(defrule put-chest-on-floor
+  (goal-is-to (action unlock) (argument-1 ?chest))
+  (?monkey (monkey (location ?place) (on-top-of ?on) (holding ?chest)))
+  (?thing (thing (name ?chest)))
+  =>
+  (format t "Monkey throws the ~A off the ~A onto the floor.~%" ?chest ?on)
+  (modify ?monkey (holding blank))
+  (modify ?thing (location ?place) (on-top-of floor)))
+
+(defrule get-key-to-unlock
+  (goal-is-to (action unlock) (argument-1 ?obj))
+  (thing (name ?obj) (on-top-of floor))
+  (chest (name ?obj) (unlocked-by ?key))
+  (monkey (holding (not ?key)))
+  (not (goal-is-to (action hold) (argument-1 ?key)))
+  =>
+  (assert (goal-is-to (action hold) (argument-1 ?key))))
+
+(defrule move-to-chest-with-key
+  (goal-is-to (action unlock) (argument-1 ?chest))
+  (thing (name ?chest) (location ?cplace) (on-top-of floor))
+  (monkey (location (not ?cplace)) (holding ?key))
+  (chest (name ?chest) (unlocked-by ?key))
+  (not (goal-is-to (action walk-to) (argument-1 ?cplace)))
+  =>
+  (assert (goal-is-to (action walk-to) (argument-1 ?cplace))))
 
 (defrule unlock-chest-to-hold-object
   (goal-is-to (action hold) (argument-1 ?obj))
