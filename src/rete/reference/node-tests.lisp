@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.3 2002/09/03 15:48:11 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.4 2002/09/03 19:18:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,7 +40,7 @@
              #'(lambda ()
                  (function
                   (lambda (token)
-                    (eq class (fact-name (token-fact token))))))))
+                    (eq class (fact-name (token-top-fact token))))))))
 
 (defun make-simple-slot-test (slot-name value)
   (find-test 
@@ -50,13 +50,13 @@
         (lambda (token)
           (equal value
                  (get-slot-value
-                  (token-fact token)
+                  (token-top-fact token)
                   slot-name)))))))
 
 (defun make-inter-pattern-test (slot-name binding)
   (function
-   (lambda (token)
-     (equal (get-slot-value (token-fact token) slot-name)
+   (lambda (left-tokens right-token)
+     (equal (get-slot-value (token-top-fact right-token) slot-name)
             (get-slot-value 
-             (token-find-fact token (binding-address binding))
+             (token-find-fact left-tokens (binding-address binding))
              (binding-slot-name binding))))))

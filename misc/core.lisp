@@ -21,15 +21,6 @@
   (slot name))
 
 #+ignore
-(defrule frodo ()
-  (frodo (name ?name frodo) (age 0) (has-ring ?ring))
-  (bilbo (relative ?name) (age 0))
-  (?gandalf (gandalf (name galdalf) (age ?age (= ?age 100))))
-  (test (eq ?ring t))
-  (not (saruman))
-  =>
-  (format t "frodo: has-ring is ~S~%" ?ring))
-
 (defrule simple-rule ()
   (frodo (name frodo))
   (bilbo (name bilbo))
@@ -37,6 +28,12 @@
   =>
   (format t "simple-rule fired.~%"))
 
+(defrule variable-rule ()
+  (frodo (name ?name))
+  (bilbo (name ?name))
+  =>
+  )
+
 (defvar *frodo* (assert (frodo (name frodo))))
 (defvar *bilbo* (assert (bilbo (name bilbo))))
-(defvar *gandalf* (assert (gandalf (name gandalf))))
+(defvar *gandalf* (assert (gandalf (name gandalf) (age 100))))

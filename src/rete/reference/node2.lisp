@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.3 2002/09/03 15:48:12 youngde Exp $
+;;; $Id: node2.lisp,v 1.4 2002/09/03 19:18:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,23 +28,54 @@
   ((successor :initform nil
               :accessor node2-successor)
    (tests :initform (list)
-          :reader node2-tests)
+          :accessor node2-tests)
    (left-memory :initform (make-hash-table)
                 :reader node2-left-memory)
    (right-memory :initform (make-hash-table)
                  :reader node2-right-memory)))
 
-(defmethod accept-tokens-from-left ((self node2) tokens)
-  (call-successor (node2-successor self) tokens))
+(defmacro combine-tokens (left-tokens right-token)
+  `(progn
+     (token-push-fact ,left-tokens (token-top-fact ,right-token))
+     ,left-tokens))
 
-(defmethod accept-token-from-right ((self node2) token)
-  (call-successor (node2-successor self) token))
+(defun remember-token (memory token)
+  (setf (gethash (token-top-fact token) memory) token))
+
+(defun add-tokens-to-left-memory (node2 tokens)
+  (remember-token (node2-left-memory node2) tokens))
+
+(defun add-token-to-right-memory (node2 token)
+  (remember-token (node2-right-memory node2) token))
+
+(defun test-and-pass-tokens (node2 left-tokens right-token)
+  (when (every #'(lambda (test)
+                   (funcall test left-tokens right-token))
+               (node2-tests node2))
+    (call-successor
+     (node2-successor node2) 
+     (combine-tokens left-tokens right-token))))
+  
+(defmethod accept-tokens-from-left ((self node2) left-tokens)
+  (add-tokens-to-left-memory self left-tokens)
+  (maphash #'(lambda (key right-token)
+               (declare (ignore key))
+               (test-and-pass-tokens self left-tokens right-token))
+           (node2-right-memory self)))
+
+(defmethod accept-token-from-right ((self node2) right-token)
+  (add-token-to-right-memory self right-token)
+  (maphash #'(lambda (key left-tokens)
+               (declare (ignore key))
+               (test-and-pass-tokens self left-tokens right-token))
+           (node2-left-memory self)))
 
 (defmethod add-successor ((self node2) successor-node connector)
   (setf (node2-successor self)
     (make-successor successor-node connector)))
 
-(defun node2-add-test (node2 test))
+(defun node2-add-test (node2 test)
+  (push test (node2-tests node2)))
 
 (defun make-node2 ()
   (make-instance 'node2))

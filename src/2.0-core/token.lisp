@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.5 2002/08/30 14:37:37 youngde Exp $
+;;; $Id: token.lisp,v 1.6 2002/09/03 19:18:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,9 +44,9 @@
 (defun token-find-fact (token address)
   (aref (slot-value token 'facts) address))
 
-(defun token-fact (token)
+(defun token-top-fact (token)
   (with-slots ((fact-vector facts)) token
     (aref fact-vector (1- (length fact-vector)))))
 
 (defun token-push-fact (token fact)
-  (vector-push-extend (slot-value token 'facts) fact))
+  (vector-push-extend fact (slot-value token 'facts)))

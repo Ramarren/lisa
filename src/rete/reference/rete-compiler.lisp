@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.12 2002/09/03 15:48:13 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.13 2002/09/03 19:18:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,9 +103,6 @@
       (node2-add-test
        join-node
        (make-inter-pattern-test (pattern-slot-name slot) binding)))))
-
-(defmethod add-successor :after ((self t) node conn)
-  (format t "add-successor: ~S, ~S, ~S~%" self node conn))
 
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
