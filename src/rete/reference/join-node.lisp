@@ -20,11 +20,11 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.10 2002/10/02 18:10:12 youngde Exp $
+;;; $Id: join-node.lisp,v 1.11 2002/10/03 14:47:45 youngde Exp $
 
 (in-package "LISA")
 
-(defclass join-node (network-node)
+(defclass join-node ()
   ((successor :initform nil
               :accessor join-node-successor)
    (tests :initform (list)

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.30 2002/10/02 19:05:30 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.31 2002/10/03 14:47:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,10 +44,21 @@
   ((root-nodes :initform (make-hash-table)
                :reader rete-roots)))
 
-(defun record-node (node)
+(defun record-node (node parent)
   (increment-use-count node)
-  (push node *rule-specific-nodes*)
+  (push (make-node-pair node parent) *rule-specific-nodes*)
   node)
+
+(defmethod remove-node-from-parent ((self rete-network) (parent t) child)
+  (let ((root-nodes (rete-roots self)))
+    (maphash #'(lambda (key node)
+                 (when (eq node child)
+                   (remhash key root-nodes)))
+             root-nodes)))
+
+(defmethod remove-node-from-parent ((self rete-network) 
+                                    (parent shared-node) child)
+  (remove-successor parent child))
 
 (defun make-root-node (class)
   (let ((root (gethash class *root-nodes*)))
@@ -55,15 +66,15 @@
       (setf root (make-node1
                   (make-class-test class)))
       (setf (gethash class *root-nodes*) root))
-    (record-node root)))
+    (record-node root t)))
 
 (defmethod add-successor ((parent t) new-node connector)
   (declare (ignore connector))
   new-node)
 
-(defmethod add-successor :after (parent new-node connector)
-  (declare (ignore parent connector))
-  (record-node new-node))
+(defmethod add-successor :after (parent (new-node shared-node) connector)
+  (declare (ignore connector))
+  (record-node new-node parent))
 
 (defun make-intra-pattern-node (slot)
   (let ((test

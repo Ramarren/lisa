@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.6 2002/10/02 20:00:19 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.8 2002/10/03 14:53:02 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,14 +42,11 @@
    rete-network #'(lambda () (make-reset-token t))))
   
 (defun remove-rule-from-network (rete-network rule)
-  (labels ((remove-nodes (parent nodes)
-             (cl:assert (not (endp nodes)) nil
-               "Somehow we ran off the end of the node list")
-             (let ((node (first nodes)))
-               (typecase node
-               (shared-node
-                (when (= (decrement-use-count node) 0)
-                  (remove-node-from-parent parent node))
-                (remove-nodes node (rest nodes)))
-               (t nil)))))
-    (remove-nodes t (rule-node-list rule))))
+  (labels ((remove-nodes (nodes)
+             (if (endp nodes) rule
+               (let ((node (node-pair-child (first nodes)))
+                     (parent (node-pair-parent (first nodes))))
+                 (when (zerop (decrement-use-count node))
+                   (remove-node-from-parent rete-network parent node))
+                 (remove-nodes (rest nodes))))))
+    (remove-nodes (rule-node-list rule))))

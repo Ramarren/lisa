@@ -17,25 +17,18 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: network-node.lisp
+;;; File: node-pair.lisp
 ;;; Description:
 
-;;; $Id: network-node.lisp,v 1.1 2002/10/02 18:10:13 youngde Exp $
+;;; $Id: node-pair.lisp,v 1.1 2002/10/03 14:48:08 youngde Exp $
 
 (in-package "LISA")
 
-(defclass network-node ()
-  ((refcnt :initform 0
-           :accessor network-node-refcnt)))
+(defun make-node-pair (child parent)
+  (cons child parent))
 
-(defmethod increment-use-count ((self network-node))
-  (incf (network-node-refcnt self)))
+(defun node-pair-child (node-pair)
+  (car node-pair))
 
-(defmethod decrement-use-count ((self network-node))
-  (decf (network-node-refcnt self)))
-
-(defmethod node-use-count ((self network-node))
-  (network-node-refcnt self))
-
-(defun node-referenced-p (network-node)
-  (plusp (node-use-count network-node)))
+(defun node-pair-parent (node-pair)
+  (cdr node-pair))

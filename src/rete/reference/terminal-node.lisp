@@ -20,11 +20,11 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.9 2002/10/02 18:10:13 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.10 2002/10/03 14:47:45 youngde Exp $
 
 (in-package "LISA")
 
-(defclass terminal-node (network-node)
+(defclass terminal-node ()
   ((rule :initarg :rule
          :initform nil
          :reader terminal-node-rule)
