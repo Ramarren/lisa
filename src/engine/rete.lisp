@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.27 2000/12/11 16:49:47 youngde Exp $
+;;; $Id: rete.lisp,v 1.28 2000/12/15 21:20:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -59,8 +59,10 @@
   (add-activation (get-strategy self)
                   (make-activation rule token)))
 
-(defmethod destroy-activation ((self rete) token)
-  (remove-activation (get-strategy self) token))
+(defmethod disable-activation ((self rete) token)
+  (let ((activation (find-activation (get-strategy self) token)))
+    (cl:assert (not (null activation)))
+    (setf (get-eligible activation) nil)))
 
 (defmethod increment-time ((self rete))
   (incf (get-clock self)))
@@ -161,7 +163,8 @@
     (do ((activation (next-activation strategy)
                      (next-activation strategy)))
         ((null activation) t)
-      (fire-rule activation))))
+      (when (eligible-p activation)
+        (fire-rule activation)))))
 
 (defun make-rete (&key (strategy (make-depth-first-strategy)))
   (make-instance 'rete :strategy strategy))

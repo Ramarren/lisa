@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.3 2000/11/27 21:28:50 youngde Exp $
+;;; $Id: activation.lisp,v 1.4 2000/12/15 21:20:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -30,12 +30,20 @@
          :reader get-rule)
    (token :initarg :token
           :initform nil
-          :reader get-token))
+          :reader get-token)
+   (eligible :initform t
+             :accessor get-eligible))
   (:documentation
    "Represents a rule activation."))
 
 (defmethod fire-rule ((self activation))
   (fire (get-rule self) (get-token self)))
+
+(defun eligible-p (activation)
+  (get-eligible activation))
+
+(defun inactive-p (activation)
+  (not (eligible-p activation)))
 
 (defmethod print-object ((self activation) strm)
   (let ((fact (get-top-fact (get-token self)))

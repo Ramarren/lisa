@@ -22,7 +22,7 @@
 ;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
 ;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.8 2000/12/15 20:38:18 youngde Exp $
+;;; $Id: strategies.lisp,v 1.9 2000/12/15 21:20:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,10 +35,9 @@
    resolution strategies."))
 
 (defgeneric add-activation (strategy activation))
-(defgeneric remove-activation (strategy token))
 (defgeneric find-activation (strategy token rule))
 (defgeneric next-activation (strategy))
-(defgeneric remmove-activations (strategy))
+(defgeneric remove-activations (strategy))
 
 (defclass indexed-priority-list ()
   ((priority-vector :reader get-priority-vector)
@@ -61,26 +60,30 @@
   (setf (slot-value self 'delta) (/ priorities 2)))
 
 (defun insert-activation (plist activation)
+  (declare (type indexed-priority-list plist))
   (flet ((index-salience (priority)
+           (declare (type fixnum priority))
            (with-accessors ((inodes get-inodes)) plist
              (setf inodes
                (sort (pushnew priority inodes)
-                     #'(lambda (p1 p2)
-                         (> p1 p2)))))))
+                     #'(lambda (p1 p2) (> p1 p2)))))))
     (with-accessors ((vector get-priority-vector)
                      (activations get-activations)) plist
     (let* ((salience (get-salience (get-rule activation)))
-           (inode (+ salience (get-delta plist)))
-           (queue (aref vector inode)))
+           (inode (+ salience (get-delta plist))))
       (setf (aref vector inode)
-        (apply (get-insertion-function plist) `(,activation ,queue)))
+        (apply (get-insertion-function plist)
+               `(,activation ,(aref vector inode))))
       (index-salience inode)
-      (setf (gethash (get-hash-code (get-token activation)) activations) activation)))))
+      (setf (gethash (get-hash-code (get-token activation))
+                     activations) activation)))))
 
 (defun lookup-activation (plist token)
+  (declare (type indexed-priority-list plist))
   (gethash (get-hash-code token) (get-activations plist)))
 
-(defun next-activation (plist)
+(defun get-next-activation (plist)
+  (declare (type indexed-priority-list plist))
   (with-accessors ((inodes get-inodes)
                    (vector get-priority-vector)
                    (activations get-activations)) plist
@@ -95,36 +98,33 @@
   (make-instance 'indexed-priority-list :insertion-function func))
 
 (defclass depth-first-strategy (strategy)
-  ()
+  ((priority-queue :initform
+                   (make-indexed-priority-list
+                    :insertion-function
+                    #'(lambda (obj place) (push obj place)))
+                   :reader get-priority-queue))
   (:documentation
    "A depth-first conflict resolution strategy."))
 
 (defmethod add-activation ((self depth-first-strategy) activation)
-  (with-accessors ((activations get-activations)) self
-    (setf activations
-      (nconc activations `(,activation)))))
+  (insert-activation (get-priority-queue self) activation))
 
-(defmethod retract-activation ((self depth-first-strategy) activation)
-  (with-accessors ((activations get-activations)) self
-    (setf activations
-      (delete-if #'(lambda (act)
-                     (= (hash-code act) (hash-code activation)))
-                 activations))
-    (values activation)))
-
-(defmethod remove-activation ((self depth-first-strategy) token)
-  (let ((activation
-         (find-if #'(lambda (activation)
-                      (= (hash-code activation) (hash-code token)))
-                  (get-activations self))))
-    (unless (null activation)
-      (retract-activation self activation))))
+(defmethod find-activation ((self depth-first-strategy) token)
+  (lookup-activation (get-priority-queue self) token))
 
 (defmethod next-activation ((self depth-first-strategy))
-  (pop (get-activations self)))
+  (get-next-activation (get-priority-queue self)))
 
 (defmethod remove-activations ((self depth-first-strategy))
-  (setf (get-activations self) nil))
+  (initialize-queue self))
+
+(defmethod initialize-queue ((self depth-first-strategy))
+  (setf (slot-value self 'priority-queue)
+    (make-indexed-priority-list
+     :insertion-function #'(lambda (obj place) (push obj place)))))
+
+(defmethod initialize-instance :after ((self depth-first-strategy) &rest args)
+  (initialize-queue self))
 
 (defun make-depth-first-strategy ()
   (make-instance 'depth-first-strategy))
