@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code.
 
-;;; $Id: funcall.lisp,v 1.3 2001/01/04 22:13:08 youngde Exp $
+;;; $Id: funcall.lisp,v 1.4 2001/01/04 22:45:09 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,17 +33,23 @@
   (:documentation
    "This class manages the mechanics of executing arbitrary Lisp code."))
 
+(defmethod make-lexical-binding ((binding pattern-binding) token)
+  (let ((fact (find-fact token (get-location binding))))
+    (cl:assert (not (null fact)) ()
+      "No fact for location ~D." (get-location binding))
+    `(,(get-name binding) ,fact)))
+
+(defmethod make-lexical-binding ((binding slot-binding) token)
+  (let ((fact (find-fact token (get-location binding))))
+    (cl:assert (not (null fact)) ()
+      "No fact for location ~D." (get-location binding))
+    `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
+  
 (defun create-function-context (funcall token)
-  (labels ((make-lexical-binding (binding)
-             (let ((fact (find-fact token (get-location binding))))
-               (cl:assert (not (null fact)) ()
-                 "No fact for location ~D." (get-location binding))
-               `(,(get-name binding) 
-                 ,(get-slot-value fact (get-slot-name binding)))))
-           (make-context ()
+  (flet ((make-context ()
            `(lambda ()
               (let (,@(mapcar #'(lambda (binding)
-                                  (make-lexical-binding binding))
+                                  (make-lexical-binding binding token))
                               (get-bindings funcall)))
                 ,@(get-forms funcall)))))
     (eval (make-context))))

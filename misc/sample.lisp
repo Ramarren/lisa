@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.32 2001/01/03 21:31:47 youngde Exp $
+;;; $Id: sample.lisp,v 1.33 2001/01/04 22:45:09 youngde Exp $
 
 (in-package :lisa)
 
@@ -89,13 +89,13 @@
   =>
   (format t "multiple-references fired! Value of ?name is ~S~%" ?name))
 
-#+ignore
 (defrule schtum
   (?f-1 (rocky (name "rocky")))
   =>
   (format t "schtum fired (?f-1 = ~S).~%" ?f-1)
   (modify ?f-1 (name "bullwinkle")))
 
+#+ignore
 (defrule rocky-boris-natasha
   (?f-1 (rocky (name "bullwinkle")))
   (boris (name ?boris-name "boris"))
