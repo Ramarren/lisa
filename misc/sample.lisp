@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.7 2000/11/29 01:07:43 youngde Exp $
+;;; $Id: sample.lisp,v 1.8 2000/11/30 02:43:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,8 +61,8 @@
   (format t "nemesis fired!~%"))
 
 (defrule schtum
-  (rocky (name "rocky"))
-  (boris (name "boris"))
+  (?f-1 (rocky (name "rocky")))
+  (?f-2 (boris (name "boris")))
   =>
   (format t "schtum fired!~%"))
 

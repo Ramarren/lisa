@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.11 2000/11/30 00:25:13 youngde Exp $
+;;; $Id: token.lisp,v 1.12 2000/11/30 02:43:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -52,7 +52,8 @@
 (defmethod find-fact ((self token) level)
   (labels ((traverse (token level)
              (cond ((<= level 0)
-                    (get-parent token))
+                    (values token))
+                   ;(get-parent token))
                    (t
                     (traverse (get-parent token) (1- level))))))
     (traverse self (- (get-depth self) level))))

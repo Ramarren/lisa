@@ -17,25 +17,35 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: add-token.lisp
-;;; Description: Represents TOKENs used for add operations on the
-;;; network.
+;;; File: bindings.lisp
+;;; Description: Classes in this file represent various types of
+;;; variable bindings that form the lexical environment of rule
+;;; right-hand-sides.
 
-;;; $Id: add-token.lisp,v 1.7 2000/11/30 02:43:31 youngde Exp $
+;;; $Id: bindings.lisp,v 1.1 2000/11/30 02:43:31 youngde Exp $
 
 (in-package :lisa)
 
-(defclass add-token (token)
+(defclass binding ()
+  ((name :initarg :name
+         :initform nil
+         :reader get-name)
+   (location :initarg :location
+             :initform nil
+             :reader get-location))
+  (:documentation
+   "The base class for all types of bindings."))
+
+(defmethod print-object ((self binding) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(name = ~S ; location = ~D)"
+            (get-name self) (get-location self))))
+
+(defclass pattern-binding (binding)
   ()
   (:documentation
-   "Represents TOKENs used for add operations on the network."))
+   "This class represents a fact-to-pattern binding."))
 
-(defmethod print-object ((self add-token) strm)
-  (print-unreadable-object (self strm :identity t :type t)
-    (format strm "(class = ~S)"
-            (get-class (get-top-fact self)))))
-
-(defun make-add-token (&rest args)
-  (apply #'make-token (find-class 'add-token) args))
-
+(defun make-pattern-binding (name location)
+  (make-instance 'pattern-binding :name name :location location))
 

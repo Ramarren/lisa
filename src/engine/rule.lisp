@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.10 2000/11/30 00:25:13 youngde Exp $
+;;; $Id: rule.lisp,v 1.11 2000/11/30 02:43:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,11 +58,23 @@
   (with-accessors ((actions get-actions)) self
     (format t "Firing rule ~S (token depth ~D)~%"
             (get-name self) (size token))
+    (traverse-token self token)
+    (traverse-bindings self token)
     (funcall actions)))
 
-(defmethod add-binding ((self rule) name))
+(defmethod add-binding ((self rule) name)
+  (setf (gethash name (get-bindings self))
+    (make-pattern-binding name (get-pattern-count self))))
 
-(defmethod traverse-tokens ((self rule) token)
+(defmethod traverse-bindings ((self rule) token)
+  (flet ((show-binding (b)
+           (let ((fact (find-fact token (get-location b))))
+             (format t "~S, ~S~%" b fact))))
+    (maphash #'(lambda (key val)
+                 (show-binding val))
+             (get-bindings self))))
+
+(defmethod traverse-token ((self rule) token)
   (labels ((traverse (token)
              (cond ((null token)
                     (values))
@@ -73,9 +85,9 @@
 
 (defmethod add-pattern ((self rule) pattern)
   (with-accessors ((patterns get-patterns)) self
-    (setf patterns (nconc patterns `(,pattern)))
     (when (has-binding-p pattern)
-      (add-binding self (get-pattern-binding pattern))))
+      (add-binding self (get-pattern-binding pattern)))
+    (setf patterns (nconc patterns `(,pattern))))
   (values pattern))
 
 (defmethod freeze-rule ((self rule))
