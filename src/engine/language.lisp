@@ -20,14 +20,14 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.47 2001/05/05 17:46:42 youngde Exp $
+;;; $Id: language.lisp,v 1.48 2001/05/07 17:48:12 youngde Exp $
 
 (in-package "LISA")
 
-(defmacro defrule (name (&key (salience 0) (module nil)) &rest body)
+(defmacro defrule (name (&key (salience 0) (module nil)) &body body)
   `(redefine-defrule ',name ',body :salience ,salience :module ,module))
 
-(defmacro deftemplate (name &body body)
+(defmacro deftemplate (name (&key &allow-other-keys) &body body)
   `(redefine-deftemplate ',name ',body))
 
 (defmacro defimport (symbolic-name (class-name) (&body body))

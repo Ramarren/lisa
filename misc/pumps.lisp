@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.3 2001/05/07 15:53:31 youngde Exp $
+;;; $Id: pumps.lisp,v 1.4 2001/05/07 17:48:12 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -57,8 +57,8 @@
              (do ()
                  ((not (intact-p tank)) t)
                (add-water tank (get-flow-rate self))
-               (lmp:process-sleep 0.10)))))
-    (lmp:make-process
+               (sleep 0.10)))))
+    (port:make-process
      (concatenate 'string "Pump Process " (get-name self))
      #'add-water-to-tank)))
 
@@ -90,21 +90,24 @@
            (do ()
                ((not (intact-p self)))
              (add-water self -1)
-             (lmp:process-sleep 0.025))
+             (sleep 0.025))
            (cond ((>= (get-level self) 1000)
                   (format t "Tank ~S exploded!~%" self))
                  ((<= (get-level self) 0)
                   (format t "Tank ~S ran dry and caught fire!~%" self)))))
-    (lmp:make-process
+    (port:make-process
      (concatenate 'string "Tank Process " (get-name self))
      #'adjust-tank-level)))
 
 (defimport pump (lisa-user::pump) ())
 (defimport tank (lisa-user::tank) ())
 
-(deftemplate tank-level-warning
+(deftemplate tank-level-warning ()
   (slot tank)
   (slot type))
+
+(deftemplate idle ()
+  (slot count))
 
 (defrule warn-if-low ()
   (tank (name ?name) (:object ?tank))
@@ -149,6 +152,13 @@
   =>
   (retract ?warning)
   (format t "Tank ~S is now OK.~%" ?name))
+
+(defrule sleep-if-bored (:salience -100)
+  (?idle (idle (count ?count)))
+  =>
+  (retract ?idle)
+  (sleep 0.025)
+  (assert (idle (count (1+ ?count)))))
 
 (defrule report-fire ()
   (?fact (tank (name ?name) (:object ?tank)))
