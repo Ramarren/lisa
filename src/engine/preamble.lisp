@@ -20,11 +20,11 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.4 2001/05/11 14:41:50 youngde Exp $
+;;; $Id: preamble.lisp,v 1.5 2001/05/17 15:38:12 youngde Exp $
 
 (in-package "LISA")
 
-(defconstant +lisa-engine-var+ (gentemp "?")
+(defconstant +lisa-engine-var+ (intern (gensym "?"))
   "Used to represent the variable bound to a rule's RETE instance and
   accessible from a rule's LHS.")
 
