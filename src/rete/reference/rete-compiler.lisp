@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.6 2002/08/29 22:59:56 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.7 2002/08/29 23:16:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -98,11 +98,14 @@
            #'pass-token)))
       (add-new-terminal node))))
 
+(defun add-inter-pattern-nodes (patterns))
+    
 (defun compile-rule-into-network (rete-network patterns)
   (let ((*root-nodes* (rete-roots rete-network))
         (*terminals* (make-array 0 :adjustable t :fill-pointer t))
         (*shared-nodes* (rete-shared-nodes rete-network)))
     (add-intra-pattern-nodes patterns)
+    (add-inter-pattern-nodes patterns)
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)
     (map nil #'(lambda (terminal)
                  (add-successor terminal (make-terminal-node) #'pass-token))
