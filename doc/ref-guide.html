@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.9-31 i686) [Netscape]">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -65,23 +65,18 @@ in terms of time and size.</blockquote>
 
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(defimport <i>symbolic-name</i> (<i>class-name</i>
-&amp;optional ancestors) (<i>slot-name</i>*))</td>
+<td WIDTH="80%" NOSAVE>(defimport <i>class-name</i> (&amp;key <i>use-inheritancep</i>))</td>
 
 <td>Macro</td>
 </tr>
 </table>
 
 <blockquote>Makes a CLOS class known to LISA and allows instances of this
-class to be asserted into the knowledge base. The <i>symbolic-name</i>
-is the name that will be used in rules and during pattern matching; <i>class-name</i>
-is the fully-qualified name of the class as it is known to Lisp. If the
-class's ancestry is to be considered during pattern matching, <i>ancestors</i>
-will represent a list containing the <i>symbolic-name</i>s of those classes.
-To limit the slots available for pattern matching, include a list of relevant
-<i>slot-name</i>s.
-If no slot-names are specified LISA will examine the meta class for <i>class-name</i>
-and make all of the slots in the class hierarchy available.</blockquote>
+class to be asserted into the knowledge base. <i>Class-name</i>
+is the symbolic name of the class as it would be given to FIND-CLASS. If <i>use-inheritancep</i>
+  is non-NIL (the default), LISA makes the entire class hierarchy and slot
+  content available for pattern matching. Note that it is not necessary to
+  import the ancestors of <i>class-name</i> as LISA will do this automatically.</blockquote>
 
 <table WIDTH="100%" >
 <tr>
@@ -274,8 +269,7 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
+<dt>&nbsp;</dt>
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
@@ -285,8 +279,7 @@ any other:
 <dd>
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
+<dt>&nbsp;</dt>
 <p>Once bound, method and function calls can be made on this object from
 the rule's LHS and RHS.
 <p>When reasoning over CLOS objects, LISA is capable of considering an
@@ -304,14 +297,12 @@ ancestry. The following code fragment provides an example:
 (defclass boris (fundamental) ())</dd>
 
 <br>&nbsp;
-<dd>
-(defimport fundamental (lisa-user::fundamental) ())</dd>
 
 <dd>
-(defimport rocky (lisa-user::rocky (fundamental)) ())</dd>
+(defimport rocky)</dd>
 
 <dd>
-(defimport boris (lisa-user::boris (fundamental)) ())</dd>
+(defimport boris)</dd>
 
 <br>&nbsp;
 <dd>
@@ -326,13 +317,11 @@ ancestry. The following code fragment provides an example:
 <dd>
 &nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
 
-<br>&nbsp;
-<p>&nbsp;
+<dt>&nbsp;</dt>
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
-and <i>boris</i> in the knowledge base, retracting each in turn. Note how
-the <i>defimport</i> forms for <i>rocky</i> and <i>boris</i> specify the
-symbolic name of the ancestor class <i>fundamental</i>, rather than the
-CLOS identifier.</dl>
+and <i>boris</i> in the knowledge base, retracting each in turn. Note how it was
+unnecessary to import class <i>fundamental</i>, as LISA discovers the class
+hierarchy for <i>rocky</i> and <i>boris</i> and imports it automatically.</dl>
 </blockquote>
 
 <blockquote>
@@ -380,7 +369,7 @@ Use of this macro only makes sense from within a rule's RHS.</blockquote>
 <td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance</i> &amp;optional
 <i>slot-id</i>)</td>
 
-<td>Generic function</td>
+<td>Function</td>
 </tr>
 </table>
 
@@ -390,19 +379,6 @@ and synchronizes the instance with its associated shadow fact. LISA automaticall
 generates a specialized method for this function at <i>defimport</i> time;
 an application <i>must</i> call this method whenever a slot change occurs
 outside of LISA's control.</blockquote>
-
-<table WIDTH="100%" NOSAVE >
-<tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(tell-lisa-modified-instance <i>instance slot-name</i>)</td>
-
-<td>Generic function</td>
-</tr>
-</table>
-
-<blockquote>LISA calls this function whenever a change occurs to <i>instance</i>
-from within the knowledge base (i.e. via the <i>modify</i> operator). Applications
-can specialize on this function if they so choose. The <i>slot-name</i>
-specifies the affected slot.</blockquote>
 
 <h4>
 <a NAME="Engine-Related Operators"></a>Engine-Related Operators</h4>
@@ -645,16 +621,25 @@ for <i>watch</i> to see the allowable event types.</blockquote>
 
 <h3>
 II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
-For application developers, LISA makes available the LISA-USER package.
-Generally, all user-level work should be done in this package; see the
-various examples provided in "lisa:misc;".
+For application developers, LISA makes available two different types of
+environments. Package LISA-USER contains all of LISA's exported symbols, plus
+those of COMMON-LISP. User-level work can safely be done in this package.
+Alternatively, package LISA-LISP can be used with DEFPACKAGE forms to import a
+LISA environment into user-defined packages:
+<blockquote>
+  <p>(defpackage &quot;FRODO&quot;<br>
+  &nbsp; (:use &quot;LISA-LISP&quot;))</p>
+</blockquote>
+<p>As with LISA-USER, LISA-LISP exports all external symbols in the LISA and
+COMMON-LISP packages. See the
+various examples provided in "lisa:misc;".</p>
 <h3>
 III.&nbsp;<a NAME="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
 In addition to statically declared rules, LISA supports the definition
 of rules at runtime. That is, it is possible to create new rules from the
 RHSs of existing rules as they fire. These <i>dynamically defined</i> rules
 become immediately available to the inference engine for potential activation.
-As a simple example, consider the following rule:
+As a simple example, consider the following rule:<br>
 <blockquote>(defrule rocky ()
 <br>&nbsp; (rocky (name ?name))
 <br>&nbsp; =>
@@ -740,9 +725,22 @@ INSTANCE 2)))
 <p>As explained previously, the second value is the symbolic name LISA
 assigned to the query when its rule instance was initially created. Most
 of the time it will be ignored.
-<p><b>NB: The 1.2 implementation of queries will only function with facts
-representing CLOS instances; queries on template-based facts are not supported,
-and such queries will in fact fail ingloriously</b>.
+<p>As of release 1.3, LISA incorporates a unified view of template- and
+CLOS-based facts; as a result queries now function for both types of facts. In
+the former case, LISA creates a class modeled around the template. Class and
+slot names are taken directly from the DEFTEMPLATE form; each slot is given a
+reader method named according to DEFSTRUCT conventions (i.e. <i>class name-slot
+name</i>). For example,&nbsp;
+<blockquote>
+  <p>(deftemplate frodo ()<br>
+  &nbsp; (slot companion (default merry)))
+</blockquote>
+<p>Will yield the following class specification:
+<blockquote>
+  <p>(defclass frodo (inference-engine-object)<br>
+  &nbsp; ((companion :initform 'merry :initarg :companion :reader
+  frodo-companion)))
+</blockquote>
 <p>These functions and macros comprise the current interface to the query
 engine:
 <br>&nbsp;
@@ -774,6 +772,21 @@ that variable.</blockquote>
 symbol <i>name</i>. Doing so removes the query's rule instance from the
 Rete network and the query itself from the cache. Useful only during query
 development, probably.</blockquote>
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(with-simple-query ((<i>var value</i>) <i>query-form</i>
+      &amp;body <i>body</i>))</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Evaluates <i>query-form</i>. Then, iterates over the resulting list
+  structure, binding each variable and fact to <i>var</i> and <i>value</i>,
+  respectively, and evaluating <i>body</i>. This macro is useful if one is
+  interested in just the individual variable/fact pairs and doesn't care much
+  about the binding context that occurred during query firing.</p>
+</blockquote>
 
 <h3>
 V.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
