@@ -21,13 +21,15 @@
 ;;; Description: Represents TOKENs used for add operations on the
 ;;; network.
 
-;;; $Id: add-token.lisp,v 1.2 2000/11/04 02:52:37 youngde Exp $
+;;; $Id: add-token.lisp,v 1.3 2000/11/06 22:37:16 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass add-token (token)
   ()
   (:documentation
    "Represents TOKENs used for add operations on the network."))
 
-(defun make-add-token ())
+(defun make-add-token (initial-fact &key (parent nil) (clone nil))
+  (make-instance 'add-token :fact initial-fact :parent parent :clone clone))
+

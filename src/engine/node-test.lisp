@@ -21,12 +21,50 @@
 ;;; Description: Node containing an arbitrary list of tests. Used for TEST
 ;;; conditional elements and as the base class for JOIN nodes.
 
-;;; $Id: node-test.lisp,v 1.1 2000/11/02 21:12:34 youngde Exp $
+;;; $Id: node-test.lisp,v 1.2 2000/11/06 22:37:16 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass node-test (node)
-  ()
+  ((tests :initform nil
+          :accessor get-tests)
+   (engine :initarg :engine
+           :reader get-engine))
   (:documentation
    "Node containing an arbitrary list of tests. Used for TEST conditional
    elements and as the base class for JOIN nodes."))
+
+(defmethod add-test ((self node-test) test)
+  (with-accessors ((tests get-tests)) self
+    (setf tests
+      (nconc tests `(,test)))))
+
+(defmethod call-node-right ((self node-test) token)
+  (call-next-method))
+
+(defmethod call-node-left ((self node-test) token)
+  (flet ((pass-token (tok)
+           (with-accessors ((engine get-engine)) self
+             (let ((descendant (make-token (get-null-fact engine)
+                                           :parent token)))
+               (update-time descendant engine)
+               (pass-along self descendant)
+               (values t)))))
+    (if (run-tests self token)
+        (pass-token token)
+      (values nil))))
+
+(defmethod run-tests ((self node-test))
+  (not (member 'nil (mapcar #'(lambda (test)
+                                (do-test test))
+                            (get-tests self)))))
+
+(defmethod pass-along ((self node-test) token)
+  (mapcar #'(lambda (node)
+              (call-node-left node token))
+          (get-successors self)))
+
+(defmethod equals ((self node-test) (node-test obj))
+  (compare2 #'(lambda (a b) (equals a b))
+            (get-tests self) (get-tests obj)))
+

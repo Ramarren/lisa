@@ -23,9 +23,9 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.2 2000/11/04 02:48:48 youngde Exp $
+;;; $Id: token.lisp,v 1.3 2000/11/06 22:37:16 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass token ()
   ((sort-code :initform 0
@@ -55,7 +55,7 @@
                     (get-parent token))
                    (t
                     (traverse (get-parent token) (1- level))))))
-    (traverse (- (get-depth self) level))))
+    (traverse self (- (get-depth self) level))))
 
 (defmethod size ((self token))
   (get-depth self))
@@ -69,36 +69,33 @@
   (eql (get-fact-id (get-fact self))
        (get-fact-id (get-fact tok))))
 
-;;; various constructors for making TOKEN instances...
+(defmethod initialize-instance :after ((self token)
+                                       &key fact (parent nil) (clone nil)
+                                       &allow-other-keys)
+  (flet ((init-derived (self fact parent)
+           (setf (slot-value self 'depth) (1+ (get-depth parent)))
+           (setf (slot-value self 'sort-code) 
+             (+ (ash (get-sort-code parent) 3)
+                (get-fact-id fact)))
+           (setf (slot-value self 'clock) (+ (get-time fact)
+                                            (get-clock parent))))
+         (init-new (self fact)
+           (setf (slot-value self 'clock) (get-time fact))
+           (setf (slot-value self 'sort-code) (get-fact-id fact)))
+         (init-clone (self token)
+           (setf (slot-value self 'fact) (get-top-fact token))
+           (setf (slot-value self 'parent) (get-parent token))
+           (setf (slot-value self 'depth) (get-depth token))
+           (setf (slot-value self 'sort-code) (get-sort-code token))
+           (setf (slot-value self 'clock) (get-clock token))
+           (setf (slot-value self 'neg-count) (get-neg-count token))))
+    (cond ((not (null clone))
+           (init-clone self clone))
+          ((not (null parent))
+           (init-derived self parent))
+          (t (init-new self)))
+    (when (next-method-p)
+      (call-next-method))))
 
-(defun make-token (&rest args)
-  (apply #'make-instance 'token args))
-
-(defun make-new-token (initial-fact)
-  (make-token
-   :fact initial-fact
-   :depth 1
-   :clock (get-time top-fact)
-   :sort-code (get-fact-id top-fact)))
-
-(defun make-derived-token (token fact)
-  (make-token
-   :fact fact
-   :parent token
-   :depth (1+ (get-depth token))
-   :sort-code (+ (ash (get-sort-code token) 3)
-                 (get-fact-id fact))
-   :clock (+ (get-time fact) (get-clock token))))
-
-(defun make-duplicate-token (left right)
-  (make-token left (get-top-fact right)))
-
-(defun make-identical-token (token)
-  (make-token 
-   :fact (get-top-fact token)
-    :parent (get-parent token)
-    :depth (get-depth token)
-    :sort-code (get-sort-code token)
-    :clock (get-clock token)
-    :neg-count (get-neg-count token)))
-
+(defun make-token (initial-fact &key (parent nil) (clone nil))
+  (make-instance 'token :fact initial-fact :parent parent :clone clone))

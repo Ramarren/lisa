@@ -20,9 +20,9 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.1 2000/10/20 17:11:54 youngde Exp $
+;;; $Id: utils.lisp,v 1.2 2000/11/06 22:37:38 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defun find-before (item sequence &key (test #'eql))
   "Returns both that portion of SEQUENCE that occurs before ITEM and
@@ -45,3 +45,21 @@
         ((funcall test item (first sequence))
          (rest sequence))
         (t (find-after item (rest sequence) :test test))))
+
+(defun compare2 (predicate lst1 lst2)
+  "Applies PREDICATE to every pair of elements in both lists, and
+  returns T if PREDICATE was true for each pair, or NIL as soon as
+  PREDICATE fails."
+  (declare (type list lst1) (type list lst2))
+  (cond ((not (and (listp lst1)
+                   (listp lst2)))
+         (values nil))
+        ((and (null lst1) (null lst2))
+         (values t))
+        ((or (and (null lst1) (not (null lst2)))
+             (and (null lst2) (not (null lst1))))
+         (values nil))
+        (t
+         (if (apply predicate `(,(first lst1) ,(first lst2)))
+             (compare2 predicate (rest lst1) (rest lst2))
+           (values nil)))))
