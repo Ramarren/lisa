@@ -23,7 +23,7 @@ separated into various categories.
 <h4>
 Fact-related Operators</h4>
 &nbsp;
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(deftemplate <i>name</i> () (<i>slot-name*</i>))</td>
 
@@ -38,7 +38,7 @@ Templates are a convenient way of specifying concepts that don't need the
 full support of CLOS. Reasoning over them is slightly more efficient, both
 in terms of time and size.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(defimport <i>symbolic-name</i> (<i>class-name</i>)
 (<i>slot-name</i>*))</td>
@@ -55,7 +55,7 @@ the slots available for pattern matching, include a list of relevant <i>slot-nam
 If no slot-names are specified LISA will examine the meta class for <i>class-name</i>
 and make all of the slots in the class hierarchy available.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(assert (<i>template-name</i> (<i>slot-name value</i>)*))</td>
 
@@ -68,7 +68,7 @@ knowledge base. Slot values are assigned using a list of (<i>slot-name
 value</i>) pairs. The template associated with <i>template-name</i> must
 be known to LISA a priori.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(retract <i>fact</i> &amp;optional <i>engine</i>)</td>
 
@@ -81,7 +81,7 @@ should be bound to either a LISA fact object or an integer representing
 the fact identifier. Unless <i>engine</i> is supplied, the inference engine
 returned by (current-engine) will be used.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(assert-instance <i>instance</i>)</td>
 
@@ -93,7 +93,7 @@ returned by (current-engine) will be used.</blockquote>
 of <i>instance</i> should already exist and have been identified to LISA
 via a <i>defimport</i>.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(retract-instance <i>instance</i>)</td>
 
@@ -105,7 +105,7 @@ via a <i>defimport</i>.</blockquote>
 of <i>instance</i> should already exist and have been identified to LISA
 via a <i>defimport</i>.</blockquote>
 
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(modify <i>fact</i> (<i>slot-name value</i>)*)</td>
 
@@ -121,7 +121,7 @@ evaluated at execution time.</blockquote>
 <h4>
 Rule-related Operators</h4>
 &nbsp;
-<table BORDER WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(defrule <i>name (key*) pattern*</i> => <i>action*</i>)</td>
 
@@ -260,5 +260,45 @@ CLOS-Related Operators</h4>
 There are a few special operators and functions that LISA provides for
 managing CLOS instances within the knowledge base.
 <br>&nbsp;
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(engine)</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Returns the inference engine associated with a particular rule.
+Use of this macro only makes sense from within a rule's RHS.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance</i> &amp;optional
+<i>slot-id</i>)</td>
+
+<td>Generic function</td>
+</tr>
+</table>
+
+<blockquote>Notifies LISA that a change has been made to <i>instance</i>
+outside of the knowledge-base (i.e. not via the <i>modify</i> operator),
+and synchronizes the instance with its associated shadow fact. LISA automatically
+generates a specialized method for this function at <i>defimport</i> time;
+an application <i>must</i> call this method whenever a slot change occurs
+outside of LISA's control.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(tell-lisa-modified-instance <i>instance slot-name</i>)</td>
+
+<td>Generic function</td>
+</tr>
+</table>
+
+<blockquote>LISA calls this function whenever a change occurs to <i>instance</i>
+from within the knowledge base (i.e. via the <i>modify</i> operator). Applications
+can specialize on this function if they so choose. The <i>slot-name</i>
+specifies the affected slot.</blockquote>
+
 </body>
 </html>
