@@ -20,14 +20,15 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.19 2002/11/19 19:04:45 youngde Exp $
+;;; $Id: rule.lisp,v 1.20 2002/11/20 16:14:20 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rule ()
-  ((name :initarg :name
-         :initform nil
-         :reader rule-name)
+  ((short-name :initarg :short-name
+               :initform nil
+               :reader rule-short-name)
+   (qualified-name :reader rule-name)
    (comment :initform nil
             :initarg :comment
             :reader rule-comment)
@@ -92,10 +93,9 @@
 
 (defmethod print-object ((self rule) strm)
   (print-unreadable-object (self strm :type t)
-    (if (initial-context-p (rule-context self))
-        (format strm "~A" (rule-name self))
-      (format strm "~A.~A" 
-              (context-name (rule-context self))
+    (format strm "~A"
+            (if (initial-context-p (rule-context self))
+                (rule-short-name self)
               (rule-name self)))))
 
 (defun compile-rule (rule patterns actions)
@@ -131,6 +131,13 @@
         (ensure-logical-blocks-are-valid addresses))
       (first addresses))))
 
+(defmethod initialize-instance :after ((self rule) &rest initargs)
+  (setf (slot-value self 'qualified-name)
+    (intern (format nil "~A.~A" 
+                    (context-name (rule-context self))
+                    (rule-short-name self))))
+  self)
+                    
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) 
                        (salience 0) 
@@ -142,7 +149,7 @@
                 append (parsed-pattern-binding-set pattern)))))
     (compile-rule
      (make-instance 'rule 
-       :name name 
+       :short-name name 
        :engine engine
        :comment doc-string
        :salience salience

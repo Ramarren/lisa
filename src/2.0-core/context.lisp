@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.6 2002/11/20 15:34:38 youngde Exp $
+;;; $Id: context.lisp,v 1.7 2002/11/20 16:14:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -82,7 +82,8 @@
   `(let ((*active-context* ,context))
      ,@body))
 
-(defmacro with-rule-name ((context name symbolic-name) &body body)
+(defmacro with-rule-name-parts ((context short-name long-name) 
+                                symbolic-name &body body)
   (let ((qualifier (gensym))
         (rule-name (gensym)))
     `(let* ((,rule-name (symbol-name ,symbolic-name))
@@ -90,9 +91,12 @@
             (,context (if ,qualifier
                           (subseq ,rule-name 0 ,qualifier)
                         (symbol-name :initial-context)))
-            (,name (if ,qualifier
-                       (subseq ,rule-name (1+ ,qualifier))
-                     ,rule-name)))
+            (,short-name (if ,qualifier
+                             (subseq ,rule-name (1+ ,qualifier))
+                           ,rule-name))
+            (,long-name (if ,qualifier
+                            ,rule-name
+                          (format nil "~A.~A" ,context ,short-name))))
        ,@body)))
 
 (defun make-context (name &key (strategy nil))
