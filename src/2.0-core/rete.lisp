@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.26 2002/11/07 15:53:47 youngde Exp $
+;;; $Id: rete.lisp,v 1.27 2002/11/07 17:46:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -63,7 +63,7 @@
   (superclasses nil :type list))
 
 (defun register-meta-object (rete key meta-object)
-  (setf (gethash (rete-meta-data rete) key) meta-object))
+  (setf (gethash key (rete-meta-data rete)) meta-object))
 
 (defun register-class (rete class symbolic-name)
   (setf (gethash (class-name class) (rete-class-table rete)) symbolic-name))

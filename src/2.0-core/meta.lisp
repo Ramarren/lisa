@@ -26,9 +26,18 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.6 2002/11/07 15:53:48 youngde Exp $
+;;; $Id: meta.lisp,v 1.7 2002/11/07 17:46:06 youngde Exp $
 
 (in-package "LISA")
+
+(defun get-class-name (meta-object)
+  (fact-meta-object-class-name meta-object))
+
+(defun get-slot-list (meta-object)
+  (fact-meta-object-slot-list meta-object))
+
+(defun get-superclasses (meta-object)
+  (fact-meta-object-superclasses meta-object))
 
 (defun find-effective-slot (meta-object slot-name)
   "Finds the actual CLOS slot name as identified by the symbolic name
@@ -48,13 +57,6 @@
         "This fact name does not have a registered meta class: ~S"
         symbolic-name))
     meta-fact))
-
-(defun find-symbolic-name (instance)
-  (let ((symbolic-name
-         (get (class-name (class-of instance)) +lisa-symbolic-name+)))
-    (cl:assert (not (null symbolic-name)) nil
-      "The class of this instance is not known to LISA: ~S." instance)
-    symbolic-name))
 
 (defun acquire-meta-data (symbolic-name actual-name)
   (labels ((populate-slot-table (meta-object slot-list)
@@ -81,9 +83,9 @@
            (import-classes (class-object)
              (let ((superclasses
                     (if *consider-taxonomy-when-reasoning*
-                        (reflect:find-direct-superclasses class)
+                        (reflect:find-direct-superclasses class-object)
                       nil)))
-               (import-one-class class superclasses)
+               (import-one-class class-object superclasses)
                (dolist (super superclasses)
                  (import-classes super)))))
     (import-classes (find-class actual-name))))
@@ -91,7 +93,7 @@
 (defun ensure-meta-data-exists (symbolic-name actual-name)
   (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
     (when (null meta-data)
-      (assert (find-class actual-name nil) nil
+      (cl:assert (find-class actual-name nil) nil
         "LISA doesn't know about the fact object ~S" symbolic-name)
       (setf meta-data
         (acquire-meta-data symbolic-name actual-name)))

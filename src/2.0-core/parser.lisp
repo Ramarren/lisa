@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.54 2002/11/07 15:53:47 youngde Exp $
+;;; $Id: parser.lisp,v 1.55 2002/11/07 17:46:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -230,8 +230,6 @@
 
 (defun parse-default-pattern (pattern location)
   (let ((head (first pattern)))
-    (cl:assert (find-meta-fact head nil) nil
-      "This pattern has no meta data: ~S" pattern)
     (macrolet ((collect-constraint-bindings (constraint list)
                  `(progn
                     (dolist (obj (utils:flatten ,constraint))
@@ -374,6 +372,7 @@
     `(let ((,deffacts (list)))
        (dolist (fact ',body)
          (let ((head (first fact)))
+           (ensure-meta-data-exists head head)
            (push 
             (apply #'make-fact head (rest fact))
             ,deffacts)))

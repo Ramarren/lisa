@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.6 2002/11/04 18:55:28 youngde Exp $
+;;; $Id: preamble.lisp,v 1.7 2002/11/07 17:46:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -43,6 +43,11 @@
 (defun in-rule-firing-p ()
   (declare (inline in-rule-firing-p))
   (not (null (active-rule))))
+
+(defvar *consider-taxonomy-when-reasoning* nil)
+
+(defmacro consider-taxonomy ()
+  `(setf *consider-taxonomy-when-reasoning* t))
 
 (defclass inference-engine-object () ())
 

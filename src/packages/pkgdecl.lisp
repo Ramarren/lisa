@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.57 2002/11/05 20:32:59 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.58 2002/11/07 17:46:29 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -44,7 +44,7 @@
            "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
            "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK" "CLEAR-BREAKS"
            "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE" "BINDINGS"
-           "*BREAK-ON-SUBRULES*" "LOGICAL")
+           "*BREAK-ON-SUBRULES*" "LOGICAL" "CONSIDER-TAXONOMY")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -63,7 +63,8 @@
                 "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
                 "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK"
                 "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE"
-                "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"))
+                "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
+                "CONSIDER-TAXONOMY"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
