@@ -20,7 +20,7 @@
 ;;; File: test-facts.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: test-facts.lisp,v 1.3 2000/11/10 02:49:51 youngde Exp $
+;;; $Id: test-facts.lisp,v 1.4 2000/11/10 18:30:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -49,5 +49,9 @@
 (defparameter *last* (merge-successor *root* *node-tect* *rule*))
 
 (setf (aref *rule-roots* 0) *last*)
-
-  
+(setf *last* (merge-successor *last* (make-node1-teq 'name "rocky") *rule*))
+(setf (aref *terminals* 0) *last*)
+(setf (aref *terminals* 0) (merge-successor (aref *terminals* 0)
+                                            (make-node1-rtl) *rule*))
+(setf (aref *terminals* 0) (merge-successor (aref *terminals* 0)
+                                            (make-terminal-node *rule*) *rule*))
