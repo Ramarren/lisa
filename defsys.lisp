@@ -20,10 +20,14 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.58 2001/06/04 22:02:29 youngde Exp $
+;;; $Id: defsys.lisp,v 1.59 2001/06/25 19:39:51 youngde Exp $
 
 (in-package "CL-USER")
 
+(defvar *lisa-root-pathname*
+    (pathname (directory-namestring *load-truename*)))
+
+#+ignore
 (defvar *lisa-root-pathname*
   (make-pathname :directory
                  (pathname-directory
@@ -58,6 +62,17 @@
   (translate-logical-pathname "lisa:lib;clisp;")
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
+
+;;; Make sure the binary directory structure exists...
+
+(let ((lisa-binary-directories
+       '("engine" "mp" "packages" "reflect" "utils"))
+      (lisa-supported-lisps
+       '("acl" "lispworks" "cmucl" "clisp")))
+  (dolist (lisp lisa-supported-lisps)
+    (dolist (dir lisa-binary-directories)
+      (ensure-directories-exist 
+       (concatenate 'string "lisa:lib;" lisp ";" dir ";")))))
 
 (load "lisa:clocc;port;port.system")
 
@@ -186,7 +201,8 @@
 
 (defmacro with-quiet-compile (&body body)
   `(let ((*compile-print* nil))
-    ,@body))
+     (with-compilation-unit ()
+       ,@body)))
 
 (defun compile-lisa ()
   (with-quiet-compile
