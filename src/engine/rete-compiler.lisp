@@ -18,7 +18,7 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: rete-compiler.lisp
-;;; Description: This class generates a pattern network.
+;;; Description: This class generates the Rete pattern network.
 
 ;;; See the paper "Rete: A Fast Algorithm for the Many Pattern/Many
 ;;; Object Pattern Match Problem", Charles L. Forgy, Artificial
@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.12 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.13 2000/12/05 01:03:17 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,7 +56,7 @@
    (roots :initform nil
           :accessor get-roots))
   (:documentation
-   "Generates a pattern network."))
+   "Generates the Rete pattern network."))
 
 (defun add-tests (slots rule node)
   (flet ((add-simple-test (node slot)
