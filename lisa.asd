@@ -19,29 +19,15 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: rete.asd
-;;; Description: System definition file.
+;;; File: lisa.asd
+;;; Description: Lisa's ASDF system definition file.
 
-;;; $Id: rete.asd,v 1.2 2004/06/07 18:35:23 youngde Exp $
+;;; $Id: lisa.asd,v 1.1 2004/06/07 18:36:12 youngde Exp $
 
 (in-package :cl-user)
 
-(asdf:defsystem :lisa.rete
-  :components ((:file "node-tests")
-               (:file "shared-node")
-               (:file "successor")
-               (:file "node-pair")
-               (:file "terminal-node")
-               (:file "node1")
-               (:file "join-node")
-               (:file "node2")
-               (:file "node2-not")
-               (:file "node2-test")
-               (:file "node2-exists")
-               (:file "rete-compiler")
-               (:file "tms"
-                :depends-on ("join-node"))
-               (:file "network-ops")
-               (:file "network-crawler"))
-  :serial t
-  :depends-on ("lisa.core"))
+(asdf:defsystem :lisa
+  :depends-on ("lisa.packages" "lisa.implementations" "lisa.utils"
+               "lisa.reflect" "lisa.core" "lisa.rete" "lisa.config"
+               "lisa.epilogue"))
+  

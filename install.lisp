@@ -22,7 +22,7 @@
 ;;; File: install.lisp
 ;;; Description: 
 
-;;; $Id: install.lisp,v 1.1 2004/06/07 18:01:28 youngde Exp $
+;;; $Id: install.lisp,v 1.2 2004/06/07 18:35:17 youngde Exp $
 
 (in-package :cl-user)
 
@@ -71,6 +71,13 @@
           (call-next-advice module-name pathname)
         (call-next-advice module-name (cdr lisa-module))))))
 
+#-:asdf
+(load (merge-pathnames
+       (make-pathname
+        :directory '(:relative "misc")
+        :name "asdf" :type "lisp" :case :local)
+       *load-truename*))
+
 (eval-when (:load-toplevel :execute)
   (flet ((find-or-load-system (system path)
            (let ((path (merge-pathnames path *load-truename*)))
@@ -103,5 +110,6 @@
     (find-or-load-system :lisa.config
                          (make-pathname
                           :directory '(:relative "src" "config")
-                          :name "config" :type "asd" :case :local))))
+                          :name "config" :type "asd" :case :local))
+    (asdf:operate 'asdf:load-op :lisa)))
   

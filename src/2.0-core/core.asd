@@ -22,13 +22,14 @@
 ;;; File: core.asd
 ;;; Description: System definition file.
 
-;;; $Id: core.asd,v 1.3 2004/06/07 18:21:37 youngde Exp $
+;;; $Id: core.asd,v 1.4 2004/06/07 18:35:20 youngde Exp $
 
 (in-package :cl-user)
 
 (asdf:defsystem :lisa.preamble
   :components ((:file "preamble")
                (:file "conditions"))
+  :serial t
   :depends-on ("lisa.packages"))
 
 (asdf:defsystem :lisa.core
