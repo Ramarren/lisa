@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.3 2002/11/08 15:53:47 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.4 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,3 +31,4 @@
 
 (eval-when (:load-toplevel :execute)
   (make-default-inference-engine))
+

@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.2 2002/11/18 20:22:22 youngde Exp $
+;;; $Id: context.lisp,v 1.3 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,9 +32,18 @@
    (strategy :initarg :strategy
              :reader context-strategy)))
 
+(defmethod print-object ((self context) strm)
+  (print-unreadable-object (self strm :type t)
+    (format strm "~A" (context-name self))))
+
+(defun make-context-name (defined-name)
+  (etypecase defined-name
+    (symbol (symbol-name defined-name))
+    (string defined-name)))
+
 (defun make-context (name &key (strategy nil))
   (make-instance 'context
-    :name name
+    :name (make-context-name name)
     :strategy (if (null strategy)
                   (make-breadth-first-strategy)
                 strategy)))

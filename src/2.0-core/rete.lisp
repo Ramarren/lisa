@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.35 2002/11/15 16:36:05 youngde Exp $
+;;; $Id: rete.lisp,v 1.36 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,6 +41,10 @@
               :reader rete-meta-data)
    (dependency-table :initform (make-hash-table :test #'equal)
                      :accessor rete-dependency-table)
+   (contexts :initform (make-hash-table :test #'equal)
+             :reader rete-contexts)
+   (focus-stack :initform (list)
+                :accessor rete-focus-stack)
    (halted :initform nil
            :accessor rete-halted)
    (firing-count :initform 0
@@ -49,18 +53,13 @@
              :initform nil
              :reader rete-strategy)))
 
+(defmethod initialize-instance :after ((self rete) &rest initargs)
+  (push-context 
+   self (register-new-context self (make-context :initial-context))))
+
 ;;; FACT-META-OBJECT represents data about facts. Every LISA fact is backed by
 ;;; a CLOS instance that was either defined by the application or internally
-;;; by LISA (via DEFTEMPLATE). FACT-META-OBJECT performs housekeeping chores;
-;;; mapping symbolic fact names to actual class names, slot names to their
-;;; corresponding effective slot names, etc.
-
-#+ignore
-(defstruct fact-meta-object
-  (symbolic-name nil :type symbol)
-  (class-name nil :type symbol)
-  (slot-table (make-hash-table))
-  (superclasses nil :type list))
+;;; by LISA (via DEFTEMPLATE).
 
 (defstruct fact-meta-object
   (class-name nil :type symbol)
@@ -175,9 +174,17 @@
   (assert-fact self fact)
   fact)
 
+(defun clear-focus-stack (rete)
+  (setf (rete-focus-stack rete) (list)))
+
+(defun push-context (rete context)
+  (push context (rete-focus-stack rete)))
+
 (defun set-initial-state (rete)
   (forget-all-facts rete)
   (remove-activations (rete-strategy rete))
+  (clear-focus-stack rete)
+  (push-context rete (find-context rete :initial-context))
   (setf (rete-next-fact-id rete) -1)
   (setf (rete-firing-count rete) 0)
   t)
@@ -213,6 +220,12 @@
            (synchronize-with-instance fact slot-id)
            (add-fact-to-network network fact)))
     instance))
+
+(defun find-context (rete defined-name)
+  (gethash (make-context-name defined-name) (rete-contexts rete)))
+
+(defun register-new-context (rete context)
+  (setf (gethash (context-name context) (rete-contexts rete)) context))
 
 (defmethod add-activation ((self rete) activation)
   (trace-enable-activation activation)

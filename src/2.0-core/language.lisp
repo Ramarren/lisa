@@ -20,11 +20,14 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.14 2002/11/15 20:31:36 youngde Exp $
+;;; $Id: language.lisp,v 1.15 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
-(defmacro defrule (name (&key (salience 0) (module nil)) &body body)
+(defmacro defrule (name (&key (salience 0) 
+                              (context nil)
+                              (auto-focus nil))
+                   &body body)
   (let ((rule-name (gensym)))
     `(let ((,rule-name ,@(if (consp name)
                              `(,name)
@@ -32,13 +35,19 @@
        (redefine-defrule ,rule-name
                          ',body
                          :salience ,salience
-                         :module ,module))))
+                         :context ,context
+                         :auto-focus ,auto-focus))))
 
 (defmacro deftemplate (name (&key) &body body)
   (redefine-deftemplate name body))
 
 (defmacro defimport (class-name)
   `(import-class-specification ',class-name))
+
+(defmacro defcontext (context-name)
+  `(unless (find-context (inference-engine) ,context-name)
+     (register-new-context (inference-engine) 
+                           (make-context ,context-name))))
 
 (defun expand-slots (body)
   (mapcar #'(lambda (pair)

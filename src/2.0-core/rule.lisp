@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.17 2002/11/14 18:21:46 youngde Exp $
+;;; $Id: rule.lisp,v 1.18 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,9 +34,11 @@
    (salience :initform 0
              :initarg :salience
              :reader rule-salience)
-   (module :initform nil
-           :initarg :module
-           :reader rule-module)
+   (context :initarg :context
+            :reader rule-context)
+   (auto-focus :initform nil
+               :initarg :auto-focus
+               :reader rule-auto-focus)
    (behavior :initform nil
              :accessor rule-behavior)
    (binding-set :initarg :binding-set
@@ -126,7 +128,10 @@
       (first addresses))))
 
 (defun make-rule (name engine patterns actions 
-                  &key (doc-string nil) (salience 0) (module nil))
+                  &key (doc-string nil) 
+                       (salience 0) 
+                       (context nil)
+                       (auto-focus nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
             (loop for pattern in patterns
@@ -137,7 +142,10 @@
        :engine engine
        :comment doc-string
        :salience salience
-       :module module
+       :context (if (null context)
+                    (find-context 'initial-context)
+                  context)
+       :auto-focus auto-focus
        :logical-marker (find-any-logical-boundaries patterns)
        :binding-set (make-rule-binding-set))
      patterns actions)))

@@ -20,13 +20,18 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.9 2002/11/08 15:53:49 youngde Exp $
+;;; $Id: preamble.lisp,v 1.10 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *active-rule* nil)
 (defvar *active-engine* nil)
 (defvar *active-tokens* nil)
+(defvar *active-context* nil)
+
+(defun active-context ()
+  (declare (inline active-context))
+  *active-context*)
 
 (defun active-tokens ()
   (declare (inline active-tokens))

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.67 2002/11/18 18:55:17 youngde Exp $
+;;; $Id: parser.lisp,v 1.68 2002/11/19 15:57:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -94,7 +94,9 @@
       (build-ruleset patterns nil)
       (nreverse rulesets))))
 
-(defun define-rule (name body &optional (salience 0) (module nil))
+(defun define-rule (name body &optional (salience 0) 
+                                        (context nil)
+                                        (auto-focus nil))
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
@@ -104,14 +106,18 @@
          (make-composite-ruleset lhs) rhs
          :doc-string doc-string
          :salience salience
-         :module module)
+         :context context
+         :auto-focus auto-focus)
       (make-rule name (inference-engine) lhs rhs
                  :doc-string doc-string
                  :salience salience
-                 :module module))))
+                 :context context
+                 :auto-focus auto-focus))))
 
-(defun redefine-defrule (name body &key (salience 0) (module nil))
-  (define-rule name body salience module))
+(defun redefine-defrule (name body &key (salience 0)
+                                        (context nil)
+                                        (auto-focus nil))
+  (define-rule name body salience context auto-focus))
 
 (defun extract-rule-headers (body)
   (if (stringp (first body))
