@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.4 2000/10/27 21:38:38 youngde Exp $
+;;; $Id: parser.lisp,v 1.5 2000/10/28 00:07:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,14 +111,14 @@
                       (values flist))
                      ((literalp field)
                       (parse-fields (rest fields)
-                                    (nconc flist `(,field))))
+                                    (nconc flist `((,field)))))
                      ((variablep field)
                       (if (consp (second fields))
                           (parse-fields (rest (rest fields))
                                         (nconc flist
-                                               `(,field ,(second fields))))
+                                               `((,field ,(second fields)))))
                         (parse-fields (rest fields)
-                                      (nconc flist `(,field)))))
+                                      (nconc flist `((,field))))))
                      (t
                       (error "parse-ordered-pattern: parse error for ~S~%"
                              pattern))))))
@@ -176,5 +176,5 @@
              (or (null class)
                  (is-lisa-class class)))))
     (if (ordered-patternp (first p))
-        (parser-ordered-pattern p)
+        (parse-ordered-pattern p)
       (parse-unordered-pattern p))))

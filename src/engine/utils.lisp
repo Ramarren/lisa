@@ -20,18 +20,23 @@
 ;;; File: utils.lisp
 ;;; Description: Various utilities useful to the inference engine.
 
-;;; $Id: utils.lisp,v 1.2 2000/10/27 21:38:38 youngde Exp $
+;;; $Id: utils.lisp,v 1.3 2000/10/28 00:07:03 youngde Exp $
 
 (in-package "LISA")
 
 (defun make-internal-class (name slots)
-  (let ((class (find-class name nil)))
-    (when (null class)
-      (setf class
-        (eval `(defclass ,name (lisa-kb-class)
-                 (,@slots))))
-      (clos:finalize-inheritance class))
-    (values class)))
+  (flet ((validate-class (class)
+           (when (not (= (length slots)
+                         (length (clos:class-direct-slots class))))
+             (error "New definition of class ~S inconsistent with existing instance." name))))
+    (let ((class (find-class name nil)))
+      (when (null class)
+        (setf class
+          (eval `(defclass ,name (lisa-kb-class)
+                   (,@slots))))
+        (clos:finalize-inheritance class))
+      (validate-class class)
+      (values class))))
 
 (defun has-superclass (class super)
   (member super (clos:class-precedence-list class)))
