@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.16 2000/11/17 16:34:45 youngde Exp $
+;;; $Id: language.lisp,v 1.17 2000/11/17 21:45:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -36,6 +36,12 @@
 
 (defmacro defimport (name class)
   `(import-and-register-class ',name ',class))
+
+(defmacro reset ()
+  `(reset-engine (current-engine)))
+
+(defmacro run ()
+  `(run-engine (current-engine)))
 
 (defmacro halt ()
   `(values))

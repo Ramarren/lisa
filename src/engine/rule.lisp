@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.6 2000/11/17 02:52:29 youngde Exp $
+;;; $Id: rule.lisp,v 1.7 2000/11/17 21:45:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -45,7 +45,10 @@
            :reader get-engine)
    (rule-source :initform nil
                 :initarg :rule-source
-                :reader get-rule-source))
+                :reader get-rule-source)
+   (initial-pattern :initform (make-generic-pattern 'initial-fact nil)
+                    :reader get-initial-pattern
+                    :allocation :class))
   (:documentation
    "This class represents LISA rules."))
 
@@ -53,6 +56,14 @@
   (with-accessors ((actions get-actions)) self
     (format t "Firing rule ~S~%" (get-name self))
     (funcall actions)))
+
+(defmethod add-pattern ((self rule) pattern)
+  (with-accessors ((patterns get-patterns)) self
+    (setf patterns (nconc patterns `(,pattern)))))
+
+(defmethod freeze-rule ((self rule))
+  (when (= (get-pattern-count self) 0)
+    (add-pattern self (get-initial-pattern self))))
 
 (defmethod add-node ((self rule) node)
   (with-accessors ((nodes get-nodes)) self
@@ -63,11 +74,9 @@
   (length (get-patterns self)))
   
 (defmethod compile-patterns ((self rule) plist)
-  (with-accessors ((patterns get-patterns)) self
-    (mapc #'(lambda (p)
-              (setf patterns
-                (append patterns `(,(make-pattern (first p) (second p))))))
-          plist)))
+  (mapc #'(lambda (p)
+            (add-pattern self (make-pattern (first p) (second p))))
+        plist))
 
 (defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self) (compile-function rhs)))

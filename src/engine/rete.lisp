@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.11 2000/11/17 16:45:51 youngde Exp $
+;;; $Id: rete.lisp,v 1.12 2000/11/17 21:45:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -37,6 +37,9 @@
              :reader get-compiler)
    (clock :initform 0
           :accessor get-clock)
+   (initial-fact :initform 
+                 (make-fact (find-class 'initial-fact) nil)
+                 :reader get-initial-fact)
    (fact-list :initform nil
               :accessor get-fact-list)
    (next-fact-id :initform 0
@@ -56,10 +59,16 @@
 (defmethod increment-time ((self rete))
   (incf (get-clock self)))
 
+(defmethod get-engine-time ((self rete))
+  (get-clock self))
+
 (defmethod record-fact ((self rete) fact)
   (with-accessors ((facts get-fact-list)) self
     (setf facts
       (nconc facts `(,fact)))))
+
+(defmethod remove-facts ((self rete))
+  (setf (get-fact-list self) nil))
 
 (defmethod next-fact-id ((self rete))
   (with-accessors ((next-fact-id get-next-fact-id)) self
@@ -77,8 +86,16 @@
   (record-fact self fact)
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
-  
-(defmethod run ((self rete))
+
+(defmethod reset-engine ((self rete))
+  (remove-facts self)
+  (remove-activations (get-strategy self))
+  (setf (get-next-fact-id self) 0)
+  (setf (get-clock self) 0)
+  (assert-fact self (get-initial-fact self))
+  (values nil))
+
+(defmethod run-engine ((self rete))
   (mapc #'(lambda (activation)
             (fire-rule activation))
         (get-activations (get-strategy self))))
