@@ -20,7 +20,7 @@
 ;;; File: tms-support.lisp
 ;;; Description: Support functions for LISA's Truth Maintenance System (TMS).
 
-;;; $Id: tms-support.lisp,v 1.2 2002/11/13 17:47:21 youngde Exp $
+;;; $Id: tms-support.lisp,v 1.3 2002/11/13 21:13:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,7 +29,8 @@
 (define-symbol-macro scheduled-dependencies *scheduled-dependencies*)
 
 (defun add-logical-dependency (rete fact dependency-set)
-  (push (gethash dependency-set (rete-dependency-table rete)) fact))
+  (setf (gethash dependency-set (rete-dependency-table rete))
+    (push fact (gethash dependency-set (rete-dependency-table rete)))))
 
 (defun find-logical-dependencies (rete dependency-set)
   (gethash dependency-set (rete-dependency-table rete)))
@@ -40,15 +41,19 @@
         do (push (token-find-fact tokens i) dependencies))
     (nreverse dependencies)))
 
-(defun schedule-dependency-removal (rete dependency-set)
+(defun schedule-dependency-removal (dependency-set)
+  (format t "scheduling ~S~%" dependency-set)
   (push dependency-set scheduled-dependencies))
 
 (defmacro with-truth-maintenance ((rete) &body body)
   (let ((rval (gensym)))
-    `(let* ((scheduled-dependencies (list))
-            (,rval (progn ,@body)))
+    `(let ((*scheduled-dependencies* (list))
+           (,rval nil))
+       (setf ,rval (progn ,@body))
        (dolist (dependency scheduled-dependencies)
-         (dolist (dependent-fact
-                     (gethash dependency (rete-dependency-table ,rete)))
-           (retract-fact ,rete dependent-fact)))
+         (with-accessors ((table rete-dependency-table)) ,rete
+           (dolist (dependent-fact
+                       (gethash dependency table)
+                     (remhash dependency table))
+             (retract-fact ,rete dependent-fact))))
        ,rval)))

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.44 2002/11/13 16:06:48 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.45 2002/11/13 21:13:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -173,7 +173,8 @@
                ((test-pattern-p pattern)
                 (make-node2-test))
                (t (make-node2)))))
-    (when (eql (parsed-pattern-address (logical-block-marker)))
+    (when (eql (parsed-pattern-address pattern) (logical-block-marker))
+      (format t "found marker: ~S~%" (logical-block-marker))
       (mark-as-logical-block join-node (logical-block-marker)))
     join-node))
 
@@ -207,6 +208,7 @@
         (*leaf-nodes* (make-array (length patterns)))
         (*logical-block-marker* (rule-logical-marker rule))
         (*node-test-table* (node-test-cache rete-network)))
+    (format t "rule logical marker: ~S~%" (rule-logical-marker rule))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
     (add-terminal-node rule)

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.15 2002/11/13 16:06:31 youngde Exp $
+;;; $Id: rule.lisp,v 1.16 2002/11/13 21:13:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,9 +103,6 @@
 (defun add-subrule (rule subrule)
   (push subrule (rule-subrules rule)))
 
-(defun add-logical-dependency (rule dependencies fact)
-  (setf (gethash dependencies (rule-active-dependencies rule)) fact))
-
 (defun logical-rule-p (rule)
   (numberp (rule-logical-marker rule)))
 
@@ -127,7 +124,7 @@
        :comment doc-string
        :salience salience
        :module module
-       :logical-marker (find-logical-marker patterns)
+       :logical-marker (find-logical-marker)
        :binding-set (make-rule-binding-set))
      patterns actions)))
 

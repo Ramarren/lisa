@@ -1,8 +1,6 @@
 
 (in-package "LISA")
 
-(use-default-engine)
-
 (clear)
 
 (deftemplate frodo ()
@@ -96,11 +94,11 @@
 (defrule logical-rule ()
   (frodo)
   (logical
-   (gandalf)
-   (samwise))
+   (gandalf))
   =>
   (assert (bilbo)))
 
+#+ignore
 (defrule respond-to-logical-rule ()
   (bilbo)
   =>
@@ -168,3 +166,8 @@
 (defparameter *samwise* (assert (samwise (friend frodo) (age 100))))
 (defparameter *gandalf* (assert (gandalf (name gandalf) (age 200))))
 |#
+
+(assert (frodo))
+(assert (gandalf))
+(run)
+(facts)
