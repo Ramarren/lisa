@@ -20,23 +20,27 @@
 ;;; File: node2-or.lisp
 ;;; Description:
 
-;;; $Id: node2-or.lisp,v 1.2 2002/10/30 19:02:57 youngde Exp $
+;;; $Id: node2-or.lisp,v 1.3 2002/10/30 19:41:04 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-or (join-node) ())
 
+(defmethod pass-tokens-to-successor :around ((self node2-or) tokens)
+  (setf (token-in-compound-network tokens) t)
+  (call-next-method))
+
 (defmethod test-tokens :around ((self node2-or) left-tokens right-token)
   (declare (ignorable left-tokens right-token))
   (let ((test-results (call-next-method)))
-    (format t "test-results: ~S~%" test-results)
     (cond (test-results t)
           ((typep (successor-node (join-node-successor self)) 'node2-or)
            t)
           (t nil))))
   
 (defmethod test-against-right-memory ((self node2-or) left-tokens)
-  (if (zerop (right-memory-count self))
+  (if (and (zerop (right-memory-count self))
+           (token-in-compound-network left-tokens))
       (pass-tokens-to-successor
        self (combine-tokens left-tokens t))
     (loop for right-token being the hash-value 

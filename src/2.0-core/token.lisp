@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.28 2002/10/29 17:50:55 youngde Exp $
+;;; $Id: token.lisp,v 1.29 2002/10/30 19:40:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,8 @@
    (not-counter :initform 0
                 :accessor token-not-counter)
    (hash-code :initform nil)
+   (in-compound-network :initform nil
+                        :accessor token-in-compound-network)
    (contents :initform nil
              :reader token-contents)))
 
