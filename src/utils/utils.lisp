@@ -25,7 +25,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.21 2002/11/18 14:55:05 youngde Exp $
+;;; $Id: utils.lisp,v 1.22 2004/09/15 14:21:40 youngde Exp $
 
 (in-package "LISA.UTILS")
 
@@ -232,6 +232,7 @@ so that the bare symbols are read as keywords."
 ;;; Function Compositions
 ;;;
 
+#|
 (defmacro compose (&rest functions)
   "Macro: compose functions or macros of 1 argument into a lambda.
 E.g., (compose abs (dl-val zz) 'key) ==>
@@ -262,3 +263,4 @@ All the values from nth function are fed to the n-1th."
             (declare (function f0 f1))
             (lambda (&rest args) (multiple-value-call f0 (apply f1 args))))
           functions :initial-value #'identity))
+|#
