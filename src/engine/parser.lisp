@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.18 2000/12/09 21:57:06 youngde Exp $
+;;; $Id: parser.lisp,v 1.19 2000/12/10 03:04:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -108,27 +108,6 @@
                  (error "Parse error at ~S~%" p)))))
     `(,(parse-pattern template nil))))
 
-(defun parse-ordered-pattern (pattern)
-  (labels ((parse-fields (fields flist)
-             (let ((field (first fields)))
-               (cond ((null field)
-                      (values flist))
-                     ((literalp field)
-                      (parse-fields (rest fields)
-                                    (nconc flist `((,field)))))
-                     ((variablep field)
-                      (if (consp (second fields))
-                          (parse-fields (rest (rest fields))
-                                        (nconc flist
-                                               `((,field ,(second fields)))))
-                        (parse-fields (rest fields)
-                                      (nconc flist `((,field))))))
-                     (t
-                      (error "parse-ordered-pattern: parse error for ~S~%"
-                             pattern))))))
-    `(,(canonicalize-pattern (first pattern)
-                             (parse-fields (rest pattern) nil)))))
-
 (defun parse-unordered-pattern (pattern)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
@@ -173,9 +152,7 @@
     (finalize-pattern head (make-slot-list body 0 nil))))
 
 (defun make-default-pattern (p)
-  (if (unordered-pattern-p p)
-      (parse-unordered-pattern p)
-    (parse-ordered-pattern p)))
+  (parse-unordered-pattern p))
 
 (defun canonicalize-fact (body)
   (labels ((create-slots (slots id)
