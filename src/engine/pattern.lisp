@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description: Base class for all types of patterns found on a rule LHS.
 
-;;; $Id: pattern.lisp,v 1.54 2001/09/05 23:31:52 youngde Exp $
+;;; $Id: pattern.lisp,v 1.55 2001/09/06 00:04:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,6 +50,7 @@
 
 (defun fixup-runtime-bindings (pattern)
   (labels ((fixup-bindings (part result)
+             (declare (optimize (speed 3) (debug 1) (safety 1)))
              (let ((token (first part))
                    (new-token nil))
                (cond ((null token)

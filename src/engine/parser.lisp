@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.76 2001/07/17 20:11:52 youngde Exp $
+;;; $Id: parser.lisp,v 1.77 2001/09/06 00:05:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -249,27 +249,6 @@
 (defun show-deffacts (deffact)
   (format t "~S~%" deffact)
   (values deffact))
-
-#+ignore
-(defun parse-and-insert-deffacts (name body)
-  `(let ((deffacts '()))
-     (dolist (fact ',body)
-       (let* ((head (first fact))
-              (meta-class (find-meta-class head)))
-         (push (make-fact 
-                head
-                (canonicalize-slot-names
-                 meta-class
-                 (mapcar #'(lambda (slot)
-                             (let ((name (first slot))
-                                   (value (second slot)))
-                               (if (quotablep value)
-                                   `(,name ,value)
-                                 `(,name ,value))))
-                         (rest fact))))
-               deffacts)))
-     (add-autofact (current-engine)
-                   (make-deffacts ',name (nreverse deffacts)))))
 
 (defun parse-and-insert-deffacts (name body)
   `(let ((deffacts '()))
