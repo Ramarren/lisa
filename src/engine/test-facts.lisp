@@ -17,17 +17,29 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: rete.lisp
-;;; Description: Class representing the inference engine itself.
+;;; File: test-facts.lisp
+;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: rete.lisp,v 1.2 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: test-facts.lisp,v 1.1 2000/11/09 20:41:47 youngde Exp $
 
 (in-package :lisa)
 
-(defclass rete ()
-  ((hash-index :initarg :hash-index
-               :initform 0
-               :accessor get-hash-index)))
-   
-(defun make-rete ()
-  (make-instance 'rete))
+(defclass rocky ()
+  ((name :initarg :name
+         :initform nil
+         :reader get-name)))
+
+(defclass boris ()
+  ((name :initarg :name
+         :initform nil
+         :reader get-name)))
+
+(defun make-rocky (name)
+  (make-instance 'rocky :name name))
+
+(defun make-boris (name)
+  (make-instance 'boris :name name))
+
+  
+  
+  

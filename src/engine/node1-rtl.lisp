@@ -21,9 +21,9 @@
 ;;; Description: A node whose test always passes, but which transfers calls
 ;;; from the "right" side to the "left".
 
-;;; $Id: node1-rtl.lisp,v 1.2 2000/11/03 19:23:26 youngde Exp $
+;;; $Id: node1-rtl.lisp,v 1.3 2000/11/09 20:41:47 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass node1-rtl (node1)
   ()

@@ -30,9 +30,21 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.3 2000/11/04 02:28:29 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.4 2000/11/09 20:41:47 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
+
+(defclass root-node (node1)
+  ()
+  (:documentation
+   "Private class used by RETE-COMPILER to represent root nodes in the
+   network."))
+
+(defmethod call-node-right ((self root-node) token)
+  (pass-along self token))
+
+(defun make-root-node ()
+  (make-instance 'root-node))
 
 (defclass rete-compiler ()
   ((hash-key :initform 101

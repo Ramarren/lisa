@@ -17,16 +17,16 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ;;;
-;;; File: defrule.lisp
-;;; Description: The DEFRULE class.
+;;; File: rule.lisp
+;;; Description: The RULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.8 2000/11/09 19:26:04 youngde Exp $
+;;; $Id: rule.lisp,v 1.1 2000/11/09 20:41:47 youngde Exp $
 
 (in-package :lisa)
 
 (defvar *rete* (make-hash-table))
 
-(defclass defrule ()
+(defclass rule ()
   ((name :initarg :name
          :initform nil
          :reader get-name)
@@ -48,14 +48,14 @@
   (:documentation
    "This class represents LISA rules."))
 
-(defmethod add-node ((self defrule) node)
+(defmethod add-node ((self rule) node)
   (with-accessors ((nodes get-nodes)) self
     (setf nodes (nconc nodes `(,node)))))
 
-(defmethod get-pattern-count ((self defrule))
+(defmethod get-pattern-count ((self rule))
   (length (get-patterns self)))
   
-(defmethod compile-patterns ((self defrule) plist)
+(defmethod compile-patterns ((self rule) plist)
   (with-accessors ((patterns get-patterns)) self
     (mapc #'(lambda (p)
               (format t "compiling pattern: ~S~%" p)
@@ -63,17 +63,17 @@
                 (append patterns `(,(make-pattern (first p) (second p))))))
           plist)))
 
-(defmethod compile-actions ((rule defrule) rhs)
-  (setf (get-actions rule) (compile-function rhs)))
+(defmethod compile-actions ((self rule) rhs)
+  (setf (get-actions self) (compile-function rhs)))
 
-(defmethod finalize-rule-definition ((rule defrule) lhs rhs)
-  (compile-patterns rule lhs)
-  (compile-actions rule rhs)
-  (setf (gethash (get-name rule) *rete*) rule)
+(defmethod finalize-rule-definition ((self rule) lhs rhs)
+  (compile-patterns self lhs)
+  (compile-actions self rhs)
+  (setf (gethash (get-name self) *rete*) rule)
   (values rule))
 
-(defun make-defrule (name &key (doc-string nil) (salience 0) (source nil))
+(defun make-rule (name &key (doc-string nil) (salience 0) (source nil))
   "Constructor for class DEFRULE."
-  (make-instance 'defrule :name name :comment doc-string
+  (make-instance 'rule :name name :comment doc-string
                  :salience salience :rule-source source))
 
