@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.21 2002/11/07 19:16:11 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.22 2002/11/07 19:22:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -170,7 +170,3 @@
 
 (defun make-behavior (function bindings)
   (make-predicate-test function bindings))
-
-(register-clear-handler
- "node-tests" #'(lambda ()
-                  (clrhash *node-test-table*)))
