@@ -1,0 +1,244 @@
+;; -*- mode: Lisp -*-
+;;
+;; File: defrule.zb
+;; Description: Grammar for language constructs. Production rule
+;; content was heavily influenced by the "CLIPS Reference Manual".
+;;
+
+(:name "defrule"
+       :domain-file "defrule-domain"
+       :grammar "null-grammar"
+       :package "LESS.PARSER"
+       :identifier-continue-chars
+       "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+       :identifier-start-chars
+       "$-_<>=+*/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+       :lex-cats ((varname
+                   "\\?[a-z,A-Z,_]+[a-z,A-Z,0-9,_]*")
+                  (anonymous-varname
+                   "\\?"))
+;;                  (function-name
+;;                   "[<,>,=,+,\-,\*,/,_,a-z,A-Z,0-9]+"))
+       )
+
+;;
+;; Production rules...
+;;
+
+(defrule defrule
+    := ("(" "defrule" name
+         comment
+         declaration-list
+         left-hand-side
+         "=>"
+         right-hand-side
+         ")")
+    :build (:form (build-defrule name comment
+                                 declaration-list
+                                 left-hand-side
+                                 right-hand-side))
+    )
+
+(defrule comment
+    := ()
+    := string
+    )
+
+(defrule declaration-list
+    := ()
+    := ("(declare" declaration ")")
+    )
+
+(defrule declaration
+    := ("(salience" number ")")
+    )
+
+(defrule left-hand-side
+    := conditional-element-list
+    )
+
+(defrule right-hand-side
+    := action-list
+    )
+
+(defrule action-list
+    := ()
+    := (action action-list)
+    :build (cons action action-list)
+    )
+
+(defrule action
+    := function-call
+    :build (:form (build-action function-call))
+    )
+
+(defrule conditional-element-list
+    := ()
+
+    := (conditional-element)
+    :build (cons conditional-element nil)
+    
+    := (conditional-element conditional-element-list)
+    :build (cons conditional-element
+                 conditional-element-list)
+    )
+
+(defrule conditional-element
+    := pattern-ce
+    := assigned-pattern-ce
+    := not-ce
+    := test-ce
+    )
+
+(defrule pattern-ce
+    := ("(" ordered-pattern-ce ")")
+    :build (:form ordered-pattern-ce)
+
+    := ("(" template-pattern-ce ")")
+    :build (:form template-pattern-ce)
+    )
+
+(defrule assigned-pattern-ce
+    := (variable-name "<-" pattern-ce)
+    :build (build-assigned-pattern variable-name pattern-ce)
+    )
+
+(defrule test-ce
+    := ("(test" function-call ")")
+    :build (build-test-pattern function-call)
+    )
+
+(defrule not-ce
+    := ("(not" conditional-element ")")
+    :build (build-not-pattern conditional-element)
+    )
+
+(defrule ordered-pattern-ce
+    := name
+    :build (build-ordered-pattern name nil)
+
+    := (name constraint-list)
+    :build (build-ordered-pattern name constraint-list)
+    )
+
+(defrule template-pattern-ce
+    := name
+    :build (:form (build-unordered-pattern name))
+    
+    := (name lhs-slot-list)
+    :build (:form (build-unordered-pattern name
+                                           :slots lhs-slot-list))
+    )
+
+(defrule lhs-slot-list
+    := single-field-lhs-slot
+    :build (list single-field-lhs-slot)
+    
+    := (single-field-lhs-slot lhs-slot-list)
+    :build (cons single-field-lhs-slot lhs-slot-list)
+    )
+
+(defrule single-field-lhs-slot
+    := ("(" slot-name constraint ")")
+    :build (:form (if (consp constraint)
+                      (cons slot-name constraint)
+                    (list slot-name constraint)))
+    )
+
+(defrule constraint-list
+    := constraint
+
+    := (constraint constraint-list)
+    :build (append constraint
+                   (if (consp constraint-list)
+                       constraint-list
+                     (list constraint-list)))
+    )
+
+(defrule constraint
+    := anonymous-variable-name
+    := connected-constraint
+    :build (list connected-constraint)
+    )
+
+(defrule connected-constraint
+    := single-constraint
+
+    := (single-constraint "&" connected-constraint)
+    :build (list single-constraint connected-constraint)
+    )
+
+(defrule single-constraint
+    := term
+    := ("~" term)
+    )
+
+(defrule term
+    := constant
+
+    := single-field-variable
+
+    := ("." function-call)
+    :build (build-predicate-constraint function-call)
+
+    := ("=" function-call)
+    :build (build-return-value-constraint function-call)
+    )
+
+(defrule function-call
+    := ("(" function-name ")")
+    :build (cons function-name nil)
+    
+    := ("(" function-name function-argument-list ")")
+    :build (cons function-name function-argument-list)
+    )
+
+(defrule function-argument-list
+    := function-argument
+    :build (cons function-argument nil)
+    
+    := (function-argument function-argument-list)
+    :build (cons function-argument function-argument-list)
+    )
+
+(defrule function-argument
+    := varname-or-value
+    := function-call
+    )
+
+(defrule single-field-variable
+    := variable-name
+    )
+
+(defrule varname-or-value
+    := variable-name
+    := constant
+    )
+
+(defrule variable-name
+    := varname
+    :build (make-symbol varname)
+    )
+
+(defrule anonymous-variable-name
+    := anonymous-varname
+    :build (make-symbol anonymous-varname)
+    )
+
+(defrule slot-name
+    := name
+    )
+
+(defrule function-name
+    := name
+    )
+
+(defrule name
+    := identifier
+    )
+
+(defrule constant
+    := name
+    := string
+    := number
+    )
