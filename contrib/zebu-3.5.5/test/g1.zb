@@ -1,0 +1,36 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         g1.zb
+; Description:  Grammar Example g1 from Fischer&LeBlanc
+; Author:       Joachim H. Laubsch
+; Language:     Zebu
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/g1.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "g1")
+
+(defrule S := E)
+
+(defrule E := (E "+" Term)
+	   := Term)
+
+(defrule Term  := Identifier
+	       := ( "(" E ")" ) )
+
+#||
+(setf (SYSTEM::environment-variable "zebutest") "~/hpnlrw/zebu/test")
+
+(let ((*load-verbose* t))
+  (compile-slr-grammar
+   (merge-pathnames "g1.zb" *ZEBU-test-directory*)))
+
+(setq zebu:*current-grammar*
+      (zebu-load-file (merge-pathnames "g1.tab" *ZEBU-test-directory*)))
+(progn (format t "symbols: ") (terpri) (zebu::cruise-symbols-2))
+(zebu::print-collection t)
+(zebu::calculate-first-sets)
+(setq $i (third (zb::oset-item-list zb::f-i-set)))
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of g1.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

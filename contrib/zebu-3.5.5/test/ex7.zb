@@ -1,0 +1,30 @@
+(:name "ex5"
+  :package "CL-USER"
+  :grammar "zebu-mg"
+  :lex-cats ((BEGIN "begin")
+	     (END "end")
+	     (Id2 "[-a-zA-Z][-$_a-zA-Z0-9]*")
+ ))
+
+
+;; Domain definition
+
+   Program     := [(-stmts kb-sequence)];
+   Combination := [(-function) (-args kb-sequence)];
+   Tuple       := [(-members kb-sequence)];
+
+;; Rules
+
+   Program --> BEGIN Stmt+ ";" END
+               { Program: [(-stmts Stmt+)] } ;
+
+   Stmt    --> Id2 | Appl | Program ;
+
+   Appl    --> Identifier "(" Arg* "," ")"
+               {Combination: [(-function Identifier) (-args Arg*)]};
+
+   Arg     --> Identifier | Number | Appl | Tuple ;
+
+   Tuple   --> "<" Arg+ " " ">" 
+               { Tuple: [(-members Arg+)] };
+

@@ -1,0 +1,14 @@
+
+(:grammar "null-grammar"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :lex-cats (
+            (node-name "[A-Z]+")
+            ))
+
+(defrule datr-theorem
+  := (node-name ":" identifier ".")
+  :build(:form 
+         (list node-name identifier)))
+
+

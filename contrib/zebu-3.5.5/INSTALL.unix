@@ -1,0 +1,58 @@
+The Zebu runtime system is all you need if you want to use the
+parser/generator that was produced by the compiler (in form of a .tab
+file).
+
+The Zebu-compiler is necessary in order to convert the external
+grammar description (in form of a .zb file) into a LALR(1) parsing
+table (in form of a .tab file), and associated printers and semantic
+functions (in form of a <grammar-name>-domain.lisp file).
+
+Installation under Unix
+-----------------------
+
+set the environment variables for LISP to the directory, where your
+lisp development environment resides.  (In case of Lucid, the name of
+the executable is 'base-lisp-de', in case your Lisp uses a different
+name you could create a link, or edit the Makefile)
+
+
+	cd <directory where the Zebu sources reside>
+	make
+
+
+
+Alternative Installation (using DEFSYSTEM)
+------------------------------------------
+
+DEFSYSTEM makes it easier to load and compile grammars, since one does not
+need to remember the location of a module in a directory structure.
+The bad news is that this DEFSYSTEM is incompatible with the one
+maintained at CMU.  At some point we will clean this up.  (Anyone who
+would write the definition using the DEFSYSTEM distributed by CMU
+should send me the file and I will include it in the next version)
+ 
+To install, follow the directions in ZEBU-sys.lisp.  You will need the
+portable DEFSYS which is available at:
+ http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/tools/defsys/laubsch/
+
+The most recent version defsys-5.7 can can be found on ftp.digitool.com 
+in /pub/mcl/contrib as defsys-5.7.tar.gz.
+
+The file ZEBU-sys.lisp defines three systems
+
+	Zebu		        the runtime system
+	Zebu-compiler	        the compiler
+	Zebu-RR                 the rewrite rule system
+
+To use ZEBU evaluate
+--------------------
+
+	(load "ZEBU-init.lisp")
+
+	(zb:zebu)                ; to load the runtime system
+
+	(zb:zebu-compiler)       ; to load the grammar compiler
+
+	(zb:zebu-rr)             ; to load the rewrite-rule module
+
+

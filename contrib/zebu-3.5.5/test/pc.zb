@@ -1,0 +1,44 @@
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         pc.zb
+; Description:  propositional calculus
+; Author:       Joachim H. Laubsch
+; Created:      15-Aug-91
+; Modified:     Thu Oct  2 12:57:16 1997 (Joachim H. Laubsch)
+; Language:     Lisp
+; Package:      USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/pc.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: pc.zb,v $
+; RCS Revision 1.1  2000/10/12 02:39:45  youngde
+; RCS Added Zebu as contrib; initial class files; initial grammar
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "pc"
+ :domain-file "pc-dom"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+(defrule Formula
+  := Propositional-variable
+  := Boolean-Expr
+  := ( "(" Formula ")" )
+  :build (progn Formula)
+  )
+
+(defrule Propositional-Variable
+  := Identifier)
+
+(defrule Boolean-Expr
+  := (Formula.1 Boolean-Op Formula.2)
+  :build (list Boolean-Op Formula.1 Formula.2)
+  )
+
+(defrule Boolean-Op
+  := "and"
+  := "or"
+  )
+

@@ -1,0 +1,12 @@
+#!/bin/ksh -p
+
+type=`uname -m | cut -c6`
+if [ "$type" -eq '3' ]
+then
+	echo 6
+elif [ "$type" -eq '7' ]
+then
+	echo h
+else
+	echo h
+fi

@@ -1,0 +1,45 @@
+************************************************************
+*                             Installation
+************************************************************
+
+The Zebu runtime system is all you need if you want to use the
+parser/generator that was produced by the compiler (in form of a .tab
+file).
+
+The Zebu-compiler is necessary in order to convert the external
+grammar description (in form of a .zb file) into a LALR(1) parsing
+table (in form of a .tab file), and associated printers and semantic
+functions (in form of a <grammar-name>-dom.lisp file).
+
+Installation
+------------
+
+1. copy the subdirectory `win' into some directory on your drive,
+e.g. c:\work\zebu
+
+2. In ACL 
+
+2.1 	(load "zinit.lsp")
+
+2.2 (if you have a LISP compiler)
+	load zcompile.lsp
+
+This compiles all of ZEBU.
+
+To use the compiled ZEBU evaluate
+
+	(zb:zebu)                ; to load the runtime system
+
+	(zb:zebu-compiler)       ; to load the grammar compiler
+
+2.3 (if you don't have a LISP compiler)
+
+	(zb:zebu :compiled nil)                ; to load the runtime system
+
+	(zb:zebu-compiler :compiled nil)       ; to load the grammar compiler
+
+
+Bug reports to
+--------------
+
+laubsch@cup.hp.com

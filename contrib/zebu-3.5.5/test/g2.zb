@@ -1,0 +1,36 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         g1.zb
+; Description:  Zebu Grammar Example with useless nonterminals
+; Author:       Joachim H. Laubsch
+; Language:     CL
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/g2.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "g1")
+
+(defrule S := A
+	   := B)
+
+(defrule A := "a")
+
+(defrule B := (B "b") )
+
+(defrule C := "c")
+
+#||
+(setf (SYSTEM::environment-variable "zebutest") "~/hpnlrw/zebu/test")
+(let ((*load-verbose* t))
+  (compile-slr-grammar
+   (merge-pathnames "g1.zb" *ZEBU-test-directory*)))
+;;; Warning: The following non-terminals where defined but not used: C 
+
+(setq zebu:*current-grammar*
+      (zebu-load-file (merge-pathnames "g1.tab" *ZEBU-test-directory*)))
+(progn (format t "symbols: ") (terpri) (zebu::cruise-symbols-2))
+(zebu::print-collection t)
+
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of g1.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

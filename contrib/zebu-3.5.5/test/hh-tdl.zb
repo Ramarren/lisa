@@ -1,0 +1,93 @@
+(:name "hh-tdl"
+ :grammar "zebu-mg"
+ :package "CL-USER"
+ :identifier-continue-chars
+ "$*-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :identifier-start-chars
+ "$*-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+)
+;; ENRICH 'lex-cats' !!! (to handle '*avm*'...)
+;; :lex-cats ((Identifier "[A-z]+"))
+;; 
+
+;; Domain definition
+;; skip 'options,' optional expressions to begin
+
+;; REORGANIZE W.R.T. KB-DOMAIN ???
+;; (ISN'T THIS OPTIONAL ANYWAY ??)
+;; CREATE GLOBAL HIERARCHY??? (how to break down?)
+
+Type-Feat := kb-domain: [];
+
+Type-Def := Type-Feat: [(-type Identifier) (-def)];     
+;; 1st restricted, 2nd generic ?!!
+;; return what, where?					
+;; are these things nested??
+
+AVM-Def := Type-Feat: [(-body)]; 
+;; unique labels?  case sensitivity??
+
+Disjunction := Type-Feat: [(-terms)];  
+	Disj-Inc := Disjunction: [];	
+	Disj-Exc := Disjunction: [];	
+;; (dis)advantages of specificity?
+
+Conjunction := Type-Feat: [(-terms)];
+
+Feature-Term := Type-Feat: [(-terms)];
+
+Attr-Val := Type-Feat: [(-attr-path) (-val)];
+
+
+
+;; Productions 
+
+
+Type-Def 	--> 	Type AVM-Def "."
+			{Type-Def: [(-type Type)
+				    (-def AVM-Def)]};
+			
+;;		      |	Type Subtype-Def "."
+;;			{Type-Def: [(-type Type)
+;;				    (-def Subtype-Def)]};
+
+
+AVM-Def 	--> 	":=" Body
+			{AVM-Def: [(-body Body)]};
+
+Body		-->	Disjunction;
+;;currently transparent, soon to include the following...
+;;			{Body: [(-disj Disjunction)
+;;				(-const Constraint+)]}
+
+Disjunction	--> 	Conjunction+ "|"
+			{Disj-Inc: [(-terms Conjunction+)]} | 
+			Conjunction+ "^"	              
+			{Disj-Exc: [(-terms Conjunction+)]};
+;; "+" vs. "*" ?
+;; tricky tricky!
+
+Conjunction	-->	Term+ "&"
+			{Conjunction: [(-terms Term+)]};			
+
+Term		-->	Type |
+			Feature-Term;
+
+Feature-Term	-->	"[" Attr-Val* "," "]" 
+			{Feature-Term: [(-terms Attr-Val*)]};   
+;; "*" vs. "+" ?		       					
+;; tricky tricky!
+
+Attr-Val 	-->	Attribute+ "." 
+			{Attr-Val: [(-attr-path Attribute+)
+				    (-val NIL)]}
+
+		      |	Attribute+ "." Disjunction 
+			{Attr-Val: [(-attr-path Attribute+)
+				    (-val Disjunction)]};
+;; what about paths -- sufficiently general??
+
+Type		--> 	Identifier;
+
+Attribute	-->	Identifier;
+

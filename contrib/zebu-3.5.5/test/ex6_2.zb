@@ -1,0 +1,39 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+(:name "ex6_2"
+ :domain-file "ex6-dom"
+ :grammar "zebu-mg"
+ :identifier-start-chars
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars
+    "_-=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ )
+
+;; Domain definition
+
+ assignment := [(-lhs) (-rhs)];
+ locative   := [(-path)]; 
+
+;; Productions
+
+ S -->  L "=" R 		{assignment: [(-lhs L) (-rhs R)]}
+	| R ;
+
+ L -->  "*" R               	{locative: [(-path R)]}
+	| Identifier;
+
+ R -->  NUMBER
+	| L;
+
+
+#||
+(ds:compile-module "ex6_2")
+(ds:load-module "ex6_2")
+(read-parser "foo = 0" :grammar (find-grammar "ex6_2"))
+(type-of (read-parser "**foo = ***x" :grammar (find-grammar "ex6_2")))
+(equalp (ASSIGNMENT--lhs
+	 (read-parser "**foo = ***x" :grammar (find-grammar "ex6_2")))
+	(read-parser "**foo" :grammar (find-grammar "ex6_2")))
+||#
+
+
+

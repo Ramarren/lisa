@@ -2,13 +2,40 @@
 ;;; File: language.lisp
 ;;; Description: Macros that implement the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.1 2000/10/10 20:42:29 youngde Exp $
+;;; $Id: language.lisp,v 1.2 2000/10/12 02:39:45 youngde Exp $
 
 (in-package "LISA")
 
 (defmacro defrule (name &body body)
   `(redefine-defrule ',name ',body))
 
+(defun redefine-defrule (name args)
+  (labels ((variablep (sym)
+             (eq (elt (symbol-name sym) 0) #\?))
+           (extract-assignement (
+           (lhs (ce-list lhs-forms)
+             (let ((looking-at (first ce-list)))
+               (cond ((null looking-at)
+                      (error "Missing separator '=>'"))
+                     ((stringp looking-at)
+                      (if (stringp (first lhs-forms))
+                          (error "Multiple doc strings.")
+                        (lhs (rest ce-list) (append lhs-forms `(,looking-at)))))
+                     ((consp looking-at)
+                      (lhs (rest ce-list) (append lhs-forms looking-at)))
+                     ((symbolp looking-at)
+                      (cond ((eq looking-at '=>')
+                             (values lhs-forms (rest ce-list)))
+                            ((and (variablep looking-at)
+                                  (eq (second ce-list '<-'
+                             
+                             (lhs (rest ce-list) (append lhs-forms `(,looking-at))))
+                            (t (error "Missing variable."))))
+                     (t (error "Malformed left-hand-side.")))))
+           (rhs (
+  (values name args))
+
+#+ignore
 (defun redefine-defrule (name &rest args)
   (let* ((rule-body (first args))
          (doc-string (extract-documentation rule-body)))

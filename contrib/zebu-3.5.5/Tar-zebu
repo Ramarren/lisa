@@ -1,0 +1,60 @@
+#! /bin/csh
+        set ZEBUDIR = `pwd`
+	set ZEBUVERSION = `cat $ZEBUDIR/Version`
+	set ZEBUTARDIR = zebu-$ZEBUVERSION
+	set ZEBUARCHIVE = $ZEBUDIR/../$ZEBUTARDIR.tar
+	echo "tar zebu to $ZEBUARCHIVE"
+	if (-d /tmp/$ZEBUTARDIR) then 
+		rm -r /tmp/$ZEBUTARDIR
+	endif
+ 	mkdir /tmp/$ZEBUTARDIR
+	chmod 777 /tmp/$ZEBUTARDIR
+
+ 	cd $ZEBUDIR
+	make distclean
+	find . \( -name '*.lisp' -o -name '*.zb' -o -name 'README' \
+	-o -name 'machine' -o -name '*.doc' \
+	-o -name 'win*' -o -name '*.tdl' \
+	-o -name 'Zebu_intro.tex' -o -name 'Zebu_intro.ps' -o -name 'Makefile' -o -name 'sample-*' \
+	-o -name 'Version' -o -name 'ChangeLog' -o -name 'COPYRIGHT'  \
+	-o -name 'Tar-zebu' -o -name 'shar-zebu' -o -name 'INSTALL.*' \)\
+	-type f -print | cpio -pamvhd /tmp/$ZEBUTARDIR
+
+	echo "Cleaning up /tmp/$ZEBUTARDIR"
+	cd /tmp/$ZEBUTARDIR
+	find .  \( -name 'Z-info.*' -o -name 'Z-shake' -o -name 'package.doc' -o -name '*~' \)\
+	-type f -print -exec rm {} \;
+	rm -rf archive/
+	if !( -d test) then
+	mkdir test
+	chmod 777 test
+	endif
+	
+	echo "Cleaning up /tmp/$ZEBUTARDIR/test"
+	cd /tmp/$ZEBUTARDIR/test
+	find . \( -name '*-domain.*' -o -name 'Bib*' \
+	-o -name 'zebra*' -o -name 'time*' -o -name '*foo*' \
+	-o -name 'tfs*' \) \
+	-type f -print -exec rm {} \;
+
+	if !( -d binary) then
+	mkdir binary
+	chmod 777 binary
+	endif
+
+	cd /tmp/$ZEBUTARDIR/
+	echo "Creating Windows directory and files"
+	$ZEBUDIR/winzebu
+
+	echo "Making tar file"
+ 	cd /tmp
+	tar cvf $ZEBUARCHIVE ./$ZEBUTARDIR
+
+#	rm -rf $ZEBUTARDIR
+
+ 	cd $ZEBUDIR/..
+	echo "Compressing to" `pwd`/$ZEBUTARDIR.t"gz using gzip."
+
+	gzip $ZEBUARCHIVE
+	mv $ZEBUTARDIR.tar".gz" $ZEBUTARDIR.t"gz"
+	chmod 666 $ZEBUTARDIR.t"gz"

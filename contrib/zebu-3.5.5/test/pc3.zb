@@ -1,0 +1,105 @@
+; -*- mode:     CL -*- --------------------------------------------------- ;
+; File:         pc3.zb
+; Description:  Propositional Calculus Grammar with AVM Semantics
+; Author:       Joachim H. Laubsch
+; Created:      15-Aug-91
+; Modified:     Thu Oct  2 12:57:22 1997 (Joachim H. Laubsch)
+; Language:     CL
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/pc3.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: pc3.zb,v $
+; RCS Revision 1.1  2000/10/12 02:39:45  youngde
+; RCS Added Zebu as contrib; initial class files; initial grammar
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "pc3"
+ :package "CL-USER"
+ :grammar "zebu-mg"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :domain-file "pc3-domain"
+ :domain 
+ (kb-domain
+  :subtype (Formula
+	    :subtype (Propositional-variable 
+		      :slots (-name))
+	    :subtype (P-Formula :slots   (-content))
+	    :subtype (Boolean-Expr
+		      :slots ((-rand1    Formula)
+			      (-rand2    Formula))
+		      :subtype Boolean-Or
+		      :subtype Boolean-And))
+  :subtype (Atomic-Wff :slots (-predicate
+			       (-Role-Argument-Pairs KB-Sequence)))
+  :subtype (Role-Argument-Pair :slots (-Role -Argument))
+  )
+ )
+
+Formula --> Propositional-variable
+	    | Boolean-Expr
+	    | "(" Formula ")" 		{ type: P-Formula 
+						[(-content Formula)] }
+	    | Atomic-Wff ;  
+
+Propositional-Variable
+  --> Identifier	{ type: Propositional-variable 
+			  [(-name Identifier)] } ;
+
+Boolean-Expr --> Formula.1 "and" Formula.2
+                        { type: Boolean-And
+			  [(-rand1 Formula.1)
+			   (-rand2 Formula.2)] }
+
+		| Formula.1 "or" Formula.2
+			{ type: Boolean-Or
+			  [(-rand1 Formula.1)
+			   (-rand2 Formula.2)] } ;
+
+Atomic-Wff --> Identifier "(" Role-Argument-Pairs ")"
+		{ type: Atomic-Wff
+		  [(-predicate Identifier)
+		   (-Role-Argument-Pairs Role-Argument-Pairs)] } ;
+
+Role-Argument-Pairs -->  Role-Argument-Pair * " " ;
+
+Role-Argument-Pair --> Identifier ":" Term
+			{ type: Role-Argument-Pair
+			  [(-Role Identifier)
+			   (-Argument Term)] } ;
+
+Term -->  Identifier | Number ;
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(zb:compile-lalr1-grammar "pc3.zb" 
+			  :output-file (merge-pathnames
+					"binary/pc3.tab"
+					*ZEBU-test-directory*))
+(zb:zebu-load-file (merge-pathnames "binary/pc3.tab"
+				    *ZEBU-test-directory*))
+(zebu::print-actions "pc3")
+(zebu::print-productions)
+
+(zb:read-parser "walks()"
+		:grammar (zb:find-grammar "pc3"))
+
+(zb:read-parser "walks(agent: John)" :grammar (zb:find-grammar "pc3"))
+
+(zb:read-parser "(walks(agent: John))" :grammar (zb:find-grammar "pc3"))
+
+(zb:read-parser "walks(agent: John) and talks(agent: John)"
+		:grammar (zb:find-grammar "pc3"))
+
+(zb:read-parser "walks( time: 12 agent: John)"
+		:grammar (zb:find-grammar "pc3"))
+
+(zb:read-parser "walks(agent: John time: 12) and talks(agent: John  time: 13) and Q"
+		:grammar (zb:find-grammar "pc3"))
+
+||#
+

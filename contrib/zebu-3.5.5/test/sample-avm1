@@ -1,0 +1,28 @@
+[(s1 v1) (s2 v2)]
+
+foo: [(s1 v1) (s2 %1= v2) (s3 %1)]
+
+[]
+
+[( s1 "foo" )]
+
+foo: [(s1 "foo")
+      (s2 %1= "bar")
+      (s3 %1)]
+
+foo: [(s1 "foo")
+      (s2 %1= "bar")
+      (s3 "baz\"2")]
+
+[( s1 "foo
+bar" )]
+
+[( s1 "foo
+\"
+\\"
+\\\"
+bar
+" )]
+
+[( s1  "h\"atten Sie gerne Umlaute?")]
+

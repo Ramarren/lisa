@@ -1,0 +1,4 @@
+#!/bin/sh
+cd $ZEBU
+find /tmp -name 'zebu.shar' -type f -print -exec rm {} \;
+shar -a -C -v . > /tmp/zebu.shar

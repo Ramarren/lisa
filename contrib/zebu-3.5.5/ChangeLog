@@ -1,0 +1,139 @@
+1999-01-13  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* In zebu-generator.lisp replace the def of type->predicate by new
+	def which considers the builtin types NUMBER IDENTIFIER STRING
+
+Thu Oct 2 12:43:10 1997  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* changes for CMUCL suggested by Raymond Toy <toy@rtp.ericsson.se>
+
+Fri Mar 15 09:41:11 1996  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* lexical categories are sorted in the way they are declared.
+	Fix supplied by (Marc Dzaebel), marc@rose.de
+
+Fri Mar  8 15:12:09 1996  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* test/exercise.lisp ((compile-module "ex2")): Release 3.4.8
+	print each rule if :verbose is T
+	eliminate EMPTY action
+	updated doc on number, identifier and string as subtypes of the
+	root domain
+
+Tue Mar  5 09:58:21 1996  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* Release 3.4.7
+	* COPYRIGHT: added GNU Copyleft
+	* COMPILE-ZEBU.lisp corrections for Allegro
+
+Thu Dec 21 17:01:24 1995  Joachim Laubsch  <laubsch@hpwat03.cup.hp.com>
+
+	* 3.4.5 first release of a version that will run in ACL 3.0
+	Windows 3.1.  The script winzebu translates to short filenames,
+	creating the subdirectory 'win'
+
+Tue Aug  2 14:17:18 1994  Joachim H. Laubsch  (laubsch@hpljhl.hpl.hp.com)
+
+	* COMPILE-ZEBU.lisp: *load-binary-pathname-types* for 
+	(and :SUN :LUCID)
+
+	* zebu-driver.lisp (read-parser): if a lex cat is scanned and
+	iff an IDENTIFIER is also expected prefer the IDENTIFIER in case
+	it is longer. 
+
+Thu Jul 28 09:50:16 1994  Joachim H. Laubsch  (laubsch@hpljhl.hpl.hp.com)
+
+	* zebu-loadgram.lisp: Fixed Bug with "." as separator 
+	(ambiguous constituent names were made) 
+	Version 3.3.2
+
+	* zebu-generator.lisp (insert-clause): warn if syntax is not
+	unparsable, because some non-terminal is unbound in semantics
+
+Fri May 13 11:00:43 1994  Joachim H. Laubsch  (laubsch@hpljl)
+
+	* zebu-generator.lisp (insert-clause): fixed error that led to
+	wrong printers
+	(gen-printers): warning message for use of undefined domain type,
+	assume possibility of undefined type in is-subtype-of.
+
+Thu May 12 10:39:12 1994  Joachim H. Laubsch  (laubsch@hpljl)
+
+	* zebu-tree-attributes.lisp: konrad@dfki.uni-sb.de fixed
+	 bug in prepare-tree-attributes
+
+Thu Apr 28 15:55:22 1994  Joachim H. Laubsch  (laubsch@hpljl)
+
+	* added debug-parser (&key (grammar t) (lexer nil))
+	(debug-parser) will load a version of read-parser
+	that traces the parsing engine's shift and reduce
+	moves.
+	(debug-parser :lexer t) will provide more information
+	on the lexer's progress.
+	(debug-parser :grammar nil :lexer nil) will reload the
+	silent and fast version of read-parser.
+
+Mon Apr 25 10:00:59 1994  Joachim H. Laubsch  (laubsch@hpljl)
+
+	* zebu-driver.lisp: implemented state-sensitive token look-
+	ahead
+
+Tue Aug 31 17:13:47 1993  Joachim H.  Laubsch  (laubsch@hpljl)
+
+	* introduce the keyword CASE-SENSITIVE -- which can 
+	be given as part of the grammar spec.  If its value is
+	true the case of grammar keywords is significant.
+
+Tue Aug 17 20:14:52 1993  Joachim Laubsch  (laubsch at hpljl)
+
+	* fix number token lexer bug.  Now integer, ratio and float
+	should be recognized.
+
+Tue Jul 20 20:14:52 1993  Joachim Laubsch  (laubsch at hpljl)
+
+	* introduce macro
+	   def-tree-attributes (class &rest slots)
+	   def-tree-attributes can be compiled and at load-time
+	   no compiler is necessary.
+
+Mon May 17 21:05:39 1993  Joachim Laubsch  (laubsch at hpljl)
+
+	* KB-equal compares now also sequences which are "dotted 
+	lists".
+
+Wed May  5 10:57:05 1993  Joachim Laubsch  (laubsch at hpljl)
+
+	* Printers for slots of type kb-sequence are now
+	generated properly if the Kleene +/* notation is
+	used.
+
+	Example:
+	;; Domain definition
+
+	Program     := [(-stmts kb-sequence)];
+        ..
+
+	;; Rules
+
+	Program --> "begin" Stmt+ ";" "end"
+                    { Program: [(-stmts Stmt+)] } ;
+        ..
+
+Tue Apr 27 16:03:50 1993  Joachim Laubsch  (laubsch at hpljl)
+	* kb-subtypep is now a function analogous to CL's subtypep
+	KB-type-name-p is a function that returns true iff its
+	argument is a symbol naming a subtype of KB-DOMAIN.
+
+	Improved printer generation.
+
+	Checked for MCL compatibility and rewrote part of 
+	regular expression compiler.
+
+Wed Apr  7 10:00:18 1993  Joachim Laubsch  (laubsch at hpljl)
+
+	* To Do
+; Muessen die Kleene-Operatoren eigentlich die leere KB-sequence ans
+; Ende jeder Sequenz schreiben? Ein normales nil sollte mit Hilfe
+; eines modifizierten Printers dasselbe leisten, oder?
+
+

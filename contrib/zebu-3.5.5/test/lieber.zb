@@ -1,0 +1,82 @@
+;; This is a Zebu grammmar that recognizes phone numbers and e-mail addresses in free text.
+;; Henry Lieberman 2 February 1995
+
+(:name "Phone-and-E-Mail"
+       :identifier-start-chars "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#%*^&:;,?/|\\~`+='"
+       :identifier-continue-chars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+;;
+
+(defrule Words 
+  := () 
+  := (Word) 
+  :build (:form (list Word))
+  := (Word Words)
+  :build (:form (cons Word Words))
+  )
+
+(defrule Word
+  := Identifier 
+  := Number
+  := Phone-Number
+  := E-Mail-Address)
+
+(defrule Phone-Number 
+  ;; Example: 253-0315
+  := (Number.1 "-" Number.2) 
+  :build (:form (make-instance 'phone-number :exchange Number.1 :extension Number.2))
+  ;; Example: (617) 253-0315
+  := ("(" Number ")" Phone-Number)
+  :build (:form (make-instance 'phone-number
+                   :area-code Number 
+                   :exchange (exchange Phone-Number)
+                   :extension (extension Phone-Number))))
+
+;; I didn't put anything about restricting to seven digits, etc. 
+
+(defrule Host 
+  ;; Example: media.mit.edu
+  := (Identifier)
+  :build (:form (make-instance 'host :domain-path (list Identifier)))
+  := (Identifier "." Host)
+  :build (:form (make-instance 'host :domain-path (cons Identifier (domain-path Host)))))
+
+(defrule E-Mail-Address
+  ;; Example: lieber@media.mit.edu
+  := (Identifier "@" Host)
+  :build (:form (make-instance 'e-mail-address :person Identifier :host Host)))
+
+
+
+#||
+
+
+(defclass e-mail-address ()
+  ((person :initarg :person :accessor person) (host :initarg :host :accessor host)))
+
+(defclass host () ((domain-path :initarg :domain-path :accessor domain-path)))
+
+(defclass phone-number ()
+  ((area-code :initarg :area-code :accessor area-code) (exchange :initarg :exchange :accessor exchange)
+   (extension :initarg :extension :accessor extension)))
+
+(compile-and-load-grammar "Phone-and-E-Mail") ;; in file Phone-and-E-Mail.zb
+
+
+;; This doesn't work...
+(read-parser
+ "My name is Henry, my address is lieber@media.mit.edu and you can call me at (617) 253-0315" 
+ :grammar (find-grammar "Phone-and-E-Mail"))
+
+;;  Having trouble with . and @ characters ...
+
+;; But this does...
+(read-parser
+ "My name is Henry, my address is lieber @ media . mit . edu and you can call me at (617) 253-0315" 
+ :grammar (find-grammar "Phone-and-E-Mail"))
+
+
+||#
+
+
+
+

@@ -1,0 +1,96 @@
+#!/bin/csh
+# a script to make an MS-DOG  compatible release in the subdirectory `win'
+# imagine: file names with more than 8 characters!
+# see instructions in INSTALL.dos
+
+set ZEBU = `pwd`
+if (-d $ZEBU/win) then 
+	rm -r $ZEBU/win
+endif
+
+echo making directory $ZEBU/win
+mkdir $ZEBU/win
+chmod 777 $ZEBU/win
+
+cp Version $ZEBU/win/version
+cp INSTALL.win $ZEBU/win/install.txt
+cp zebu-mg.zb $ZEBU/win/zebu-mg.zb
+foreach file ( *.lisp )
+	echo Copying $file to $ZEBU/win/$file:r.lsp
+ 	cp $file $ZEBU/win/$file:r.lsp
+end
+
+cd $ZEBU/win
+foreach file ( zebu-* )
+	set newname = `echo $file | awk 'sub("^zebu-","")'` 
+	mv $file $newname
+	echo Renameing $file to $newname
+end
+
+# special files
+mv zebra-debug.lsp zdebug.lsp
+rm ZEBU-sys.lsp
+rm Compile.lsp
+
+mv ZEBU-init.lsp zinit.lsp
+mv COMPILE-ZEBU.lsp zcompile.lsp
+mv aux.lsp zaux.lsp
+mv tree-attributes.lsp treeattr.lsp
+mv mg-hierarchy.lsp mg-hier.lsp
+mv kb-domain.lsp kb-dom.lsp
+mv generator.lsp gnrator.lsp
+
+foreach file ( "zinit" "zcompile" )
+	echo Substituting in $file.lsp
+	awk -f $ZEBU/winpatch.awk $file.lsp > /tmp/$file
+	rm $file.lsp
+	mv /tmp/$file $file.lsp
+end
+
+foreach file ( * )
+	echo Converting $file to DOS	
+	ux2dos $file > /tmp/$file
+	rm $file
+	mv /tmp/$file $file
+	chmod 666 $file
+end
+
+# test directory
+if (-d $ZEBU/win/test) then 
+	rm -r $ZEBU/win/test
+endif
+
+echo making directory $ZEBU/win/binary
+mkdir $ZEBU/win/binary
+chmod 777 $ZEBU/win/binary
+
+echo making directory $ZEBU/win/test
+mkdir $ZEBU/win/test
+chmod 777 $ZEBU/win/test
+
+cd $ZEBU/test
+
+foreach file ( *.lisp )
+	echo Copying $file to $ZEBU/win/test/$file:r.lsp
+ 	cp $file $ZEBU/win/test/$file:r.lsp
+end
+
+foreach file ( *.zb )
+	echo Copying $file to $ZEBU/win/test/$file
+ 	cp $file $ZEBU/win/test/$file
+end
+
+foreach file ( * )
+	if !(-d $file) then
+		echo Converting $file to DOS	
+		ux2dos $file > /tmp/$file
+		rm $file	
+		mv /tmp/$file $file
+		chmod 666 $file
+	endif
+end
+
+mkdir $ZEBU/win/test/binary
+chmod 777 $ZEBU/win/test/binary
+
+cd $ZEBU/test

@@ -1,0 +1,23 @@
+#!/bin/csh
+# I use this to ship the ZEBU release to my PC
+set ZEBUDIR = `pwd`
+
+if (-d /trilogy/trilogy/jhl/win) then
+	rm -rf /trilogy/trilogy/jhl/win 
+endif
+ 
+$ZEBUDIR/Tar-zebu 
+cd .. 
+mv zebu-3.4.5.tar.gz /trilogy/trilogy/jhl/zebu.tar.gz
+cd /trilogy/trilogy/jhl 
+gunzip zebu.tar.gz 
+
+tar xvf zebu.tar 
+rm zebu.tar 
+if (-d /trilogy/trilogy/jhl/zebu) then
+	rm -rf /trilogy/trilogy/jhl/zebu
+endif
+
+mv zebu-3.4.5 zebu 
+cd zebu 
+$ZEBUDIR/winzebu 

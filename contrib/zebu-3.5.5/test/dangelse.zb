@@ -1,0 +1,12 @@
+;;; The dangling else example of pp 228 of the old dragon book.
+(:name "dangelse" :grammar "null-grammar")
+
+;; Productions
+
+(defrule s
+	:= ("if" s "then" s "else" s)
+
+	:= ("if" s "then" s)
+
+	:= IDENTIFIER)
+

@@ -1,0 +1,35 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         simple.zb
+; Description:  Zebu Grammar: Simple Expressions
+; Author:       Joachim H. Laubsch
+; Language:     CL
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/simple.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "simple")
+
+(defrule E := ( Prefix "(" E ")" )
+	   := ( "V" Tail ) )
+
+(defrule Prefix := "F" 
+	        := ())
+
+(defrule Tail   := ( "+" E) 
+	        := ())
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(let ((*load-verbose* t))
+  (compile-slr-grammar "simple.zb"))
+(setq zebu:*current-grammar*
+      (zebu-load-file "simple.tab"))
+(progn (format t "symbols: ") (terpri) (zebu::cruise-symbols-2))
+(zebu::print-collection t)
+(zb::cruise-first-sets)
+(zb::cruise-follow-sets)
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of simple.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+

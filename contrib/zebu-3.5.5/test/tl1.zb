@@ -1,0 +1,38 @@
+; -*- mode: Lisp -*-
+;
+; Zebu grammar describing TL1 syntactic structure.
+;
+
+(:name "tl1" :grammar "zebu-mg")
+
+;;
+;; Domain description...
+;;
+
+command := [(opcode) (param-blocks kb-sequence)];
+parameter-block := [(contents kb-sequence)];
+name-value-pair := [(name) (value)];
+
+command --> opcode parameter-block* ":" ";"
+            { command: [(opcode opcode)
+                        (param-blocks parameter-block*)] };
+                        
+
+;;opcode --> identifier "-" identifier;
+opcode --> identifier;
+
+parameter-block --> parameter-list
+                     { parameter-block: [(contents parameter-list)] };
+
+parameter-list -->  parameter { kb-sequence: [(first parameter)] }
+                  | parameter "," parameter-list
+                    { kb-sequence: [(first parameter) (rest parameter-list)] };
+                                       
+parameter -->   name { name-value-pair: [(name name)] }
+              | name "=" value { name-value-pair: [(name name) (value value)]};
+
+name --> identifier;
+
+value --> identifier | number | string;
+
+

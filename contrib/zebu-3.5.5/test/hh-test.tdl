@@ -1,0 +1,6 @@
+index := *avm* &
+	 [ PERSON  person,
+	   NUMBER  number,
+	   GENDER  gender].
+
+

@@ -1,0 +1,103 @@
+; -*- mode:     CL -*- --------------------------------------------------- ;
+; File:         pc2.zb
+; Description:  Propositional Calculus Grammar with AVM Semantics
+; Author:       Joachim H. Laubsch
+; Created:      15-Aug-91
+; Modified:     Thu Oct  2 12:57:21 1997 (Joachim H. Laubsch)
+; Language:     CL
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/test/Attic/pc2.zb,v 1.1 2000/10/12 02:39:45 youngde Exp $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: pc2.zb,v $
+; RCS Revision 1.1  2000/10/12 02:39:45  youngde
+; RCS Added Zebu as contrib; initial class files; initial grammar
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "pc2"
+ :domain-file "pc2-dom"
+ :package "CL-USER"
+ :grammar "zebu-mg"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :domain-file "pc2-domain"
+ )
+
+;; Domain definition
+
+Formula := kb-domain: [];
+
+  Propositional-variable := Formula: [ (-name) ];
+  P-Formula              := Formula: [ (-content) ];
+  Boolean-Expr           := Formula: [ (-rand1 Formula) (-rand2 Formula)];
+    Boolean-Or           := Boolean-Expr: [];
+    Boolean-And          := Boolean-Expr: [];
+  Atomic-Wff             := Formula: [ (-predicate)
+         			       (-Role-Argument-Pairs
+					 kb-sequence) ];
+
+Role-Argument-Pair := kb-domain: [(-Role) (-Argument)];
+
+;; Productions
+
+Formula --> Propositional-variable
+	    | Boolean-Expr
+	    | "(" Formula ")" 	     { P-Formula:[(-content Formula)] }
+	    | Atomic-Wff ;  
+
+Propositional-Variable
+  --> Identifier	{Propositional-variable: [(-name Identifier)]} ;
+
+Boolean-Expr --> Formula.1 "and" Formula.2
+                        {Boolean-And:
+			  [(-rand1 Formula.1)
+			   (-rand2 Formula.2)]}
+
+		| Formula.1 "or" Formula.2
+			{Boolean-Or:
+			  [(-rand1 Formula.1)
+			   (-rand2 Formula.2)]};
+
+Atomic-Wff --> Identifier "(" Role-Argument-Pairs ")"
+		{ Atomic-Wff:
+		  [(-predicate Identifier)
+		   (-Role-Argument-Pairs Role-Argument-Pairs)] };
+
+Role-Argument-Pairs -->
+      
+      | Role-Argument-Pair Role-Argument-Pairs
+	{ KB-sequence:
+	  [(first Role-Argument-Pair)
+	   (rest  Role-Argument-Pairs)] } ;
+
+Role-Argument-Pair --> Identifier ":" Term
+			{Role-Argument-Pair:
+			  [(-Role Identifier)
+			   (-Argument Term)]};
+
+Term -->  Identifier | Number ;
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(zb:compile-slr-grammar "pc2.zb" 
+			:output-file (merge-pathnames
+				      "binary/pc2.tab"
+				      *ZEBU-test-directory*))
+(zb:zebu-load-file (merge-pathnames "binary/pc2.tab" *ZEBU-test-directory*))
+(zebu::print-actions "pc2")
+
+(zb:read-parser "walks(agent: John)" :grammar (zb:find-grammar "pc2"))
+
+(zb:read-parser "walks(agent: John time: 12)" :grammar (zb:find-grammar "pc2"))
+
+(zb:read-parser "(walks(agent: John))" :grammar (zb:find-grammar "pc2"))
+
+(zb:read-parser "walks(agent: John) and talks(agent: John)" :grammar (zb:find-grammar "pc2"))
+
+(zb:read-parser "walks(agent: John) and talks(agent: John) and Q" :grammar (zb:find-grammar "pc2"))
+
+||#
+

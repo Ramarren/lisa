@@ -1,0 +1,60 @@
+************************************************************
+*                             Installation
+************************************************************
+
+The Zebu runtime system is all you need if you want to use the
+parser/generator that was produced by the compiler (in form of a .tab
+file).
+
+The Zebu-compiler is necessary in order to convert the external
+grammar description (in form of a .zb file) into a LALR(1) parsing
+table (in form of a .tab file), and associated printers and semantic
+functions (in form of a <grammar-name>-domain.lisp file).
+
+Installation
+------------
+
+1. Check whether the pathname for the Zebu directory is correct in your
+installation.
+
+2. In MCL evaluate
+
+	(load "COMPILE-ZEBU.lisp")
+
+This compiles all of ZEBU.
+
+3. To use ZEBU evaluate
+
+	(load "ZEBU-init.lisp")
+
+	(zb:zebu)                ; to load the runtime system
+
+	(zb:zebu-compiler)       ; to load the grammar compiler
+
+	(zb:zebu-rr)             ; to load the rewrite-rule module
+
+
+
+Alternative Installation (using DEFSYSTEM)
+------------------------------------------
+
+DEFSYSTEM makes it easier to load and compile grammars, since one does
+not need to remember the location of a module in a directory
+structure.  The bad news is that this DEFSYSTEM is incompatible with
+the one maintained at CMU.  At some point we will clean this up.
+(Anyone who would write the definition using the DEFSYSTEM distributed
+by Mark Kantrovitz CMU should send me the file and I will include it in
+the next version)
+ 
+To install, follow the directions in ZEBU-sys.lisp.  You will need the
+portable DEFSYS which is available at:
+ http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/tools/defsys/laubsch/
+
+The most recent version defsys-5.7 can can be found on ftp.digitool.com 
+in /pub/mcl/contrib as defsys-5.7.tar.gz.
+
+The file ZEBU-sys.lisp defines three systems
+
+	Zebu		        the runtime system
+	Zebu-compiler	        the compiler
+	Zebu-RR                 the rewrite rule system
