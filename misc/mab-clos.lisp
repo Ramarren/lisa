@@ -22,7 +22,7 @@
 ;;; implementation, a common AI planning problem. The monkey's objective is to
 ;;; find and eat some bananas.
 
-;;; $Id: mab-clos.lisp,v 1.5 2001/05/23 21:47:33 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.6 2001/05/24 19:55:45 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -68,7 +68,7 @@
 
 (defimport chest (lisa-user::chest) ())
 
-(defimport goal-is-to (lisa-user::goal-is-to) ()
+(defimport goal-is-to (lisa-user::goal-is-to)
   (action argument-1 argument-2))
 
 ;;;(watch :activations)

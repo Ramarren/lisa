@@ -21,7 +21,7 @@
 ;;; Description: This class represents LISA facts that are actually CLOS
 ;;; instances.
 
-;;; $Id: shadow-fact.lisp,v 1.7 2001/04/19 14:44:42 youngde Exp $
+;;; $Id: shadow-fact.lisp,v 1.8 2001/05/24 19:55:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,6 +49,10 @@
 (defun instance-of-shadow-fact (self)
   (declare (type shadow-fact self))
   (get-slot-value self (find-meta-slot (get-meta-fact self) :object)))
+
+(defun has-superclass (self symbolic-name)
+  (declare (type shadow-fact self))
+  (member symbolic-name (get-superclasses (get-meta-fact self))))
 
 (defun slot->meta-slot (self slot-id)
   (declare (type shadow-fact self) (type symbol slot-id))

@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.30 2001/05/24 00:34:57 youngde Exp $
+;;; $Id: meta.lisp,v 1.31 2001/05/24 19:55:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -72,7 +72,10 @@
                  :class-name class-name :slots slots))
 
 (defclass meta-shadow-fact (meta-fact)
-  ((effective-slots :reader get-effective-slots))
+  ((effective-slots :reader get-effective-slots)
+   (superclasses :initarg :superclasses
+                 :initform '()
+                 :reader get-superclasses))
   (:documentation
    "This class represents meta information for the class shadow-fact."))
 
@@ -92,10 +95,11 @@
 (defmethod find-effective-slot ((self meta-shadow-fact) (slot-name slot-name))
   (find-effective-slot self (slot-name-name slot-name)))
 
-(defun make-meta-shadow-fact (symbolic-name class-name slots)
+(defun make-meta-shadow-fact (symbolic-name class-name superclasses slots)
   (make-instance 'meta-shadow-fact
                  :symbolic-name symbolic-name
                  :class-name class-name
+                 :superclasses superclasses
                  :slots
                  (append
                   (mapcar #'(lambda (slot)
@@ -143,12 +147,19 @@
      (values t))))
 
 (defun import-class (symbolic-name class superclasses slot-specs)
-  (let ((meta (make-meta-shadow-fact
-               symbolic-name (class-name class) slot-specs)))
-    (register-meta-class symbolic-name meta)
-    (register-external-class symbolic-name class)
-    (generate-internal-methods class)
-    (values meta)))
+  (flet ((validate-superclasses (class-list)
+           (mapc #'(lambda (class-name)
+                     (unless (has-meta-classp class-name)
+                       (environment-error
+                        "This class has not been registered: ~S" class-name)))
+                 class-list)))
+    (let ((meta (make-meta-shadow-fact
+                 symbolic-name (class-name class) 
+                 (validate-superclasses superclasses) slot-specs)))
+      (register-meta-class symbolic-name meta)
+      (register-external-class symbolic-name class)
+      (generate-internal-methods class)
+      (values meta))))
 
 (defun create-class-template (name slots)
   (let* ((class (eval `(defclass ,name (deftemplate) ())))

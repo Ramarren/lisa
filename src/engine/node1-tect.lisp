@@ -21,7 +21,7 @@
 ;;; Description: A one-input node that tests the fact class type in a pattern
 ;;; network.
 
-;;; $Id: node1-tect.lisp,v 1.11 2001/03/30 14:30:40 youngde Exp $
+;;; $Id: node1-tect.lisp,v 1.12 2001/05/24 19:55:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,10 +32,28 @@
   (:documentation
    "A one-input node that tests the fact class type in a pattern."))
 
+(defmethod class-matches-p ((self node1-tect) (fact fact))
+  (eq (fact-name fact) (get-class self)))
+
+(defmethod class-matches-p ((self node1-tect) (fact shadow-fact))
+  (let ((fact-name (fact-name fact)))
+    (or (eq fact-name (get-class self))
+        (has-superclass fact (get-class self)))))
+
+#+ignore
 (defmethod call-node-right ((self node1-tect) (token token))
   (flet ((call-right (self token)
            (if (eq (fact-name (get-top-fact token))
                    (get-class self))
+               (pass-along self token)
+             (values nil))))
+    (if (call-next-method self token)
+        (values nil)
+      (call-right self token))))
+
+(defmethod call-node-right ((self node1-tect) (token token))
+  (flet ((call-right (self token)
+           (if (class-matches-p self (get-top-fact token))
                (pass-along self token)
              (values nil))))
     (if (call-next-method self token)
