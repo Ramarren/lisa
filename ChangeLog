@@ -1,3 +1,20 @@
+2001-05-10  David E. Young  <youngde@nc.rr.com>
+
+	Fairly comprehensive multi-processing (thread) support. It should
+	now be possible to 1) run multiple inference engines within a Lisp
+	world; and 2) have multiple threads access a single inference
+	engine. Included with this support is a sample application that
+	serves as a decent example; see "lisa:misc;pumps.lisp". This
+	application has been tested with the three MP-capable Lisp
+	implementations that LISA supports (ACL, LispWorks, CMUCL).
+
+	Syntax change to the DEFTEMPLATE macro in preparation for possible
+	future extensions. The proper form is now:
+
+	  (deftemplate ()
+	    (slot ...)
+	    (...))
+
 2001-04-25  David E. Young  <youngde@nc.rr.com>
 
 	LISA's last alpha release (0.8.2), and the birth of this
