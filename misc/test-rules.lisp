@@ -35,7 +35,8 @@
 (defrule natasha ()
   (boris (name "natasha") (:object ?obj))
   =>
-  (format t "natasha fired! Instance is ~S~%" ?obj))
+  (format t "natasha fired! Instance is ~S~%" ?obj)
+  (format t "engine is ~S~%" (engine)))
 
 (defmethod tell-lisa-modified-instance ((self boris) slot)
   (format t "LISA modified slot ~S of boris instance ~S~%" slot self))

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.51 2001/04/20 18:35:15 youngde Exp $
+;;; $Id: rule.lisp,v 1.52 2001/04/24 20:37:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -133,17 +133,25 @@
                                       (get-pattern-count self)))))
     (mapc #'compile-pattern plist)))
 
+(defun add-special-bindings (self bindings)
+  (declare (type rule self) (type list bindings))
+  (push (make-special-binding +lisa-engine+ (get-engine self)) bindings)
+  (values bindings))
+
 (defmethod compile-actions ((self rule) rhs)
   (let ((global-bindings (get-binding-table self))
         (action-bindings nil))
     (flet ((add-binding (var)
              (let ((binding (lookup-binding global-bindings var)))
                (cl:assert (not (null binding)) ())
-               (pushnew binding action-bindings
-                        :key #'get-name))))
+               (setf action-bindings
+                 (pushnew binding action-bindings
+                          :key #'get-name)))))
       (mapc #'(lambda (var) (add-binding var))
             (collect #'(lambda (obj) (variablep obj))
                      (flatten rhs)))
+      (setf action-bindings
+        (add-special-bindings self action-bindings))
       (setf (get-actions self)
         (make-function-call rhs action-bindings)))))
 

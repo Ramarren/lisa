@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.14 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: bindings.lisp,v 1.15 2001/04/24 20:37:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -89,6 +89,21 @@
 (defun make-global-slot-binding (name location slot)
   (make-instance 'global-slot-binding :name name :location location
                  :slot-name slot)) 
+
+(defclass special-binding (binding)
+  ((value :initarg :value
+          :reader get-value))
+  (:documentation
+   "This class represents a special type of binding whose value is
+   pre-determined."))
+
+(defmethod print-object ((self special-binding) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(name = ~S ; value = ~S)"
+            (get-name self) (get-value self))))
+
+(defun make-special-binding (name value)
+  (make-instance 'special-binding :name name :value value))
 
 (defclass binding-table ()
   ((table :initform (make-hash-table)
