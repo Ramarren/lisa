@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.14 2002/09/26 01:54:25 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.15 2002/09/27 15:29:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -84,33 +84,7 @@
   (make-variable-test (pattern-slot-name slot)
                       (pattern-slot-slot-binding slot)))
 
-(defun make-predicate-test (predicate bindings)
-  (macrolet ((compile-test (test specials)
-               `(progv (,@specials) nil
-                  (compile nil ,test))))
-    (let* ((special-vars
-            (mapcar #'binding-variable bindings))
-           (test (compile-test predicate special-vars)))
-      (function
-       (lambda (tokens)
-         (progv
-             `(,@special-vars)
-             `(,@(mapcar #'(lambda (binding)
-                             (if (pattern-binding-p binding)
-                                 (token-find-fact 
-                                  tokens (binding-address binding))
-                               (get-slot-value
-                                (token-find-fact 
-                                 tokens (binding-address binding))
-                                (binding-slot-name binding))))
-                         bindings))
-           (funcall test)))))))
-
-(defun make-behavior (function bindings)
-  (make-predicate-test function bindings))
-
-#+ignore  
-(defun make-predicate-test (forms bindings)
+(defun make-predicate-test (forms bindings &optional (negated-p nil))
   (let* ((special-vars
           (mapcar #'binding-variable bindings))
          (body
@@ -120,19 +94,24 @@
          (predicate
           (compile nil `(lambda ()
                           (declare (special ,@special-vars))
-                          ,@body))))
-    (function
-     (lambda (tokens)
-       (progv
-           `(,@special-vars)
-           `(,@(mapcar #'(lambda (binding)
-                           (if (pattern-binding-p binding)
-                               (token-find-fact 
-                                tokens (binding-address binding))
-                             (get-slot-value
-                              (token-find-fact 
-                               tokens (binding-address binding))
-                              (binding-slot-name binding))))
-                       bindings))
-         (funcall predicate))))))
+                          ,@body)))
+         (test
+          (function
+           (lambda (tokens)
+             (progv
+                 `(,@special-vars)
+                 `(,@(mapcar #'(lambda (binding)
+                                 (if (pattern-binding-p binding)
+                                     (token-find-fact 
+                                      tokens (binding-address binding))
+                                   (get-slot-value
+                                    (token-find-fact 
+                                     tokens (binding-address binding))
+                                    (binding-slot-name binding))))
+                             bindings))
+               (funcall predicate))))))
+    (if negated-p (complement test) test)))
          
+(defun make-behavior (function bindings)
+  (make-predicate-test function bindings))
+

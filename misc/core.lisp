@@ -26,9 +26,14 @@
   (slot age))
 
 (defrule frodo ()
-  (frodo (name ?name bilbo))
+  (frodo (name ?name frodo))
   =>
   (format t "frodo fired: ~S~%" ?name))
+
+(defrule not-frodo ()
+  (frodo (name ?name (not frodo)))
+  =>
+  (format t "not-frodo fired: ~S~%" ?name))
 
 #+ignore
 (defrule simple-rule ()

@@ -24,21 +24,13 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.30 2002/09/26 19:13:13 youngde Exp $
+;;; $Id: parser.lisp,v 1.31 2002/09/27 15:29:44 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
 
 (defvar *binding-table* nil)
-
-(defmacro make-equality-predicate (var atom)
-  `(function
-    (lambda ()
-      (equal (symbol-value ,var) ,atom))))
-
-(defun make-generic-predicate (forms)
-  (eval `(function (lambda () (progn ,@forms)))))
 
 (defun find-or-set-slot-binding (var slot-name location)
   (multiple-value-bind (binding existsp)
@@ -129,7 +121,7 @@
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
-                :actions (make-generic-predicate (first actions)))))
+                :actions (first actions))))
       (multiple-value-bind (lhs remains)
           (utils:find-before *rule-separator* body :test #'eq)
         (cl:assert (not (null remains)) nil "Missing rule separator")
@@ -174,8 +166,8 @@
     (cl:assert (and (listp form)
                     (= (length form) 1)) nil
       "The body of a TEST CE must be a single Lisp form")
-    (values (list :test (make-generic-predicate form)) 
-            (collect-bindings form))))
+    (values (list :test form
+            (collect-bindings form)))))
 
 (defun parse-default-pattern (pattern location)
   (let ((head (first pattern)))
@@ -198,19 +190,20 @@
                  `(and (consp ,bindings)
                        (every #'(lambda (b)
                                   (= location (binding-address b)))
-                              ,bindings))))
+                              ,bindings)))
+               (make-equality-predicate (var value)
+                 `(progn
+                    `(equal ,,var ,@(if (symbolp ,value) `(',,value) `(,,value))))))
       (labels ((parse-constraint (var constraint)
                  (let ((bindings (list)))
                    (cond ((simple-form-p constraint)
-                          (values 
-                           (make-equality-predicate var constraint) 
-                           (list (find-slot-binding var)) nil))
+                          (values (make-equality-predicate var constraint)
+                                  (list (find-slot-binding var)) nil))
                          ((simple-negated-form-p constraint)
-                          (values (make-equality-predicate 
-                                   var (second constraint))
+                          (values (make-equality-predicate var (second constraint))
                                   (list (find-slot-binding var)) t))
                          (t
-                          (values (make-generic-predicate constraint)
+                          (values constraint
                                   (collect-constraint-bindings
                                    constraint bindings)
                                   nil)))))
