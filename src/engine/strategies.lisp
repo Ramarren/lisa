@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.26 2001/04/16 18:31:54 youngde Exp $
+;;; $Id: strategies.lisp,v 1.27 2001/08/30 17:37:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,6 +33,7 @@
 
 (defgeneric add-activation (strategy activation))
 (defgeneric find-activation (strategy rule token))
+(defgeneric find-activations (strategy rule))
 (defgeneric next-activation (strategy))
 (defgeneric remove-activations (strategy))
 (defgeneric list-activations (strategy))
@@ -82,12 +83,21 @@
         (apply (get-insertion-function plist)
                `(,activation ,queue)))))))
 
-(defun lookup-activation (plist rule token)
+(defun lookup-activation (self rule token)
+  (declare (type indexed-priority-list self))
   (find-if #'(lambda (act)
                (and (= (hash-code act) (hash-code token))
                     (eq (get-rule act) rule)))
-           (aref (get-priority-vector plist)
-                 (+ (get-salience rule) (get-delta plist)))))
+           (aref (get-priority-vector self)
+                 (+ (get-salience rule) (get-delta self)))))
+
+(defun lookup-activations (self rule)
+  (declare (type indexed-priority-list self))
+  (let ((rule-name (get-name rule)))
+    (collect #'(lambda (activation)
+                 (eql rule-name (get-name (get-rule activation))))
+             (aref (get-priority-vector self)
+                   (+ (get-salience rule) (get-delta self))))))
 
 (defun get-next-activation (plist)
   (declare (type indexed-priority-list plist))
@@ -126,6 +136,9 @@
 
 (defmethod find-activation ((self builtin-strategy) rule token)
   (lookup-activation (get-priority-queue self) rule token))
+
+(defmethod find-activations ((self builtin-strategy) rule)
+  (lookup-activations (get-priority-queue self) rule))
 
 (defmethod next-activation ((self builtin-strategy))
   (get-next-activation (get-priority-queue self)))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.61 2001/08/28 16:02:30 youngde Exp $
+;;; $Id: rete.lisp,v 1.62 2001/08/30 17:37:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,10 +60,15 @@
   (declare (type rete self))
   (gethash rule-name (get-rules self)))
 
-(defun remove-rule (self rule-name)
+(defun remove-rule (self rule)
   (declare (type rete self))
-  (remove-rule-from-network self rule-name)
-  (remhash rule-name (get-rules self)))
+  (let ((rule-name (get-name rule)))
+    (remove-rule-from-network self rule-name)
+    (remhash rule-name (get-rules self))
+    (mapc #'(lambda (activation)
+              (disable-activation self activation))
+          (find-activations (get-strategy self) rule))
+    (values rule)))
 
 (defun remove-rules (self)
   (declare (type rete self))
@@ -82,11 +87,12 @@
   (with-accessors ((rules get-rules)) self
     (let ((rule-name (get-name rule)))
       (unless (null (find-rule self rule-name))
-        (remove-rule self rule-name))
+        (remove-rule self rule))
       (add-rule-to-network (get-compiler self) rule)
       (setf (gethash rule-name rules) rule)
       (when (plusp (fact-count self))
-        (synchronize-rule self rule)))))
+        (synchronize-rule self rule))
+      (values rule))))
 
 ;;; This function is a bit brutal in terms of efficiency, but I don't expect a
 ;;; large number of DEFFACTs per inference engine...
