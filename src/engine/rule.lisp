@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.52 2001/04/24 20:37:13 youngde Exp $
+;;; $Id: rule.lisp,v 1.53 2001/04/25 00:04:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -67,7 +67,8 @@
 (defmethod add-binding ((self rule) binding)
   (add-binding (get-binding-table self) binding))
 
-(defmethod find-binding ((self rule) varname)
+(defun find-binding (self varname)
+  (declare (type rule self))
   (lookup-binding (get-binding-table self) varname))
 
 (defmethod get-bindings ((self rule))
@@ -96,14 +97,16 @@
    self (make-pattern-binding 
          (get-pattern-binding pattern) (get-location pattern))))
 
-(defmethod add-pattern ((self rule) pattern)
+(defun add-pattern (self pattern)
+  (declare (type rule self) (type pattern pattern))
   (finalize-pattern pattern (get-binding-table self))
   (setup-any-pattern-bindings self pattern)
   (do-special-ce-handling self pattern)
   (add-new-pattern self pattern)
   (values pattern))
 
-(defmethod freeze-rule ((self rule))
+(defun freeze-rule (self)
+  (declare (type rule self))
   (when (zerop (get-pattern-count self))
     (add-new-pattern self (get-initial-pattern self))))
 
@@ -135,7 +138,7 @@
 
 (defun add-special-bindings (self bindings)
   (declare (type rule self) (type list bindings))
-  (push (make-special-binding +lisa-engine+ (get-engine self)) bindings)
+  (push (make-special-binding +lisa-engine-var+ (get-engine self)) bindings)
   (values bindings))
 
 (defmethod compile-actions ((self rule) rhs)
