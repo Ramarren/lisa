@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.4 2000/11/17 02:52:29 youngde Exp $
+;;; $Id: fact.lisp,v 1.5 2000/11/17 16:34:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,8 +31,8 @@
    (fact-id :initarg :fact-id
             :initform nil
             :accessor get-fact-id)
-   (slots :initform (make-hash-table)
-          :accessor get-slots)
+   (slot-table :initform (make-hash-table)
+               :accessor get-slot-table)
    (clock :initarg :clock
           :initform 0
           :accessor get-clock))
@@ -43,10 +43,10 @@
   (class-name (get-class self)))
 
 (defmethod set-slot-value ((self fact) slot value)
-  (setf (gethash slot (get-slots self)) value))
+  (setf (gethash slot (get-slot-table self)) value))
 
 (defmethod get-slot-value ((self fact) slot)
-  (gethash slot (get-slots self)))
+  (gethash slot (get-slot-table self)))
   
 (defmethod get-time ((self fact))
   (get-clock self))
@@ -57,6 +57,11 @@
 (defmethod equals ((self fact) (obj fact))
   (equal (get-class self) (get-class obj)))
 
+(defmethod initialize-instance :after ((self fact) &key (slots nil))
+  (let ((map (slot-value self 'slot-table)))
+    (mapc #'(lambda (slot)
+              (setf (gethash (first slot) map) (second slot)))
+          slots)))
+
 (defun make-fact (class slots)
-  (format t "MAKE-FACT: class = ~S, slots = ~S~%" class slots)
-  (make-instance 'fact :class class))
+  (make-instance 'fact :class class :slots slots))

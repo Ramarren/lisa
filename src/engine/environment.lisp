@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.6 2000/11/17 02:57:31 youngde Exp $
+;;; $Id: environment.lisp,v 1.7 2000/11/17 16:34:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,7 +41,11 @@
              (setf val (find-class val errorp))))
       (values val))))
 
-(defun import-and-register-class (name binding))
+(defun import-and-register-class (name binding)
+  (if (and (symbolp name)
+           (symbolp binding))
+      (import-class name (find-class binding))
+    (error "IMPORT-AND-REGISTER-CLASS: both NAME and BINDING must be symbols.")))
 
 (defgeneric current-engine ()
   (:documentation

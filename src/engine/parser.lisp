@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.11 2000/11/17 02:52:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.12 2000/11/17 16:34:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -202,13 +202,15 @@
         (mapcar #'validate-fact-structure body)
       (canonicalize-fact body))))
 
-(defun parse-fact (body)
+(defun parse-and-insert-fact (body)
   "Parses a fact as the result of an ASSERT."
   (let ((head (first body)))
     (cond ((symbolp head)
            (let ((class (find-imported-class head nil)))
              (if (null class)
                  (error "PARSE-FACT: no class object found for ~S." head)
-               (make-fact class (parse-fact-body (rest body))))))
+               (assert-fact (current-engine)
+                            (make-fact class 
+                                       (parse-fact-body (rest body)))))))
           (t
            (error "PARSE-FACT: parse error at ~S." body)))))

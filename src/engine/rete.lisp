@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.9 2000/11/17 02:52:29 youngde Exp $
+;;; $Id: rete.lisp,v 1.10 2000/11/17 16:34:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,11 @@
              :initform nil
              :reader get-strategy)
    (compiler :initform (make-rete-compiler)
-             :reader get-compiler))
+             :reader get-compiler)
+   (clock :initform 0
+          :accessor get-clock)
+   (fact-list :initform nil
+              :accessor get-fact-list))
   (:documentation
    "Represents the inference engine itself."))
 
@@ -47,9 +51,17 @@
   (add-activation (get-strategy self)
                   (make-activation rule token)))
 
-(defmethod assert-fact ((self rete) token)
+(defmethod insert-token ((self rete) (token add-token))
   (call-node-right (get-root-node (get-compiler self)) token))
 
+(defmethod assert-fact ((self rete) fact)
+  (setf (get-fact-id fact) (next-fact-id self))
+  (increment-time self)
+  (update-time fact self)
+  (add-fact-to-engine self fact)
+  (insert-token self (make-add-token :initial-fact fact))
+  (values fact))
+  
 (defmethod run ((self rete))
   (mapc #'(lambda (activation)
             (fire-rule activation))
