@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.12 2001/01/23 15:26:17 youngde Exp $
+;;; $Id: utils.lisp,v 1.13 2001/01/23 21:05:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -85,7 +85,7 @@
                      (funcall func key val)
                    (unless (and (null obj)
                                 (not use-p))
-                     (push obj seq))) ht))
+                     (push obj seq)))) ht)
     (nreverse seq)))
 
 (defun collect (predicate list)

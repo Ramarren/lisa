@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.35 2001/01/23 15:56:34 youngde Exp $
+;;; $Id: pattern.lisp,v 1.36 2001/01/23 21:05:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,11 +70,9 @@
             `(equal ,,var ,,value)))))
        
 (defun canonicalize-slot (pattern slot bindings)
-  (declare (type (pattern pattern) (slot slot)
-                 (binding-table bindings)))
   (labels ((make-slot-variable ()
              (make-lisa-defined-slot-variable
-              (intern (make-symbol (format nil "?~A" (gensym))))))
+              (intern (format nil "?~A" (symbol-name (gensym))))))
            (new-slot-binding (var)
              (unless (lookup-binding bindings var)
                (add-binding bindings

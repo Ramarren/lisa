@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.14 2000/12/22 03:21:59 youngde Exp $
+;;; $Id: fact.lisp,v 1.15 2001/01/23 21:05:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -48,7 +48,7 @@
 (defmethod set-fact-id ((self fact) id)
   (setf (slot-value self 'fact-id) id)
   (setf (slot-value self 'symbolic-id)
-    (intern (make-symbol (format nil "F-~D" id)))))
+    (intern (symbol-name (make-symbol (format nil "F-~D" id))))))
   
 (defmethod set-slot-value ((self fact) slot value)
   (setf (gethash slot (get-slot-table self)) value))

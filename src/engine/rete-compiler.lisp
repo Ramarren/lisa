@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.42 2001/01/22 21:58:52 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.43 2001/01/23 21:05:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,14 +47,16 @@
   (make-instance 'root-node))
 
 (defclass rete-compiler ()
-  ((root-node :initform (make-root-node)
-              :reader get-root-node)
+  ((root-node :reader get-root-node)
    (terminals :initform nil
               :accessor get-terminals)
    (roots :initform nil
           :accessor get-roots))
   (:documentation
    "Generates the Rete pattern network."))
+
+(defmethod initialize-instance :after ((self rete-compiler) &rest args)
+  (setf (slot-value self 'root-node) (make-root-node)))
 
 (defun add-simple-tests (pattern rule parent-node)
   (let ((last-node parent-node))
@@ -88,30 +90,10 @@
       (first-pass patterns 0))))
 
 (defun add-right-to-left-node (compiler rule)
-  (declare (type (rete-compiler compiler) (rule rule)))
   (with-accessors ((terminals get-terminals)) compiler
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0) (make-node1-rtl) rule))))
     
-#+ignore
-(defun add-node2-tests (rule node2 pattern)
-  (flet ((add-variable-test (slot)
-           (let ((binding (find-binding rule (get-value slot))))
-             (cl:assert (typep binding 'slot-binding))
-             (unless (= (get-location binding)
-                        (get-location pattern))
-               (add-binding-test node2 binding (get-name slot)))))
-         (add-constraint-test (slot)
-           (add-test node2
-                     (make-test2-eval
-                      (make-node-function-call slot pattern rule)))))
-    (mapc #'(lambda (slot)
-              (unless (or (localized-slotp slot)
-                          (not (has-constraintp slot)))
-                (add-constraint-test slot)))
-          (get-slots pattern))
-    (values node2)))
-
 (defun add-node2-tests (rule node2 pattern)
   (flet ((add-constraint-test (slot)
            (add-test node2
@@ -183,3 +165,4 @@
                                   
 (defun make-rete-compiler ()
   (make-instance 'rete-compiler))
+

@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.9 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: environment.lisp,v 1.10 2001/01/23 21:05:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,8 +55,10 @@
    singleton RETE; clients that employ more than one RETE instance should
    override this method."))
 
-(let ((singleton-engine (make-rete)))
+(let ((singleton-engine nil))
   (defmethod current-engine ()
+    (when (null singleton-engine)
+      (setf singleton-engine (make-rete)))
     (values singleton-engine)))
 
 (defmacro with-inference-engine ((engine) &body body)
