@@ -24,7 +24,7 @@
 ;;; operator right now. However, all rules are present and the two scenarios on pgs. 555 and
 ;;; 556 are represented (by the functions CULTURE-1 and CULTURE-2).
 
-;;; $Id: mycin.lisp,v 1.4 2004/09/15 20:38:46 youngde Exp $
+;;; $Id: mycin.lisp,v 1.5 2004/09/15 20:45:22 youngde Exp $
 
 (in-package :lisa-user)
 
@@ -76,44 +76,44 @@
 (defrule rule-52 (:cf 0.4)
   (culture-site (value blood))
   (gram (value neg) (entity ?organism))
-  (morphology (value rod) (entity ?organism))
+  (morphology (value rod))
   (burn (value serious))
   =>
   (assert (organism-identity (value pseudomonas) (entity ?organism))))
 
 (defrule rule-71 (:cf 0.7)
   (gram (value pos) (entity ?organism))
-  (morphology (value coccus) (entity ?organism))
-  (growth-conformation (value clumps) (entity ?organism))
+  (morphology (value coccus))
+  (growth-conformation (value clumps))
   =>
   (assert (organism-identity (value staphylococcus) (entity ?organism))))
 
 (defrule rule-73 (:cf 0.9)
   (culture-site (value blood))
   (gram (value neg) (entity ?organism))
-  (morphology (value rod) (entity ?organism))
-  (aerobicity (value anaerobic) (entity ?organism))
+  (morphology (value rod))
+  (aerobicity (value anaerobic))
   =>
   (assert (organism-identity (value bacteroides) (entity ?organism))))
 
 (defrule rule-75 (:cf 0.6)
   (gram (value neg) (entity ?organism))
-  (morphology (value rod) (entity ?organism))
+  (morphology (value rod))
   (compromised-host (value t))
   =>
   (assert (organism-identity (value pseudomonas) (entity ?organism))))
 
 (defrule rule-107 (:cf 0.8)
   (gram (value neg) (organism ?organism))
-  (morphology (value rod) (entity ?organism))
-  (aerobicity (value aerobic) (entity ?organism))
+  (morphology (value rod))
+  (aerobicity (value aerobic))
   =>
   (assert (organism-identity (value enterobacteriaceae) (entity ?organism))))
 
 (defrule rule-165 (:cf 0.7)
   (gram (value pos) (entity ?organism))
-  (morphology (value coccus) (entity ?organism))
-  (growth-conformation (value chains) (entity ?organism))
+  (morphology (value coccus))
+  (growth-conformation (value chains))
   =>
   (assert (organism-identity (value streptococcus) (entity ?organism))))
 

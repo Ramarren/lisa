@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.61 2004/09/15 17:34:41 youngde Exp $
+;;; $Id: rete.lisp,v 1.62 2004/09/15 20:45:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -199,12 +199,22 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
+#+ignore
 (defmethod assert-fact-with-cf ((self rete) fact cf)
   (let ((dup (duplicate-fact-p self fact)))
     (if dup
         (setf (cf fact) (cf:combine cf (cf dup)))
       (setf (cf fact) cf))
     (assert-fact-aux self fact)
+    fact))
+
+(defmethod assert-fact-with-cf ((self rete) fact cf)
+  (let ((dup (duplicate-fact-p self fact)))
+    (cond (dup
+           (setf (cf dup) (cf:combine cf (cf dup))))
+          (t
+           (setf (cf fact) cf)
+           (assert-fact-aux self fact)))
     fact))
 
 (defmethod assert-fact ((self rete) fact &key cf)
