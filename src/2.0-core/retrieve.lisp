@@ -20,7 +20,7 @@
 ;;; File: retrieve.lisp
 ;;; Description:
 
-;;; $Id: retrieve.lisp,v 1.2 2002/10/11 15:53:28 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.3 2002/12/19 15:09:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -71,7 +71,8 @@
          (let* ((,query-name (gensym))
                 (,query
                  (defquery ',query-name
-                     (query-fact (query-name ,query-name))
+;;;                     (query-fact (query-name ,query-name))
+                     (query-fact)
                    ,@body
                    =>
                    (push (list ,@(mapcar #'make-query-binding varlist))
