@@ -22,7 +22,7 @@
 ;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
 ;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.6 2000/12/14 21:43:41 youngde Exp $
+;;; $Id: strategies.lisp,v 1.7 2000/12/15 16:57:23 youngde Exp $
 
 (in-package :lisa)
 
@@ -39,6 +39,38 @@
 (defgeneric find-activation (strategy token rule))
 (defgeneric next-activation (strategy))
 (defgeneric remmove-activations (strategy))
+
+(defclass indexed-priority-list ()
+  ((priority-list :reader get-priority-list)
+   (index :initform nil
+          :accessor get-index)
+   (delta :accessor get-delta)
+   (insertion-function :initarg :insertion-function
+                       :reader get-insertion-function)
+   (activations :initform (make-hash-table)
+                :reader get-activations))
+  (:documentation
+   "Utility class that implements an indexed priority 'queue' to manage
+   activations. Employed by various types of conflict resolution strategies,
+   particularly DEPTH-FIRST-STRATEGY and BREADTH-FIRST-STRATEGY."))
+
+(defmethod initialize-instance :after ((self indexed-priority-list)
+                                       &key (priorities 500))
+  (setf (slot-value self 'priority-list)
+    (make-array (1+ priorities) :adjustable t :fill-pointer t))
+  (setf (slot-value self 'delta (/ priorities 2))))
+
+(defun insert-activation (plist activation)
+  (with-accessors ((vector get-priority-list)
+                   (index get-index)
+                   (activations get-activations)) plist
+    (let* ((salience (get-salience (get-rule activation)))
+           (slot (+ salience (get-delta plist)))
+           (queue (aref vector slot)))
+      (setf (aref vector slot)
+        (apply (get-insertion-function plist) activation queue))
+      (index-salience)
+      (setf (gethash (hash-code (get-token activation))) activation))))
 
 (defclass depth-first-strategy (strategy)
   ()

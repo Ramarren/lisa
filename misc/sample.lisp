@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.26 2000/12/14 18:18:10 youngde Exp $
+;;; $Id: sample.lisp,v 1.27 2000/12/15 16:57:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,6 +55,17 @@
 (defimport boris lisa::boris)
 (defimport natasha lisa::natasha)
 
+(defrule rocky-1
+  (rocky (name "rocky"))
+  =>
+  (format t "rocky-1 fired.~%"))
+
+(defrule rocky-2
+  (rocky (name "rocky"))
+  =>
+  (format t "rocky-2 fired.~%"))
+
+#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name ?nemesis))
@@ -62,6 +73,7 @@
   (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis)
   (assert (boris (name "boris"))))
 
+#+ignore
 (defrule boris
   (boris (name ?name "boris"))
   =>
@@ -73,12 +85,14 @@
   =>
   (format t "multiple-references fired! Value of ?name is ~S~%" ?name))
 
+#+ignore
 (defrule schtum
   (?f-1 (rocky (name "rocky")))
   =>
   (format t "schtum fired (?f-1 = ~S).~%" ?f-1)
   (modify ?f-1 (name "bullwinkle")))
 
+#+ignore
 (defrule rocky-boris-natasha
   (?f-1 (rocky (name ?name "bullwinkle")))
   (boris (name "boris"))
@@ -87,6 +101,7 @@
   (format t "rocky-boris-natasha fired (name = ~S).~%" ?name)
   (retract ?f-1))
 
+#+ignore
 (defrule not-pattern
   (boris (name "boris"))
   (not (rocky (name "bullwinkle")))
