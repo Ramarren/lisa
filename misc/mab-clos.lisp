@@ -22,7 +22,7 @@
 ;;; implementation, a common AI planning problem. The monkey's objective is to
 ;;; find and eat some bananas.
 
-;;; $Id: mab-clos.lisp,v 1.2 2001/04/18 14:05:08 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.3 2001/04/18 17:41:23 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -31,6 +31,8 @@
              :initform 'green-couch)
    (on-top-of :initarg :on-top-of
               :initform 'floor)
+   (satisfied :initarg :satisfied
+              :initform nil)
    (holding :initarg :holding
             :initform 'nothing)))
 
@@ -381,9 +383,14 @@
   (?thing (thing (name ?name)))
   =>
   (format t "Monkey eats the ~A.~%" ?name)
-  (modify ?monkey (holding blank))
+  (modify ?monkey (holding blank) (satisfied t))
   (retract ?goal)
   (retract ?thing))
+
+(defrule monkey-is-satisfied ()
+  (monkey (satisfied t) (:object ?monkey))
+  =>
+  (format t "Monkey is satisfied: ~S~%" ?monkey))
 
 ;;; startup rule...
 
