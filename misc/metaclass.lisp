@@ -20,26 +20,26 @@
 ;;; File: metaclass.lisp
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.3 2002/11/22 20:14:57 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.4 2002/11/22 20:23:49 youngde Exp $
 
 (in-package "CL-USER")
 
 (defclass standard-kb-class (standard-class) ())
 
-(defclass standard-kb-object ()
-  ((shared-initialize :initform t))
-  (:metaclass standard-kb-class))
+(defclass standard-kb-object () ())
 
-(defmethod shared-initialize :after ((self standard-kb-object) slot-names &rest initargs)
-  (setf (slot-value self 'shared-initialize) nil))
+(defmethod shared-initialize :around ((self standard-kb-object) slot-names &rest initargs)
+  (let ((*kb-instance* self))
+    (declare (special *kb-instance*))
+    (call-next-method)))
 
 (defmethod (setf mop:slot-value-using-class) :around 
            (new-value (self standard-kb-class) instance slot)
-  (break)
-  (let ((initializing-p (slot-value instance 'shared-initialize)))
+  (let ((initializing-p (and (boundp '*kb-instance*)
+                             (eq instance *kb-instance*))))
     (call-next-method)
     (if initializing-p
-        (format t "Instance ~S during initialization." instance)
+        (format t "Instance ~S during initialization.~%" instance)
       (format t "Instance ~S setting slot ~S~%" instance slot))
     new-value))
 
