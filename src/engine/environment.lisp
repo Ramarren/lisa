@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.18 2001/05/05 17:46:42 youngde Exp $
+;;; $Id: environment.lisp,v 1.19 2001/05/05 21:01:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,12 @@
   (when (null *default-engine*)
     (setf *default-engine* (make-inference-engine)))
   (values *default-engine*))
-  
+
+(defun use-engine (engine)
+  "Make ENGINE the default inference engine. Use this function with great care
+  in an MP environment."
+  (setf *default-engine* engine))
+
 (defun current-engine (&optional (errorp t))
   "Returns the currently-active inference engine. Usually only invoked by code
   running within the context of WITH-INFERENCE-ENGINE."
