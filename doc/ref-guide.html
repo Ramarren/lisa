@@ -513,13 +513,47 @@ will succeed if the AND form returns non-<i>nil</i>; i.e. the functions
 
 HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
 
-If a rule provides no conditional elements, then it is said to match the
+  <pre>or pattern</pre>
+  <blockquote>
+    <p>The <i>or</i> conditional element collects any number of patterns into a
+    logical group, and matches if any of the patterns inside the <i>or</i>
+    match. If more than one of the sub-patterns matches, the <i>or</i> group
+    matches more than once. LISA implements a rule containing an <i>or</i> CE as
+    a collection of related rules, with each rule representing exactly one
+    branch. For example, given the following DEFRULE form:</p>
+    <dl>
+      <dd>(defrule frodo ()&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (frodo)&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (or (bilbo)&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (gandalf))&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (samwise)</dd>
+      <dd>=&gt;)</dd>
+    </dl>
+    <p>LISA will generate two rules into the rete network, a primary rule and a
+    single sub-rule:</p>
+    <blockquote>
+      <pre>frodo: (frodo), (bilbo), (samwise)</pre>
+      <pre>frodo..1: (frodo), (gandalf), (samwise)</pre>
+    </blockquote>
+    <p>Notice that LISA separates the example DEFRULE into the primary rule <i>frodo</i>,
+    and a single sub-rule, <i>frodo..1</i>. LISA maintains the relationship
+    between a primary rule and its sub-rules; if a primary rule is removed,
+    every related sub-rule is also eliminated.</p>
+  </blockquote>
+
+</blockquote>
+
+
+
+<blockquote>
+  <pre>The initial fact</pre>
+  <p>If a rule provides no conditional elements, then it is said to match the
 
 <i>initial-fact</i>,
 
 which is asserted as the result of a call to <i>reset</i>. Thus, the following
 
-rule will always activate after each reset:
+rule will always activate after each reset:</p>
 
 <dl>
 
@@ -1726,6 +1760,18 @@ Sets a breakpoint in the rule identified by the symbol <i>rule-name.</i></p>
 </blockquote>
 <table border="0" width="100%">
   <tr>
+    <td width="80%">*break-on-subrules*</td>
+    <td width="20%">Special variable</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Setting this variable to a non-NIL value will cause the debugger to manage
+  breakpoints for a primary rule and all of its subrules (see the section on the
+  <i>or</i> conditional element for an explanation of primary rules).</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
     <td width="80%">(next)</td>
     <td width="20%">Function</td>
   </tr>
@@ -1764,7 +1810,7 @@ Sets a breakpoint in the rule identified by the symbol <i>rule-name.</i></p>
   </tr>
 </table>
 <blockquote>
-  <p>Displays the bindings (pattern variables) found on the rule's RHS, along
+  <p>Displays the bindings (pattern variables) found on the rule's LHS, along
   with their values.</p>
 
 </blockquote>
