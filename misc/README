@@ -1,0 +1,42 @@
+To test OPS5, start Allegro CL for Windows, then type the following to
+the toploop (assuming ops.lsp and mab.lsp are in c:\ops\):
+
+ > (load "c:\\ops5\\ops.lsp")
+ > (in-package :ops)
+ > (i-g-v)
+ > (load "c:\\ops5\\mab.lsp")
+ > (make start 1)
+ > (run)
+
+You should see the following output:
+
+1. T1 1
+2. MB1 6 4
+3. MB8 7 5
+4. MB5 8 5
+5. MB11 9
+6. MB14 10 2
+JUMP ONTO THE FLOOR 
+7. MB12 9 12
+WALK TO 9-5 
+8. MB7 8 5 16
+GRAB LADDER 
+9. MB9 7 5 20
+10. MB13 23 20 5
+WALK TO 2-2 
+11. MB10 7 27
+12. MB2 6 4 27
+13. MB16 32 27 25
+14. MB18 33 25
+DROP LADDER 
+15. MB17 32 27 35
+CLIMB ONTO LADDER 
+16. MB4 6 4 27 39
+GRAB BANANAS 
+end -- no production true
+ 20 productions (87 // 216 nodes)
+ 16 firings (45 rhs actions)
+ 10 mean working memory size (13 maximum)
+  4 mean conflict set size (6 maximum)
+ 15 mean token memory size (19 maximum)
+
