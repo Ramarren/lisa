@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.4.2-2 i586) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -36,7 +36,7 @@ separated into various categories:
 <a href="#Engine-Related Operators">Engine-Related Operators</a>
 <blockquote>Language elements dealing with operations on an inference engine.</blockquote>
 <a href="#Environment-Related Operators">Environment-Related Operators</a>
-<blockquote>Language elements dealing with the&nbsp;LISA environment.</blockquote>
+<blockquote>Language elements dealing with the LISA environment.</blockquote>
 <a href="#Debugging-Related Operators">Debugging-Related Operators</a>
 <blockquote>Language elements useful during system development.</blockquote>
 </blockquote>
@@ -252,10 +252,6 @@ rule will always activate after each reset:
 
 <br>&nbsp;
 <p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
@@ -263,7 +259,7 @@ CLOS instance. It is possible to bind this slot to a variable just like
 any other:
 <br>&nbsp;
 <dd>
-(tank (name ?name) (:object ?tank-object))</dd>
+(tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 </blockquote>
 
 <dd>
@@ -493,7 +489,7 @@ belonging to <i>engine</i>.</blockquote>
 <blockquote>Asks LISA to report the occurrence of <i>event</i> to <i>standard
 output</i>. The entire watch facility needs work, especially to accommodate
 a multi-inference-engine environment. Also, it would be nice to generalize
-the facility such that it behaves more like a "publish/subscribe" mechansim
+the facility such that it behaves more like a "publish/subscribe" mechanism
 with "real" events.
 <p>Currently, LISA allows monitoring of these events:
 <pre>:facts</pre>
@@ -571,24 +567,24 @@ good.</li>
 <br>&nbsp;
 <li>
 <i>Ruleset partitioning</i>: LISA doesn't yet support the notion of rule
-"modules" or "packets".<br>
-<BR></li>
+"modules" or "packets".</li>
 
+<br>&nbsp;
 <li>
 <i>Better language/engine interface</i>: This is a sore point that I intend
 to address soon. I really want LISA to have clean separation between the
 rule language implementation and the inference engine. In other words,
 I'd like to have a "generic" Rete implementation upon which one can attach
 different rule programming languages. If you don't like the language that
-comes with LISA, write a new one. That sort of thing.<br>
-<BR></li>
+comes with LISA, write a new one. That sort of thing.</li>
 
+<br>&nbsp;
 <li>
 <i>Query language</i>: There should be a way to query the knowlege base
 for information. Something similar to Loom's query language would be very
-nice.<br>
-<BR></li>
+nice.</li>
 
+<br>&nbsp;
 <li>
 <i>Better CLOS pattern matching</i>: LISA needs to offer better support
 for matching on a class's hierarchy, rather than just the class itself.
