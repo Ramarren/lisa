@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.2 2000/10/27 20:06:46 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.3 2000/11/04 02:28:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,7 @@
   ((hash-key :initform 101
              :accessor get-hash-key)
    (root-node :initform (make-root-node)
-              :reader (get-root-node)))
+              :reader get-root-node))
   (:documentation
    "Generates a pattern network."))
 
@@ -54,7 +54,7 @@
                           (make-node1-tect
                            (get-name pattern) rule))))
                (setf (aref rule-roots i) last)
-               (find-multifields)
+               (find-multifields)))))))
                
                
                

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.5 2000/10/20 02:32:42 youngde Exp $
+;;; $Id: defsys.lisp,v 1.6 2000/11/04 02:28:28 youngde Exp $
 
 (in-package "USER")
 
@@ -86,12 +86,37 @@
                  (:module "utils"
                           :source-pathname "utils"
                           :binary-pathname "utils"
-                          :components ((:file "compose"))
+                          :components ((:file "compose")
+                                       (:file "utils"))
                           :depends-on (packages))
                  (:module "engine"
                           :source-pathname "engine"
                           :binary-pathname "engine"
-                          :components ((:file "defrule")
+                          :components ((:file "macros")
+                                       (:file "token")
+                                       (:file "node")
+                                       (:file "node1"
+                                              :depends-on (node))
+                                       (:file "node1-tect"
+                                              :depends-on (node1))
+                                       (:file "node1-teq"
+                                              :depends-on (node1))
+                                       (:file "node1-rtl"
+                                              :depends-on (node1))
+                                       (:file "node-test"
+                                              :depends-on (node))
+                                       (:file "node2"
+                                              :depends-on (node-test))
+                                       (:file "test1")
+                                       (:file "pattern")
+                                       (:file "generic-pattern"
+                                              :depends-on (test1 pattern))
+                                       (:file "factories"
+                                              :depends-on (generic-pattern))
+                                       (:file "defrule"
+                                              :depends-on (factories))
+                                       (:file "parser"
+                                              :depends-on (defrule macros))
                                        (:file "language"
-                                              :depends-on (defrule)))
+                                              :depends-on (parser)))
                           :depends-on (packages utils))))

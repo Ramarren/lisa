@@ -3,7 +3,7 @@
 ;;; Description: Exercise code to assist in some form of validation
 ;;; for LISA's grammar.
 ;;;
-;;; $Id: exercises.lisp,v 1.3 2000/10/17 15:01:46 youngde Exp $
+;;; $Id: exercises.lisp,v 1.4 2000/11/04 02:28:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -135,3 +135,27 @@
       (print a)
       (print b)
       (terpri))))
+
+(defrule rule-20
+    "Simple ordered fact."
+  (fact-1 1 2 "schtum")
+  =>
+  (halt))
+
+(defrule rule-21
+    "Simple ordered fact."
+  (fact-1 ?x blue ?y)
+  =>
+  (halt))
+
+(defrule rule-22
+    "Ordered fact with constraints."
+  (fact-1 ?x (eq ?x 'schtum))
+  =>
+  (halt))
+
+(defrule rule-23
+    "Ordered fact with constraints."
+  (fact-1 ?x (eq ?x 'schtum) green ?y)
+  =>
+  (halt))
