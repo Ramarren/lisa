@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.1 2002/09/07 00:20:53 youngde Exp $
+;;; $Id: join-node.lisp,v 1.2 2002/09/07 23:52:43 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,11 +37,20 @@
 (defun remember-token (memory token)
   (setf (gethash (token-top-fact token) memory) token))
 
+(defun forget-token (memory token)
+  (remhash (token-top-fact token) memory))
+
 (defun add-tokens-to-left-memory (join-node tokens)
   (remember-token (join-node-left-memory join-node) tokens))
 
 (defun add-token-to-right-memory (join-node token)
   (remember-token (join-node-right-memory join-node) token))
+
+(defun remove-tokens-from-left-memory (join-node tokens)
+  (forget-token (join-node-left-memory join-node) tokens))
+
+(defun remove-token-from-right-memory (join-node token)
+  (forget-token (join-node-right-memory join-node) token))
 
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)
