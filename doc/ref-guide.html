@@ -229,14 +229,16 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
-<p><br>When a CLOS instance is asserted into the knowledge-base, LISA creates
+<br>&nbsp;
+<p>&nbsp;
+<p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
 CLOS instance. It is possible to bind this slot to a variable just like
 any other:
 <br>&nbsp;
 <dd>
-(tank (name ?name)&nbsp;(:object ?tank-object))</dd>
+(tank (name ?name) (:object ?tank-object))</dd>
 </blockquote>
 
 <dd>
@@ -252,8 +254,7 @@ all variables declared on the LHS are available, along with the special
 operator <i>engine</i>, which evaluates to the rule's inference engine
 object. Currently, each rule's RHS is given to the Lisp compiler during
 rule compilation, and executes within a special lexical environment established
-by LISA for each firing.
-<br>&nbsp;</blockquote>
+by LISA for each firing.</blockquote>
 
 <h4>
 CLOS-Related Operators</h4>
@@ -364,6 +365,60 @@ by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 still has activations. Typically used only on rule RHSs.</blockquote>
 
 <h4>
+Environment-Related Operators</h4>
+
+<blockquote>These operators are used to establish one or more LISA environments.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(use-default-engine)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Create and make available a default instance of the inference
+engine. Use this function when you want a basic, single-threaded LISA environment.
+Typically, this form will appear near the beginning of a file of LISA constructs
+(rules, templates, etc.). It is idempotent; that is, subsequent calls to
+the function will <i>not</i> create a new inference engine unless LISA
+is completely re-initialized.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(use-engine <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Make <i>engine</i> the default inference engine. Use this function
+with great care in a multi-processing environment.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(with-inference-engine (<i>engine</i>) <i>forms</i>*)</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Evaluates <i>forms</i> within the context of the inference
+engine <i>engine</i>. Under most circumstances, use this macro in a multi-processing
+environment to safely load a knowledge base into <i>engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(current-engine)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Returns the currently-active inference engine. Usually only
+invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
+
+<h4>
 Debugging-Related Operators</h4>
 These operators are typically used interactively to inspect the state of
 an inference engine. Some of these operators are only loosly defined and
@@ -451,6 +506,32 @@ for <i>watch</i> to see the allowable event types.</blockquote>
 
 <blockquote>Displays the list of events currently being monitored.</blockquote>
 
+<h3>
+II. The Environment</h3>
+
+<p><br>For application developers, LISA makes available the LISA-USER package.
+Generally, all user-level work should be done in this package; see the
+various examples provided in "lisa:misc;".
+<br>&nbsp;
+<h3>
+III. Getting started.</h3>
+LISA requires the Portable Defsystem as maintained by the CLOCC project;
+for your convenience, a copy is included in the distribution. Building
+LISA should be straight-forward; load "lisa:defsys.lisp" and evaluate (mk:compile-system
+:lisa). Note that currently LISA includes a copy of the CLOCC package PORT;
+this will build automatically. If you already have PORT in your Lisp you'll
+have to edit defsys.lisp until I find a better way to manage this. One
+other thing. LISA uses logical pathnames in her defsystem, and translations
+that are suitable for a Linux environment are established there. They might
+work for you; perhaps not. Once again, until I figure out how to correctly
+place default translations you might have to do some hand editing. Sorry.
+<p>To build a knowledge base, write your production rules using the various
+source examples (and this document) as your guide and load the file into
+Lisp. You can then change to the LISA-USER package and experiment. Look
+for the examples in "lisa:misc;".
+<p>A note to CLISP users. LISA requires that CLISP be run with full ANSI
+support enabled. Also, the baseline version with which LISA has been tested
+is 2.25.1. Earlier releases might work as well, but no guarantees.
 <br>&nbsp;
 </body>
 </html>
