@@ -20,14 +20,16 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.10 2002/09/11 01:50:24 youngde Exp $
+;;; $Id: token.lisp,v 1.11 2002/09/11 14:59:41 youngde Exp $
 
 (in-package "LISA")
 
 (defclass token ()
   ((facts :initform
           (make-array 0 :adjustable t :fill-pointer t)
-          :reader token-facts)))
+          :reader token-facts)
+   (contents :initform nil
+             :reader token-contents)))
 
 (defclass add-token (token) ())
 (defclass remove-token (token) ())
@@ -46,13 +48,22 @@
 (defun token-pop-fact (token)
   (with-slots ((fact-vector facts)) token
     (unless (zerop (fill-pointer fact-vector))
-      (prog1
-          (aref fact-vector (1- (fill-pointer fact-vector)))
-        (decf (fill-pointer fact-vector))))))
+      (aref fact-fector (decf (fill-pointer fact-vector))))))
+
+(defun token-contents (token)
+  (coerce (token-facts token) 'list))
+
+(defun token-terminal-contents (token)
+  "Danger! This function should only be called after the token has reached its
+  terminal node."
+  (with-slots ((contents contents)) token
+    (when (null contents)
+      (setf contents (token-contents token)))
+    contents))
 
 (defun replicate-token (token)
   (let ((new-token (make-instance (class-of token))))
-    (with-slots ((new-fact-vector facts)) new-token
+    (with-slots ((existing-fact-vector facts)) token
       (dotimes (i (length existing-fact-vector))
         (token-push-fact new-token (aref existing-fact-vector i))))
     new-token))
@@ -61,5 +72,5 @@
   (token-push-fact (make-instance 'add-token) fact))
 
 (defun make-remove-token (fact)
-  (token-push-fact (make-instance 'remove-token)))
+  (token-push-fact (make-instance 'remove-token) fact))
 
