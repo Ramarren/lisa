@@ -17,17 +17,38 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: pattern-compiler.lisp
+;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: pattern-compiler.lisp,v 1.4 2002/08/29 22:59:56 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.1 2002/08/30 14:37:41 youngde Exp $
 
 (in-package "LISA")
 
+(let ((*node-test-table*
+       (make-hash-table :test #'equal)))
+
+  (defun find-test (key constructor)
+    (let ((test (gethash key *node-test-table*)))
+      (when (null test)
+        (setf test
+          (setf (gethash key *node-test-table*)
+            (funcall constructor))))
+      test)))
+
+(defun make-class-test (class)
+  (find-test class
+             #'(lambda ()
+                 (function
+                  (lambda (token)
+                    (eq class (fact-name (token-fact token))))))))
+
 (defun make-simple-slot-test (slot-name value)
-  (function
-   (lambda (token)
-     (equal value
-            (get-slot-value
-             (token-peek-fact token)
-             slot-name)))))
+  (find-test 
+   `(,slot-name ,value)
+   #'(lambda ()
+       (function
+        (lambda (token)
+          (equal value
+                 (get-slot-value
+                  (token-fact token)
+                  slot-name)))))))

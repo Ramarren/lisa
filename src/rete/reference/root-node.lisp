@@ -20,29 +20,16 @@
 ;;; File: root-node.lisp
 ;;; Description:
 
-;;; $Id: root-node.lisp,v 1.2 2002/08/30 01:41:20 youngde Exp $
+;;; $Id: root-node.lisp,v 1.3 2002/08/30 14:37:41 youngde Exp $
 
 (in-package "LISA")
 
 (defclass root-node (shared-node)
   ((class :initarg :class
-          :reader root-node-class)
-   (successors :initform
-               (make-array 0 :adjustable t :fill-pointer t)
-               :reader root-node-successors)))
-
-(defmethod add-successor ((self root-node) successor-node connector)
-  (vector-push-extend
-   (make-successor successor-node connector)
-   (root-node-successors self))
-  successor-node)
+          :reader root-node-class)))
 
 (defmethod accept-token ((self root-node) token)
-  (map nil #'(lambda (successor)
-               (funcall (successor-connector successor)
-                        (successor-node successor)
-                        token))
-       (root-node-successors self)))
+  (pass-token-to-successors self token))
 
 (defun make-root-node (class)
   (make-instance 'root-node :class class))

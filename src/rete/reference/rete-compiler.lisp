@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.8 2002/08/30 01:41:20 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.9 2002/08/30 14:37:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,21 +30,22 @@
 (defmacro add-new-terminal (node)
   `(vector-push-extend ,node *terminals*))
 
+(defmacro with-shared-node-key ((key slot) &body body)
+  `(let ((,key (list (pattern-slot-name ,slot)
+                     (pattern-slot-value ,slot))))
+     ,@body))
+
 (defclass rete-network ()
-  ((root-nodes :initform (make-hash-table :test #'equal)
+  ((root-nodes :initform (make-hash-table)
                :reader rete-roots)))
 
 (defun add-root-node (class)
-  (let* ((key `(:class ,class))
-         (root (gethash key *shared-nodes*)))
+  (let ((root (gethash class *root-nodes*)))
     (when (null root)
-      (setf root (make-root-node class))
-      (setf (gethash key *root-nodes*) root))
+      (setf root (make-node1
+                  (make-class-test class)))
+      (setf (gethash class *root-nodes*) root))
     root))
-
-(defun find-root-for-token (rete-network token)
-  (gethash `(:class ,(fact-name (token-peek-fact token)))
-           (rete-roots rete-network)))
 
 (defun make-intra-pattern-node (slot)
   (make-node1
@@ -53,11 +54,9 @@
     (pattern-slot-value slot))))
 
 (defun distribute-token (rete-network token)
-  (let ((root (find-root-for-token rete-network token)))
-    (cl:assert (not (null root)) nil
-      "There's no root node in the network for this fact: ~S"
-      (token-peek-fact token))
-    (accept-token root token)))
+  (maphash #'(lambda (root-node)
+               (accept-token root-node token))
+           (rete-roots rete-network)))
 
 (defun make-rete-network ()
   (make-instance 'rete-network))
@@ -80,15 +79,22 @@
 ;;; end connector functions
 
 (defun add-intra-pattern-nodes (patterns)
-  (dolist (pattern patterns)
-    (let ((node
-           (add-root-node (parsed-pattern-class pattern))))
-      (dolist (slot (parsed-pattern-slots pattern))
-        (setf node
-          (add-successor 
-           node (make-intra-pattern-node slot)
-           #'pass-token)))
-      (add-new-terminal node))))
+  (flet ((add-successor (node slot)
+           (with-shared-node-key (key slot)
+             (let ((successor-node
+                    (find-successor-node node key)))
+               (when (null successor-node)
+                 (setf successor-node
+                   (add-successor 
+                    key (make-intra-pattern-node slot) #'pass-token)))
+               successor-node))))
+    (dolist (pattern patterns)
+      (let ((node
+             (add-root-node (parsed-pattern-class pattern))))
+        (dolist (slot (parsed-pattern-slots pattern))
+          (setf node
+            (add-successor node slot)))
+        (add-new-terminal node)))))
 
 (defun add-inter-pattern-nodes (patterns))
     
