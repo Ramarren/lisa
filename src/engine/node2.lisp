@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.5 2000/11/08 00:58:55 youngde Exp $
+;;; $Id: node2.lisp,v 1.6 2000/11/08 20:49:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,6 +31,8 @@
               :accessor get-left-tree)
    (right-tree :initform (make-token-tree)
                :accessor get-right-tree)
+   (pattern-matches :initform 0
+                    :accessor get-pattern-matches)
    (hashkey :initform nil
             :accessor get-hashkey))
   (:documentation
@@ -53,17 +55,19 @@
   (run-tests-vary-left self token (get-left-tree self)))
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
-  (labels ((eval-tests (left-token)
-             (when (map-until #'do-tests (get-tests self))
-               (pass-along self (make-token left-token right-token))
-               (values t)))
-           (eval-tokens (tokens)
-             (mapcar #'eval-tests tokens)))
-    (maphash #'eval-tokens tree)))
+  (flet ((eval-tests (left-token)
+           (pass-along self (make-token left-token right-token))))
+    (maptree #'(lambda (tokens)
+                 (mapcar #'eval-tests tokens)) tree)
+    (values nil)))
 
-(defmethod run-tests-vary-right ((self node2) token tree)
-  (labels ((eval-right-tests (token tests)))
-    (maphash #'eval-right-tests tree)))
+(defmethod run-tests-vary-right ((self node2) left-token tree)
+  (flet ((eval-tests (right-token)
+           (incf (get-pattern-matches self))
+           (pass-along self (make-token left-token right-token))))
+    (maptree #'(lambda (tokens)
+                 (mapcar #'eval-tests tokens)) tree)
+    (values nil)))
 
 (defun make-node2 (engine hash)
   (make-instance 'node2 :engine engine :hashkey hash))

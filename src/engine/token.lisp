@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.3 2000/11/06 22:37:16 youngde Exp $
+;;; $Id: token.lisp,v 1.4 2000/11/08 20:49:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,8 +70,7 @@
        (get-fact-id (get-fact tok))))
 
 (defmethod initialize-instance :after ((self token)
-                                       &key fact (parent nil) (clone nil)
-                                       &allow-other-keys)
+                                       &key fact (parent nil) (clone nil))
   (flet ((init-derived (self fact parent)
            (setf (slot-value self 'depth) (1+ (get-depth parent)))
            (setf (slot-value self 'sort-code) 

@@ -18,20 +18,19 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: token-tree.lisp
-;;; Description: Maintains a collection of tokens.
+;;; Description: Maintains a collection of tokens. Each hash location
+;;; yields a LIST of tokens.
 
-;;; $Id: token-tree.lisp,v 1.2 2000/11/08 00:58:55 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.3 2000/11/08 20:49:00 youngde Exp $
 
 (in-package :lisa)
 
 (defclass token-tree ()
   ((table :initform (make-hash-table)
-          :accessor get-table)
-   (hash-code :initform nil
-              :initarg :hash-code
-              :reader get-hash-code))
+          :accessor get-table))
   (:documentation
-   "Maintains a collection of tokens."))
+   "Maintains a hashed collection of tokens. Each hash location yields
+   a LIST of tokens."))
 
 (defmethod add-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self
@@ -51,7 +50,14 @@
   (clrhash (get-table self)))
 
 (defmethod make-hash-code ((self token-tree) token)
-  (abs (mod (get-sort-code token) (get-hash-code self))))
+  (sxhash (get-sort-code token)))
 
-(defun make-token-tree (hash-code)
-  (make-instance 'token-tree :hash-code hash-code))
+(defmacro with-token-tree-iterator ((mname tree) &body body)
+  `(with-hash-table-iterator (,mname (get-table tree))
+     ,@body))
+
+(defun maptree (function tree)
+  (maphash function (get-table tree)))
+
+(defun make-token-tree ()
+  (make-instance 'token-tree))
