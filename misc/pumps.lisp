@@ -34,14 +34,14 @@
 ;;; destroy itself.
 
 ;;; To run the simulation, load this file and (from the LISA-USER package)
-;;; evaluate (reset) and (run). Be default, the only output occurs during
-;;; threshold crossings; for more feedback, bind the variable *verbose-output*
-;;; to T before evaluating (run), as in
-;;;
-;;;   (let ((*verbose-output t))
-;;;     (run))
+;;; evaluate (start-pumps). By default, the only output occurs during
+;;; threshold crossings; for more feedback, pass T to the start-pumps
+;;; function. To stop the simulation, you must interrupt Lisp then evaluate
+;;; (stop-pumps). Alternatively, I suppose one could give (start-pumps) its
+;;; own thread; then, interrupting Lisp wouldn't be required. Haven't tried
+;;; this, though.
 
-;;; $Id: pumps.lisp,v 1.11 2001/05/10 17:45:56 youngde Exp $
+;;; $Id: pumps.lisp,v 1.12 2001/05/10 18:15:49 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -167,7 +167,12 @@
     (assert-instance pump)
     (values *equipment*)))
 
-(defun stop-run ()
+(defun start-pumps (&optional (verbose nil))
+  (let ((*verbose-output* verbose))
+    (reset)
+    (run)))
+
+(defun stop-pumps ()
   (halt (current-engine))
   (mapc #'(lambda (equip)
             (port:kill-process (rest equip)))
