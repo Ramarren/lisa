@@ -20,18 +20,9 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.27 2001/01/03 17:08:16 youngde Exp $
+;;; $Id: parser.lisp,v 1.28 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(defrule)))
-
-(defun make-test-pattern (p)
-  (list "test" p))
-
-(defun make-negated-pattern (p)
-  (list p))
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.14 2001/01/05 19:46:39 youngde Exp $
+;;; $Id: pattern.lisp,v 1.15 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -49,18 +49,6 @@
 
 #+ignore
 (defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
-  (flet ((create-slot-tests (slot)
-           (remove-if #'null
-                      (mapcar #'(lambda (field)
-                                  (unless (null field)
-                                    (make-test1 field)))
-                              slot))))
-    (mapc #'(lambda (slot-desc)
-              (add-slot self (first slot-desc)
-                        (create-slot-tests (rest slot-desc))))
-          slot-list)))
-
-(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
   (labels ((create-constraint-test (constraint)
              (cond ((literalp constraint)
                     (make-test1-eq constraint))
@@ -82,4 +70,36 @@
     (mapc #'(lambda (slot-desc)
               (add-slot self (first slot-desc)
                         (create-slot-tests (rest slot-desc))))
+          slot-list)))
+
+(defun canonicalize-slot (slot)
+  (flet ((make-slot-variable ()
+           (intern (make-symbol (format nil "?~A" (gensym))))))
+    (let ((value (second slot))
+          (constraint (third slot)))
+      (cond ((or (literalp value)
+                 (and (consp value)
+                      (eq (first value) 'not)))
+             (let* ((var (make-slot-variable))
+                    (new-constraint
+                     (if (literalp value) 
+                         `(equal ,var ,value)
+                       `(not (equal ,var ,(second value))))))
+               (values var new-constraint t)))
+            (t (values value constraint nil))))))
+
+(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
+  (flet ((create-slot-tests (slot)
+           (multiple-value-bind (value constraint changed)
+               (canonicalize-slot slot)
+             (let ((tests (list (make-test1 value))))
+               (unless (null constraint)
+                 (push (if changed
+                           (make-test1-internal-eval constraint)
+                         (make-test1-eval constraint))
+                       tests))
+               (values (reverse tests))))))
+    (mapc #'(lambda (slot-desc)
+              (add-slot self (first slot-desc)
+                        (create-slot-tests slot-desc)))
           slot-list)))

@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.5 2001/01/03 17:08:16 youngde Exp $
+;;; $Id: macros.lisp,v 1.6 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,6 +35,7 @@
 
 (defmacro slot-valuep (val)
   `(or (literalp ,val)
+       (consp ,val)
        (variablep ,val)))
 
 (defmacro constraintp (constraint)

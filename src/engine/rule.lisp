@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.28 2001/01/05 17:38:06 youngde Exp $
+;;; $Id: rule.lisp,v 1.29 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -59,36 +59,6 @@
     (format t "Firing rule ~S (token depth ~D)~%"
             (get-name self) (size token))
     (evaluate (create-lexical-context self) token)))
-;    (funcall (create-lexical-context self token))))
-
-(defmethod create-lexical-binding ((binding pattern-binding) token)
-  (let ((fact (find-fact token (get-location binding))))
-    (cl:assert (not (null fact)) ()
-      "No fact for location ~D." (get-location binding))
-    `(,(get-name binding) ,fact)))
-
-(defmethod create-lexical-binding ((binding slot-binding) token)
-  (let ((fact (find-fact token (get-location binding))))
-    (cl:assert (not (null fact)) ()
-      "No fact for location ~D." (get-location binding))
-    `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
-  
-(defun create-lexical-bindings (bindings token)
-  (let ((vars nil))
-    (maphash #'(lambda (key val)
-                 (declare (ignore key))
-                 (setf vars
-                   (nconc vars `(,(create-lexical-binding val token)))))
-             bindings)
-    (values vars)))
-  
-#+ignore
-(defmethod create-lexical-context ((self rule) token)
-  (flet ((make-context ()
-           `(lambda ()
-              (let (,@(create-lexical-bindings (get-bindings self) token))
-                ,@(get-actions self)))))
-    (eval (make-context))))
 
 (defmethod create-lexical-context ((self rule))
   (let ((bindings (list)))

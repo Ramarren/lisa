@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.28 2001/01/05 21:11:41 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.29 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -105,23 +105,28 @@
                                   (get-tests slot)))))))
     (add-simple-node-tests (get-slots pattern) parent-node)))
 
+(defmethod create-node1-test ((test test1-internal-eval)
+                              slot rule pattern)
+  (make-node1 test slot rule pattern))
+
+(defmethod create-node1-test ((test test1-eval) slot rule pattern)
+  (when (= (get-pattern-count rule) 1)
+    (make-node1 test slot rule pattern)))
+
+(defmethod create-node1-test ((test test1) slot rule pattern)
+  (values nil))
+
 (defun add-simple-tests (pattern rule parent-node)
   (let ((last-node parent-node))
-    (macrolet ((node1-needed-p (test)
-                 `(or (not (value-is-variable-p ,test))
-                      (and (value-is-predicate-p ,test)
-                           (= (get-pattern-count ,rule) 1))))
-               (add-test-maybe (slot test)
-                 `(when (node1-needed-p ,test)
-                      (setf last-node
-                        (merge-successor ,last-node
-                                         (make-node1 ,test ,slot ,rule ,pattern)
-                                         ,rule)))))
-      (mapc #'(lambda (slot)
-                (mapc #'(lambda (test)
-                          (add-test-maybe slot test))
-                      (get-tests slot)))
-            (get-slots pattern)))
+    (mapc #'(lambda (slot)
+              (mapc #'(lambda (test)
+                        (let ((node
+                               (create-node1-test test slot rule pattern)))
+                          (unless (null node)
+                            (setf last-node
+                              (merge-successor last-node node rule)))))
+                    (get-tests slot)))
+          (get-slots pattern))
     (values last-node)))
 
 (defun create-single-nodes (compiler rule patterns)

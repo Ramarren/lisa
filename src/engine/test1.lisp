@@ -22,7 +22,7 @@
 ;;; element. They serve as nothing more than "holders" for tests waiting to be
 ;;; compiled by the Rete compiler.
 
-;;; $Id: test1.lisp,v 1.8 2001/01/05 17:38:06 youngde Exp $
+;;; $Id: test1.lisp,v 1.9 2001/01/07 01:28:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,8 +31,8 @@
           :initarg :value
           :reader get-value))
   (:documentation
-   "The base class for tests located within conditional elements. There's no
-   reason this class should be instantiated directly."))
+   "The standard class for non-functional tests located within conditional
+   elements."))
 
 (defmethod value-is-variable-p ((self test1))
   (variablep (get-value self)))
@@ -40,18 +40,23 @@
 (defmethod value-is-predicate-p ((self test1))
   (consp (get-value self)))
 
-(defclass test1-eq (test1)
+(defun make-test1 (value)
+  (make-instance 'test1 :value value))
+
+(defclass test1-eval (test1)
   ()
   (:documentation
-   "Represents a single equality test in a conditional element."))
+   "Represents a user-defined functional constraint within a conditional
+   element."))
 
-(defun make-test1-eq (value)
-  (make-instance 'test1-eq :value value))
+(defun make-test1-eval (value)
+  (make-instance 'test1-eval :value value))
 
-(defclass test1-neq (test1)
+(defclass test1-internal-eval (test1)
   ()
   (:documentation
-   "Represents a single negated equality test in a conditional element."))
+   "Represents a Lisa-defined functional constraint within a conditional
+   element."))
 
-(defun make-test1-neq (value)
-  (make-instance 'test1-neq :value value))
+(defun make-test1-internal-eval (value)
+  (make-instance 'test1-internal-eval :value value))
