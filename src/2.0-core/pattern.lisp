@@ -18,29 +18,41 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: pattern.lisp
-;;; Description: Base class for all types of patterns found on a rule LHS.
+;;; Description: Structures here collectively represent patterns after they've
+;;; been analysed by the language parser. This is the canonical representation
+;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.4 2002/08/23 00:16:27 youngde Exp $
+;;; $Id: pattern.lisp,v 1.5 2002/08/23 15:18:40 youngde Exp $
 
 (in-package "LISA")
 
-(defstruct (parsed-pattern
-            (:constructor make-internal-parsed-pattern))
+(defstruct pattern-slot
+  "Represents the canonical form of a slot within a pattern analysed by the
+  language parser. NAME is the slot identifier, as a symbol; VALUE is the
+  slot's value, and its type can be one of (symbol number string list) or a
+  LISA variable; CONSTRAINT, if not NIL, represents a constraint placed on the
+  slot's value. CONSTRAINT should only be non-NIL if VALUE is a variable, and
+  can be one of the types listed for VALUE or a CONS representing arbitrary
+  Lisp code."
+  (name nil :type symbol)
+  (value nil)
+  (constraint nil))
+
+(defstruct parsed-pattern
+  "Represents the canonical form of a pattern analysed by the language
+  parser. CLASS is the name, or head, of the pattern, as a symbol; SLOTS is a
+  list of PATTERN-SLOT objects representing the analysed slots of the pattern;
+  ADDRESS is a small integer representing the pattern's position within the
+  rule form, starting at 0; BINDING, if not NIL, is the variable to which a
+  token matching the pattern will be bound during the match process; VARIABLES
+  is a list of all variables found in the pattern's slots; TYPE is one of
+  (:GENERIC :NEGATED :TEST) and indicates the kind of pattern represented."
   (class nil :type symbol)
   (slots nil :type list)
-  (location nil :type integer)
+  (address nil :type integer)
   (binding nil :type symbol)
   (variables nil :type list)
   (type nil :type symbol))
 
 (defun bound-pattern-p (parsed-pattern)
   (not (null (parsed-pattern-binding parsed-pattern))))
-
-(defun make-parsed-pattern (&key class slots binding type location variables)
-  (make-internal-parsed-pattern
-   :class class
-   :slots slots
-   :binding binding
-   :type type
-   :variables variables
-   :location location))

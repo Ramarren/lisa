@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.5 2002/08/23 00:16:27 youngde Exp $
+;;; $Id: parser.lisp,v 1.6 2002/08/23 15:18:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -80,7 +80,7 @@
               :slots (rest form)
               :type type
               :binding binding
-              :location location))
+              :address location))
            (parse-pattern (p binding)
              (let ((head (first p)))
                (cl:assert (symbolp head) nil
@@ -128,7 +128,8 @@
                      nil "This pattern has a malformed slot: ~S" pattern)
                  (when (variablep field)
                    (pushnew field variables))
-                 (make-slot :name name :field field :constraint constraint)))
+                 (make-pattern-slot :name name :value field
+                                    :constraint constraint))) 
              (parse-pattern-body (body slots)
                (let ((slot (first body)))
                  (cl:assert (listp slot) nil
