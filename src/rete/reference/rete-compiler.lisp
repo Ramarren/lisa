@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.17 2002/09/07 00:20:53 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.18 2002/09/10 19:34:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -66,11 +66,12 @@
 (defun make-rete-network ()
   (make-instance 'rete-network))
 
-;;; The following three functions serve as "connectors" between any two
-;;; nodes. PASS-TOKEN connects two pattern (one-input) nodes, or a join node
-;;; to a terminal node; PASS-TOKENS-ON-LEFT connects either a pattern node to
-;;; a join node, or two join nodes; PASS-TOKEN-ON-RIGHT connects a pattern
-;;; node to a join node.
+;;; The following functions serve as "connectors" between any two
+;;; nodes. PASS-TOKEN connects two pattern (one-input) nodes, or a join node 
+;;; to a terminal node; ENTER-JOIN-NETWORK-FROM-LEFT connects a pattern node
+;;; to a join node; ENTER-JOIN-NETWORK-FROM-RIGHT also connects a pattern node
+;;; to a join node; both PASS-TOKENS-ON-LEFT and PASS-TOKEN-ON-RIGHT connect
+;;; two join nodes.
 
 (defun pass-token (node token)
   (accept-token node token))
@@ -80,6 +81,12 @@
 
 (defun pass-token-on-right (node2 token)
   (accept-token-from-right node2 token))
+
+(defun enter-join-network-from-left (node2 tokens)
+  (pass-tokens-on-left node2 (replicate-token tokens)))
+
+(defun enter-join-network-from-right (node2 token)
+  (pass-token-on-right node2 (replicate-token token)))
 
 ;;; end connector functions
 
@@ -131,15 +138,25 @@
       (make-node2-not)
     (make-node2)))
 
+(defun make-left-join-connection (join-node node)
+  (if (typep node 'shared-node)
+      (add-successor node join-node #'enter-join-network-from-left)
+    (add-successor node join-node #'pass-tokens-on-left))
+  join-node)
+
+(defun make-right-join-connection (join-node node)
+  (if (typep node 'shared-node)
+      (add-successor node join-node #'enter-join-network-from-right)
+    (add-successor node join-node #'pass-token-on-right))
+  join-node)
+
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
     (let ((join-node (make-join-node pattern))
           (address (parsed-pattern-address pattern)))
       (add-join-node-tests join-node pattern)
-      (add-successor
-       (left-input address) join-node #'pass-tokens-on-left)
-      (add-successor
-       (right-input address) join-node #'pass-token-on-right)
+      (make-left-join-connection join-node (left-input address))
+      (make-right-join-connection join-node (right-input address))
       (set-leaf-node join-node address))))
 
 (defun add-terminal-node ()
