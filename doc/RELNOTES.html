@@ -1,6 +1,47 @@
 
 <h1>Release Notes for LISA 2.0 (beta)</h1>
 <h2>The LISA Project</h2>
+<h3>18 November, 2002</h3>
+<p>The second beta release for 2.0, 2.0b2, offers a number of significant
+enhancements. Some of these might break existing code:</p>
+<ul>
+  <li>Truth maintenance has been completed. Negated patterns are now allowed
+    within LOGICAL forms, lifting the restriction imposed by the initial TMS
+    implementation. Beware removing or redefining rules that have active logical
+    dependencies, however; this is not (yet) supported. Also, there are
+    restrictions on where the LOGICAL operator may appear within a DEFRULE form.
+    See the Reference Guide for details.<br>
+  </li>
+  <li>The ASSERT and RETRACT macros now operate on both template and CLOS
+    instances.&nbsp; ASSERT-INSTANCE and RETRACT-INSTANCE have been deprecated.<br>
+  </li>
+  <li>The last remaining (known) concurrency issues have been addressed. As a
+    side effect, LISA delays validating asserted facts (i.e. looking for their
+    meta data) until assertion time. To assist developers, LISA will signal a
+    continuable error if an attempt is made to assert a template fact that was
+    not previously defined.<br>
+  </li>
+  <li>DEFIMPORT is no longer required. And indeed, its semantics have changed.
+    If a class is either defined in, or imported into, a package of rules, then
+    LISA will discover it automatically upon assertion of the first instance.
+    Note that if a class is imported then its name <i>and all required slots</i>
+    must be imported as well. DEFIMPORT is now a convenience macro that may be
+    used to handle those details.<br>
+  </li>
+  <li>USE-DEFAULT-ENGINE is deprecated. LISA now creates an initial inference
+    engine instance when first loaded.<br>
+  </li>
+  <li>Inheritance reasoning, or the consideration of an object's taxonomy during
+    pattern matching, is now an &quot;all or nothing&quot; deal. In other words,
+    this behavior is either enabled or disabled globally rather than on a
+    class-by-class basis. By default, taxonomic reasoning is disabled; if you
+    want this behavior evaluate the form (CONSIDER-TAXONOMY) prior to asserting
+    any facts.</li>
+</ul>
+<p>I hope I've remembered everything. This will likely be LISA's last beta
+before the official 2.0 production release. In the interim, I'll probably begin
+writing a document describing LISA's implementation of the Rete algorithm, for
+posterity if nothing else.</p>
 <h3>6 November, 2002</h3>
 <p>LISA 2.0's first beta release, 2.0b1. This version introduces LISA's notion
 of truth maintenance, implemented via the new LOGICAL conditional element. The
