@@ -20,7 +20,7 @@
 ;;; File: node1-not.lisp
 ;;; Description: Simple composition class that negates the value of a NODE1.
 
-;;; $Id: node1-not.lisp,v 1.2 2001/01/04 22:05:18 youngde Exp $
+;;; $Id: node1-not.lisp,v 1.3 2001/01/28 20:03:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,7 +38,7 @@
 
 (defmethod print-object ((self node1-not) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (print-unreadable-object (get-node self) strm)))
+    (print-object (get-node self) strm)))
 
 (defun make-node1-not (node1)
   (make-instance 'node1-not :node node1))

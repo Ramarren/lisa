@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.12 2001/01/25 22:14:33 youngde Exp $
+;;; $Id: slot.lisp,v 1.13 2001/01/28 20:03:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -57,3 +57,17 @@
 (defun make-slot (name value constraint)
   (make-instance 'slot :name name :value value :constraint constraint))
 
+(defclass optimisable-slot (slot)
+  ()
+  (:documentation
+   "A subclass of SLOT describing a slot instance that's eligible for
+   certain optimisations."))
+
+(defclass optimisable-negated-slot (optimisable-slot)
+  ()
+  (:documentation
+   "A subclass of SLOT describing a slot instance that's eligible for
+   certain optimisations, AND is negated."))
+
+(defmethod get-value ((self optimisable-negated-slot))
+  (second (slot-value self 'value)))

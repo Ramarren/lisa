@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.39 2001/01/26 14:14:02 youngde Exp $
+;;; $Id: pattern.lisp,v 1.40 2001/01/28 20:03:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -79,9 +79,9 @@
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
-             (rewrite-slot (make-slot-variable) slot-value nil))
+             (change-class slot 'optimisable-slot))
             ((negated-rewritable-constraintp slot-value)
-             (rewrite-slot (make-slot-variable) (second slot-value) t))
+             (change-class slot 'optimisable-negated-slot))
             ;; Then the slot value must be a variable...
             ((null slot-constraint)
              (when (lookup-binding global-bindings slot-value)
@@ -125,8 +125,9 @@
                    (collect #'(lambda (obj) (variablep obj))
                             (flatten (get-constraint slot))))))
     (mapc #'(lambda (slot)
-              (add-new-binding (get-value slot) slot)
-              (add-constraint-bindings slot))
+              (unless (typep slot 'optimisable-slot)
+                (add-new-binding (get-value slot) slot)
+                (add-constraint-bindings slot)))
           (get-slots pattern))))
 
 (defmethod finalize-pattern ((self pattern) global-bindings)
