@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.24 2001/01/05 02:25:54 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.25 2001/01/05 02:35:23 youngde Exp $
 
 (in-package :lisa)
 
@@ -174,7 +174,24 @@
         (add-tests slot (get-tests slot))
         (add-node2-tests rule node2 (rest slots))))
     (values node2)))
-                      
+
+(defun add-node2-tests (rule node2 pattern)
+  (flet ((add-tests (slot tests)
+           (mapc #'(lambda (test)
+                     (when (value-is-variable-p test)
+                       (let ((binding (find-binding rule (get-value test))))
+                         (cl:assert (typep binding 'slot-binding))
+                         (unless (= (get-location binding)
+                                    (get-location pattern))
+                           (add-binding-test node2 binding 
+                                             (get-name slot))))))
+                   tests)))
+    (mapc #'(lambda (slot)
+              (add-tests slot (get-tests slot)))
+          (get-slots pattern))
+    (values node2)))
+
+#+ignore
 (defun add-node2-tests (rule node2 pattern)
   (labels ((add-tests (slot tests)
              (let ((test (first tests)))
