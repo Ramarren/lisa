@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.52 2001/04/27 18:58:27 youngde Exp $
+;;; $Id: defsys.lisp,v 1.53 2001/04/30 20:23:52 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -110,7 +110,10 @@
                                        (:file "fact")
                                        (:file "shadow-fact"
                                               :depends-on (fact))
-                                       (:file "rete")
+                                       (:file "rete"
+                                              :depends-on (fact shadow-fact))
+                                       (:file "clos"
+                                              :depends-on (rete))
                                        (:file "clear-token"
                                               :depends-on (token))
                                        (:file "remove-token"

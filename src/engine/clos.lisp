@@ -19,9 +19,15 @@
 
 ;;; File: clos.lisp
 ;;; Description: Contains code and data structures that provide some ancillary
-;;; support for CLOS reasoning.
+;;; support for CLOS reasoning. You'll find this stuff globally (rather than
+;;; within, say, class RETE) because LISA assumes responsibility for managing
+;;; the instance->engine bindings, which are especially needed whenever a CLOS
+;;; object is modified outside of LISA's control (triggering the notification
+;;; protocol). This is especially convenient when the application is running
+;;; multiple inference engines and a single CLOS instance can reside in more
+;;; than one.
 
-;;; $Id: clos.lisp,v 1.1 2001/04/30 20:10:36 youngde Exp $
+;;; $Id: clos.lisp,v 1.2 2001/04/30 20:23:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,13 +56,13 @@
        (make-clos-instance-data :engine engine :fact fact)
        (get-clos-bindings instance))))
 
-(defun unbind-clos-instance (engine instance)
+(defun unbind-clos-instance (engine instance &optional (errorp t))
   (with-clos-map-lock
       (let* ((bindings (get-clos-bindings instance))
              (position (position engine bindings 
                                  :key #'clos-instance-data-engine)))
-        (cl:assert (not (null position)) ()
-          "LISA doesn't know about this CLOS instance: ~S." instance)
+        (when (and (null bindings) errorp)
+          (error "LISA doesn't know about this CLOS instance: ~S." instance))
         (setf (aref bindings position) nil))))
 
 (defun find-shadow-fact (engine instance &optional (errorp t))
