@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.37 2002/06/01 01:30:11 youngde Exp $
+;;; $Id: meta.lisp,v 1.38 2002/08/04 23:45:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -105,7 +105,7 @@
   "Initializes instances of class META-FACT. SLOTS is a list of symbolic slot
   names; EFFECTIVE-SLOTS is a list of actual slot names."
   (let ((slot-table (get-slots self))
-        (position -1)
+        (position 0)
         (effective-slot-table (slot-value self 'effective-slots)))
     (mapc #'(lambda (slot-name)
               (setf (gethash slot-name slot-table)
@@ -114,7 +114,10 @@
     (mapc #'(lambda (slot)
               (setf (gethash (intern (symbol-name slot)) 
                              effective-slot-table) slot))
-          effective-slots)))
+          effective-slots)
+    (setf (gethash :object slot-table)
+      (make-slot-name :object 0))
+    self))
 
 (defun make-meta-fact (name class-name superclasses slots)
   "The constructor for class META-FACT. The symbolic name assigned to the fact
@@ -129,10 +132,8 @@
                 (intern (symbol-name (class-name superclass))))
             superclasses)
     :slots
-    (append
-     (mapcar #'(lambda (slot)
-                 (intern (symbol-name slot))) slots)
-     '(:object))
+    (mapcar #'(lambda (slot)
+                (intern (symbol-name slot))) slots)
     :effective-slots slots))
 
 (defmethod find-effective-slot ((self meta-fact) (slot-name symbol))
