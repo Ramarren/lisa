@@ -20,7 +20,7 @@
 ;;; File: rpc.lisp
 ;;; Description:
 
-;;; $Id: rpc.lisp,v 1.2 2002/12/09 18:19:36 youngde Exp $
+;;; $Id: rpc.lisp,v 1.3 2002/12/09 18:46:53 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -35,6 +35,16 @@
 (defvar *server-host* "localhost")
 (defvar *server-port* 10000)
 (defvar *server-proc* nil)
+
+(defclass frodo ()
+  ((name :initarg :name
+         :initform nil
+         :accessor frodo-name)))
+
+(defun assert-instance (object)
+  (print object)
+  (terpri)
+  (print (frodo-name object)))
 
 (defun make-server ()
   (make-rpc-server
@@ -55,7 +65,8 @@
 
 (defun stop-server ()
   (unless (null *server-proc*)
-    (rpc-close :stop :final)))
+    (rpc-close :stop :final)
+    (setf *server-proc* nil)))
 
 (defun make-client ()
   (make-rpc-client
@@ -67,4 +78,5 @@
   (multiple-value-bind (port stuff)
       (make-client)
     (with-remote-port (port :close t)
-      (rcall 'print "Hello from client"))))
+      (rcall 'print "Hello from client")
+      (rcall 'assert-instance (make-instance 'frodo :name 'frodo)))))
