@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.7 2000/11/18 22:31:42 youngde Exp $
+;;; $Id: fact.lisp,v 1.8 2000/11/30 16:10:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,7 +51,7 @@
 (defmethod get-time ((self fact))
   (get-clock self))
 
-(defmethod update-time ((self fact) (engine rete))
+(defmethod update-time ((self fact) engine)
   (setf (get-clock self) (get-engine-time engine)))
 
 (defmethod equals ((self fact) (obj fact))
