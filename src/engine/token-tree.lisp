@@ -18,30 +18,41 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: token-tree.lisp
-;;; Description: Maintains a collection of tokens. Each hash location
-;;; yields a LIST of tokens.
+;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.6 2000/11/27 21:28:50 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.7 2000/11/28 14:37:30 youngde Exp $
 
 (in-package :lisa)
 
 (defclass token-tree ()
   ((table :initform (make-hash-table)
-          :accessor get-table))
+          :accessor get-table)
+   (use-sortcode-p :initarg :use-sortcode
+                   :initform nil
+                   :accessor get-use-sortcode))
   (:documentation
-   "Maintains a hashed collection of tokens. Each hash location yields
-   a LIST of tokens."))
+   "Maintains a hashed collection of tokens."))
 
 (defmethod add-token ((self token-tree) (tok token))
-  (setf (gethash (hash-code tok) (get-table self)) tok))
+  (setf (gethash (create-hash-code self tok)
+                 (get-table self)) tok))
 
 (defmethod remove-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self
-    (let* ((key (hash-code tok))
+    (let* ((key (create-hash-code self tok))
            (obj (gethash key table)))
       (unless (null obj)
         (remhash key table))
       (values obj))))
+
+(defmethod use-sortcode-p ((self token-tree))
+  (get-use-sortcode self))
+
+(defmethod create-hash-code ((self token-tree) token)
+  (cond ((use-sortcode-p self)
+         (hash-code tok))
+        (t
+         (get-fact-id (get-top-fact token)))))
 
 (defmethod clear-tree ((self token-tree))
   (clrhash (get-table self)))
@@ -54,5 +65,5 @@
                (funcall function val))
            (get-table tree)))
 
-(defun make-token-tree ()
-  (make-instance 'token-tree))
+(defun make-token-tree (&key (use-sortcode-p nil))
+  (make-instance 'token-tree :use-sortcode use-sortcode-p))

@@ -29,9 +29,9 @@
 ;   =>
 ;   (printout t "schtum-simple!" crlf))
 
-(defrule no-patterns
-  =>
-  (printout t "no-patterns!" crlf))
+; (defrule no-patterns
+;   =>
+;   (printout t "no-patterns!" crlf))
 
 (reset)
 ;(assert (natasha (name "natasha") (nemesis "bullwinkle")))

@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.5 2000/11/27 21:28:50 youngde Exp $
+;;; $Id: sample.lisp,v 1.6 2000/11/28 14:37:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -67,7 +67,6 @@
   =>
   (format t "schtum fired!~%"))
 
-#+ignore
 (defrule no-patterns
     =>
   (format t "no-patterns fired!~%"))

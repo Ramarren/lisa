@@ -21,7 +21,7 @@
 ;;; Description: A node whose test always passes, but which transfers calls
 ;;; from the "right" side to the "left".
 
-;;; $Id: node1-rtl.lisp,v 1.5 2000/11/27 21:28:50 youngde Exp $
+;;; $Id: node1-rtl.lisp,v 1.6 2000/11/28 14:37:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,7 +33,6 @@
 
 (defmethod call-node-right ((self node1-rtl) token)
   (call-next-method self token)
-  (print "call-node-right (node1-rtl)")
   (pass-along self token)
   (values t))
 
