@@ -55,7 +55,36 @@ is optionally composed of slot-names, values, variables and predicates.
 The best way to understand these things is to look at some examples:
 <pre>(simple-pattern)</pre>
 
-<blockquote>The simplest</blockquote>
+<blockquote>The simplest type of pattern. This example will match any fact
+of class <i>simple-pattern</i>.</blockquote>
+
+<pre>(goal-is-to (action unlock))</pre>
+
+<blockquote>This pattern matches facts of class <i>goal-is-to</i>. In addition,
+it specifies that the slot named <i>action</i> must have as its value the
+symbol <i>unlock</i>.</blockquote>
+
+<pre>(thing (name ?chest) (on-top-of (not floor)))</pre>
+
+<blockquote>A bit more interesting. Matches facts of class <i>thing</i>;
+assuming this is the first appearance of the variable <i>?chest</i>, binds
+it to the value of the slot <i>name</i>; specifies that the slot <i>on-top-of</i>
+should not have as its value the symbol <i>floor</i>.</blockquote>
+
+<pre>(?monkey (monkey (holding ?chest)))</pre>
+
+<blockquote>Assuming the variable <i>?chest</i> was bound in a previous
+pattern, matches facts of class <i>monkey</i> whose slot <i>holding</i>
+has the same value as <i>?chest</i>. Additionally, if the pattern is successfully
+matched, binds the fact object to the variable <i>?monkey</i>.</blockquote>
+
+<pre>(pump (flow-rate ?flow-rate (&lt; ?flow-rate 25)))</pre>
+
+<blockquote>More interesting still. This pattern matches facts of class
+<i>pump</i>, and binds the value of the slot <i>flow-rate</i> to the variable
+<i>?flow-rate</i>. In addition, there is a constraint on this slot declaring
+that the value of <i>?flow-rate</i> must be less than 25. In general, constraints
+can be arbitrary Lisp expressions that serve as predicates.</blockquote>
 </blockquote>
 </blockquote>
 
