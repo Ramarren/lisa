@@ -21,7 +21,7 @@
 ;;; Description: Maintains a collection of tokens. Each hash location
 ;;; yields a LIST of tokens.
 
-;;; $Id: token-tree.lisp,v 1.3 2000/11/08 20:49:00 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.4 2000/11/16 19:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,14 +34,14 @@
 
 (defmethod add-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self
-    (let* ((key (make-hash-code tok))
+    (let* ((key (make-hash-code self tok))
            (slot (gethash key table)))
       (setf (gethash key table)
         (nconc slot `(,tok))))))
 
 (defmethod remove-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self
-    (let* ((key (make-hash-code tok))
+    (let* ((key (make-hash-code self tok))
            (slot (gethash key table)))
       (setf (gethash key table)
         (delete tok slot :test #'equals)))))

@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.9 2000/11/16 16:38:04 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.10 2000/11/16 19:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -130,7 +130,3 @@
                                   
 (defun make-rete-compiler ()
   (make-instance 'rete-compiler))
-
-               
-               
-             

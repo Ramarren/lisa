@@ -20,18 +20,19 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.2 2000/11/16 16:38:04 youngde Exp $
+;;; $Id: environment.lisp,v 1.3 2000/11/16 19:07:45 youngde Exp $
 
 (in-package :lisa)
 
-(defparameter *class-map*
-    (make-hash-table))
+(let ((class-map (make-hash-table)))
+  (defun import-class (name class)
+    (setf (gethash name class-map) (class-name class)))
 
-(defun import-class (name class)
-  (setf (gethash name *class-map*) (class-name class)))
-
-(defun find-imported-class (name)
-  (gethash name *class-map*))
+  (defun find-imported-class (name)
+    (let ((val (gethash name class-map)))
+      (if (null val)
+          (error "No imported class for symbol ~S." name)
+        (find-class val)))))
 
 (let ((engine (make-rete)))
   (defun current-engine ()

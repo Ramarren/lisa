@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Various utilities useful to the inference engine.
 
-;;; $Id: utils.lisp,v 1.4 2000/11/09 18:22:53 youngde Exp $
+;;; $Id: utils.lisp,v 1.5 2000/11/16 19:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,8 @@
         (setf class
           (eval `(defclass ,name (lisa-kb-class)
                    (,@slots))))
-        (clos:finalize-inheritance class))
+        (clos:finalize-inheritance class)
+        (import-class (class-name class) class))
       (validate-class class)
       (values class))))
 
