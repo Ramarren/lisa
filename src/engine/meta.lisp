@@ -26,9 +26,13 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.36 2002/05/31 02:51:21 youngde Exp $
+;;; $Id: meta.lisp,v 1.37 2002/06/01 01:30:11 youngde Exp $
 
 (in-package "LISA")
+
+(defstruct meta-data
+  (fact-map (make-hash-table))
+  (class-map (make-hash-table)))
 
 (defclass meta-fact ()
   ((symbolic-name :initarg :symbolic-name
@@ -231,40 +235,3 @@
                          nil (reflect:class-slot-list class))))
     (register-meta-fact name meta-fact)
     meta-fact))
-
-(defparameter *initial-fact* nil
-  "A special instance of FACT representing the initial fact.")
-
-(defparameter *clear-fact* nil
-  "A special instance of FACT used when clearing or resetting the inference
-  engine.")
-
-(defparameter *not-or-test-fact* nil
-  "A special instance of FACT used when performing 'not' pattern matching.")
-
-(defstruct meta-data
-  (fact-map (make-hash-table))
-  (class-map (make-hash-table)))
-
-(defmacro make-special-fact (class-name)
-  `(progn
-     (defclass ,class-name (inference-engine-object)
-       ((identifier :initarg :identifier)))
-     (register-meta-fact 
-      ',class-name (make-meta-fact ',class-name ',class-name '() '()))
-     (make-fact ',class-name '())))
-    
-(defun make-initial-fact ()
-  (when (null *initial-fact*)
-    (setf *initial-fact* (make-special-fact initial-fact)))
-  *initial-fact*)
-
-(defun make-clear-fact ()
-  (when (null *clear-fact*)
-    (setf *clear-fact* (make-special-fact clear-fact)))
-  *clear-fact*)
-
-(defun make-not-or-test-fact ()
-  (when (null *not-or-test-fact*)
-    (setf *not-or-test-fact* (make-special-fact not-or-test-fact)))
-  *not-or-test-fact*)

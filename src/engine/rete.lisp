@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.67 2002/05/31 02:51:21 youngde Exp $
+;;; $Id: rete.lisp,v 1.68 2002/06/01 01:30:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,8 +46,9 @@
               :accessor get-facts)
    (instance-table :initform (make-hash-table)
                    :accessor get-instance-table)
-   (meta-data :initform (make-meta-data)
-              :reader get-meta-data)
+   (meta-data :reader get-meta-data)
+   (query-table :initform (make-hash-table)
+                :reader get-query-table)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id)
    (halted-p :initform nil)
@@ -57,19 +58,27 @@
    "Represents the inference engine itself."))
 
 (defmethod initialize-instance :after ((self rete) &rest args)
-  (with-inference-engine (self)
-    (deftemplate initial-fact ())
-    (deftemplate clear-fact ())
-    (deftemplate not-or-test-fact ())
-    (deftemplate query-fact () (slot lisa::query-name))
-    (setf (slot-value self 'initial-fact)
-      (make-fact 'initial-fact '()))
-    (setf (slot-value self 'clear-fact)
-      (make-fact 'clear-fact '()))
-    (setf (slot-value self 'null-fact)
-      (make-fact 'not-or-test-fact '()))
-    self))
+  (initialize-internal-concepts self)
+  self)
 
+(defun initialize-internal-concepts (rete)
+  (flet ((initialize-query-fact ()
+           (let ((*package* (find-package "LISA")))
+             (deftemplate query-fact () (slot query-name)))))
+    (setf (slot-value rete 'meta-data)
+      (make-meta-data))
+    (with-inference-engine (rete)
+      (deftemplate initial-fact ())
+      (deftemplate clear-fact ())
+      (deftemplate not-or-test-fact ())
+      (setf (slot-value rete 'initial-fact)
+        (make-fact 'initial-fact '()))
+      (setf (slot-value rete 'clear-fact)
+        (make-fact 'clear-fact '()))
+      (setf (slot-value rete 'null-fact)
+        (make-fact 'not-or-test-fact '()))
+      (initialize-query-fact))))
+  
 (defun meta-fact-map (rete)
   (meta-data-fact-map (get-meta-data rete)))
 
@@ -267,12 +276,18 @@
 
 (defun forget-clos-instances (rete)
   (clrhash (get-instance-table rete)))
-  
+
+(defun rebuild-internal-caches (rete)
+  (clrhash (get-instance-table rete))
+  (clrhash (get-query-table rete)))
+
 (defmethod clear-engine ((self rete))
   (forget-clos-instances self)
   (set-initial-state self)
   (remove-rules self)
   (remove-autofacts self)
+  (initialize-internal-concepts self)
+  (rebuild-internal-caches self)
   (setf (slot-value self 'compiler) (make-rete-compiler))
   t)
 

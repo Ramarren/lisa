@@ -21,13 +21,9 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.18 2002/05/31 02:51:21 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.19 2002/06/01 01:30:14 youngde Exp $
 
 (in-package "LISA")
-
-(defvar *query-map*
-    (make-hash-table)
-  "Serves as the query name cache.")
 
 (defvar *query-result*
     '()
@@ -39,7 +35,7 @@
   (with-inference-engine ((current-engine))
     (let* ((?name (get-name query))
            (*query-result* '())
-           (fact (assert (query-fact (lisa::query-name ?name)))))
+           (fact (assert (query-fact (query-name ?name)))))
       (run)
       (retract fact)
       (values *query-result* ?name))))
@@ -88,7 +84,7 @@
          (when (null ,query)
            (setf ,query
              (defquery ',query-name
-                 (query-fact (lisa::query-name ,query-name))
+                 (query-fact (query-name ,query-name))
                ,@body
                =>
                (push (list ,@(mapcar #'make-query-binding varlist))
@@ -100,10 +96,11 @@
   "Discards a query from the cache by 1) removing it from *QUERY-MAP*; and 2)
   removing it from the rete network."
   (flet ((remove-query (key name)
-           (remhash key *query-map*)
+           (remhash key (get-query-table (current-engine)))
            (undefrule name (current-engine))))
     (block found
-      (with-hash-table-iterator (next-item *query-map*)
+      (with-hash-table-iterator
+          (next-item (get-query-table (current-engine)))
         (multiple-value-bind (foundp key value) (next-item)
           (when (and foundp
                      (string= (symbol-name value)
@@ -114,19 +111,13 @@
 (defun remember-query (hash query)
   "Binds the name of QUERY (a RULE instance) to HASH by entering it into the
   hash table *QUERY-MAP*."
-  (setf (gethash hash *query-map*) (get-name query)))
-
-(defmethod clear-engine :after ((self rete))
-  "Removes all queries from *QUERY-MAP* whenever an inference engine is
-  CLEARed."
-  (clrhash *query-map*)
-  (values self))
+  (setf (gethash hash (get-query-table (current-engine))) (get-name query)))
 
 (defun find-query (hash)
   "Looks up a query name in the local query table *QUERY-MAP*, indexed by
   HASH. Then, attempts to resolve that name to a rule instance in the current
   inference engine."
-  (let ((query-name (gethash hash *query-map*)))
+  (let ((query-name (gethash hash (get-query-table (current-engine)))))
     (if (not (null query-name))
         (progn
           (format t "Good. Found query in cache.~%")

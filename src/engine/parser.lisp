@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.82 2002/05/31 02:51:21 youngde Exp $
+;;; $Id: parser.lisp,v 1.83 2002/06/01 01:30:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -92,10 +92,9 @@
                            :pattern `(,@(parse-default-pattern (second p)))
                            :type :negated))
                          ((variablep head)
-                          (if (null binding)
-                              (parse-pattern (first (rest p)) head)
-                            (pattern-error
-                             template "Too many pattern variables: ~S." head)))
+                          (cl:assert (null binding) nil
+                            "Too many pattern variables: ~S" head)
+                          (parse-pattern (first (rest p)) head))
                          (t
                           (make-parsed-pattern
                            :pattern `(,@(parse-default-pattern p))
@@ -123,20 +122,15 @@
                (let ((name (first slot))
                      (field (second slot))
                      (constraint (third slot)))
-                 (print name)
-                 (print field)
-                 (print constraint)
                  (cond ((and (symbolp name)
                              (slot-valuep field)
                              (constraintp constraint))
-                        (print "more schtum")
                         (cl:assert (has-meta-slot-p meta name) nil
-                          "This slot has no meta data: ~S." `(,slot))
+                          "This slot has no meta data: ~S." slot)
                         `(,name ,field ,constraint))
                        (t
-                        (pattern-error
-                         pattern
-                         "There are type problems with this slot: ~S." slot)))))
+                        (cl:assert nil nil
+                            "There are type problems with this slot: ~S." slot)))))
              (parse-pattern-body (body slots)
                (let ((slot (first body)))
                  (cond ((consp slot)
@@ -180,8 +174,8 @@
                  (canonicalize-slot-names
                   ,meta-class (,@(normalize-slots slots))))))))
           (t
-           (parsing-error
-            "A fact must begin with a symbol: ~S." head)))))
+           (cl:assert nil nil
+             "A fact must begin with a symbol: ~S." head)))))
 
 (defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()
