@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.37 2002/06/06 01:54:20 youngde Exp $
+;;; $Id: fact.lisp,v 1.38 2002/08/05 00:02:01 youngde Exp $
 
 (in-package "LISA")
 
@@ -66,7 +66,8 @@
 (defun initialize-slot-value (fact slot-name value)
   "Sets the value of a slot in a fact's slot table. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance; VALUE is the slot's new value."
-  (setf (aref (get-slot-table fact) (slot-name-position slot-name)) value))
+  (setf (gethash (slot-name-name slot-name) (get-slot-table fact))
+    value))
 
 (defun set-slot-from-instance (fact meta-fact instance slot-name)
   "Assigns to a slot the value from the corresponding slot in the fact's CLOS
@@ -94,13 +95,13 @@
     (mapcar #'(lambda (meta-slot)
                 (declare (type slot-name meta-slot))
                 `(,(slot-name-name meta-slot)
-                  ,(aref table (slot-name-position meta-slot))))
+                  ,(gethash table (slot-name-name meta-slot))))
             (meta-slot-list (get-meta-fact fact)))))
 
 (defun get-slot-value (fact slot-name)
   "Returns the value associated with a slot name. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance."
-  (aref (get-slot-table fact) (slot-name-position slot-name)))
+  (gethash (slot-name-name slot-name) (get-slot-table fact)))
 
 (defun effective-slot->meta-slot (fact effective-slot-id)
   "Retrieves the SLOT-NAME instance associated with a CLOS instance's
@@ -172,8 +173,7 @@
   (let ((meta (find-meta-fact (fact-name self))))
     (setf (slot-value self 'meta-fact) meta)
     (setf (slot-value self 'slot-table)
-      (make-array (meta-slot-count meta)
-                  :initial-element nil))
+      (make-hash-table))
     (if (null instance)
         (initialize-fact-from-template self slots)
       (initialize-fact-from-instance self instance))))
