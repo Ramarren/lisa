@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.11 2001/01/18 15:49:33 youngde Exp $
+;;; $Id: funcall.lisp,v 1.12 2001/01/22 16:21:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -68,7 +68,7 @@
     (apply (get-function self) (build-arglist))))
 
 (defmethod equals ((self function-call) (obj function-call))
-  (tree-equal (get-forms self) (get-forms obj)))
+  (tree-equal (get-forms self) (get-forms obj) :test #'equal))
 
 (defmethod print-object ((self function-call) strm)
   (print-unreadable-object (self strm :type t)

@@ -21,7 +21,7 @@
 ;;; Description: Parent class of all nodes in the Rete pattern network. This
 ;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.11 2000/12/14 18:18:12 youngde Exp $
+;;; $Id: node.lisp,v 1.12 2001/01/22 16:21:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -62,19 +62,19 @@
 (defmethod merge-successor ((self node) node rule)
   "Merges a node into the list of successors. Returns either NODE or the
   existing successor."
-  (labels ((merge-maybe (successors)
-             (let ((test (first successors)))
-               (cond ((null test)
-                      (add-successor self node rule)
-                      (values node))
-                     ((equals node test)
-                      (add-node rule test)
-                      (values test))
-                     (t
-                      (merge-maybe (rest successors)))))))
-    (merge-maybe (get-successors self))))
+  (let ((succ (some #'(lambda (succ)
+                        (when (equals node succ)
+                          (values succ)))
+                    (get-successors self))))
+    (cond ((null succ)
+           (add-successor self node rule)
+           (values node))
+          (t
+           (add-node rule succ)
+           (values succ)))))
 
 (defmethod resolve ((self node) node)
+  (format t "resolving in node ~S for node ~S~%" self node)
   (or (find-if #'(lambda (n)
                    (equals n node))
                (get-successors self))
