@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.20 2000/12/10 03:19:18 youngde Exp $
+;;; $Id: parser.lisp,v 1.21 2000/12/10 03:26:01 youngde Exp $
 
 (in-package :lisa)
 
@@ -127,19 +127,6 @@
 
 (defun make-default-pattern (p)
   (parse-unordered-pattern p))
-
-(defun canonicalize-fact (body)
-  (labels ((create-slots (slots id)
-             (let ((val (first slots)))
-               (cond ((null val)
-                      (values nil))
-                     ((literalp val)
-                      (append `((,(make-interned-symbol 
-                                   "__SLOT-~D" id) ,val))
-                              (create-slots (rest slots) (1+ id))))
-                     (t
-                      (error "CANONICALIZE-FACT: parse error at ~S." slots))))))
-    (create-slots body 0)))
 
 (defun normalize-slots (&rest args)
   (labels ((compose-slots (pairs slot-name slots)
