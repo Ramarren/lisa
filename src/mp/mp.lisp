@@ -30,7 +30,7 @@
 
 ;;; NB: This stuff is NOT intended for consumption outside of core LISA.
 
-;;; $Id: mp.lisp,v 1.4 2001/04/26 20:17:25 youngde Exp $
+;;; $Id: mp.lisp,v 1.5 2001/04/27 00:21:05 youngde Exp $
 
 (in-package "LISA.MULTIPROCESSING")
 
@@ -68,8 +68,8 @@
   `(progn ,@body))
 
 #+threads
-(defmacro without-scheduling (&rest args)
-  `(port:without-scheduling ,args))
+(defmacro without-scheduling (&body body)
+  `(port:without-scheduling ,@body))
 
 #-threads
 (defmacro without-scheduling (&body body)
