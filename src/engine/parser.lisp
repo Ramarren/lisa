@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.69 2001/04/20 15:29:42 youngde Exp $
+;;; $Id: parser.lisp,v 1.70 2001/04/25 15:50:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -155,6 +155,7 @@
                  (slot-value (second slot)))
              (cond ((and (symbolp slot-name)
                          (or (literalp slot-value)
+                             (multifieldp slot-value)
                              (variablep slot-value)))
                     (if (quotablep slot-value)
                         ``(,',slot-name ,',slot-value)

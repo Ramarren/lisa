@@ -20,7 +20,7 @@
 ;;; File: macros.lisp
 ;;; Description: General LISA macros.
 
-;;; $Id: macros.lisp,v 1.19 2001/03/15 16:31:40 youngde Exp $
+;;; $Id: macros.lisp,v 1.20 2001/04/25 15:50:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,6 +40,10 @@
             (not (variablep ,sym))
             (not (null ,sym)))
        (numberp ,sym) (stringp ,sym)))
+
+(defmacro multifieldp (val)
+  `(and (listp ,val)
+    (eq (first ,val) 'quote)))
 
 (defmacro slot-valuep (val)
   `(or (literalp ,val)
