@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.50 2001/04/25 15:50:15 youngde Exp $
+;;; $Id: defsys.lisp,v 1.51 2001/04/26 17:49:52 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -72,7 +72,13 @@
                  (:module "reflection"
                           :source-pathname "reflect"
                           :binary-pathname "reflect"
-                          :components ((:file "reflect")))
+                          :components ((:file "reflect"))
+                          :depends-on (packages))
+                 (:module "mp"
+                          :source-pathname "mp"
+                          :binary-pathname "mp"
+                          :components ((:file "mp"))
+                          :depends-on (packages))
                  (:module "utils"
                           :source-pathname "utils"
                           :binary-pathname "utils"
@@ -164,7 +170,7 @@
                                        (:file "watch")
                                        (:file "debug")
                                        (:file "instrumenting"))
-                          :depends-on (packages reflection conditions utils
+                          :depends-on (packages reflection mp conditions utils
                                                 preamble)))
     :depends-on (port)
     :initially-do
