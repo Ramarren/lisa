@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.41 2002/11/20 16:14:20 youngde Exp $
+;;; $Id: rete.lisp,v 1.42 2002/11/20 20:04:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -178,9 +178,12 @@
 (defun clear-focus-stack (rete)
   (setf (rete-focus-stack rete) (list)))
 
+(defun initial-context (rete)
+  (find-context rete :initial-context))
+
 (defun reset-focus-stack (rete)
   (setf (rete-focus-stack rete)
-    (list (find-context rete :initial-context))))
+    (list (initial-context rete))))
 
 (defun set-initial-state (rete)
   (forget-all-facts rete)
@@ -233,17 +236,19 @@
 (defun register-new-context (rete context)
   (setf (gethash (context-name context) (rete-contexts rete)) context))
 
-(defun next-context (rete)
-  (setf *active-context* 
-    (pop (rete-focus-stack rete))))
+(defun current-context (rete)
+  (first (rete-focus-stack rete)))
 
-(defun initial-context (rete)
-  (if (endp (rete-focus-stack rete))
-      (find-context rete :initial-context)
-    (pop (rete-focus-stack rete))))
+(defun next-context (rete)
+  (with-accessors ((focus-stack rete-focus-stack)) rete
+    (pop focus-stack)
+    (setf *active-context* (first focus-stack))))
+
+(defun starting-context (rete)
+  (first (rete-focus-stack rete)))
 
 (defun push-context (rete context)
-  (push *active-context* (rete-focus-stack rete))
+  (push context (rete-focus-stack rete))
   (setf *active-context* context))
 
 (defun pop-context (rete)
@@ -263,7 +268,7 @@
     (setf (activation-eligible activation) nil)))
 
 (defmethod run-engine ((self rete) &optional (step -1))
-  (with-context (initial-context self)
+  (with-context (starting-context self)
     (setf (rete-halted self) nil)
     (do ((count 0))
         ((or (= count step) (rete-halted self)) count)
@@ -272,6 +277,7 @@
         (cond ((null activation)
                (next-context self)
                (when (null (active-context))
+                 (reset-focus-stack self)
                  (halt-engine self)))
               ((eligible-p activation)
                (incf (rete-firing-count self))

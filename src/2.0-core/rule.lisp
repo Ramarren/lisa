@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.20 2002/11/20 16:14:20 youngde Exp $
+;;; $Id: rule.lisp,v 1.21 2002/11/20 20:04:03 youngde Exp $
 
 (in-package "LISA")
 
@@ -141,7 +141,7 @@
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) 
                        (salience 0) 
-                       (context nil)
+                       (context (active-context))
                        (auto-focus nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
@@ -154,7 +154,7 @@
        :comment doc-string
        :salience salience
        :context (if (null context)
-                    (find-context (inference-engine) 'initial-context)
+                    (find-context (inference-engine) :initial-context)
                   (find-context (inference-engine) context))
        :auto-focus auto-focus
        :logical-marker (find-any-logical-boundaries patterns)
@@ -165,7 +165,7 @@
                             &rest args
                             &key &allow-other-keys)
   (flet ((make-composite-name (index)
-           (intern (format nil "~S..~D" name index))))
+           (intern (format nil "~A~~~D" name index))))
     (let ((primary-rule
            (apply #'make-rule name engine (first patterns) actions args))
           (index 0))

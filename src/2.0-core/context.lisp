@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.7 2002/11/20 16:14:19 youngde Exp $
+;;; $Id: context.lisp,v 1.8 2002/11/20 20:04:02 youngde Exp $
 
 (in-package "LISA")
 
@@ -96,7 +96,7 @@
                            ,rule-name))
             (,long-name (if ,qualifier
                             ,rule-name
-                          (format nil "~A.~A" ,context ,short-name))))
+                          (concatenate 'string ,context "." ,short-name))))
        ,@body)))
 
 (defun make-context (name &key (strategy nil))
