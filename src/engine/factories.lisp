@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.28 2001/03/14 21:30:49 youngde Exp $
+;;; $Id: factories.lisp,v 1.27 2001/03/14 21:26:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -67,6 +67,10 @@
 (defmethod make-node1 ((slot slot) pattern)
   (make-node1-tfn (get-name slot)
                   (make-node-function-call slot pattern)))
+
+#+ignore
+(defmethod make-node2-test ((slot simple-slot) pattern)
+  (values nil))
 
 (defmethod make-node2-test ((slot simple-variable-slot) pattern)
   (let ((binding (lookup-binding pattern (get-value slot))))
