@@ -11,15 +11,18 @@ enhancements. Some of these might break existing code:</p>
     dependencies, however; this is not (yet) supported. Also, there are
     restrictions on where the LOGICAL operator may appear within a DEFRULE form.
     See the Reference Guide for details.<br>
+    <br>
   </li>
   <li>The ASSERT and RETRACT macros now operate on both template and CLOS
     instances.&nbsp; ASSERT-INSTANCE and RETRACT-INSTANCE have been deprecated.<br>
+    <br>
   </li>
   <li>The last remaining (known) concurrency issues have been addressed. As a
     side effect, LISA delays validating asserted facts (i.e. looking for their
     meta data) until assertion time. To assist developers, LISA will signal a
     continuable error if an attempt is made to assert a template fact that was
     not previously defined.<br>
+    <br>
   </li>
   <li>DEFIMPORT is no longer required. And indeed, its semantics have changed.
     If a class is either defined in, or imported into, a package of rules, then
@@ -27,9 +30,11 @@ enhancements. Some of these might break existing code:</p>
     Note that if a class is imported then its name <i>and all required slots</i>
     must be imported as well. DEFIMPORT is now a convenience macro that may be
     used to handle those details.<br>
+    <br>
   </li>
   <li>USE-DEFAULT-ENGINE is deprecated. LISA now creates an initial inference
     engine instance when first loaded.<br>
+    <br>
   </li>
   <li>Inheritance reasoning, or the consideration of an object's taxonomy during
     pattern matching, is now an &quot;all or nothing&quot; deal. In other words,
