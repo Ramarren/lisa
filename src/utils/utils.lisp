@@ -20,22 +20,22 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.8 2000/11/27 16:22:51 youngde Exp $
+;;; $Id: utils.lisp,v 1.9 2000/11/30 21:42:44 youngde Exp $
 
 (in-package :lisa)
 
 (defun find-before (item sequence &key (test #'eql))
   "Returns both that portion of SEQUENCE that occurs before ITEM and
   the rest of SEQUENCE anchored at ITEM, or NIL otherwise."
-  (labels ((fb (obj seq test &optional (val nil))
+  (labels ((find-item (obj seq test val)
              (let ((item (first seq)))
                (cond ((null seq)
                       (values nil nil))
                      ((funcall test obj item)
                       (values val seq))
                      (t
-                      (fb obj (rest seq) test (nconc val `(,item))))))))
-    (fb item sequence test)))
+                      (find-item obj (rest seq) test (nconc val `(,item))))))))
+    (find-item item sequence test nil)))
 
 (defun find-after (item sequence &key (test #'eql))
   "Returns that portion of SEQUENCE that occurs after ITEM, or NIL

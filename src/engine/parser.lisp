@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.13 2000/11/29 01:07:45 youngde Exp $
+;;; $Id: parser.lisp,v 1.14 2000/11/30 21:42:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,11 +53,11 @@
       (add-rule (current-engine) rule))))
 
 (defun extract-rule-headers (body)
-  (labels ((extract-headers (headers &key (doc nil))
+  (labels ((extract-headers (headers doc)
              (let ((obj (first headers)))
                (cond ((stringp obj)
                       (if (null doc)
-                          (extract-headers (rest headers) :doc obj)
+                          (extract-headers (rest headers) obj)
                         (error "Parse error at ~S~%" headers)))
                      ((consp obj)
                       (let ((decl (first obj)))
@@ -66,10 +66,10 @@
                             (values doc obj (rest headers))
                           (values doc nil headers))))
                      (t (values doc nil headers))))))
-    (extract-headers body)))
+    (extract-headers body nil)))
 
 (defun parse-rulebody (body)
-  (labels ((parse-lhs (body &optional (patterns nil))
+  (labels ((parse-lhs (body patterns)
              (format t "parse-lhs: looking at ~S~%" body)
              (let ((pattern (first body)))
                (cond ((consp pattern)
@@ -84,19 +84,19 @@
     (multiple-value-bind (lhs remains)
         (find-before '=> body :test #'eq)
       (if (not (null remains))
-          (values (parse-lhs lhs)
+          (values (parse-lhs lhs nil)
                   (parse-rhs (find-after '=> remains :test #'eq)))
         (error "parse-rulebody: rule structure unsound.")))))
 
 (defun make-rule-pattern (template)
-  (labels ((parse-pattern (p &optional (binding nil))
+  (labels ((parse-pattern (p binding)
              (let ((head (first p)))
                (if (symbolp head)
                    (cond ((eq head 'test)
                           (make-test-pattern (rest p)))
                          ((eq head 'not)
                           (make-negated-pattern
-                           (parse-pattern (first (rest p)))))
+                           (parse-pattern (first (rest p)) binding)))
                          ((variablep head)
                           (if (null binding)
                               (parse-pattern (first (rest p)) head)
@@ -106,10 +106,10 @@
                            :pattern (make-default-pattern p)
                            :binding binding)))
                  (error "Parse error at ~S~%" p)))))
-    `(,(parse-pattern template))))
+    `(,(parse-pattern template nil))))
 
 (defun parse-ordered-pattern (pattern)
-  (labels ((parse-fields (fields &optional (flist nil))
+  (labels ((parse-fields (fields flist)
              (let ((field (first fields)))
                (cond ((null field)
                       (values flist))
@@ -127,13 +127,13 @@
                       (error "parse-ordered-pattern: parse error for ~S~%"
                              pattern))))))
     `(,(canonicalize-pattern (first pattern)
-                             (parse-fields (rest pattern))))))
+                             (parse-fields (rest pattern) nil)))))
 
 (defun parse-unordered-pattern (pattern)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (list name field constraint)))
-           (parse-pattern-body (body &optional (slots nil))
+           (parse-pattern-body (body slots)
              (let ((slot (first body)))
                (cond ((consp slot)
                       (parse-pattern-body (rest body)
@@ -144,7 +144,7 @@
                      (t
                       (error "parse-unordered-pattern: parse error at ~S~%" body))))))
     (list (first pattern)
-          (parse-pattern-body (rest pattern)))))
+          (parse-pattern-body (rest pattern) nil))))
 
 (defun internalize-class (name slots)
   "Creates an internal, LISA-specific class representing ordered
@@ -159,7 +159,7 @@
 (defun canonicalize-pattern (head body)
   (labels ((make-slot-id (id)
              (make-interned-symbol "__SLOT-~D" id))
-           (make-slot-list (body slot-id &optional (slots nil))
+           (make-slot-list (body slot-id slots)
              (if (null body)
                  (values slots)
                (make-slot-list (rest body)
@@ -170,7 +170,7 @@
            (finalize-pattern (head slots)
              (internalize-class head slots)
              (values `(,head ,slots))))
-    (finalize-pattern head (make-slot-list body 0))))
+    (finalize-pattern head (make-slot-list body 0 nil))))
 
 (defun make-default-pattern (p)
   (if (unordered-pattern-p p)
