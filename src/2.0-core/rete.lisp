@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.65 2004/09/16 20:04:00 youngde Exp $
+;;; $Id: rete.lisp,v 1.66 2004/09/16 20:30:37 youngde Exp $
 
 (in-package "LISA")
 
@@ -207,21 +207,29 @@
    t)
 
 (defmethod recalculate-fact-cf (rete fact (fact-cf t))
-  (cl:assert (null fact-cf) nil
-    "This is not a legal certainty factor: ~S" fact-cf)
-  (let ((conjunct-cf (cf:conjunct-cf (token-facts *active-tokens*)))
-        (rule-cf (cf (active-rule)))
-        (dup (duplicate-fact-p rete fact)))
-    (cond (dup
-           (if (plusp rule-cf)
-               (setf (cf dup) (* rule-cf (cf:combine conjunct-cf (cf dup))))
-             (setf (cf dup) (cf:combine conjunct-cf (cf dup))))
-           nil)
-          (t
-           (if (plusp rule-cf)
-               (setf (cf fact) (* conjunct-cf rule-cf))
-             (setf (cf fact) conjunct-cf))
-           t))))
+  (flet ((set-fact-cf (fact cf)
+           (let ((rule-cf (cf (active-rule))))
+             (cond ((and (plusp rule-cf)
+                       (zerop cf))
+                    (setf (cf fact) rule-cf))
+                   ((and (plusp rule-cf)
+                         (plusp cf))
+                    (setf (cf fact) (* cf rule-cf)))
+                   ((plusp cf)
+                    (setf (cf fact) cf))
+                   (t nil)))))
+    (cl:assert (null fact-cf) nil
+      "This is not a legal certainty factor: ~S" fact-cf)
+    (unless *active-tokens*
+      (return-from  recalculate-fact-cf t))
+    (let ((conjunct-cf (cf:conjunct-cf (token-facts *active-tokens*)))
+          (dup (duplicate-fact-p rete fact)))
+      (cond (dup
+             (set-fact-cf dup (cf:combine conjunct-cf (cf dup)))
+             nil)
+            (t
+             (set-fact-cf fact (cf:combine conjunct-cf (cf fact)))
+             t)))))
 
 (defmethod assert-fact ((self rete) fact &key cf)
   (when (recalculate-fact-cf self fact cf)
