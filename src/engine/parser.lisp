@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.10 2000/11/16 21:26:17 youngde Exp $
+;;; $Id: parser.lisp,v 1.11 2000/11/17 02:52:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -155,9 +155,7 @@
 
 (defun canonicalize-pattern (head body)
   (labels ((make-slot-id (id)
-             (intern
-              (make-symbol
-               (format nil "__SLOT-~D" id))))
+             (make-interned-symbol "__SLOT-~D" id))
            (make-slot-list (body slot-id &optional (slots nil))
              (if (null body)
                  (values slots)
@@ -176,3 +174,41 @@
       (parse-unordered-pattern p)
     (parse-ordered-pattern p)))
 
+(defun canonicalize-fact (body)
+  (labels ((create-slots (slots id)
+             (let ((val (first slots)))
+               (cond ((null val)
+                      (values nil))
+                     ((literalp val)
+                      (append `((,(make-interned-symbol 
+                                   "__SLOT-~D" id) ,val))
+                              (create-slots (rest slots) (1+ id))))
+                     (t
+                      (error "CANONICALIZE-FACT: parse error at ~S." slots))))))
+    (create-slots body 0)))
+
+(defun parse-fact-body (body)
+  (flet ((validate-fact-structure (slot)
+           (cond ((consp slot)
+                  (let ((name (first slot))
+                        (value (second slot)))
+                    (if (and (symbolp name)
+                             (literalp value))
+                        (values slot)
+                      (error "PARSE-FACT-BODY: malformed slot ~S." slot))))
+                 (t
+                  (error "PARSE-FACT-BODY: parse error at ~S." slot)))))
+    (if (consp (first body))
+        (mapcar #'validate-fact-structure body)
+      (canonicalize-fact body))))
+
+(defun parse-fact (body)
+  "Parses a fact as the result of an ASSERT."
+  (let ((head (first body)))
+    (cond ((symbolp head)
+           (let ((class (find-imported-class head nil)))
+             (if (null class)
+                 (error "PARSE-FACT: no class object found for ~S." head)
+               (make-fact class (parse-fact-body (rest body))))))
+          (t
+           (error "PARSE-FACT: parse error at ~S." body)))))

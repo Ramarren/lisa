@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.3 2000/11/09 19:26:04 youngde Exp $
+;;; $Id: fact.lisp,v 1.4 2000/11/17 02:52:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -57,5 +57,6 @@
 (defmethod equals ((self fact) (obj fact))
   (equal (get-class self) (get-class obj)))
 
-(defun make-fact (class)
+(defun make-fact (class slots)
+  (format t "MAKE-FACT: class = ~S, slots = ~S~%" class slots)
   (make-instance 'fact :class class))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.8 2000/11/16 21:49:42 youngde Exp $
+;;; $Id: rete.lisp,v 1.9 2000/11/17 02:52:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,7 +47,7 @@
   (add-activation (get-strategy self)
                   (make-activation rule token)))
 
-(defmethod assert ((self rete) token)
+(defmethod assert-fact ((self rete) token)
   (call-node-right (get-root-node (get-compiler self)) token))
 
 (defmethod run ((self rete))

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.5 2000/11/16 21:26:17 youngde Exp $
+;;; $Id: rule.lisp,v 1.6 2000/11/17 02:52:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -50,7 +50,9 @@
    "This class represents LISA rules."))
 
 (defmethod fire ((self rule) token)
-  (format t "Firing rule ~S~%" (get-name self)))
+  (with-accessors ((actions get-actions)) self
+    (format t "Firing rule ~S~%" (get-name self))
+    (funcall actions)))
 
 (defmethod add-node ((self rule) node)
   (with-accessors ((nodes get-nodes)) self
@@ -63,7 +65,6 @@
 (defmethod compile-patterns ((self rule) plist)
   (with-accessors ((patterns get-patterns)) self
     (mapc #'(lambda (p)
-              (format t "compiling pattern: ~S~%" p)
               (setf patterns
                 (append patterns `(,(make-pattern (first p) (second p))))))
           plist)))

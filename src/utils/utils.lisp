@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.6 2000/11/09 18:22:53 youngde Exp $
+;;; $Id: utils.lisp,v 1.7 2000/11/17 02:52:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -88,3 +88,6 @@
   "Maps PREDICATE over the list ARTS as long as PREDICATE remains
   false."
   (map-while predicate args :condition nil :empty-p empty-p))
+
+(defun make-interned-symbol (&rest args)
+  (intern (make-symbol (apply #'format nil args))))

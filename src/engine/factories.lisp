@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.3 2000/10/27 21:38:38 youngde Exp $
+;;; $Id: factories.lisp,v 1.4 2000/11/17 02:52:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,5 +36,4 @@
           (t (error "make-pattern: unrecognized CE type: ~S~%" pattern)))))
 
 (defun make-pattern (head body)
-  (format t "making pattern: ~S, ~S~%" head body)
   (make-generic-pattern head body))
