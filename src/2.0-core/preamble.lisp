@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.15 2002/11/21 15:54:44 youngde Exp $
+;;; $Id: preamble.lisp,v 1.16 2002/11/21 19:35:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,7 +44,10 @@
 (defun in-rule-firing-p ()
   (not (null (active-rule))))
 
+(defgeneric equals (a b))
+
 (defvar *consider-taxonomy-when-reasoning* nil)
+(defvar *allow-duplicate-facts* t)
 
 (defmacro consider-taxonomy ()
   `(setf *consider-taxonomy-when-reasoning* t))

@@ -20,13 +20,13 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.44 2002/11/21 15:54:44 youngde Exp $
+;;; $Id: rete.lisp,v 1.45 2002/11/21 19:35:44 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete ()
   ((fact-table :initform (make-hash-table)
-               :reader rete-fact-table)
+               :accessor rete-fact-table)
    (instance-table :initform (make-hash-table)
                    :reader rete-instance-table)
    (rete-network :initform (make-rete-network)
@@ -110,22 +110,39 @@
   (forget-rule self (rule-name rule)))
 
 (defun remember-fact (rete fact)
-  (setf (gethash (fact-id fact) (rete-fact-table rete)) fact))
+  (with-accessors ((fact-table rete-fact-table)) rete
+    (setf (gethash (fact-name fact) fact-table) fact)
+    (setf (gethash (fact-id fact) fact-table) fact)))
 
 (defun forget-fact (rete fact)
-  (remhash (fact-id fact) (rete-fact-table rete)))
+  (with-accessors ((fact-table rete-fact-table)) rete
+    (remhash (fact-name fact) fact-table)
+    (remhash (fact-id fact) fact-table)))
 
 (defun find-fact-by-id (rete fact-id)
   (gethash fact-id (rete-fact-table rete)))
+
+(defun find-fact-by-name (rete fact-name)
+  (gethash fact-name (rete-fact-table rete)))
 
 (defun forget-all-facts (rete)
   (clrhash (rete-fact-table rete)))
 
 (defun get-fact-list (rete)
-  (sort
-   (loop for fact being the hash-value of (rete-fact-table rete)
-       collect fact)
-   #'(lambda (f1 f2) (< (fact-id f1) (fact-id f2)))))
+  (delete-duplicates
+   (sort
+    (loop for fact being the hash-value of (rete-fact-table rete)
+        collect fact)
+    #'(lambda (f1 f2) (< (fact-id f1) (fact-id f2))))))
+
+(defmacro ensure-fact-is-unique (rete fact)
+  (let ((existing-fact (gensym)))
+    `(unless *allow-duplicate-facts*
+       (let ((,existing-fact (find-fact-by-name ,rete (fact-name ,fact))))
+         (cl:assert (or (null ,existing-fact)
+                        (not (equals ,fact ,existing-fact))) nil
+           "~S is a duplicate of ~S.~%If you want to allow duplicate facts, set the special variable *ALLOW-DUPLICATE-FACTS* to a non-NIL value."
+        ,fact ,existing-fact)))))
 
 (defun next-fact-id (rete)
   (incf (rete-next-fact-id rete)))
@@ -144,6 +161,7 @@
         (rete-autofacts rete)))
 
 (defmethod assert-fact ((self rete) fact)
+  (ensure-fact-is-unique self fact)
   (with-truth-maintenance (self)
     (setf (fact-id fact) (next-fact-id self))
     (remember-fact self fact)

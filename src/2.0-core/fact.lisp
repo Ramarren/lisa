@@ -20,11 +20,9 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.12 2002/11/20 15:34:38 youngde Exp $
+;;; $Id: fact.lisp,v 1.13 2002/11/21 19:35:44 youngde Exp $
 
 (in-package "LISA")
-
-(defvar *show-hidden-fact-slots* nil)
 
 (defclass fact ()
   ((name :initarg :name
@@ -32,10 +30,15 @@
    (id :initform -1
        :accessor fact-id)
    (slot-table :reader fact-slot-table
-               :initform (make-hash-table))
+               :initform (make-hash-table :test #'equal))
+   (clos-instance :reader fact-clos-instance)
    (meta-data :reader fact-meta-data))
   (:documentation
    "This class represents all facts in the knowledge base."))
+
+(defmethod equals ((fact-1 fact) (fact-2 fact))
+  (and (eq (fact-name fact-1) (fact-name fact-2))
+       (equalp (fact-slot-table fact-1) (fact-slot-table fact-2))))
 
 (defun fact-symbolic-id (fact)
   (format nil "F-~D" (fact-id fact)))
@@ -67,9 +70,7 @@
   a fact instance."
   (let ((slots (list)))
     (maphash #'(lambda (slot value)
-                 (when (or (not (eq slot :object))
-                           *show-hidden-fact-slots*)
-                   (push (list slot value) slots)))
+                 (push (list slot value) slots))
              (fact-slot-table fact))
     slots))
 
@@ -91,7 +92,7 @@
 (defun find-instance-of-fact (fact)
   "Retrieves the CLOS instance associated with a fact. FACT is a FACT
   instance."
-  (get-slot-value fact :object))
+  (fact-clos-instance fact))
 
 (defun has-superclass (fact symbolic-name)
   (find symbolic-name (get-superclasses (fact-meta-data fact))))
@@ -149,7 +150,7 @@
          (make-instance (find-class (get-class-name meta-data) nil))))
     (cl:assert (not (null instance)) nil
       "No class was found corresponding to fact name ~S." (fact-name fact))
-    (initialize-slot-value fact :object instance)
+    (setf (slot-value fact 'clos-instance) instance)
     (mapc #'(lambda (slot-spec)
               (let ((slot-name (first slot-spec))
                     (slot-value (second slot-spec)))
@@ -164,7 +165,7 @@
   (mapc #'(lambda (slot-name)
             (set-slot-from-instance fact instance slot-name))
         (get-slot-list meta-data))
-  (initialize-slot-value fact :object instance)
+  (setf (slot-value fact 'clos-instance) instance)
   fact)
 
 (defun make-fact (name &rest slots)
