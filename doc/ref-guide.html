@@ -14,5 +14,50 @@ This guide describes in detail the programming interface to LISA. It is
 to have a working knowledge of rule-based systems and their development.
 This document also avoids any detailed description of LISA's implementation
 of the Rete algorithm; perhaps at some future date I'll make an attempt.
+<br>&nbsp;
+<h3>
+I. The Programming Language</h3>
+This section describes the publicly-available operators in the LISA language,
+separated into various categories.
+<br>&nbsp;
+<h4>
+Rule-related Operators</h4>
+&nbsp;
+<table BORDER WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td NOSAVE>(defrule <i>name (key*) pattern*</i> => <i>action*</i>)</td>
+
+<td NOSAVE>Macro</td>
+</tr>
+</table>
+
+<blockquote>Creates a rule identified by <i>name</i> and compiles it into
+the Rete network. The keyword arguments modify the rule as follows:
+<pre>:salience <i>integer</i></pre>
+
+<blockquote>Assigns a priority to the rule that will affect the firing
+order. The salience value is a small integer in the range (-250, 250).
+By default, all rules have salience 0.</blockquote>
+
+<pre>:module <i>name</i></pre>
+
+<blockquote>Binds the rule to a module identified by the symbol <i>name</i>.
+Currently unimplemented.</blockquote>
+Each rule consists of zero or more <i>pattern</i>s, or Conditional Elements
+(CEs). Collectively these patterns are known as the rule's Left Hand Side
+(LHS), and are the entities that participate in the pattern-matching process.
+LISA currently defines three pattern types:
+<pre>generic pattern</pre>
+
+<blockquote>This pattern type matches against facts in the knowledge base.
+The head of the pattern matches equivalently-named facts; the pattern body
+is optionally composed of slot-names, values, variables and predicates.
+The best way to understand these things is to look at some examples:
+<pre>(simple-pattern)</pre>
+
+<blockquote>The simplest</blockquote>
+</blockquote>
+</blockquote>
+
 </body>
 </html>
