@@ -20,7 +20,7 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.2 2002/10/24 14:28:17 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.3 2002/10/25 01:20:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,11 +55,37 @@
 
 (defun next ()
   (setf *stepping* t)
-  (setf *read-eval-print* nil))
+  (setf *read-eval-print* nil)
+  (values))
 
 (defun resume ()
   (setf *read-eval-print* nil)
   (setf *stepping* nil)
+  (values))
+
+(defun tokens (&key (verbose nil))
+  (format t "Token stack for ~A:~%" (rule-name (rule)))
+  (dolist (fact (token-make-fact-list *tokens*))
+    (if verbose
+        (format t "  ~S~%" fact)
+      (format t "  ~A, ~A~%"
+              (fact-symbolic-id fact)
+              (fact-name fact))))
+  (values))
+
+(defun fact (fact-id)
+  (find-fact-by-id (inference-engine) fact-id))
+
+(defun bindings ()
+  (format t "Effective bindings for ~A:~%" (rule-name (rule)))
+  (dolist (binding (rule-binding-set (rule)))
+    (format t "  ~A: ~S~%"
+            (binding-variable binding)
+            (if (eq (binding-slot-name binding) :pattern)
+                (token-find-fact *tokens* (binding-address binding))
+              (get-slot-value
+               (token-find-fact *tokens* (binding-address binding))
+               (binding-slot-name binding)))))
   (values))
 
 (defun debugger-read-eval-print ()
