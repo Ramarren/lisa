@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.8 2001/01/09 01:35:05 youngde Exp $
+;;; $Id: macros.lisp,v 1.9 2001/01/09 03:11:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,6 +47,9 @@
   `(or (null ,constraint)
        (literalp ,constraint)
        (consp ,constraint)))
+
+(defmacro normalize-field (obj)
+  `(if (symbolp ,obj) ',obj ,obj))
 
 (defmacro assert-conditions ((&rest forms))
   `(unless (and ,@forms)

@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.6 2001/01/09 01:35:05 youngde Exp $
+;;; $Id: slot.lisp,v 1.7 2001/01/09 03:11:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,5 +51,7 @@
             (get-constraint) (length (get-tests self)))))
 
 (defun make-slot (name value constraint)
-  (make-instance 'slot :name name :value value :constraint constraint))
+  (make-instance 'slot :name name 
+                 :value (if (symbolp value) `,value value)
+                 :constraint constraint))
 

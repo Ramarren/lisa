@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.28 2001/01/07 01:28:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.29 2001/01/09 03:11:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -107,7 +107,8 @@
                (assert-conditions ((symbolp name)
                                    (slot-valuep field)
                                    (constraintp constraint)))
-               (list name field constraint)))
+               `(,name ,(normalize-field field)
+                       ,(normalize-field constraint))))
            (parse-pattern-body (body slots)
              (let ((slot (first body)))
                (cond ((consp slot)
@@ -127,11 +128,14 @@
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
-             (if (and (symbolp slot-name)
-                      (or (literalp slot-value)
-                          (variablep slot-value)))
-                 ``(,',slot-name ,,slot-value)
-               (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots)))))
+             (cond ((and (symbolp slot-name)
+                         (or (literalp slot-value)
+                             (variablep slot-value)))
+                    (if (symbolp slot-value)
+                        ``(,',slot-name ,',slot-value)
+                      ``(,',slot-name ,,slot-value)))
+                   (t
+                    (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
     `(list ,@(mapcar #'normalize slots))))
 
 (defun parse-and-insert-fact (body)
