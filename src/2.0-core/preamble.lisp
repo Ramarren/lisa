@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.17 2002/11/22 15:10:26 youngde Exp $
+;;; $Id: preamble.lisp,v 1.18 2002/11/25 15:33:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,6 +28,7 @@
 (defvar *active-engine* nil)
 (defvar *active-tokens* nil)
 (defvar *active-context* nil)
+(defvar *ignore-this-instance*)
 
 (defun active-context ()
   *active-context*)

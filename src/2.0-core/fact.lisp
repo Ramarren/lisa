@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.15 2002/11/23 00:48:46 youngde Exp $
+;;; $Id: fact.lisp,v 1.16 2002/11/25 15:33:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,8 +47,10 @@
   "Assigns a new value to a slot in a fact and its associated CLOS
   instance. SLOT-NAME is a symbol; VALUE is the new value for the
   slot."
-  (setf (slot-value (find-instance-of-fact fact) slot-name) value)
-  (initialize-slot-value fact slot-name value))
+  (let* ((instance (find-instance-of-fact fact))
+         (*ignore-this-instance* instance))
+    (setf (slot-value instance slot-name) value)
+    (initialize-slot-value fact slot-name value)))
 
 (defun initialize-slot-value (fact slot-name value)
   "Sets the value of a slot in a fact's slot table. FACT is a FACT instance;
