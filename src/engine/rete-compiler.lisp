@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.48 2001/02/02 18:20:59 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.49 2001/02/02 19:29:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,8 @@
   (setf (slot-value self 'root-node) (make-root-node)))
 
 (defmacro simple-slotp (slot)
-  `(or (typep ,slot 'optimisable-slot)
+  `(or (typep ,slot 'optimisable-literal-slot)
+       (typep ,slot 'optimisable-simple-constraint-slot)
        (and (has-complex-constraintp ,slot)
             (localized-slotp ,slot))))
 
@@ -129,31 +130,6 @@
       (values node2))))
 
 ;;; the "third pass"...
-
-#+ignore
-(defun create-join-nodes (compiler rule)
-  (with-accessors ((terminals get-terminals)) compiler
-    (labels ((resolve-node (node2 location)
-               (let ((clone-1 (resolve (aref terminals (1- location)) node2)))
-                 (cond ((eq node2 clone-1)
-                        (values node2 nil))
-                       ((eq clone-1 (resolve (aref terminals location) node2))
-                        (values clone-1 t))
-                       (t (values node2 nil)))))
-             (add-join-node (node2 location)
-               (multiple-value-bind (new-node existsp)
-                   (resolve-node node2 location)
-                 (unless existsp
-                   (add-successor (aref terminals (1- location)) new-node rule)
-                   (add-successor (aref terminals location) new-node rule))
-                 (add-node rule new-node)
-                 (setf (aref terminals (1- location)) new-node)
-                 (setf (aref terminals location) new-node))))
-      (mapc #'(lambda (pattern)
-                (let ((node2 (make-join-node pattern (get-engine rule))))
-                  (add-node2-tests node2 pattern)
-                  (add-join-node node2 (get-location pattern))))
-            (rest (get-patterns rule))))))
 
 (defun create-join-nodes (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler

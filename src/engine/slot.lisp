@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.16 2001/02/01 21:05:40 youngde Exp $
+;;; $Id: slot.lisp,v 1.17 2001/02/02 19:29:47 youngde Exp $
 
 (in-package :lisa)
 
@@ -78,6 +78,7 @@
 
 (defclass optimisable-literal-slot (optimisable-slot) ())
 (defclass optimisable-variable-slot (optimisable-slot) ())
+(defclass optimisable-simple-constraint-slot (optimisable-slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
@@ -116,11 +117,12 @@
              (make-instance 'slot :name name :value value)))
           ;; The value is a variable and there is a constraint...
           ((literalp constraint)
-           (make-instance 'optimisable-variable-slot :name name :value value
-                          :constraint constraint))
+           (make-instance 'optimisable-simple-constraint-slot 
+             :name name :value value :constraint constraint))
           ((negated-literalp constraint)
-           (make-instance 'optimisable-variable-slot :name name :value value
-                          :constraint (second constraint) :negated t))
+           (make-instance 'optimisable-simple-constraint-slot
+             :name name :value value 
+             :constraint (second constraint) :negated t))
           ((variablep constraint)
            (make-instance 'slot :name name :value value
                           :constraint
