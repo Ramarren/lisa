@@ -1,3 +1,9 @@
+2001-05-22  David E. Young  <youngde@nc.rr.com>
+
+	First official Beta release. This distribution adds a reasonable
+	LISA Reference Guide that should do a better job of documentation
+	than what previously existed. Some small code improvements.
+
 2001-05-10  David E. Young  <youngde@nc.rr.com>
 
 	Fairly comprehensive multi-processing (thread) support. It should
