@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.37 2001/01/26 18:04:53 youngde Exp $
+;;; $Id: rule.lisp,v 1.38 2001/01/26 20:42:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -54,11 +54,16 @@
   (:documentation
    "This class represents LISA production rules."))
 
+#+ignore
 (defmethod fire ((self rule) token)
   (with-accessors ((actions get-actions)) self
     (evaluate (make-function-call
                (get-actions self) (get-bindings self))
               (make-function-context token (get-top-fact token)))))
+
+(defmethod fire ((self rule) token)
+  (evaluate (get-actions self)
+            (make-function-context token (get-top-fact token))))
 
 (defmethod add-binding ((self rule) binding)
   (add-binding (get-binding-table self) binding))
@@ -138,8 +143,13 @@
                                       (get-pattern-count self)))))
     (mapc #'compile-pattern plist)))
 
+#+ignore
 (defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self) rhs))
+
+(defmethod compile-actions ((self rule) rhs)
+  (setf (get-actions self)
+    (make-function-call rhs (get-bindings self))))
 
 (defmethod finalize-rule-definition ((self rule) lhs rhs)
   (compile-patterns self lhs)

@@ -359,11 +359,14 @@
 (defglobal ?*time* = (time))
 (set-reset-globals FALSE)
 
-(deffunction run-n-times (?n)
+(deffunction run-mab (?n)
+  (bind ?start (time))
   (while (> ?n 0) do
          (reset)
          (run)
-         (bind ?n (- ?n 1))))
+         (bind ?n (- ?n 1)))
+  (printout t "Elapsed time: "
+            (- (time) ?start) crlf))
 
 ;;(run-n-times 256)
 ;;(run-n-times 1)

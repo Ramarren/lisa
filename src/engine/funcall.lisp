@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.15 2001/01/25 22:14:33 youngde Exp $
+;;; $Id: funcall.lisp,v 1.16 2001/01/26 20:42:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,6 +60,7 @@
   (get-slot-value (get-fact context)
                   (get-slot-name binding)))
 
+#+ignore
 (defmethod evaluate ((self function-call) context)
   (flet ((build-arglist ()
            (mapcar #'(lambda (binding)
@@ -67,6 +68,14 @@
                    (get-bindings self))))
     (let ((val (apply (get-function self) (build-arglist))))
       (values val))))
+
+(defun evaluate (func context)
+  (declare (type function-call func)
+           (type function-call-context context))
+  (apply (get-function func)
+         (mapcar #'(lambda (binding)
+                     (make-lexical-binding binding context))
+                 (get-bindings func))))
 
 (defmethod equals ((self function-call) (obj function-call))
   (eq self obj))
@@ -82,18 +91,6 @@
       (compile nil `(lambda (,@lambda-list)
                       (declare (special ,@lambda-list))
                       (progn ,@(get-forms self)))))))
-             
-#+ignore
-(defmethod initialize-instance :after ((self function-call) &rest args)
-  (declare (ignore args))
-  (setf (slot-value self 'function)
-    (let ((lambda-list (mapcar #'get-name (get-bindings self))))
-      (let ((f `(lambda (,@lambda-list)
-                  (declare (special ,@lambda-list))
-                  (break)
-                  (progn ,@(get-forms self)))))
-        (print f)
-        (eval f)))))
              
 (defun make-function-call (forms bindings)
   (make-instance 'function-call :forms forms :bindings bindings))

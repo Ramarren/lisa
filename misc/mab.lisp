@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.15 2001/01/26 18:04:52 youngde Exp $
+;;; $Id: mab.lisp,v 1.16 2001/01/26 20:42:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -374,3 +374,11 @@
                  (on-top-of floor) (weight light) (location t1-3)))
   (assert (goal-is-to (action eat) (argument-1 bananas))))
 
+(defun run-mab (&optional (ntimes 1))
+  (let ((start (get-internal-real-time)))
+    (dotimes (i ntimes)
+      (reset)
+      (run))
+    (format t "Elapsed time: ~F~%"
+            (/ (- (get-internal-real-time) start)
+               internal-time-units-per-second))))
