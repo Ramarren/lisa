@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.25 2000/12/10 03:19:18 youngde Exp $
+;;; $Id: language.lisp,v 1.26 2000/12/14 21:43:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,6 +61,15 @@
 
 (defmacro modify (fact &body body)
   (parse-and-modify-fact fact body))
+
+(defmacro watch (event)
+  `(watch-event ,event))
+
+(defmacro unwatch (event)
+  `(unwatch-event ,event))
+
+(defmacro watching ()
+  `(format t "Watches: ~S~%" (get-watches)))
 
 (defmacro halt ()
   `(values))

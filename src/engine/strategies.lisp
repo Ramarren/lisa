@@ -19,9 +19,10 @@
 
 ;;; File: strategies.lisp
 ;;; Description: Classes that implement the various default conflict
-;;; resolution strategies for Lisa's RETE implementation.
+;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
+;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.5 2000/11/27 21:28:50 youngde Exp $
+;;; $Id: strategies.lisp,v 1.6 2000/12/14 21:43:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -49,12 +50,21 @@
     (setf activations
       (nconc activations `(,activation)))))
 
-(defmethod remove-activation ((self depth-first-strategy) token)
+(defmethod retract-activation ((self depth-first-strategy) activation)
   (with-accessors ((activations get-activations)) self
     (setf activations
-      (delete-if #'(lambda (tok)
-                     (= (hash-code tok) (hash-code token)))
-                 activations))))
+      (delete-if #'(lambda (act)
+                     (= (hash-code act) (hash-code activation)))
+                 activations))
+    (values activation)))
+
+(defmethod remove-activation ((self depth-first-strategy) token)
+  (let ((activation
+         (find-if #'(lambda (activation)
+                      (= (hash-code activation) (hash-code token)))
+                  (get-activations self))))
+    (unless (null activation)
+      (retract-activation self activation))))
 
 (defmethod next-activation ((self depth-first-strategy))
   (pop (get-activations self)))
