@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.14 2001/01/23 21:34:29 youngde Exp $
+;;; $Id: utils.lisp,v 1.15 2001/01/24 18:59:55 youngde Exp $
 
 (in-package :lisa)
 
@@ -54,30 +54,9 @@
         (t
          (find-if-after predicate (rest sequence)))))
 
-(defun compare2 (predicate lst1 lst2)
-  "Applies PREDICATE to corresponding pairs of elements in both lists, and
-  returns T if PREDICATE was true for each pair, or NIL as soon as
-  PREDICATE fails."
-  (declare (type list lst1) (type list lst2))
-  (cond ((not (and (listp lst1)
-                   (listp lst2)))
-         (values nil))
-        ((and (null lst1) (null lst2))
-         (values t))
-        ((or (and (null lst1) (not (null lst2)))
-             (and (null lst2) (not (null lst1))))
-         (values nil))
-        (t
-         (if (apply predicate `(,(first lst1) ,(first lst2)))
-             (compare2 predicate (rest lst1) (rest lst2))
-           (values nil)))))
-
-(defun make-interned-symbol (&rest args)
-  (intern (symbol-name (make-symbol (apply #'format nil args)))))
-
 (defun lsthash (func ht)
   "Applies FUNC to each entry in hashtable HT and, if FUNC so
-  indicates, appends the object to a LIST. If NIL is an acceptible
+  indicates, appends the object to a LIST. If NIL is an acceptable
   object, then FUNC should return two values; NIL and T."
   (let ((seq (list)))
     (maphash #'(lambda (key val)
@@ -86,7 +65,7 @@
                    (unless (and (null obj)
                                 (not use-p))
                      (push obj seq)))) ht)
-    (nreverse seq)))
+    (values seq)))
 
 (defun collect (predicate list)
   (let ((collection (list)))
