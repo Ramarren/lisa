@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.50 2002/11/02 02:17:53 youngde Exp $
+;;; $Id: parser.lisp,v 1.51 2002/11/04 18:55:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -143,26 +143,35 @@
          (fixup-runtime-bindings lhs))
         (t lhs)))
 
+(defvar *in-logical-pattern-p* nil)
+
 (defun parse-rulebody (body)
-  (let ((location -1))
-    (labels ((parse-lhs (body patterns)
+  (let ((location -1)
+        (patterns (list)))
+    (labels ((parse-lhs (body)
                (let ((pattern (first body)))
                  (cl:assert (listp pattern) nil
                    "This pattern is malformed: ~S" pattern)
-                 (if (consp pattern)
-                     (parse-lhs 
-                      (rest body)
-                      (push
-                       (make-rule-pattern pattern (incf location)) patterns))
-                   (nreverse patterns))))
+                 (cond ((endp body)
+                        (unless *in-logical-pattern-p*
+                          (reverse patterns)))
+                       ((eq (first pattern) 'logical)
+                        (let ((*in-logical-pattern-p* t))
+                          (parse-lhs (rest pattern)))
+                        (parse-lhs (rest body)))
+                       (t
+                        (push
+                         (make-rule-pattern 
+                          pattern (incf location)) patterns)
+                        (parse-lhs (rest body))))))
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
                 :actions actions)))
       (multiple-value-bind (lhs remains)
           (utils:find-before *rule-separator* body :test #'eq)
-        (cl:assert (not (null remains)) nil "Missing rule separator")
-        (values (parse-lhs (preprocess-left-side lhs) nil)
+        (cl:assert (not (endp remains)) nil "Missing rule separator")
+        (values (parse-lhs (preprocess-left-side lhs))
                 (parse-rhs (utils:find-after *rule-separator*
                                              remains :test #'eq)))))))
 
@@ -176,11 +185,13 @@
               :type type
               :pattern-binding binding
               :binding-set (make-binding-set)
+              :logical *in-logical-pattern-p*
               :address location))
            (build-compound-pattern (sub-patterns)
              (make-parsed-pattern
               :type :or
               :sub-patterns sub-patterns
+              :logical *in-logical-pattern-p*
               :address location))
            (parse-pattern (p &optional binding)
              (let ((head (first p)))
@@ -334,6 +345,11 @@
        (register-template ',class-name ,class)
        ,class)))
 
+(defun bind-logical-dependencies (fact)
+  (dolist (index (rule-logicals (active-rule)) fact)
+    (add-dependent-fact
+     (token-find-fact (active-tokens) index) fact)))
+  
 (defun parse-and-insert-instance (instance)
   (assert-fact
    (current-engine)

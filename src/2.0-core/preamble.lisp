@@ -20,12 +20,29 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.5 2002/10/17 18:11:06 youngde Exp $
+;;; $Id: preamble.lisp,v 1.6 2002/11/04 18:55:28 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *active-rule* nil)
 (defvar *active-engine* nil)
+(defvar *active-tokens* nil)
+
+(defun active-tokens ()
+  (declare (inline active-tokens))
+  *active-tokens*)
+
+(defun active-rule ()
+  (declare (inline active-rule))
+  *active-rule*)
+
+(defun active-engine ()
+  (declare (inline active-rule))
+  *active-engine*)
+
+(defun in-rule-firing-p ()
+  (declare (inline in-rule-firing-p))
+  (not (null (active-rule))))
 
 (defclass inference-engine-object () ())
 

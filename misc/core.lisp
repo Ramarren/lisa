@@ -93,6 +93,20 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
+(defrule logical-rule ()
+  (frodo)
+  (logical
+   (gandalf)
+   (samwise))
+  =>
+  (assert (bilbo)))
+
+(defrule respond-to-logical-rule ()
+  (bilbo)
+  =>
+  (format t "Uh oh...~%"))
+
+#+ignore
 (defrule or-rule ()
   (frodo)
   (or (gandalf)

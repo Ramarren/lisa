@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.11 2002/11/02 17:30:39 youngde Exp $
+;;; $Id: rule.lisp,v 1.12 2002/11/04 18:55:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,6 +46,8 @@
               :reader rule-node-list)
    (subrules :initform nil
              :accessor rule-subrules)
+   (logicals :initform nil
+             :accessor rule-logicals)
    (engine :initarg :engine
            :initform nil
            :reader rule-engine))
@@ -55,7 +57,8 @@
 
 (defmethod fire-rule ((self rule) tokens)
   (let ((*active-rule* self)
-        (*active-engine* (rule-engine self)))
+        (*active-engine* (rule-engine self))
+        (*active-tokens* tokens))
     (funcall (rule-behavior self) tokens)))
 
 (defun attach-rule-nodes (rule nodes)
@@ -81,21 +84,34 @@
 (defun add-subrule (rule subrule)
   (push subrule (rule-subrules rule)))
 
+(defun remember-logical-dependencies (rule patterns)
+  (with-accessors ((dependents rule-logicals)) rule
+    (dolist (pattern patterns)
+      (when (logical-pattern-p pattern)
+        (push (parsed-pattern-address pattern) dependents)))
+    rule))
+
+(defun logical-rule-p (rule)
+  (not (null (rule-logicals rule))))
+
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
             (loop for pattern in patterns
                 append (parsed-pattern-binding-set pattern)))))
-    (compile-rule
-     (make-instance 'rule 
-       :name name 
-       :engine engine
-       :comment doc-string
-       :salience salience
-       :module module
-       :binding-set (make-rule-binding-set))
-     patterns actions)))
+    (let ((rule
+           (compile-rule
+            (make-instance 'rule 
+              :name name 
+              :engine engine
+              :comment doc-string
+              :salience salience
+              :module module
+              :binding-set (make-rule-binding-set))
+            patterns actions)))
+      (remember-logical-dependencies rule patterns)
+      rule)))
 
 (defun make-composite-rule (name engine patterns actions
                             &rest args

@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.6 2002/10/17 14:47:38 youngde Exp $
+;;; $Id: fact.lisp,v 1.7 2002/11/04 18:55:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,25 +28,23 @@
 
 (defclass fact ()
   ((name :initarg :name
-         :reader fact-name
-         :documentation
-         "The symbolic name for the fact, as used in rules.")
+         :reader fact-name)
    (id :initform -1
-       :accessor fact-id
-       :documentation
-       "The numeric identifier assigned to the fact by the inference engine.")
+       :accessor fact-id)
    (slot-table :reader fact-slot-table
-               :initform (make-hash-table)
-               :documentation
-               "A hash table holding the slots for this fact.")
-   (meta-data :reader fact-meta-data
-              :documentation
-              "The META-FACT instance associated with this fact."))
+               :initform (make-hash-table))
+   (meta-data :reader fact-meta-data)
+   (dependencies :initform nil
+                 :accessor fact-dependencies))
   (:documentation
    "This class represents all facts in the knowledge base."))
 
 (defun fact-symbolic-id (fact)
   (format nil "F-~D" (fact-id fact)))
+
+(defun add-dependent-fact (fact dependent)
+  (push dependent (fact-dependencies fact))
+  fact)
 
 (defun set-slot-value (fact slot-name value)
   "Assigns a new value to a slot in a fact and its associated CLOS
