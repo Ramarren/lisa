@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.44 2002/06/04 00:31:07 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.45 2002/06/06 21:12:34 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -41,7 +41,7 @@
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
            "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING" "=>"
            "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY")
+           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -56,7 +56,7 @@
                 "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
                 "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING"
                 "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY")) 
+                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK")) 
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")
@@ -95,15 +95,11 @@
            "FIND-DIRECT-SUPERCLASSES"
            "CLASS-ALL-SUPERCLASSES"))
 
-;;; This macro is courtesy of Paul Werkowski. A very nice idea. I modified it
-;;; slightly, replacing the extended LOOP originally used in EXTERNALS-OF with
-;;; what you see here...
+;;; This macro is courtesy of Paul Werkowski. A very nice idea.
 
 (defmacro define-lisa-lisp ()
   (flet ((externals-of (pkg)
-           (let ((symbols (list)))
-             (do-external-symbols (symbol pkg symbols)
-               (push symbol symbols)))))
+           (loop for s being each external-symbol in pkg collect s)))
     (let* ((lisa-externs (externals-of "LISA"))
            (lisa-shadows (intersection (package-shadowing-symbols "LISA")
                                        lisa-externs))
