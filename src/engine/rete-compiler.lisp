@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.31 2001/01/08 16:40:05 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.32 2001/01/10 21:37:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,27 +56,15 @@
   (:documentation
    "Generates the Rete pattern network."))
 
-(defmethod create-node1-test ((test test1-internal-eval)
-                              slot rule pattern)
-  (make-node1 test slot rule pattern))
-
-(defmethod create-node1-test ((test test1-eval) slot rule pattern)
-  (when (= (get-pattern-count rule) 1)
-    (make-node1 test slot rule pattern)))
-
-(defmethod create-node1-test ((test test1) slot rule pattern)
-  (values nil))
-
 (defun add-simple-tests (pattern rule parent-node)
   (let ((last-node parent-node))
     (mapc #'(lambda (slot)
-              (mapc #'(lambda (test)
-                        (let ((node
-                               (create-node1-test test slot rule pattern)))
-                          (unless (null node)
-                            (setf last-node
-                              (merge-successor last-node node rule)))))
-                    (get-tests slot)))
+              (when (or (is-localized-patternp pattern)
+                        (= (get-pattern-count rule) 1))
+                (setf last-node
+                  (merge-successor last-node
+                                   (make-node1 slot pattern rule)
+                                   rule))))
           (get-slots pattern))
     (values last-node)))
 
