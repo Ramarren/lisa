@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.3 2000/10/27 20:06:46 youngde Exp $
+;;; $Id: parser.lisp,v 1.4 2000/10/27 21:38:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -150,12 +150,7 @@
            (mapcar #'(lambda (slot)
                        `(,(first slot) :initform nil))
                    slot-list)))
-    (let ((class (find-class name nil)))
-      (when (null class)
-        (setf class
-          (eval `(defclass ,name (lisa-kb-class)
-                   (,@(compose-slots slots))))))
-      (values class))))
+    (make-internal-class name (compose-slots slots))))
 
 (defun canonicalize-pattern (head body)
   (labels ((make-slot-id (id)
@@ -176,7 +171,10 @@
     (finalize-pattern head (make-slot-list body 0))))
 
 (defun make-default-pattern (p)
-  (if (unordered-patternp p)
-      (parse-unordered-pattern p)
-    (parse-ordered-pattern p)))
-
+  (flet ((ordered-patternp (name)
+           (let ((class (find-class name nil)))
+             (or (null class)
+                 (is-lisa-class class)))))
+    (if (ordered-patternp (first p))
+        (parser-ordered-pattern p)
+      (parse-unordered-pattern p))))

@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.2 2000/10/25 15:18:29 youngde Exp $
+;;; $Id: factories.lisp,v 1.3 2000/10/27 21:38:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,4 +37,4 @@
 
 (defun make-pattern (head body)
   (format t "making pattern: ~S, ~S~%" head body)
-  (make-ordered-pattern head body))
+  (make-generic-pattern head body))
