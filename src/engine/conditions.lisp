@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.10 2001/04/02 16:10:54 youngde Exp $
+;;; $Id: conditions.lisp,v 1.11 2001/04/03 16:47:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,7 +36,14 @@
   ((element :initarg :element
             :initform nil
             :reader get-element))
-  (:documentation
+  (:report
+   (lambda (condition strm)
+     (if (null (get-element condition))
+         (format strm "Syntax error:~%")
+       (format strm "While evaluating the element ~S:~%"
+               (get-element condition)))
+     (format strm (get-text condition)))
+   :documentation
    "This condition represents syntactical errors discovered during the initial
    parsing pass."))
 
@@ -85,8 +92,8 @@
   (:report
    (lambda (condition strm)
      (with-slots (rule condition) condition
-       (format strm "While executing rule ~S~%" (get-name rule))
-       (format strm "On the RHS the following error occurred:~%")
+       (format strm "While executing rule ~S...~%" (get-name rule))
+       (format strm "LISA discovered a problem on this rule's RHS:~%")
        (princ (get-condition condition) strm)))
    :documentation
    "This condition represents runtime errors that occur during rule

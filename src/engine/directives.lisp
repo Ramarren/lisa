@@ -17,26 +17,25 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: special-facts.lisp
-;;; Description: Classes that represents special facts internal to
-;;; LISA.
+;;; File: directives.lisp
+;;; Description: Classes that represent various directives that appear within
+;;; a DECLARE form.
 
-;;; $Id: special-facts.lisp,v 1.4 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: directives.lisp,v 1.1 2001/04/03 16:47:24 youngde Exp $
 
 (in-package "LISA")
 
-(defclass initial-fact (lisa-kb-class)
+(defclass directive ()
   ()
   (:documentation
-   "Represents the special fact INITIAL-FACT."))
+   "The base class for all LISA directives."))
 
-(defclass clear-fact (lisa-kb-class)
-  ()
+(defclass salience-directive (directive)
+  ((salience :initarg :salience
+             :reader get-salience))
   (:documentation
-   "Represents the special fact CLEAR-FACT."))
+   "This class represents a rule salience directive."))
 
-(defclass not-or-test-fact (lisa-kb-class)
-  ()
-  (:documentation
-   "Represents the special fact NOT-OR-TEST."))
+(defun make-salience-directive (salience)
+  (make-instance 'salience-directive :salience salience))
 
