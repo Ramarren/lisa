@@ -21,9 +21,9 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.44 2001/04/17 18:18:35 youngde Exp $
+;;; $Id: mab.lisp,v 1.45 2001/04/23 21:48:58 youngde Exp $
 
-(in-package "LISA-USER")
+(in-package "LISA")
 
 (deftemplate monkey
   (slot location)
@@ -335,10 +335,22 @@
   (assert (goal-is-to (action hold) (argument-1 ?obj)
                       (argument-2 empty))))
 
+#+ignore
 (defrule satisfy-hunger ()
   (?goal (goal-is-to (action eat) (argument-1 ?name)))
   (?monkey (monkey (holding ?name)))
   (?thing (thing (name ?name)))
+  =>
+  (format t "Monkey eats the ~A.~%" ?name)
+  (modify ?monkey (holding blank))
+  (retract ?goal)
+  (retract ?thing))
+
+(defrule satisfy-hunger ()
+  (?goal (goal-is-to (action eat) (argument-1 ?name)))
+  (?monkey (monkey (holding ?name)))
+  (?thing (thing (name ?thing-name)))
+  (test (eql ?name ?thing-name))
   =>
   (format t "Monkey eats the ~A.~%" ?name)
   (modify ?monkey (holding blank))
