@@ -1,5 +1,5 @@
 
-(in-package "LISA")
+(in-package "LISA-USER")
 
 (use-default-engine)
 
@@ -58,6 +58,13 @@
   =>
   )
 
+(defrule constraints ()
+  (frodo (name ?name))
+  (samwise (name sam) (friend ?friend (not frodo)))
+  =>
+  (format t "constraints: ~S ~S~%" ?name ?friend))
+
+#+ignore
 (defrule variable-rule ()
   (frodo (name ?name))
   (?sam (samwise (name sam) (friend ?name)))
@@ -65,6 +72,7 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
+#+ignore
 (defrule samwise ()
   (samwise (name samwise))
   =>

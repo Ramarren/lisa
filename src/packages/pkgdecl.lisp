@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.50 2002/08/21 18:28:01 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.51 2002/09/25 18:58:12 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -44,7 +44,8 @@
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
            "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING" "=>"
            "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK")
+           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
+           "FACT")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -59,7 +60,8 @@
                 "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
                 "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING"
                 "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK")) 
+                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
+                "FACT"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")

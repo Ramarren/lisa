@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.25 2002/09/24 15:26:42 youngde Exp $
+;;; $Id: parser.lisp,v 1.26 2002/09/25 18:58:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -179,10 +179,18 @@
                         (pushnew (find-slot-binding obj)
                                  ,list :key #'first)))
                     ,list))
-               (simple-negated-field-p (field)
-                 `(and (consp ,field)
-                       (eq (first ,field) 'not)
-                       (not (consp (second ,field)))))
+               (make-equality-predicate (var atom)
+                 `(function
+                   (lambda () 
+                     (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))))
+               (make-generic-predicate (&body body)
+                 `(function (lambda () ,@body)))
+               (simple-form-p (form)
+                 `(atom ,form))
+               (simple-negated-form-p (form)
+                 `(and (consp ,form)
+                       (eq (first ,form) 'not)
+                       (atom (second ,form))))
                (check-for-intra-pattern-bindings (bindings)
                  `(and (consp ,bindings)
                        (every #'(lambda (b)
@@ -200,7 +208,7 @@
                                    (slot-valuep field)
                                    (constraintp constraint))
                        nil "This pattern has a malformed slot: ~S" pattern)
-                   (when (simple-negated-field-p field)
+                   (when (simple-negated-form-p field)
                      (setf field (second field))
                      (setf negated t))
                    (when (variablep field)
@@ -209,11 +217,21 @@
                        (setf slot-binding binding)
                        (when exists-p
                          (push binding existing-bindings))))
-                   (when (consp constraint)
-                     (setf existing-bindings
-                       (append existing-bindings
-                               (collect-constraint-bindings 
-                                constraint constraint-bindings))))
+                   (unless (null constraint)
+                     (cond ((simple-form-p constraint)
+                            (setf constraint
+                              (make-equality-predicate field constraint)))
+                           ((simple-negated-form-p constraint)
+                            (setf constraint
+                              (make-equality-predicate field (second constraint))
+                              (setf negated t)))
+                           (t
+                            (setf existing-bindings
+                              (append existing-bindings
+                                      (collect-constraint-bindings 
+                                       constraint constraint-bindings)))
+                            (setf constraint
+                              (make-generic-predicate constraint)))))
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
