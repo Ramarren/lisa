@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation details.
 
-;;; $Id: reflect.lisp,v 1.8 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: reflect.lisp,v 1.9 2002/06/06 21:28:34 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
@@ -48,6 +48,11 @@
   (or (eq (class-name class) 'standard-object)
        (eq (class-name class) t)))
 
+#+CLISP
+(defun find-direct-superclasses (class)
+  (remove-if #'is-standard-classp (clos::class-direct-superclasses class)))
+             
+#-CLISP
 (defun find-direct-superclasses (class)
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
              
