@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.23 2001/03/05 21:59:58 youngde Exp $
+;;; $Id: defsys.lisp,v 1.24 2001/03/06 18:54:21 youngde Exp $
 
 (in-package :user)
 
@@ -30,20 +30,40 @@
                   (merge-pathnames *load-truename*
                                    *default-pathname-defaults*))))
 
+(defun make-lisa-directory (components)
+  (funcall #'make-pathname
+         :directory
+         (append (pathname-directory *lisa-root-pathname*) components)))
+
+(setf (logical-pathname-translations "lisa")
+  `(("src;*.*.*" ,(make-lisa-directory '("src")))
+    ("lib;acl;" ,(make-lisa-directory '("lib" "acl")))
+    ("lib;lispworks;" (make-lisa-directory '("lib" "lispworks")))
+    ("lib;cmucl;" (make-lisa-directory '("lib" "cmucl")))
+    ("lib;clisp;" (make-lisa-directory '("lib" "clisp")))))
+
 (defvar *lisa-source-pathname*
-  (make-pathname :directory
-                 (append (pathname-directory *lisa-root-pathname*)
-                         '("src"))))
+  (translate-logical-pathname "lisa:src;"))
 
 (defvar *lisa-binary-pathname*
+  #+Allegro
+  (translate-logical-pathname "lisa:lib;acl;")
+  #+LispWorks
+  (translate-logical-pathname "lisa:lib;lispworks;")
+  #+CMU
+  (translate-logical-pathname "lisa:lib;cmucl;")
+  #+CLISP
+  (translate-logical-pathname "lisa:lib;clisp;")
+  #-(or Allegro LispWorks CMU CLISP)
+  (error "Unsupported implementation."))
+
+(defvar *clocc-source-pathname*
   (make-pathname :directory
                  (append (pathname-directory *lisa-root-pathname*)
-                         #+Allegro '("lib" "acl")
-                         #+LispWorks '("lib" "lispworks")
-                         #+CMU '("lib" "cmucl")
-                         #+CLISP '("lib" "clisp")
-                         #-(or Allegro LispWorks CMU CLISP)
-                         (error "Unsupported implementation."))))
+                         '("contrib" "port"))))
+
+(setf (logical-pathname-translations "clocc")
+      `(("src;port;*.*.*" ,*clocc-source-pathname*)))
 
 (defun directory-existsp (path)
   #+(or Allegro Lispworks CMU)
@@ -72,16 +92,17 @@
 ;;; Make sure the binary directory structure exists, creating it if
 ;;; necessary...
 
-(let ((dirlist '("packages" "engine" "utils")))
-  (unless (directory-existsp *lisa-binary-pathname*)
-    (mkdir *lisa-binary-pathname*))
-  (dolist (dir dirlist)
-    (let ((path (make-pathname
-                 :directory (append (pathname-directory
-                                     *lisa-binary-pathname*)
-                                    `(,dir)))))
-      (unless (directory-existsp path)
-        (mkdir path)))))
+(defun ensure-lisa-directory-structure ()
+  (let ((dirlist '("packages" "engine" "utils")))
+    (unless (directory-existsp *lisa-binary-pathname*)
+      (mkdir *lisa-binary-pathname*))
+    (dolist (dir dirlist)
+      (let ((path (make-pathname
+                   :directory (append (pathname-directory
+                                       *lisa-binary-pathname*)
+                                      `(,dir)))))
+        (unless (directory-existsp path)
+          (mkdir path))))))
 
 #+CMU
 (progn
@@ -167,7 +188,9 @@
                                        (:file "watch")
                                        (:file "debug")
                                        (:file "instrumenting"))
-                          :depends-on (packages utils lisa-macros generics))))
+                          :depends-on (packages utils lisa-macros generics)))
+    :initially-do
+    (ensure-lisa-directory-structure))
 
 (defun compile-lisa ()
   (mk:compile-system :lisa))
