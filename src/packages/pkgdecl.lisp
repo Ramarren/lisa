@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.73 2004/09/13 19:27:53 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.74 2004/09/15 17:34:42 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -52,7 +52,7 @@
            "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
            "MAKE-INFERENCE-ENGINE" "RETE" "DUPLICATE-FACT"
            "STANDARD-KB-CLASS" "USE-FANCY-ASSERT" "RULE-DEFAULT-NAME"
-           "SLOT-VALUE-OF-INSTANCE")
+           "SLOT-VALUE-OF-INSTANCE" "IN-RULE-FIRING-P" "ACTIVE-RULE" "CF")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -103,7 +103,8 @@
 
 (defpackage "LISA.CF"
   (:use "COMMON-LISP")
-  (:export "CF-P" "CF-AND" "CF-OR" "CF-FLOOR" "+TRUE+" "+FALSE+" "COMBINE"))
+  (:nicknames "CF")
+  (:export "COMBINE"))
 
 (defpackage "LISA.UTILS"
   (:use "COMMON-LISP")

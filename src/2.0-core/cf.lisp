@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.2 2004/09/13 19:27:47 youngde Exp $
+;;; $Id: cf.lisp,v 1.3 2004/09/15 17:34:41 youngde Exp $
 
 (in-package :lisa.cf)
 
@@ -28,15 +28,11 @@
 
 (defconstant +false+ -1.0)
 
-(defgeneric cf-or (a b)
+(defgeneric cf-combine (a b)
   (:method ((a t) (b t))
    (error "Either one or both arguments is not a legal certainty factor: ~A, ~A." a b)))
 
-(defgeneric cf-and (a b)
-  (:method ((a t) (b t))
-   (error "Either one or both arguments is not a legal certainty factor: ~A, ~A." a b)))
-
-(defmethod cf-or ((a number) (b number))
+(defmethod cf-combine ((a number) (b number))
   (cond ((and (plusp a)
               (plusp b))
          (+ a b (* -1 a b)))
@@ -46,11 +42,21 @@
         (t (/ (+ a b)
               (- 1 (min (abs a) (abs b)))))))
 
-(defmethod cf-and ((a number) (b number))
-  (min a b))
-
 (defmethod cf-p ((cf number))
   (<= +false+ cf +true+))
 
-(defmethod combine (a b)
-  (cf-or a b))
+(defmethod combine ((a number) (b number) &rest args)
+  (declare (ignore args))
+  (cf-combine a b))
+
+(defmethod combine ((a lisa:fact) (b lisa:fact) &rest args)
+  (assert (lisa:in-rule-firing-p) nil
+    "COMBINE only makes sense within the context of a rule firing.")
+  (let ((cf (if args
+                (apply #'min (lisa:cf a) (lisa:cf b)
+                       (loop for f in args collect (lisa:cf f)))
+              (min (lisa:cf a) (lisa:cf b))))
+        (rule-cf (lisa:cf (lisa:active-rule))))
+    (if rule-cf
+        (* cf rule-cf)
+      cf)))

@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.25 2004/09/14 17:35:10 youngde Exp $
+;;; $Id: fact.lisp,v 1.26 2004/09/15 17:34:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -134,12 +134,17 @@
 (defun reconstruct-fact (fact)
   `(,(fact-name fact) ,@(get-slot-values fact)))
 
+#+ignore
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t)
     (let ((slots (get-slot-values self)))
       (format strm "F-~D ; ~S" (fact-id self) (fact-name self))
       (unless (null slots)
         (format strm " ; ~S" slots)))))
+
+(defmethod print-object ((self fact) strm)
+  (print-unreadable-object (self strm :type t)
+    (format strm "F-~D, ~A, CF is ~S" (fact-id self) (fact-name self) (cf self))))
 
 (defmethod initialize-instance :after ((self fact) &key (slots nil)
                                                         (instance nil))

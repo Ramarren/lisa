@@ -22,7 +22,7 @@
 ;;; File: core.asd
 ;;; Description: System definition file.
 
-;;; $Id: core.asd,v 1.5 2004/06/07 19:01:13 youngde Exp $
+;;; $Id: core.asd,v 1.6 2004/09/15 17:34:41 youngde Exp $
 
 (in-package :cl-user)
 
@@ -46,6 +46,7 @@
                (:file "language"
                 :depends-on ("parser"))
                (:file "tms-support")
+               (:file "cf")
                (:file "rete"
                 :depends-on ("language" "tms-support"))
                (:file "meta")
