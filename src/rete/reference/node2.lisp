@@ -20,14 +20,11 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.14 2002/09/12 23:42:54 youngde Exp $
+;;; $Id: node2.lisp,v 1.15 2002/09/23 19:12:41 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2 (join-node) ())
-
-(defmethod pass-tokens-to-successor ((self node2) left-tokens)
-  (call-successor (join-node-successor self) left-tokens))
 
 (defmethod test-tokens ((self node2) left-tokens right-token)
   (token-push-fact left-tokens (token-top-fact right-token))

@@ -20,7 +20,7 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.4 2002/08/30 16:54:00 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.5 2002/09/23 19:12:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,9 +29,11 @@
                :reader shared-node-successors)))
 
 (defmethod pass-token-to-successors ((self shared-node) token)
-  (maphash #'(lambda (key successor)
-               (declare (ignore key))
-               (funcall (successor-connector successor)
-                        (successor-node successor)
-                        token))
-           (shared-node-successors self)))
+  (loop for successor being the hash-value
+      of (shared-node-successors self)
+      do (funcall (successor-connector successor)
+                  (successor-node successor)
+                  token)))
+
+(defmethod accept-token ((self shared-node) (token reset-token))
+  (pass-token-to-successors self (token-push-fact token t)))
