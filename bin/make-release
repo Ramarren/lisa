@@ -1,3 +1,4 @@
+#!/bin/sh
 # This file is part of LISA, the Lisp-based Intelligent Software
 # Agents platform.
 
@@ -20,8 +21,7 @@
 # File: make-release
 # Description: Trivial script to help make LISA releases.
 
-# $Id: make-release,v 1.1 2001/04/06 18:54:47 youngde Exp $
-#!/bin/sh
+# $Id: make-release,v 1.2 2001/04/18 14:05:07 youngde Exp $
 
 ROOT=/files/devel/sourceforge/lisa
 FASL_FILES="*.fasl *.ufsl *.x86f *.err *.fas *.lib"

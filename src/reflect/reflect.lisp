@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation details.
 
-;;; $Id: reflect.lisp,v 1.4 2001/04/17 23:19:57 youngde Exp $
+;;; $Id: reflect.lisp,v 1.5 2001/04/18 14:05:08 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
@@ -36,4 +36,6 @@
   (values))
 
 (defun class-slot-list (class)
+  (unless (class-finalized-p class)
+    (finalize-inheritance class))
   (port:class-slot-list class))

@@ -22,7 +22,7 @@
 ;;; implementation, a common AI planning problem. The monkey's objective is to
 ;;; find and eat some bananas.
 
-;;; $Id: mab-clos.lisp,v 1.1 2001/04/17 20:00:39 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.2 2001/04/18 14:05:08 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -53,10 +53,19 @@
    (argument-2 :initarg :argument-2
                :initform nil)))
 
+;;; These DEFIMPORT forms make the MAB classes known to LISA. The first three
+;;; contain no slot specifications so LISA determines applicable slots via
+;;; introspection. The last form illustrates how one might limit the slots of
+;;; interest by specifying them explicitly...
+
 (defimport monkey (lisa-user::monkey) ())
+
 (defimport thing (lisa-user::thing) ())
+
 (defimport chest (lisa-user::chest) ())
-(defimport goal-is-to (lisa-user::goal-is-to) ())
+
+(defimport goal-is-to (lisa-user::goal-is-to)
+  (action argument-1 argument-2))
 
 ;;;(watch :activations)
 ;;;(watch :facts)
