@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.28 2001/03/12 20:00:16 youngde Exp $
+;;; $Id: defsys.lisp,v 1.29 2001/03/13 18:54:58 youngde Exp $
 
 (in-package :user)
 
@@ -98,6 +98,7 @@
                           :binary-pathname "engine"
                           :components ((:file "utils")
                                        (:file "lisa-kb-class")
+                                       (:file "deftemplate")
                                        (:file "special-facts")
                                        (:file "strategies")
                                        (:file "bindings")
@@ -154,13 +155,17 @@
       (mk:system-source-size :lisa :all)
       (mk:system-source-size :lisa :new-source-and-dependents)))
 
+(defmacro with-quiet-compile (&body body)
+  `(let ((*compile-print* nil))
+    ,@body))
+
 (defun compile-lisa ()
-  (let ((*compile-print* nil))
-    (mk:compile-system :lisa)))
+  (with-quiet-compile
+      (mk:compile-system :lisa)))
 
 (defun load-lisa ()
-  (let ((*compile-print* nil))
-    (mk:load-system :lisa)))
+  (with-quiet-compile
+      (mk:load-system :lisa)))
 
 (defun clean-lisa ()
   (mk:clean-system :lisa))
