@@ -20,7 +20,7 @@
 ;;; File: node1-teq.lisp
 ;;; Description: A one-input node that tests a slot's value.
 
-;;; $Id: node1-teq.lisp,v 1.4 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: node1-teq.lisp,v 1.5 2000/11/14 19:49:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,6 +51,11 @@
 (defmethod equals ((self node1-teq) (obj node1-teq))
   (and (equal (get-slot self) (get-slot obj))
        (equal (get-value self) (get-value obj))))
+
+(defmethod print-object ((self node1-teq) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(slot = ~S, value = ~S)"
+            (get-slot self) (get-value self))))
 
 (defun make-node1-teq (slot value)
   (make-instance 'node1-teq :slot slot :value value))
