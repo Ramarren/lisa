@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.67 2001/04/17 17:29:46 youngde Exp $
+;;; $Id: parser.lisp,v 1.68 2001/04/19 20:24:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -87,10 +87,12 @@
              (let ((head (first p)))
                (if (symbolp head)
                    (cond ((eq head 'test)
-                          (make-test-pattern (rest p)))
+                          (make-parsed-pattern
+                           :pattern (parse-test-pattern p)
+                           :type :test))
                          ((eq head 'not)
                           (make-parsed-pattern
-                           :pattern (make-default-pattern (second p))
+                           :pattern (parse-default-pattern (second p))
                            :type :negated))
                          ((variablep head)
                           (if (null binding)
@@ -99,12 +101,19 @@
                              template "Too many pattern variables: ~S." head)))
                          (t
                           (make-parsed-pattern
-                           :pattern (make-default-pattern p)
+                           :pattern (parse-default-pattern p)
                            :binding binding
-                           :type :generic)))
+                           :type (if binding :bound :generic))))
                  (pattern-error
                   template "Patterns must begin with a symbol.")))))
     `(,(parse-pattern template nil))))
+
+(defun parse-test-pattern (pattern)
+  (let ((forms (rest pattern)))
+    (if (listp forms)
+        (values forms)
+    (pattern-error
+     pattern "The body of a TEST CE must be a list of forms"))))
 
 (defun parse-default-pattern (pattern)
   (let* ((head (first pattern))
@@ -138,9 +147,6 @@
                         (pattern-error
                          pattern "Found one or more structural problems."))))))
     `(,head ,(parse-pattern-body (rest pattern) nil)))))
-
-(defun make-default-pattern (p)
-  (parse-default-pattern p))
 
 (defun normalize-slots (slots)
   (flet ((normalize (slot)

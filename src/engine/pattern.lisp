@@ -18,86 +18,21 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: pattern.lisp
-;;; Description:
+;;; Description: Base class for all types of patterns found on a rule LHS.
 
-;;; $Id: pattern.lisp,v 1.51 2001/04/16 18:31:54 youngde Exp $
+;;; $Id: pattern.lisp,v 1.52 2001/04/19 20:24:11 youngde Exp $
 
 (in-package "LISA")
-
-(defstruct parsed-pattern
-  (pattern nil :type list)
-  (binding nil :type symbol)
-  (type nil :type symbol))
 
 (defclass pattern ()
   ((name :initarg :name
          :reader get-name)
-   (slots :initarg :slot-list
-          :initform nil
-          :accessor get-slots)
-   (bindings :initform nil
-             :reader get-bindings)
    (location :initarg :location
              :reader get-location))
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 
-(defmethod get-slot-count ((self pattern))
-  (length (get-slots self)))
-
-(defmethod lookup-binding ((self pattern) var)
-  (find var (get-bindings self) :key #'get-name))
-
-(defmethod print-object ((self pattern) strm)
-  (print-unreadable-object (self strm :identity t :type t)
-    (format strm "name ~S" (get-name self))))
-
-(defun setup-pattern-bindings (pattern global-bindings)
-  (labels ((add-global-binding (binding)
-             (add-binding global-bindings
-                          (make-global-slot-binding
-                           (get-name binding)
-                           (get-location binding)
-                           (get-slot-name binding))))
-           (add-new-binding (var slot)
-             (let ((binding (lookup-binding global-bindings var)))
-               (when (null binding)
-                 (setf binding (make-local-slot-binding
-                                var (get-location pattern)
-                                (get-name slot)))
-                 (unless (internal-bindingp binding)
-                   (add-global-binding binding)))
-               (pushnew binding (slot-value pattern 'bindings)
-                        :key #'get-name)
-               (unless (= (get-location binding) (get-location pattern))
-                 (slot-has-global-binding slot))
-               (values binding)))
-           (add-constraint-bindings (slot)
-             (mapc #'(lambda (var)
-                       (add-new-binding var slot))
-                   (collect #'(lambda (obj) (variablep obj))
-                            (flatten (get-constraint slot))))))
-    (mapc #'(lambda (slot)
-              (unless (typep slot 'literal-slot)
-                (add-new-binding (get-value slot) slot))
-              (when (typep slot 'complex-slot)
-                (add-constraint-bindings slot)))
-          (get-slots pattern))))
-
-(defun canonicalize-slots (self)
-  (declare (type pattern self))
-  (let ((slots (list))
-        (meta (find-meta-class (get-name self))))
-    (mapc #'(lambda (slot-desc)
-              (push
-               (make-slot (find-meta-slot meta (first slot-desc))
-                          (second slot-desc)
-                          (third slot-desc))
-                    slots))
-          (get-slots self))
-    (setf (get-slots self) (nreverse slots))))
-
-(defmethod finalize-pattern ((self pattern) global-bindings)
-  (canonicalize-slots self)
-  (setup-pattern-bindings self global-bindings)
-  (values self))
+(defstruct parsed-pattern
+  (pattern nil :type list)
+  (binding nil :type symbol)
+  (type nil :type symbol))

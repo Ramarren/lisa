@@ -20,17 +20,14 @@
 ;;; File: not-pattern.lisp
 ;;; Description: Small class that represents NOT conditional elements.
 
-;;; $Id: not-pattern.lisp,v 1.3 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: not-pattern.lisp,v 1.4 2001/04/19 20:24:11 youngde Exp $
 
 (in-package "LISA")
 
-(defclass not-pattern (pattern)
+(defclass not-pattern (generic-pattern)
   ()
   (:documentation
    "A small class that represents NOT conditional elements."))
-
-(defmethod has-binding-p ((self not-pattern))
-  (values nil))
 
 (defun make-not-pattern (head body location)
   (make-instance 'not-pattern

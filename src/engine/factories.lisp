@@ -21,22 +21,9 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.30 2001/03/15 20:53:29 youngde Exp $
+;;; $Id: factories.lisp,v 1.31 2001/04/19 20:24:11 youngde Exp $
 
 (in-package "LISA")
-
-(defun make-pattern (pp location)
-  (let ((head (first (parsed-pattern-pattern pp)))
-        (body (second (parsed-pattern-pattern pp))))
-    (case (parsed-pattern-type pp)
-      (:generic
-       (make-generic-pattern head body location
-                             (parsed-pattern-binding pp)))
-      (:negated
-       (make-not-pattern head body location))
-      (otherwise
-       (error "The Pattern factory doesn't recognize this raw pattern type ~S."
-              (parsed-pattern-type pp))))))
 
 (defmethod make-join-node ((pattern generic-pattern) engine)
   (make-node2 engine))
@@ -78,3 +65,43 @@
 
 (defmethod make-node2-test ((slot slot) pattern)
   (make-test2-eval (make-node-function-call slot pattern)))
+
+(defgeneric make-conditional-element (class location pattern))
+
+(defmethod make-conditional-element ((class (eql :test)) location pattern)
+  (make-test-pattern (parsed-pattern-pattern pattern) location))
+
+(defmethod make-conditional-element ((class (eql :negated)) location pattern)
+  (let ((head (first (parsed-pattern-pattern pattern)))
+        (body (second (parsed-pattern-pattern pattern))))
+    (make-not-pattern head body location)))
+
+(defmethod make-conditional-element ((class (eql :generic)) location pattern)
+  (let ((head (first (parsed-pattern-pattern pattern)))
+        (body (second (parsed-pattern-pattern pattern))))
+    (make-generic-pattern head body location)))
+
+(defmethod make-conditional-element ((class (eql :bound)) location pattern)
+  (let ((head (first (parsed-pattern-pattern pattern)))
+        (body (second (parsed-pattern-pattern pattern))))
+    (make-bound-pattern head body location
+                        (parsed-pattern-binding pattern))))
+
+(defun make-pattern (pattern location)
+  (declare (type parsed-pattern pattern))
+  (make-conditional-element (parsed-pattern-type pattern) location pattern))
+
+#+ignore
+(defun make-pattern (pp location)
+  (let ((head (first (parsed-pattern-pattern pp)))
+        (body (second (parsed-pattern-pattern pp))))
+    (case (parsed-pattern-type pp)
+      (:generic
+       (make-generic-pattern head body location
+                             (parsed-pattern-binding pp)))
+      (:negated
+       (make-not-pattern head body location))
+      (otherwise
+       (error "The Pattern factory doesn't recognize this raw pattern type ~S."
+              (parsed-pattern-type pp))))))
+
