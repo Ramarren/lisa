@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.69 2004/09/17 17:09:53 youngde Exp $
+;;; $Id: rete.lisp,v 1.70 2004/09/17 18:04:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -212,19 +212,14 @@
   (unless *active-tokens*
       (return-from  recalculate-cf t))
   (let ((rule-cf (cf (active-rule)))
-        (orig (duplicate-fact-p rete fact))
-        (cf (cf:conjunct-cf (token-make-fact-list *active-tokens*))))
+        (orig (duplicate-fact-p rete fact)))
     (cond (orig
            (setf (cf orig)
-             (the float (cf:combine (cf orig)
-                                    (if rule-cf
-                                        (if cf (* rule-cf cf) rule-cf)
-                                      cf))))
+             (cf:recalculate-cf (token-make-fact-list *active-tokens*) rule-cf (cf orig)))
            nil)
           (t
            (setf (cf fact)
-             (the float (* (if cf cf rule-cf)
-                           (if (and cf rule-cf) rule-cf 1.0))))
+             (cf:recalculate-cf (token-make-fact-list *active-tokens*) rule-cf))
            t))))
 
 (defmethod assert-fact ((self rete) fact &key cf)
