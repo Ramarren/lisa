@@ -20,7 +20,7 @@
 ;;; File: test-facts.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: test-facts.lisp,v 1.4 2000/11/10 18:30:31 youngde Exp $
+;;; $Id: test-facts.lisp,v 1.5 2000/11/10 19:20:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,3 +55,8 @@
                                             (make-node1-rtl) *rule*))
 (setf (aref *terminals* 0) (merge-successor (aref *terminals* 0)
                                             (make-terminal-node *rule*) *rule*))
+(setf *fact* (make-fact (find-class 'rocky)))
+(set-slot-value *fact* 'name "rocky")
+(setf (get-fact-id *fact*) 1)
+(setf (get-clock *fact*) 2)
+(setf *token* (make-add-token :initial-fact *fact*))

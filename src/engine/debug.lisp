@@ -17,24 +17,11 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: terminal-node.lisp
-;;; Description: Represents terminal nodes in the Rete network.
+;;; File: debug.lisp
+;;; Description: Utilities and functions useful for inspection and
+;;; debugging of Lisa during development.
 
-;;; $Id: terminal-node.lisp,v 1.2 2000/11/10 19:20:08 youngde Exp $
+;;; $Id: debug.lisp,v 1.1 2000/11/10 19:20:08 youngde Exp $
 
 (in-package :lisa)
-
-(defclass terminal-node (node)
-  ((rule :initarg :rule
-         :initform nil
-         :reader get-rule))
-  (:documentation
-   "Represents terminal nodes in the Rete network."))
-
-(defmethod call-node-left ((self terminal-node) (token add-token))
-  (format t "terminal-node: adding rule to activation.")
-  (values t))
-
-(defun make-terminal-node (rule)
-  (make-instance 'terminal-node :rule rule))
 
