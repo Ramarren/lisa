@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.59 2004/09/14 21:07:56 youngde Exp $
+;;; $Id: rete.lisp,v 1.60 2004/09/15 14:19:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -153,16 +153,21 @@
                      (not (equals ,fact ,existing-fact)))
            (error (make-condition 'duplicate-fact
                     :existing-fact ,existing-fact)))))))
-
-(defmacro with-unique-fact (rete fact)
-  (let ((existing-fact (gensym)))
-    `(unless *allow-duplicate-facts*
-       (let ((,existing-fact
-              (gethash (hash-key ,fact) (rete-fact-table ,rete))))
-         (unless (or (null ,existing-fact)
-                     (not (equals ,fact ,existing-fact)))
-           (error (make-condition 'duplicate-fact
-                    :existing-fact ,existing-fact)))))))
+  
+(defmacro with-unique-fact ((rete fact) &body body)
+  (let ((existing-fact (gensym))
+        (body-fn (gensym)))
+    `(flet ((,body-fn ()
+              ,@body))
+       (if *allow-duplicate-facts*
+           (,body-fn)
+         (let ((,existing-fact
+                (gethash (hash-key ,fact) (rete-fact-table ,rete))))
+           (if (or (null ,existing-fact)
+                   (not (equals ,fact ,existing-fact)))
+               (,body-fn)
+             (error (make-condition 'duplicate-fact
+                                    :existing-fact ,existing-fact))))))))
   
 (defun next-fact-id (rete)
   (incf (rete-next-fact-id rete)))
@@ -181,10 +186,8 @@
         (rete-autofacts rete)))
 
 (defmethod assert-fact-aux ((self rete) fact)
-  (ensure-fact-is-unique self fact)
   (with-truth-maintenance (self)
     (setf (fact-id fact) (next-fact-id self))
-    (setf (cf fact) cf)
     (remember-fact self fact)
     (trace-assert fact)
     (add-fact-to-network (rete-network self) fact)
@@ -192,11 +195,19 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
+(defmethod assert-fact-with-cf ((self rete) fact cf)
+  (when-let (existing-fact 
+             (gethash (hash-key fact) (rete-fact-table self)))
+    (if (equals fact existing-fact)
+        (setf (cf fact) cf)
+      (assert-fact-aux self fact)))
+  fact)
+
 (defmethod assert-fact ((self rete) fact &key cf)
   (if (null cf)
-      (assert-fact-aux self fact)
-    (calculate-cf self fact cf))
-  fact)
+      (with-unique-fact (self fact)
+        (assert-fact-aux self fact))
+    (assert-fact-with-cf self fact cf)))
 
 (defmethod retract-fact ((self rete) (fact fact))
   (with-truth-maintenance (self)

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.77 2004/09/14 15:45:54 youngde Exp $
+;;; $Id: parser.lisp,v 1.78 2004/09/15 14:19:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -184,6 +184,56 @@
                 (parse-rhs (utils:find-after *rule-separator*
                                              remains :test #'eq)))))))
 
+(defun make-rule-pattern (template location)
+  (labels ((build-parsed-pattern (form bindings type 
+                                  &optional (binding nil))
+             (make-parsed-pattern
+              :test-bindings bindings
+              :class (first form)
+              :slots (rest form)
+              :type type
+              :pattern-binding binding
+              :binding-set (make-binding-set)
+              :logical *in-logical-pattern-p*
+              :address location))
+           (build-compound-pattern (sub-patterns)
+             (make-parsed-pattern
+              :type :or
+              :sub-patterns sub-patterns
+              :logical *in-logical-pattern-p*
+              :address location))
+           (parse-pattern (p &optional binding)
+             (let ((head (first p)))
+               (cl:assert (symbolp head) nil
+                 "A symbol doesn't start this pattern: ~S" p)
+               (cond ((eq head 'test)
+                      (multiple-value-bind (pattern bindings)
+                          (parse-test-pattern p)
+                        (build-parsed-pattern pattern bindings :test)))
+                     ((eq head 'not)
+                      (cl:assert (not (eq (first (second p)) 'exists)) nil
+                        "The EXISTS CE may not appear within a NOT CE.")
+                      (multiple-value-bind (pattern bindings)
+                          (parse-default-pattern (second p) location)
+                        (build-parsed-pattern pattern bindings :negated)))
+                     ((variablep head)
+                      (parse-pattern (second p)
+                                     (set-pattern-binding head location)))
+                     ((eq head 'or)
+                      (setf *compound-patterns-p* t)
+                      (build-compound-pattern
+                       (mapcar #'parse-pattern (rest p))))
+                     ((eq head 'exists)
+                      (multiple-value-bind (pattern bindings)
+                          (parse-default-pattern (second p) location)
+                        (build-parsed-pattern pattern bindings :existential)))
+                     (t
+                      (multiple-value-bind (pattern bindings)
+                          (parse-default-pattern p location)
+                        (build-parsed-pattern pattern bindings :generic binding)))))))
+    (parse-pattern template nil)))
+
+#+ignore
 (defun make-rule-pattern (template location)
   (labels ((build-parsed-pattern (form bindings type 
                                   &optional (binding nil))
