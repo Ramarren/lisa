@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.13 2002/11/05 18:10:26 youngde Exp $
+;;; $Id: rule.lisp,v 1.14 2002/11/12 19:18:37 youngde Exp $
 
 (in-package "LISA")
 
@@ -48,8 +48,10 @@
                 :accessor rule-activations)
    (subrules :initform nil
              :accessor rule-subrules)
-   (logicals :initform nil
-             :accessor rule-logicals)
+   (logical-marker :initform nil
+                   :accessor rule-logical-marker)
+   (active-dependencies :initform (make-hash-table :test #'equal)
+                        :reader rule-active-dependencies)
    (engine :initarg :engine
            :initform nil
            :reader rule-engine))
@@ -100,15 +102,20 @@
 (defun add-subrule (rule subrule)
   (push subrule (rule-subrules rule)))
 
+(defun add-logical-dependency (rule dependencies fact)
+  (setf (gethash dependencies (rule-active-dependencies rule)) fact))
+
 (defun remember-logical-dependencies (rule patterns)
-  (with-accessors ((dependents rule-logicals)) rule
+  (let ((markers (list)))
     (dolist (pattern patterns)
       (when (logical-pattern-p pattern)
-        (push (parsed-pattern-address pattern) dependents)))
+        (push (parsed-pattern-address pattern) markers)))
+    (unless (null markers)
+      (setf (rule-logical-marker rule) (first markers)))
     rule))
 
 (defun logical-rule-p (rule)
-  (not (null (rule-logicals rule))))
+  (numberp (rule-logical-marker rule)))
 
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
