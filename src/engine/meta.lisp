@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.22 2001/04/10 20:50:47 youngde Exp $
+;;; $Id: meta.lisp,v 1.23 2001/04/10 21:14:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -72,37 +72,35 @@
                  :class-name class-name :slots slots))
 
 (defclass meta-shadow-fact (meta-fact)
-  ((set-methods :reader get-set-methods))
+  ((effective-slots :reader get-effective-slots))
   (:documentation
    "This class represents meta information for the class shadow-fact."))
 
-(defmethod initialize-instance :after ((self meta-shadow-fact) &key (methods nil))
-  (let ((method-table (list)))
-    (flet ((add-set-method (slot)
-             (setf method-table
-               (acons (first slot) (second slot) method-table))))
-      (mapc #'(lambda (slot)
-                (add-set-method slot))
-            methods))
-    (setf (slot-value self 'set-methods) method-table)))
+(defmethod initialize-instance :after ((self meta-shadow-fact) &key effective-slots)
+  (let ((slot-table (make-hash-table)))
+    (mapc #'(lambda (slot)
+              (setf (gethash (intern (symbol-name slot)) slot-table) slot))
+          effective-slots)
+    (setf (slot-value self 'effective-slots) slot-table)))
+    
+(defun find-effective-slot (self slot-name)
+  (declare (type meta-shadow-fact self) (type symbol slot-name))
+  (let ((effective-slot (gethash slot-name (get-effective-slots self))))
+    (cl:assert (not (null effective-slot)) ()
+      "No effective slot for symbol ~S." slot-name)
+    (values effective-slot)))
 
-(defun find-set-method (self slot)
-  (declare (type meta-shadow-fact self))
-  (let ((method (assoc slot (get-set-methods self))))
-    (cl:assert (not (null method)) ()
-      "No set method for slot ~S of class ~S" slot (get-class-name self))
-    (rest method)))
-
-(defun make-meta-shadow-fact (symbolic-name class-name methods)
-  (let ((slots
-         (append
-          (mapcar #'(lambda (slot) (first slot)) methods)
-          `(,:object))))
-    (make-instance 'meta-shadow-fact
-                   :symbolic-name symbolic-name
-                   :class-name class-name
-                   :slots slots
-                   :methods methods)))
+(defun make-meta-shadow-fact (symbolic-name class-name slots)
+  (make-instance 'meta-shadow-fact
+                 :symbolic-name symbolic-name
+                 :class-name class-name
+                 :slots
+                 (append
+                  (mapcar #'(lambda (slot)
+                              (intern (symbol-name slot)))
+                          slots)
+                  `(,:object))
+                 :effective-slots slots))
 
 (let ((meta-map (make-hash-table))
       (class-map (make-hash-table)))
@@ -137,11 +135,13 @@
       (values name))))
 
 (defun import-class (symbolic-name class slot-specs)
-  (print symbolic-name)
-  (print class)
-  (print slot-specs)
-  (terpri)
-  (values))
+  (let ((meta (make-meta-shadow-fact
+               symbolic-name (class-name class) slot-specs)))
+    (print symbolic-name)
+    (print class)
+    (print slot-specs)
+    (terpri)
+    (values meta)))
 
 #+ignore
 (defun import-class (symbolic-name class slot-specs)
