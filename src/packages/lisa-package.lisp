@@ -20,7 +20,7 @@
 ;;; File: lisa-package.lisp
 ;;; Description: Package support code for LISA.
 
-;;; $Id: lisa-package.lisp,v 1.1 2001/06/04 22:02:29 youngde Exp $
+;;; $Id: lisa-package.lisp,v 1.2 2001/06/25 17:07:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -45,5 +45,3 @@
                  (find-package package))))
       (shadowing-import (make-symbol-list *lisa-shadow-imports*) pkg)
       (import (make-symbol-list *lisa-exports*) pkg))))
-
-(use-lisa (find-package "LISA-USER"))

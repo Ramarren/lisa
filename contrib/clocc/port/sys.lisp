@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: sys.lisp,v 1.5 2001/03/29 20:34:49 youngde Exp $
+;;; $Id: sys.lisp,v 1.6 2001/06/25 17:07:23 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/sys.lisp,v $
 
 (eval-when (compile load eval)
@@ -21,6 +21,10 @@
    class-slot-list class-slot-initargs
    pathname-ensure-name probe-directory default-directory chdir mkdir rmdir
    +month-names+ +week-days+ +time-zones+ tz->string current-time sysinfo))
+
+#+(and ALLEGRO-V5.0.1 MSWINDOWS)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require :ole))
 
 ;;;
 ;;; System
