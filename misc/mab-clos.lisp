@@ -22,9 +22,11 @@
 ;;; implementation, a common AI planning problem. The monkey's objective is to
 ;;; find and eat some bananas.
 
-;;; $Id: mab-clos.lisp,v 1.3 2001/04/18 17:41:23 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.4 2001/04/26 19:43:04 youngde Exp $
 
 (in-package "LISA-USER")
+
+(use-default-engine)
 
 (defclass monkey ()
   ((location :initarg :location
