@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.51 2004/02/28 18:23:13 youngde Exp $
+;;; $Id: rete.lisp,v 1.52 2004/03/01 00:57:50 youngde Exp $
 
 (in-package "LISA")
 
@@ -210,7 +210,6 @@
   (mapc #'(lambda (slot)
             (set-slot-value fact (first slot) (second slot)))
         slot-changes)
-  (rehash fact)
   (assert-fact self fact)
   fact)
 
