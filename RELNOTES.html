@@ -1,0 +1,39 @@
+
+<h1>Release Notes for LISA 2.0 (alpha)</h1>
+<h2>The LISA Project</h2>
+<p>1 October, 2002</p>
+<p>This is the first alpha release for LISA version 2.0, representing a
+significant improvement over the 1.x branch. At the core of 2.0 is a ground-up
+rewrite of LISA's Rete algorithm. While CLOS still forms the basic structure of
+the algorithm, 2.0 makes extensive use of closures and function objects,
+yielding a more &quot;lispy&quot; feel to the implementation. The second
+significant departure from 1.x is a redesigned language parser, with particular
+attention paid to the analysis of DEFRULE forms. While the 1.x parser performs
+multi-pass transformations over DEFRULEs, the new parser is a single-pass
+implementation that collects more structural information &quot;up-front&quot;
+before sending the output to the Rete compiler.</p>
+<p>By incorporating the algorithmic and parsing changes mentioned above, a
+significant amount of code has been eliminated from 2.0. In particular, the
+entire 1.x binding mechanism, used to establish variable bindings in production
+rules and support rule firings, has been replaced by closures. Closures also
+form the basis of various types of intra- and inter-pattern node tests, making
+possible a reduction in the number of classes required to implement nodes in the
+Rete network. These two changes alone make for a dramatic improvement in code
+readability, simplicity, and application performance.</p>
+<p>Some features present in 1.x have not yet been adapted to 2.0. These are:</p>
+<ol>
+  <li>Rule redefinition, including runtime rule creation (i.e. DEFRULE forms on
+    rule RHSs).</li>
+  <li>Query support.</li>
+  <li>Debugging support, including watches.</li>
+</ol>
+<p>This first alpha release is intended to give developers a chance to try their
+rule sets with the new algorithm and parser, and expose any remaining bugs. LISA
+2.0 is able to successfully run the sample MAB problems included in the
+distribution, but exposure to other rule sets is vital to ensuring the stability
+of forthcoming releases.</p>
+<p>Version 2.0 contains its own DEFSYSTEM file, lisa2.system. Building 2.0 is
+very similar to how one builds 1.x; the system name is LISA2 rather than LISA.
+So, something like (mk:compile-system :lisa2) should work for you.</p>
+<p>This alpha version of 2.0 has been tested with ACL 6.2 and CLISP 2.29, both
+on Windows 2000.</p>
