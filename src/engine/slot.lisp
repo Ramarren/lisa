@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.15 2001/02/01 16:57:07 youngde Exp $
+;;; $Id: slot.lisp,v 1.16 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,6 +53,10 @@
   (declare (type slot slot))
   (not (null (get-constraint slot))))
 
+(defun has-complex-constraintp (slot)
+  (declare (type slot slot))
+  (consp (get-constraint slot)))
+
 (defun localized-slotp (slot)
   (get-locality slot))
 
@@ -61,15 +65,19 @@
 
 (defmethod print-object ((self slot) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(name = ~S ; value = ~S ; constraint = ~S)"
+    (format strm "(name = ~S ; value = ~S ; constraint = ~S ; negated = ~S)"
             (get-name self) (get-value self)
-            (get-constraint self))))
+            (get-constraint self)
+            (get-negated self))))
 
 (defclass optimisable-slot (slot)
   ()
   (:documentation
    "A subclass of SLOT describing a slot instance that's eligible for
    certain optimisations."))
+
+(defclass optimisable-literal-slot (optimisable-slot) ())
+(defclass optimisable-variable-slot (optimisable-slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
@@ -91,26 +99,27 @@
   (macrolet ((generate-test (var value negated)
                `(if ,negated
                     `(not (equal ,,var ,,value))
-                  `(equal ,,val ,,value))))
+                  `(equal ,,var ,,value))))
     (cond ((literalp value)
-           (make-instance 'optimisable-slot :name name :value value))
+           (make-instance 'optimisable-literal-slot :name name :value value))
           ((negated-literalp value)
-           (make-instance 'optimisable-slot
+           (make-instance 'optimisable-literal-slot
              :name name :value (second value) :negated t))
           ((negated-variablep value)
-           ((make-instance 'optimisable-slot
-              :name name :value (second value) :negated t)))
+           (make-instance 'optimisable-variable-slot
+             :name name :value (second value) :negated t))
           ;; Then the slot value must be a variable...
           ((null constraint)
            (if (lookup-binding global-bindings value)
-               (make-instance 'optimisable-slot :name name :value value)
+               (make-instance 'optimisable-variable-slot 
+                 :name name :value value)
              (make-instance 'slot :name name :value value)))
           ;; The value is a variable and there is a constraint...
           ((literalp constraint)
-           (make-instance 'optimisable-slot :name name :value value
+           (make-instance 'optimisable-variable-slot :name name :value value
                           :constraint constraint))
           ((negated-literalp constraint)
-           (make-instance 'optimisable-slot :name name :value value
+           (make-instance 'optimisable-variable-slot :name name :value value
                           :constraint (second constraint) :negated t))
           ((variablep constraint)
            (make-instance 'slot :name name :value value

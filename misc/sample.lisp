@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.56 2001/01/28 20:29:32 youngde Exp $
+;;; $Id: sample.lisp,v 1.57 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,6 +61,19 @@
 (watch :activations)
 
 #+ignore
+(defrule all-slot-types
+  (rocky (name rocky))
+  (rocky (name (not boris)))
+  (boris (name ?name))
+  (boris (name (not ?name)))
+  (boris (name ?name boris))
+  (boris (name ?name (not rocky)))
+  (natasha (nemesis ?nemesis (not ?name)))
+  (natasha (nemesis ?nemesis (eql ?nemesis rocky)))
+  =>
+  (break))
+
+#+ignore
 (defrule fearless-leader
   (fearless-leader (type fearless))
   =>
@@ -75,15 +88,16 @@
 #+ignore
 (defrule rocky-not
   (rocky (name (not "rocky")))
+  (boris (name "boris"))
   =>
   (format t "rocky-not fired.~%"))
 
+#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name (not ?nemesis)))
   =>
-  (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis)
-  (assert (boris (name ?nemesis))))
+  (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis))
 
 #+ignore
 (defrule boris
@@ -126,7 +140,6 @@
     =>
   (format t "no-patterns fired!~%"))
 
-#+ignore
 (defrule simple-predicate
   (?fact (boris (name ?name (string= ?name "boris"))))
   =>

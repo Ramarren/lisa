@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.46 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.47 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -59,22 +59,22 @@
   (declare (ignore args))
   (setf (slot-value self 'root-node) (make-root-node)))
 
+(defmacro simple-slotp (slot)
+  `(or (typep ,slot 'optimisable-literal-slot)
+       (and (has-complex-constraintp ,slot)
+            (localized-slotp ,slot))))
+
 (defun add-simple-tests (pattern rule parent-node)
-  (macrolet ((simple-slotp (slot)
-               `(or (and (typep ,slot 'optimisable-slot)
-                         (is-literal-slotp ,slot))
-                    (and (has-constraintp ,slot)
-                         (or (localized-slotp ,slot)
-                             (= (get-pattern-count rule) 1))))))
-    (let ((last-node parent-node))
-      (mapc #'(lambda (slot)
-                (when (simple-slotp slot)
-                  (setf last-node
-                    (merge-successor last-node
-                                     (make-node1 slot pattern)
-                                     rule))))
-            (get-slots pattern))
-      (values last-node))))
+  (let ((last-node parent-node))
+    (mapc #'(lambda (slot)
+              (when (or (simple-slotp slot)
+                        (= (get-pattern-count rule) 1))
+                (setf last-node
+                  (merge-successor last-node
+                                   (make-node1 slot pattern)
+                                   rule))))
+          (get-slots pattern))
+    (values last-node)))
 
 (defun create-single-nodes (compiler rule patterns)
   (with-accessors ((terminals get-terminals)
@@ -99,6 +99,7 @@
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0) (make-node1-rtl) rule))))
     
+#+ignore
 (defun add-node2-tests (node2 pattern)
   (flet ((add-constraint-test (slot)
            (add-test node2
@@ -110,6 +111,22 @@
                 (add-constraint-test slot)))
           (get-slots pattern))
     (values node2)))
+
+(defun add-node2-tests (node2 pattern)
+  (macrolet ((first-variable-occurrence (var pattern)
+               (let ((binding (gensym)))
+                 `(let ((,binding (lookup-binding ,pattern ,var)))
+                    (cl:assert (not (null ,binding)) ()
+                      "Missing binding for ~S" ,var)
+                    (= (get-location ,pattern) (get-location ,binding))))))
+    (flet ((add-constraint-test (slot)
+             (unless (first-variable-occurrence (get-value slot) pattern)
+               (add-test node2 (make-node2-test slot pattern)))))
+      (mapc #'(lambda (slot)
+                (unless (simple-slotp slot)
+                  (add-constraint-test slot)))
+            (get-slots pattern))
+      (values node2))))
 
 ;;; the "third pass"...
 

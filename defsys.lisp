@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.12 2001/01/28 20:03:26 youngde Exp $
+;;; $Id: defsys.lisp,v 1.13 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :user)
 
@@ -116,7 +116,8 @@
                                        (:file "node1-rtl")
                                        (:file "test")
                                        (:file "node-test")
-                                       (:file "test2-simple")
+                                       (:file "test2-eq")
+                                       (:file "test2-neq")
                                        (:file "test2-eval")
                                        (:file "node2")
                                        (:file "node2-not")

@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.21 2000/12/14 18:18:12 youngde Exp $
+;;; $Id: node2.lisp,v 1.22 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,12 +46,6 @@
 
 (defmethod increment-matches ((self node2) (tok token))
   (incf (get-pattern-matches self)))
-
-(defmethod add-binding-test ((self node2) binding right-slot)
-  (declare (type slot-binding binding))
-  (add-test self (make-test2-simple (get-location binding)
-                                    (get-slot-name binding)
-                                    right-slot)))
 
 (defmethod add-to-left-tree ((self node2) token)
   (add-token (get-left-tree self) token))

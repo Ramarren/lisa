@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.43 2001/02/01 16:57:07 youngde Exp $
+;;; $Id: pattern.lisp,v 1.44 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -44,6 +44,9 @@
 
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
+
+(defmethod lookup-binding ((self pattern) var)
+  (find var (get-bindings self) :key #'get-name))
 
 (defmethod print-object ((self pattern) strm)
   (print-unreadable-object (self strm :identity t :type t)
@@ -90,7 +93,6 @@
                                global-bindings)
                     slots))
           (get-slots self))
-    (format t "~S~%" slots)
     (setf (get-slots self) (nreverse slots))))
 
 (defmethod finalize-pattern ((self pattern) global-bindings)

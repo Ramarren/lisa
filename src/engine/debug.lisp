@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.7 2000/12/06 16:13:08 youngde Exp $
+;;; $Id: debug.lisp,v 1.8 2001/02/01 21:05:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,7 +55,7 @@
                         (trace-graph (rest nodes)))))))
       (trace-graph (get-successors (get-root-node
                                     (get-compiler engine)))))
-    (values collection)))
+    (remove-duplicates collection :test #'eq)))
 
 (defun find-node2 (&optional (engine (current-engine)))
   (find-node 'node2 engine))
