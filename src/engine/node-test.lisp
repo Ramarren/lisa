@@ -21,7 +21,7 @@
 ;;; Description: Node containing an arbitrary list of tests. Used for TEST
 ;;; conditional elements and as the base class for JOIN nodes.
 
-;;; $Id: node-test.lisp,v 1.3 2000/11/09 18:22:53 youngde Exp $
+;;; $Id: node-test.lisp,v 1.4 2000/11/17 23:13:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -39,10 +39,13 @@
     (setf tests
       (nconc tests `(,test)))))
 
+(defmethod call-node-right ((self node-test) (token clear-token))
+  (values nil))
+
 (defmethod call-node-right ((self node-test) token)
   (call-next-method))
 
-(defmethod call-node-left ((self node-test) token)
+(defmethod call-node-left ((self node-test) (token add-token))
   (flet ((pass-token (tok)
            (with-accessors ((engine get-engine)) self
              (let ((descendant (make-token (get-null-fact engine)
@@ -53,6 +56,10 @@
     (if (run-tests self token)
         (pass-token token)
       (values nil))))
+
+(defmethod call-node-left ((self node-test) (token clear-token))
+  (pass-along self token)
+  (values t))
 
 (defmethod run-tests ((self node-test))
   (not (member 'nil (mapcar #'(lambda (test)

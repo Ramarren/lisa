@@ -16,35 +16,40 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-;;;
-;;; File: language.lisp
-;;; Description: Code that implements the LISA programming language.
-;;;
-;;; $Id: language.lisp,v 1.18 2000/11/17 23:13:40 youngde Exp $
+
+;;; File: sample.lisp
+;;; Description: Some simple classes useful in early Lisa testing.
+
+;;; $Id: sample.lisp,v 1.1 2000/11/17 23:13:40 youngde Exp $
 
 (in-package :lisa)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(defrule assert defimport reset clear run halt)))
+(defclass rocky ()
+  ((name :initarg :name
+         :initform nil
+         :reader get-name)))
 
-(defmacro defrule (name &body body)
-  "Creates or redefines a rule in the network."
-  `(redefine-defrule ',name ',body))
+(defclass boris ()
+  ((name :initarg :name
+         :initform nil
+         :reader get-name)))
 
-(defmacro assert ((&body body))
-  `(parse-and-insert-fact ',body))
+(defun make-rocky (name)
+  (make-instance 'rocky :name name))
 
-(defmacro defimport (name class)
-  `(import-and-register-class ',name ',class))
+(defun make-boris (name)
+  (make-instance 'boris :name name))
 
-(defmacro reset ()
-  `(reset-engine (current-engine)))
+(defimport rocky lisa::rocky)
+(defimport boris lisa::boris)
 
-(defmacro clear ()
-  `(clear-engine (current-engine)))
+#+ignore
+(defrule schtum
+  (rocky (name "rocky"))
+  (boris (name "boris"))
+  =>
+  (format t "schtum fired!~%"))
 
-(defmacro run ()
-  `(run-engine (current-engine)))
-
-(defmacro halt ()
-  `(values))
+(defrule no-patterns
+    =>
+  (format t "no-patterns fired!~%"))

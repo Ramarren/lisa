@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.9 2000/11/16 20:47:13 youngde Exp $
+;;; $Id: node2.lisp,v 1.10 2000/11/17 23:13:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -39,7 +39,7 @@
   (:documentation
    "Description: A non-negated, two-input node of the Rete network. Tests in
    this node compare slot values and types in facts from the left and right
-   inputs."))
+   memories."))
 
 (defmethod add-to-left-tree ((self node2) token)
   (add-token (get-left-tree self) token))
@@ -51,9 +51,17 @@
   (add-to-left-tree self token)
   (run-tests-vary-right self token (get-right-tree self)))
 
+(defmethod call-node-left ((self node2) (token clear-token))
+  (setf (slot-value 'left-tree self) (make-token-tree))
+  (setf (slot-value 'right-tree self) (make-token-tree))
+  (pass-along self token))
+
 (defmethod call-node-right ((self node2) (token add-token))
   (add-to-right-tree self token)
   (run-tests-vary-left self token (get-left-tree self)))
+
+(defmethod call-node-right ((self node2) (token clear-token))
+  (values nil))
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
   (flet ((eval-tests (left-token)
