@@ -20,9 +20,28 @@
 ;;; File: pumps.lisp
 ;;; Description: The "Tanks and Pumps" application, as adapted from the Java
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
-;;; support.
+;;; support. 
 
-;;; $Id: pumps.lisp,v 1.10 2001/05/10 17:08:54 youngde Exp $
+;;; The basic scenario is a "tank" containing some liquid and a "pump"
+;;; attached to the tank. There's a thread associated with the tank that acts
+;;; as a consumer of the fluid; there's also a thread running the pump that
+;;; restores fluid at an adjustable rate. There are two thresholds (high, low)
+;;; at which point the system will attempt to compensate by decreasing or
+;;; increasing the pumping rate. This behavior is implemented as a small set
+;;; of rules. If the tank runs dry it catches fire; if the tank over-fills it
+;;; explodes. As set up now, the simulation tends to fluctuate between both
+;;; thresholds; by playing with the variables it's possible to see the tank
+;;; destroy itself.
+
+;;; To run the simulation, load this file and (from the LISA-USER package)
+;;; evaluate (reset) and (run). Be default, the only output occurs during
+;;; threshold crossings; for more feedback, bind the variable *verbose-output*
+;;; to T before evaluating (run), as in
+;;;
+;;;   (let ((*verbose-output t))
+;;;     (run))
+
+;;; $Id: pumps.lisp,v 1.11 2001/05/10 17:45:56 youngde Exp $
 
 (in-package "LISA-USER")
 
