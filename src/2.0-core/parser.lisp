@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.17 2002/09/14 21:06:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.18 2002/09/16 15:34:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -95,6 +95,11 @@
       (values (first body) (rest body))
     (values nil body)))
 
+(defun finalize-parsed-patterns (patterns)
+  (if (null patterns)
+      (push (make-parsed-pattern :name 'initial-fact) patterns)
+    patterns))
+
 (defun parse-rulebody (body)
   (let ((location -1))
     (labels ((parse-lhs (body patterns)
@@ -106,7 +111,7 @@
                       (rest body)
                       (push
                        (make-rule-pattern pattern (incf location)) patterns))
-                   (nreverse patterns))))
+                   (finalize-parsed-patterns (nreverse patterns)))))
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
@@ -178,14 +183,14 @@
                                    (slot-valuep field)
                                    (constraintp constraint))
                        nil "This pattern has a malformed slot: ~S" pattern)
-                   (when (variablep field)
-                     (setf slot-binding
-                       (find-or-set-slot-binding field name location)))
                    (when (and (consp field)
                               (eq (first field) 'not)
                               (not (consp (second field))))
                      (setf field (second field))
                      (setf negated t))
+                   (when (variablep field)
+                     (setf slot-binding
+                       (find-or-set-slot-binding field name location)))
                    (when (consp constraint)
                      (collect-constraint-bindings constraint 
                                                   constraint-bindings))
@@ -194,8 +199,9 @@
                                       :slot-binding slot-binding
                                       :negated negated
                                       :constraint constraint
-                                      :constraint-bindings
-                                      (nreverse constraint-bindings))))
+                                      :constraint-bindings constraint-bindings
+                                      :all-bindings
+                                      (append slot-binding constraint-bindings))))
                (parse-pattern-body (body slots)
                  (let ((slot (first body)))
                    (cl:assert (listp slot) nil
