@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.15 2000/12/05 21:37:21 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.16 2000/12/06 16:13:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,15 +58,25 @@
   (:documentation
    "Generates the Rete pattern network."))
 
-(defun add-tests (slots rule node)
-  (flet ((add-simple-test (node slot)
-           (merge-successor 
-            node (make-node1-teq (get-name slot)
-                                 (get-value (first (get-tests slot)))) rule)))
+(defun add-simple-tests (slots rule node)
+  (labels ((add-test-maybe (node slot-name tests)
+             (let ((test (first tests)))
+               (cond ((null test)
+                      (values node))
+                     (t
+                      (if (value-is-variable-p test)
+                          (add-test-maybe node slot-name (rest tests))
+                        (add-test-maybe (merge-successor
+                                         node (make-node1-teq slot-name
+                                                              (get-value test))
+                                         rule)
+                         slot-name (rest tests)))))))
+           (add-tests (node slot)
+             (add-test-maybe node (get-name slot) (get-tests slot))))
     (if (null slots)
         (values node)
-      (add-tests (rest slots) rule
-                 (add-simple-test node (first slots))))))
+      (add-simple-tests (rest slots) rule
+                  (add-tests node (first slots))))))
            
 (defun create-single-nodes (compiler rule patterns)
   (with-accessors ((terminals get-terminals)
@@ -85,7 +95,7 @@
                           (setf (aref roots i) last)
                           (find-multifields)
                           (setf (aref terminals i)
-                            (add-tests (get-slots pattern) rule last))
+                            (add-simple-tests (get-slots pattern) rule last))
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 

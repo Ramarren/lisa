@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.17 2000/12/06 01:55:31 youngde Exp $
+;;; $Id: node2.lisp,v 1.18 2000/12/06 16:13:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -88,6 +88,7 @@
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
   (with-tree-iterator (key left-token tree)
+    (format t "run-tests-vary-left: ~S, ~S~%" key left-token)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))
       (pass-along self (make-derived-token 
