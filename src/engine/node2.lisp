@@ -22,9 +22,9 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.29 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node2.lisp,v 1.30 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node2 (node-test)
   ((left-tree :initform (make-token-tree :use-sortcode-p t)

@@ -20,8 +20,8 @@
 ;;; File: generics.lisp
 ;;; Description: Common generic functions.
 
-;;; $Id: generics.lisp,v 1.3 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: generics.lisp,v 1.4 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defgeneric equals (object-1 object-2))

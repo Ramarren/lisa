@@ -21,9 +21,9 @@
 ;;; Description: Base class for internal KB entities that are created
 ;;; to represent "ordered" facts.
 
-;;; $Id: lisa-kb-class.lisp,v 1.3 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: lisa-kb-class.lisp,v 1.4 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass lisa-kb-class ()
   ())

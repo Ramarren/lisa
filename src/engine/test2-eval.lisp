@@ -21,9 +21,9 @@
 ;;; Description: This class contains a function-call test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-eval.lisp,v 1.5 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: test2-eval.lisp,v 1.6 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass test2-eval (test)
   ((predicate :initarg :predicate

@@ -21,9 +21,9 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.9 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.10 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass generic-pattern (pattern)
   ((bound-name :initarg :bound-name

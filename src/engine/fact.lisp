@@ -20,9 +20,9 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.23 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: fact.lisp,v 1.24 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass fact ()
   ((class :initarg :class

@@ -21,9 +21,9 @@
 ;;; Description: This class holds an individual, negated test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-neq.lisp,v 1.2 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: test2-neq.lisp,v 1.3 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass test2-neq (test)
   ((fact-location :initarg :fact-location

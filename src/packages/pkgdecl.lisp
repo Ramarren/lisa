@@ -20,13 +20,13 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.7 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.8 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :cl-user)
+(in-package "CL-USER")
 
-(defpackage :lisa
-  (:use :common-lisp)
-  (:shadow :assert)
+(defpackage "LISA"
+  (:use "COMMON-LISP")
+  (:shadow "ASSERT")
   (:export "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS" "RULES"
            "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH" "UNWATCH"
            "WATCHING" "HALT"))

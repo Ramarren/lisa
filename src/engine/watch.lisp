@@ -23,9 +23,9 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.11 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: watch.lisp,v 1.12 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defparameter *watch-list* nil)
 

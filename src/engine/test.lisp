@@ -20,9 +20,9 @@
 ;;; File: test.lisp
 ;;; Description: The base class for all tests that reside in two-input nodes.
 
-;;; $Id: test.lisp,v 1.2 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: test.lisp,v 1.3 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass test ()
   ()

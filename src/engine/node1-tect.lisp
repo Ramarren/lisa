@@ -21,9 +21,9 @@
 ;;; Description: A one-input node that tests the fact class type in a pattern
 ;;; network.
 
-;;; $Id: node1-tect.lisp,v 1.8 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node1-tect.lisp,v 1.9 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node1-tect (node1)
   ((class :initform nil

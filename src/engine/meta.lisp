@@ -20,9 +20,9 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.4 2001/03/14 21:58:16 youngde Exp $
+;;; $Id: meta.lisp,v 1.5 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 ;;; CLASS-MAP maintains bindings between arbitrary names (symbols) and class
 ;;; names. LISA uses this map to locate class objects that represent facts in

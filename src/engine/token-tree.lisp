@@ -20,9 +20,9 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.19 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.20 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass token-tree ()
   ((table :initform (make-hash-table)

@@ -21,9 +21,9 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.24 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: funcall.lisp,v 1.25 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass function-call-context ()
   ((token :initarg :token

@@ -20,9 +20,9 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.20 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.21 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass terminal-node (node)
   ((rule :initarg :rule

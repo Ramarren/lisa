@@ -21,9 +21,9 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.22 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: strategies.lisp,v 1.23 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass strategy ()
   ((activations :initarg :activations

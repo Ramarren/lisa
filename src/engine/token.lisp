@@ -23,9 +23,9 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.30 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: token.lisp,v 1.31 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass token ()
   ((sort-code :initform 0

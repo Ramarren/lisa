@@ -20,9 +20,9 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.8 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: activation.lisp,v 1.9 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass activation ()
   ((rule :initarg :rule

@@ -21,9 +21,9 @@
 ;;; Description: This class represents a single-input Rete node that evaluates
 ;;; a function to test a slot's value.
 
-;;; $Id: node1-tfn.lisp,v 1.4 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node1-tfn.lisp,v 1.5 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node1-tfn (node1)
   ((slot-name :initarg :slot-name

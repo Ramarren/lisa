@@ -20,9 +20,9 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.31 2001/03/14 18:54:34 youngde Exp $
+;;; $Id: defsys.lisp,v 1.32 2001/03/15 16:00:28 youngde Exp $
 
-(in-package :user)
+(in-package "CL-USER")
 
 (defvar *lisa-root-pathname*
   (make-pathname :directory
@@ -58,10 +58,7 @@
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
-#-CLISP
 (load "lisa:clocc;port;port.system")
-#+CLISP
-(load (translate-logical-pathname "lisa:clocc;port;port.system"))
 
 #+CMU
 (progn

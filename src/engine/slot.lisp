@@ -20,9 +20,9 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.20 2001/03/14 21:26:36 youngde Exp $
+;;; $Id: slot.lisp,v 1.21 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass slot ()
   ((name :initarg :name

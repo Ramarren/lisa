@@ -20,9 +20,9 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.12 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: environment.lisp,v 1.13 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defgeneric current-engine ()
   (:documentation

@@ -21,9 +21,9 @@
 ;;; Description: Classes that represents special facts internal to
 ;;; LISA.
 
-;;; $Id: special-facts.lisp,v 1.3 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: special-facts.lisp,v 1.4 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass initial-fact (lisa-kb-class)
   ()

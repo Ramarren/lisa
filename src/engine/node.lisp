@@ -21,9 +21,9 @@
 ;;; Description: Parent class of all nodes in the Rete pattern network. This
 ;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.21 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node.lisp,v 1.22 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node ()
   ((use-count :initform 0

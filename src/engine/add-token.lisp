@@ -21,9 +21,9 @@
 ;;; Description: Represents TOKENs used for add operations on the
 ;;; network.
 
-;;; $Id: add-token.lisp,v 1.9 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: add-token.lisp,v 1.10 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass add-token (token)
   ()

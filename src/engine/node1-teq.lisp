@@ -20,9 +20,9 @@
 ;;; File: node1-teq.lisp
 ;;; Description: A one-input node that tests a slot's value.
 
-;;; $Id: node1-teq.lisp,v 1.8 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node1-teq.lisp,v 1.9 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node1-teq (node1)
   ((value :initarg :value

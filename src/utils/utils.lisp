@@ -25,9 +25,9 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.16 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: utils.lisp,v 1.17 2001/03/15 16:00:31 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defun find-before (item sequence &key (test #'eql))
   "Returns both that portion of SEQUENCE that occurs before ITEM and

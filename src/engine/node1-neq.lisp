@@ -21,9 +21,9 @@
 ;;; Description: A one-input node that tests a slot's value and negates the
 ;;; result.
 
-;;; $Id: node1-neq.lisp,v 1.3 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node1-neq.lisp,v 1.4 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node1-neq (node1)
   ((value :initarg :value

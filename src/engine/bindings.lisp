@@ -22,9 +22,9 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.13 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: bindings.lisp,v 1.14 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass binding ()
   ((name :initarg :name

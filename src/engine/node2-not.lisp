@@ -20,9 +20,9 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.10 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.11 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node2-not (node2)
   ()

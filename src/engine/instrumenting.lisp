@@ -22,9 +22,9 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.8 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.9 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (let ((instruments (make-hash-table)))
   (defun instrument (obj)

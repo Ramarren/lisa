@@ -22,9 +22,9 @@
 ;;; "template" classes. LISA generates one of these classes whenever a fact is
 ;;; supported by a DEFTEMPLATE form rather than an actual CLOS class.
 
-;;; $Id: deftemplate.lisp,v 1.2 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: deftemplate.lisp,v 1.3 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass deftemplate () ())
 

@@ -21,9 +21,9 @@
 ;;; Description: Node containing an arbitrary list of tests. Used for TEST
 ;;; conditional elements and as the base class for JOIN nodes.
 
-;;; $Id: node-test.lisp,v 1.18 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: node-test.lisp,v 1.19 2001/03/15 16:00:30 youngde Exp $
 
-(in-package :lisa)
+(in-package "LISA")
 
 (defclass node-test (node)
   ((tests :initform nil
