@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.11 2000/11/30 02:43:31 youngde Exp $
+;;; $Id: rule.lisp,v 1.12 2000/11/30 15:31:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,9 +58,26 @@
   (with-accessors ((actions get-actions)) self
     (format t "Firing rule ~S (token depth ~D)~%"
             (get-name self) (size token))
-    (traverse-token self token)
-    (traverse-bindings self token)
+    (format t "Lexical env ~S~%" (create-lexical-context self token))
     (funcall actions)))
+
+(defun create-lexical-bindings (bindings token)
+  (flet ((create-binding (pb)
+           (let ((fact (find-fact token (get-location pb))))
+             (cl:assert (not (null fact)) ()
+                 "No fact for location ~D." (get-location pb))
+             `(,(get-name pb) ,fact))))
+    (let ((vars nil))
+      (maphash #'(lambda (key val)
+                   (setf vars (nconc vars `(,(create-binding val)))))
+               bindings)
+      (values vars))))
+  
+(defmethod create-lexical-context ((self rule) token)
+  `(lambda ()
+     (progn
+       (let (,@(create-lexical-bindings (get-bindings self) token))
+         (funcall ,(get-actions self))))))
 
 (defmethod add-binding ((self rule) name)
   (setf (gethash name (get-bindings self))
