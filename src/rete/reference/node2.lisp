@@ -20,53 +20,31 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.8 2002/09/06 14:20:01 youngde Exp $
+;;; $Id: node2.lisp,v 1.9 2002/09/07 00:20:53 youngde Exp $
 
 (in-package "LISA")
 
-(defclass node2 ()
-  ((successor :initform nil
-              :accessor node2-successor)
-   (tests :initform (list)
-          :accessor node2-tests)
-   (left-memory :initform (make-hash-table)
-                :reader node2-left-memory)
-   (right-memory :initform (make-hash-table)
-                 :reader node2-right-memory)))
-
-(defun remember-token (memory token)
-  (setf (gethash (token-top-fact token) memory) token))
-
-(defun add-tokens-to-left-memory (node2 tokens)
-  (remember-token (node2-left-memory node2) tokens))
-
-(defun add-token-to-right-memory (node2 token)
-  (remember-token (node2-right-memory node2) token))
+(defclass node2 (join-node) ())
 
 (defmethod test-and-pass-tokens ((self node2) left-tokens right-token)
   (token-push-fact left-tokens (token-top-fact right-token))
   (if (every #'(lambda (test)
                  (funcall test left-tokens))
-             (node2-tests self))
-      (call-successor (node2-successor self) left-tokens)
+             (join-node-tests self))
+      (call-successor (join-node-successor self) left-tokens)
     (token-pop-fact left-tokens)))
   
 (defmethod accept-tokens-from-left ((self node2) left-tokens)
   (add-tokens-to-left-memory self left-tokens)
-  (loop for right-token being the hash-value of (node2-right-memory self)
+  (loop for right-token being the hash-value 
+      of (join-node-right-memory self)
       do (test-and-pass-tokens self left-tokens right-token)))
 
 (defmethod accept-token-from-right ((self node2) right-token)
   (add-token-to-right-memory self right-token)
-  (loop for left-tokens being the hash-value of (node2-left-memory self)
+  (loop for left-tokens being the hash-value 
+      of (join-node-left-memory self)
       do (test-and-pass-tokens self left-tokens right-token)))
-
-(defmethod add-successor ((self node2) successor-node connector)
-  (setf (node2-successor self)
-    (make-successor successor-node connector)))
-
-(defun node2-add-test (node2 test)
-  (push test (node2-tests node2)))
 
 (defun make-node2 ()
   (make-instance 'node2))

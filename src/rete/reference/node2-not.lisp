@@ -20,19 +20,19 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.1 2002/09/05 17:25:09 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.2 2002/09/07 00:20:53 youngde Exp $
 
 (in-package "LISA")
 
-(defclass node2-not (node2) ())
+(defclass node2-not (join-node) ())
 
 (defmethod test-and-pass-tokens ((self node2-not) left-tokens right-token)
-  (let ((tests (node2-tests self)))
+  (let ((tests (join-node-tests self)))
     (token-push-fact left-tokens (token-top-fact right-token))
     (if (and (not (null tests))
              (notevery #'(lambda (test)
                            (funcall test left-tokens)) tests))
-        (call-successor (node2-successor self) left-tokens)
+        (call-successor (join-node-successor self) left-tokens)
       (token-pop-fact left-tokens))))
 
 (defun make-node2-not ()

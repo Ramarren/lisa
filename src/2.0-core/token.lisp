@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.7 2002/09/04 18:27:49 youngde Exp $
+;;; $Id: token.lisp,v 1.8 2002/09/07 00:20:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,4 +55,6 @@
 (defun token-pop-fact (token)
   (with-slots ((fact-vector facts)) token
     (unless (zerop (fill-pointer fact-vector))
-      (decf (fill-pointer fact-vector)))))
+      (prog1
+          (aref fact-vector (1- (fill-pointer fact-vector)))
+        (decf (fill-pointer fact-vector))))))

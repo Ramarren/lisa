@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.16 2002/09/05 18:41:51 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.17 2002/09/07 00:20:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -102,19 +102,19 @@
              (let ((binding (pattern-slot-slot-binding slot))
                    (address (parsed-pattern-address pattern)))
                (unless (= address (binding-address binding))
-                 (node2-add-test join-node
-                                 (make-inter-pattern-test
-                                  (pattern-slot-name slot) binding)))))
+                 (join-node-add-test join-node
+                                     (make-inter-pattern-test
+                                      (pattern-slot-name slot) binding)))))
            (add-slot-constraint-test (slot)
-             (node2-add-test join-node
-                             (make-predicate-test
-                              (pattern-slot-constraint slot)
-                              (pattern-slot-constraint-bindings slot))))
+             (join-node-add-test join-node
+                                 (make-predicate-test
+                                  (pattern-slot-constraint slot)
+                                  (pattern-slot-constraint-bindings slot))))
            (add-test-pattern-predicate ()
-             (node2-add-test join-node
-                             (make-predicate-test
-                              (parsed-pattern-test-forms pattern)
-                              (parsed-pattern-test-bindings pattern))))
+             (join-node-add-test join-node
+                                 (make-predicate-test
+                                  (parsed-pattern-test-forms pattern)
+                                  (parsed-pattern-test-bindings pattern))))
            (add-generic-pattern-tests ()
              (dolist (slot (parsed-pattern-slots pattern))
                (cond ((simple-bound-slot-p slot)

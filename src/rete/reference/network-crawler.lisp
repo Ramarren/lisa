@@ -20,7 +20,7 @@
 ;;; File: network-crawler.lisp
 ;;; Description:
 
-;;; $Id: network-crawler.lisp,v 1.2 2002/09/03 21:48:41 youngde Exp $
+;;; $Id: network-crawler.lisp,v 1.3 2002/09/07 00:20:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,7 @@
                  of (shared-node-successors shared-node) 
                  collect (successor-node s)))
            (get-successor (join-node)
-             (list (successor-node (node2-successor join-node))))
+             (list (successor-node (join-node-successor join-node))))
            (trace-nodes (nodes &optional (level 0))
              (unless (null nodes)
                (let* ((node (first nodes))
