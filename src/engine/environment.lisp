@@ -20,12 +20,18 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.1 2000/11/16 15:24:59 youngde Exp $
+;;; $Id: environment.lisp,v 1.2 2000/11/16 16:38:04 youngde Exp $
 
 (in-package :lisa)
 
 (defparameter *class-map*
     (make-hash-table))
+
+(defun import-class (name class)
+  (setf (gethash name *class-map*) (class-name class)))
+
+(defun find-imported-class (name)
+  (gethash name *class-map*))
 
 (let ((engine (make-rete)))
   (defun current-engine ()
@@ -41,8 +47,8 @@
   (let ((old-engine (gensym))
         (rval (gensym)))
     `(let ((,old-engine (use-engine ,engine))
-           (,rval ,@body))
-       (setf (current-engine ,old-engine))
+           (,rval (progn ,@body)))
+       (setf (current-engine) ,old-engine)
        (values ,rval))))
 
 

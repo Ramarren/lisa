@@ -20,7 +20,7 @@
 ;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.10 2000/11/16 02:24:31 youngde Exp $
+;;; $Id: load.lisp,v 1.11 2000/11/16 16:38:04 youngde Exp $
 
 (in-package :user)
 
@@ -44,7 +44,7 @@
                     "node1" "node1-tect" "node1-teq" "node1-rtl"
                     "node-test" "node2" "terminal-node" "test1"
                     "factories" "slot" "pattern" "generic-pattern"
-                    "rule" "parser" "language" "activation"
+                    "rule" "parser" "language" "activation" "environment"
                     "test-facts" "debug")))))
   (labels ((load-files (path files)
              (cond ((null files)
