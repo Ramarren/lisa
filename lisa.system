@@ -20,9 +20,12 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.15 2002/08/06 22:40:53 youngde Exp $
+;;; $Id: lisa.system,v 1.16 2002/11/07 19:57:53 youngde Exp $
 
 (in-package "CL-USER")
+
+(error "This is the DEFSYSTEM for LISA 1.x, which is deprecated. Comment this
+line if you really want to use 1.x")
 
 (defvar *lisa-root-pathname*
     (make-pathname :directory
