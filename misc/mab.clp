@@ -14,9 +14,17 @@
 ;;; modified EJFH 4/11/96 for JES Java Expert System
 ;;; produces identical output under CLIPS
 
-;;;(set-node-index-hash 1)
+(set-node-index-hash 1)
 ;;;(set-fact-duplication TRUE)
 ;;;(set-multithreaded-io TRUE)
+
+(watch facts)
+(watch activations)
+(watch rules)
+
+(load-package jess.ViewFunctions)
+(load-function Schtum)
+
 ;;;*************
 ;;;* TEMPLATES *
 ;;;*************
@@ -174,6 +182,7 @@
   (printout t "Monkey grabs the " ?name "." crlf)
   (modify ?thing (location held) (on-top-of held))
   (modify ?monkey (holding ?name))
+;  (schtum)
   (retract ?goal))
 
 (defrule drop-object ""  
@@ -367,6 +376,9 @@
          (bind ?n (- ?n 1)))
   (printout t "Elapsed time: "
             (- (time) ?start) crlf))
+
+;(reset)
+;(run)
 
 ;;(run-n-times 256)
 ;;(run-n-times 1)

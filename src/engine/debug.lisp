@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.11 2001/02/08 16:11:47 youngde Exp $
+;;; $Id: debug.lisp,v 1.12 2001/02/13 18:22:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -107,3 +107,9 @@
               (print-path path 0))
           (find-paths-to-rule rule-name)))
   (values))
+
+(defun find-object (addr)
+  #+Lispworks
+  (sys:pointer-from-address addr)
+  #-Lispworks
+  (error "Not implemented for this platform."))
