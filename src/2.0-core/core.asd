@@ -22,14 +22,14 @@
 ;;; File: core.asd
 ;;; Description: System definition file.
 
-;;; $Id: core.asd,v 1.2 2004/06/07 17:43:02 youngde Exp $
+;;; $Id: core.asd,v 1.3 2004/06/07 18:21:37 youngde Exp $
 
 (in-package :cl-user)
 
 (asdf:defsystem :lisa.preamble
   :components ((:file "preamble")
                (:file "conditions"))
-  :depends-on ("packages"))
+  :depends-on ("lisa.packages"))
 
 (asdf:defsystem :lisa.core
   :components ((:file "deffacts")
@@ -51,6 +51,7 @@
                (:file "binding")
                (:file "token")
                (:file "retrieve"))
+  :serial t
   :depends-on ("lisa.packages" "lisa.reflect" "lisa.utils" "lisa.preamble"))
 
 (asdf:defsystem lisa.epilogue

@@ -22,7 +22,7 @@
 ;;; File: implementations.asd
 ;;; Description: System definition file.
 
-;;; $Id: implementations.asd,v 1.1 2004/06/07 15:53:39 youngde Exp $
+;;; $Id: implementations.asd,v 1.2 2004/06/07 18:21:44 youngde Exp $
 
 (in-package :cl-user)
 
@@ -32,4 +32,4 @@
                (:file "allegro-auto-notify")
                #+Lispworks
                (:file "lispworks-auto-notify"))
-  :depends-on ("preamble"))
+  :depends-on ("lisa.preamble"))
