@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.36 2001/03/27 20:57:11 youngde Exp $
+;;; $Id: defsys.lisp,v 1.37 2001/03/30 19:08:10 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -59,10 +59,7 @@
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
-#-CLISP
 (load "lisa:clocc;port;port.system")
-#+CLISP
-(load (translate-logical-pathname "lisa:clocc;port;port.system"))
 
 #+CMU
 (progn
@@ -94,13 +91,16 @@
                           :binary-pathname "engine"
                           :components ((:file "generics"))
                           :depends-on (packages))
+                 (:module "conditions"
+                          :source-pathname "engine"
+                          :binary-pathname "engine"
+                          :components ((:file "conditions"))
+                          :depends-on (packages))
                  (:module "engine"
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "utils")
-                                       #+nil(:file "lisa-kb-class")
                                        (:file "deftemplate")
-                                       #+nil(:file "special-facts")
                                        (:file "slot-name")
                                        (:file "meta")
                                        (:file "strategies")
@@ -151,7 +151,7 @@
                                        (:file "watch")
                                        (:file "debug")
                                        (:file "instrumenting"))
-                          :depends-on (packages utils lisa-macros generics)))
+                          :depends-on (packages conditions utils lisa-macros generics)))
     :depends-on (port)
     :initially-do
     (progn

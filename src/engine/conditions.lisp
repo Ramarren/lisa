@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.2 2001/03/30 18:35:51 youngde Exp $
+;;; $Id: conditions.lisp,v 1.3 2001/03/30 19:08:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,15 +39,20 @@
 (define-condition rule-structure-error (lisa-condition)
   ((rule-name :initarg :rule-name)
    (text :initarg :text))
-  (:documentation
+  (:report
+   (lambda (condition strm)
+     (with-slots (rule-name text) condition
+       (format strm "While parsing rule ~S:~%" rule-name)
+       (format strm text)))
+   :documentation
    "This condition represents structural errors found while parsing DEFRULE
    forms."))
 
-(defmacro parsing-error (&rest args)
+(defmacro parsing-error (format-string &rest args)
   `(error 'syntactical-error
-    :text (apply #'format nil ,args)))
+    :text (apply #'format nil ,format-string `(,,@args))))
 
 (defmacro rule-structure-error (rule-name parse-condition)
-  `(with-slots (text) parse-condition
+  `(with-slots (text) ,parse-condition
     (error 'rule-structure-error
      :rule-name ,rule-name :text text)))
