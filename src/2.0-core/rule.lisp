@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.23 2002/11/21 15:54:44 youngde Exp $
+;;; $Id: rule.lisp,v 1.24 2002/12/04 15:05:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -69,6 +69,11 @@
         (*active-tokens* tokens))
     (unbind-rule-activation self tokens)
     (funcall (rule-behavior self) tokens)))
+
+(defun rule-default-name (rule)
+  (if (initial-context-p (rule-context rule))
+      (rule-short-name rule)
+    (rule-name rule)))
 
 (defun bind-rule-activation (rule activation tokens)
   (setf (gethash (hash-key tokens) (rule-activations rule))

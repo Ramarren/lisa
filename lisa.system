@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.24 2002/12/03 18:28:07 youngde Exp $
+;;; $Id: lisa.system,v 1.25 2002/12/04 15:05:29 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -75,7 +75,7 @@
 
 (let ((lisa-binary-directories
        '("engine" "core20" "packages" "reflect" "utils" "implementations"
-         "rete-compiler" "debugger"))
+         "rete-compiler" "debugger" "config"))
       (lisa-supported-lisps
        '("acl" "lispworks" "cmucl" "clisp")))
   (dolist (lisp lisa-supported-lisps)
@@ -172,12 +172,17 @@
                           :compile-only t
                           #|:components ((:file "debugger"))|#
                           :depends-on (core20))
+                 (:module "configuration"
+                          :source-pathname "config"
+                          :binary-pathname "config"
+                          :components ((:file "config"))
+                          :depends-on (core20))
                  (:module "epilogue"
                           :source-pathname "2.0-core"
                           :binary-pathname "core20"
                           :components
                           ((:file "epilogue"))
-                          :depends-on (core20)))
+                          :depends-on (configuration)))
     :finally-do
     (progn
       (mk:system-source-size :lisa :all)

@@ -20,7 +20,7 @@
 ;;; File: watches.lisp
 ;;; Description:
 
-;;; $Id: watches.lisp,v 1.2 2002/10/18 16:54:55 youngde Exp $
+;;; $Id: watches.lisp,v 1.3 2002/12/04 15:05:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,7 +34,7 @@
 (defun watch-activation-detail (activation direction)
   (format *trace-output* "~A Activation: ~A : ~A~%"
           direction
-          (rule-name (activation-rule activation))
+          (rule-default-name (activation-rule activation))
           (activation-fact-list activation))
   (values))
 
@@ -48,7 +48,7 @@
   (let ((rule (activation-rule activation)))
     (format *trace-output* "FIRE ~D: ~A ~A~%"
             (rete-firing-count (rule-engine rule))
-            (rule-name rule)
+            (rule-default-name rule)
             (activation-fact-list activation))
     (values)))
 

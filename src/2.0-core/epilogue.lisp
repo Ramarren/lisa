@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.9 2002/12/03 18:28:16 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.10 2002/12/04 15:05:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,7 +52,7 @@
   (define-lisa-lisp)
   (when (use-fancy-assert)
     (set-dispatch-macro-character
-     #\# #\^ #'(lambda (strm subchar arg)
+     #\# #\? #'(lambda (strm subchar arg)
                  (declare (ignore subchar arg))
                  (list 'identity (read strm t nil t)))))
   (pushnew :lisa *features*))

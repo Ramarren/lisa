@@ -20,7 +20,7 @@
 ;;; File: auto-notify.lisp
 ;;; Description: Small test code for LISA's auto-notify feature.
 
-;;; $Id: auto-notify.lisp,v 1.3 2002/12/03 16:03:46 youngde Exp $
+;;; $Id: auto-notify.lisp,v 1.4 2002/12/04 15:05:41 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -41,4 +41,4 @@
 
 (reset)
 
-(assert (#^*frodo*))
+(assert (#?*frodo*))

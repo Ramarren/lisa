@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.70 2002/12/03 16:03:57 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.71 2002/12/04 15:05:42 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -51,7 +51,7 @@
            "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT" "FACT-NAME" "FACT-ID"
            "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
            "MAKE-INFERENCE-ENGINE" "RETE" "DUPLICATE-FACT"
-           "STANDARD-KB-CLASS")
+           "STANDARD-KB-CLASS" "USE-FANCY-ASSERT" "RULE-DEFAULT-NAME")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -77,7 +77,7 @@
                 "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT" "FACT-NAME" "FACT-ID"
                 "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
                 "MAKE-INFERENCE-ENGINE" "RETE" "DUPLICATE-FACT"
-                "STANDARD-KB-CLASS"))
+                "STANDARD-KB-CLASS" "USE-FANCY-ASSERT" "RULE-DEFAULT-NAME"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
