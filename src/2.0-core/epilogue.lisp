@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.8 2002/11/22 15:58:47 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.9 2002/12/03 18:28:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,6 +50,11 @@
   (make-default-inference-engine)
   (setf *active-context* (initial-context (inference-engine)))
   (define-lisa-lisp)
+  (when (use-fancy-assert)
+    (set-dispatch-macro-character
+     #\# #\^ #'(lambda (strm subchar arg)
+                 (declare (ignore subchar arg))
+                 (list 'identity (read strm t nil t)))))
   (pushnew :lisa *features*))
 
 

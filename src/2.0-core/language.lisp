@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.24 2002/11/22 15:58:47 youngde Exp $
+;;; $Id: language.lisp,v 1.25 2002/12/03 18:28:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -122,11 +122,9 @@
   (active-rule))
 
 (defun assert-instance (instance)
-  (warn "ASSERT-INSTANCE is deprecated. Use ASSERT instead.")
   (parse-and-insert-instance instance))
 
 (defun retract-instance (instance)
-  (warn "RETRACT-INSTANCE is deprecated. Use RETRACT instead.")
   (parse-and-retract-instance instance (inference-engine)))
 
 (defun facts ()

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.23 2002/12/03 16:03:29 youngde Exp $
+;;; $Id: lisa.system,v 1.24 2002/12/03 18:28:07 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -84,8 +84,6 @@
              (translate-logical-pathname
               (concatenate 'string "lisa:lib;lisa;" lisp ";" dir ";"))))
         (ensure-directories-exist pathname)))))
-
-(pushnew :lisa-fancy-assert *features*)
 
 (mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
@@ -180,7 +178,7 @@
                           :components
                           ((:file "epilogue"))
                           :depends-on (core20)))
-    :initially-do
+    :finally-do
     (progn
       (mk:system-source-size :lisa :all)
       (mk:system-source-size :lisa :new-source-and-dependents)))

@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.20 2002/12/02 16:21:45 youngde Exp $
+;;; $Id: preamble.lisp,v 1.21 2002/12/03 18:28:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -54,6 +54,7 @@
 
 (defvar *consider-taxonomy-when-reasoning* nil)
 (defvar *allow-duplicate-facts* t)
+(defvar *use-fancy-assert* t)
 
 (defun consider-taxonomy ()
   *consider-taxonomy-when-reasoning*)
@@ -66,6 +67,12 @@
 
 (defsetf allow-duplicate-facts () (new-value)
   `(setf *allow-duplicate-facts* ,new-value))
+
+(defun use-fancy-assert ()
+  *use-fancy-assert*)
+
+(defsetf use-fancy-assert () (new-value)
+  `(setf *use-fancy-assert* ,new-value))
 
 (defclass inference-engine-object () ())
 
@@ -145,13 +152,6 @@
     macro is MP-safe."
   `(let ((*active-engine* ,engine))
     (progn ,@body)))
-
-#+lisa-fancy-assert
-(eval-when (:load-toplevel)
-  (set-dispatch-macro-character
-   #\# #\^ #'(lambda (strm subchar arg)
-               (declare (ignore subchar arg))
-               (list 'identity (read strm t nil t)))))
 
 (register-clear-handler
  "environment" 
