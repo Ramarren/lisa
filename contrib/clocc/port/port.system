@@ -1,0 +1,20 @@
+;;; -*- Lisp -*-
+;;;
+;;; Cross-implementation Portability System
+;;;
+;;; $Id: port.system,v 1.1 2001/03/06 21:23:28 youngde Exp $
+;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/port.system,v $
+
+(mk:defsystem port
+    :source-pathname (translate-logical-pathname "clocc:src;port;")
+    :source-extension "lisp"
+    :components
+    ((:file "ext")
+     (:file "gray" :depends-on ("ext"))
+     (:file "net" :depends-on ("ext" "sys"))
+     (:file "proc" :depends-on ("ext"))
+     (:file "shell" :depends-on ("ext"))
+     (:file "sys" :depends-on ("ext")))
+    :initially-do
+    (progn (mk:system-source-size :port :all)
+           (mk:system-source-size :port :new-source-and-dependents)))
