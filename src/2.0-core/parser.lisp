@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.28 2002/09/26 15:21:16 youngde Exp $
+;;; $Id: parser.lisp,v 1.29 2002/09/26 15:44:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,11 +34,8 @@
 
 (defmacro make-equality-predicate (var atom)
   `(function
-    (lambda () 
-      (print ,var)
-      (format t "equal: ~S~%"
-              (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))
-      (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))))
+    (lambda ()
+      (equal (symbol-value ,var) ,@(if (symbolp atom) `(',atom) `(,atom))))))
 
 (defmacro make-generic-predicate (&rest body)
   `(function (lambda () ,@body)))
@@ -244,6 +241,8 @@
                        (parse-constraint field constraint))
                      (setf existing-bindings
                        (append existing-bindings constraint-bindings)))
+                   (print existing-bindings)
+                   (print constraint-bindings)
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
