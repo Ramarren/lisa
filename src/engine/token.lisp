@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.28 2001/03/02 21:50:50 youngde Exp $
+;;; $Id: token.lisp,v 1.29 2001/03/05 16:35:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -134,9 +134,7 @@
            (init-new initial-fact))
           (t
            (error "In INITIALIZE-INSTANCE for class ~S: inconsistent keyword arguments."
-                  self)))
-    (when (next-method-p)
-      (call-next-method))))
+                  self)))))
 
 (defmethod print-object ((self token) strm)
   (print-unreadable-object (self strm :type t :identity t)

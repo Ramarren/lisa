@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.10 2001/03/02 21:50:50 youngde Exp $
+;;; $Id: bindings.lisp,v 1.11 2001/03/05 16:35:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,8 +38,7 @@
   (:documentation
    "The base class for all types of bindings."))
 
-(defmethod initialize-instance :after ((self binding) &rest args)
-  (declare (ignore args))
+(defmethod initialize-instance :after ((self binding) &key &allow-other-keys)
   (setf (slot-value self 'internal)
     (string= "?_" (subseq (symbol-name (get-name self)) 0 2))))
 

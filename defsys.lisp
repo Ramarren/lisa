@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.20 2001/03/03 22:15:42 youngde Exp $
+;;; $Id: defsys.lisp,v 1.21 2001/03/05 16:35:17 youngde Exp $
 
 (in-package :user)
 
@@ -106,6 +106,11 @@
                           :binary-pathname "engine"
                           :components ((:file "macros"))
                           :depends-on (packages))
+                 (:module "generics"
+                          :source-pathname "engine"
+                          :binary-pathname "engine"
+                          :components ((:file "generics"))
+                          :depends-on (packages))
                  (:module "engine"
                           :source-pathname "engine"
                           :binary-pathname "engine"
@@ -160,7 +165,7 @@
                                        (:file "watch")
                                        (:file "debug")
                                        (:file "instrumenting"))
-                          :depends-on (packages utils lisa-macros))))
+                          :depends-on (packages utils lisa-macros generics))))
 
 (defun compile-lisa ()
   (mk:compile-system :lisa))

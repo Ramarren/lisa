@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.20 2001/02/22 21:26:12 youngde Exp $
+;;; $Id: strategies.lisp,v 1.21 2001/03/05 16:35:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -52,7 +52,8 @@
    particularly DEPTH-FIRST-STRATEGY and BREADTH-FIRST-STRATEGY."))
 
 (defmethod initialize-instance :after ((self indexed-priority-list)
-                                       &key (priorities 500))
+                                       &key (priorities 500)
+                                       (insertion-function nil))
   (setf (slot-value self 'priority-vector)
     (make-array (1+ priorities) :initial-element nil))
   (setf (slot-value self 'delta) (/ priorities 2)))

@@ -21,7 +21,7 @@
 ;;; Description: Parent class of all nodes in the Rete pattern network. This
 ;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.19 2001/03/02 21:50:50 youngde Exp $
+;;; $Id: node.lisp,v 1.20 2001/03/05 16:35:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -37,11 +37,9 @@
 (defgeneric call-node-left (node token))
 (defgeneric call-node-right (node token))
 
-(defgeneric equals (node-1 node-2)
-  (:method ((n1 node) n2)
-           (declare (ignore n2))
-           (values nil)))
-
+(defmethod equals ((self node) obj)
+  (values nil))
+  
 (defmethod increase-use-count ((self node))
   (incf (get-use-count self)))
 
