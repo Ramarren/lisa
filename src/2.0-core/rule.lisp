@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.31 2004/09/14 15:45:54 youngde Exp $
+;;; $Id: rule.lisp,v 1.32 2004/09/15 17:57:15 youngde Exp $
 
 (in-package :lisa)
 
@@ -163,11 +163,14 @@
       (first addresses))))
 
 (defmethod initialize-instance :after ((self rule) &rest initargs)
-  (setf (slot-value self 'qualified-name)
-    (intern (format nil "~A.~A" 
-                    (context-name (rule-context self))
-                    (rule-short-name self))))
-  self)
+  (with-slots ((qual-name qualified-name)
+               (cf cf)) self
+    (setf qual-name
+      (intern (format nil "~A.~A" 
+                      (context-name (rule-context self))
+                      (rule-short-name self))))
+    (unless cf
+      (setf cf 0.0))))
                     
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) 
