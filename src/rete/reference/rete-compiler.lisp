@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.29 2002/10/02 18:10:13 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.30 2002/10/02 19:05:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,14 +44,18 @@
   ((root-nodes :initform (make-hash-table)
                :reader rete-roots)))
 
+(defun record-node (node)
+  (increment-use-count node)
+  (push node *rule-specific-nodes*)
+  node)
+
 (defun make-root-node (class)
   (let ((root (gethash class *root-nodes*)))
     (when (null root)
       (setf root (make-node1
                   (make-class-test class)))
       (setf (gethash class *root-nodes*) root))
-    (increment-use-count root)
-    root))
+    (record-node root)))
 
 (defmethod add-successor ((parent t) new-node connector)
   (declare (ignore connector))
@@ -59,9 +63,7 @@
 
 (defmethod add-successor :after (parent new-node connector)
   (declare (ignore parent connector))
-  (push new-node *rule-specific-nodes*)
-  (increment-use-count new-node)
-  new-node)
+  (record-node new-node))
 
 (defun make-intra-pattern-node (slot)
   (let ((test
