@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.4 2001/01/09 01:35:05 youngde Exp $
+;;; $Id: bindings.lisp,v 1.5 2001/01/09 20:15:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -66,7 +66,7 @@
 
 (defclass binding-table ()
   ((table :initform (make-hash-table)
-          :reader (get-table)))
+          :reader get-table))
   (:documentation
    "A small class that maintains a collection of variable bindings."))
 

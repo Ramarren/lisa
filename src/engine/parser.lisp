@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.29 2001/01/09 03:11:58 youngde Exp $
+;;; $Id: parser.lisp,v 1.30 2001/01/09 20:15:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,6 +41,8 @@
     (let ((rule (make-rule name (current-engine)
                            :doc-string doc-string :source body)))
       (finalize-rule-definition rule lhs rhs)
+      (setf *rule* rule)
+      (break)
       (add-rule (current-engine) rule))))
 
 (defun extract-rule-headers (body)

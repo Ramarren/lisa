@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.18 2001/01/09 01:35:05 youngde Exp $
+;;; $Id: pattern.lisp,v 1.19 2001/01/09 20:15:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,40 +53,15 @@
              self (make-slot (first desc) (second desc) (third desc))))
         slot-list))
 
-(defun canonicalize-slot (rule pattern slot)
-  (flet ((make-slot-variable ()
-           (intern (make-symbol (format nil "?~A" (gensym)))))
-         (rewrite-constraint (var value negated)
-           (if negated
-               `(not (equal ,var ,value))
-             `(equal ,var ,value))))
-    (let* ((value (second slot))
-           (constraint (third slot))
-           (var (if (variablep value)
-                    value
-                  (make-slot-variable))))
-      (cond ((literalp value)
-             (values var (rewrite-constraint var value nil) t))
-            ((negated-constraintp value)
-             (values var (rewrite-constraint var (second value) t) t))
-            ((and (not (null constraint))
-                  (literalp constraint))
-             (values value (rewrite-constraint 
-                            value constraint nil) t))
-            ((and (not (null constraint))
-                  (negated-constraintp constraint))
-             (values value (rewrite-constraint 
-                            value (second constraint) t) t))
-            (t
-             (values value constraint nil))))))
-
 (defun canonicalize-slot (pattern slot bindings)
   (declare (type (pattern pattern) (slot slot)
                  (binding-table bindings)))
   (labels ((make-slot-variable ()
              (intern (make-symbol (format nil "?~A" (gensym)))))
+           (first-occurrence (var)
+             (not (lookup-binding bindings var)))
            (new-slot-binding (var)
-             (unless (lookup-binding var bindings)
+             (unless (lookup-binding bindings var)
                (add-binding bindings
                             (make-slot-binding
                              var (get-location pattern)
@@ -98,46 +73,26 @@
                    `(not (equal ,var ,value)))
                (setf (get-constraint slot)
                  `(equal ,var ,value)))
-             (new-binding-maybe var)))
+             (new-slot-binding var)))
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
              (rewrite-slot (make-slot-variable) slot-value nil))
-            ((negated-constraintp slot-value)
+            ((negated-rewritable-constraintp slot-value)
              (rewrite-slot (make-slot-variable) (second slot-constraint) t))
             ((null slot-constraint)
              (if (first-occurrence slot-value)
                  (new-slot-binding slot-value)
                (rewrite-slot (make-slot-variable) slot-value nil)))
-            ((literalp constraint)
-             (rewrite-slot slot-value constraint nil))
-            ((and (not (null slot-constraint))
-                  (literalp constraint))
+            ((literalp slot-constraint)
              (rewrite-slot slot-value slot-constraint nil))
-            ((and (not (null slot-constraint))
-                  (negated-constraintp slot-constraint))
-             (rewrite-slot slot-value slot-constraint t))))))
+            ((negated-rewritable-constraintp slot-constraint)
+             (rewrite-slot slot-value (second slot-constraint) t))
+            (t
+             (values slot))))))
 
 (defmethod finalize-pattern ((self pattern) bindings)
   (mapc #'(lambda (slot)
-            (canonicalize-slot pattern slot bindings))
+            (canonicalize-slot self slot bindings)
+            (format t "slot = ~S~%" slot))
         (get-slots self)))
-
-#+ignore
-(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
-  (flet ((create-slot-tests (slot)
-           (multiple-value-bind (value constraint changed)
-               (canonicalize-slot slot)
-             (format t "name ~S value ~S ; constraint ~S ; changed ~S~%"
-                     (first slot) value constraint changed)
-             (let ((tests (list (make-test1-var value))))
-               (unless (null constraint)
-                 (push (if changed
-                           (make-test1-internal-eval constraint)
-                         (make-test1-eval constraint))
-                       tests))
-               (values (reverse tests))))))
-    (mapc #'(lambda (slot-desc)
-              (add-slot self (first slot-desc)
-                        (create-slot-tests slot-desc)))
-          slot-list)))

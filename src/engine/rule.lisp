@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.31 2001/01/09 01:35:05 youngde Exp $
+;;; $Id: rule.lisp,v 1.32 2001/01/09 20:15:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -100,6 +100,7 @@
                      (get-location pattern)
                      (get-name slot)))
   
+#+ignore
 (defmethod record-slot-bindings ((self rule) pattern)
   (declare (type pattern pattern))
   (flet ((create-slot-bindings (slot)
@@ -110,11 +111,6 @@
                          (add-binding self binding))))
                  (get-tests slot))))
     (mapc #'create-slot-bindings (get-slots pattern))))
-
-(defun canonicalize-pattern (rule pattern)
-  (mapc #'(lambda (slot)
-            (canonicalize-slot rule pattern slot))
-        (get-slots pattern)))
 
 (defun add-new-pattern (rule pattern)
   (with-accessors ((patterns get-patterns)) rule
@@ -128,11 +124,12 @@
   (values))
 
 (defmethod add-pattern ((self rule) pattern)
+  (finalize-pattern pattern (get-binding-table self))
   (when (has-binding-p pattern)
     (add-binding self (make-pattern-binding
                        (get-pattern-binding pattern)
                        (get-location pattern))))
-  (record-slot-bindings self pattern)
+;;;  (record-slot-bindings self pattern)
   (do-special-ce-handling self pattern)
   (add-new-pattern self pattern)
   (values pattern))

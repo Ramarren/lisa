@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.9 2001/01/09 03:11:58 youngde Exp $
+;;; $Id: macros.lisp,v 1.10 2001/01/09 20:15:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,7 +38,7 @@
        (consp ,val)
        (variablep ,val)))
 
-(defmacro negated-constraintp (constraint)
+(defmacro negated-rewritable-constraintp (constraint)
   `(and (consp ,constraint)
         (eq (first ,constraint) 'not)
         (not (consp (second ,constraint)))))
@@ -49,7 +49,11 @@
        (consp ,constraint)))
 
 (defmacro normalize-field (obj)
-  `(if (symbolp ,obj) ',obj ,obj))
+  `(if (and (not (variablep ,obj))
+            (not (null ,obj))
+            (symbolp ,obj))
+       ',obj
+     ,obj))
 
 (defmacro assert-conditions ((&rest forms))
   `(unless (and ,@forms)
