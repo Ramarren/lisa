@@ -20,9 +20,11 @@
 ;;; File: defrule.lisp
 ;;; Description: The DEFRULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.2 2000/10/17 02:08:22 youngde Exp $
+;;; $Id: defrule.lisp,v 1.3 2000/10/19 20:28:04 youngde Exp $
 
 (in-package "LISA")
+
+(defvar *rete* (list))
 
 (defclass defrule ()
   ((name :initarg :name
@@ -43,13 +45,15 @@
 
 (defmethod add-pattern ((rule defrule) pattern)
   (with-accessors ((patterns get-patterns)) rule
-    (setf patterns (nconc patterns pattern))))
+    (setf patterns (nconc patterns `(,pattern)))))
 
-(defmethod set-actions ((rule defrule) &rest actions)
-  (setf (get-actions rule)
-        #'(lambda ()
-            `,@actions)))
+(defmethod set-actions ((rule defrule) function)
+  (setf (get-actions rule) function))
 
-(defun make-defrule (name)
+(defun make-defrule (name &key (doc-string nil) (salience 0))
   "Constructor for class DEFRULE."
-  (make-instance 'defrule :name name))
+  (let ((rule
+         (make-instance 'defrule :name name :comment doc-string :salience salience)))
+    (push rule *rete*)
+    (values rule)))
+

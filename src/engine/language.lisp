@@ -20,18 +20,12 @@
 ;;; File: language.lisp
 ;;; Description: Macros that implement the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.5 2000/10/17 15:01:06 youngde Exp $
+;;; $Id: language.lisp,v 1.6 2000/10/19 20:28:04 youngde Exp $
 
 (in-package "LISA")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (export '(defrule)))
-
-(defstruct rule
-  (name nil)
-  (doc-string nil :type string)
-  (patterns nil)
-  (actions nil))
 
 (defun make-test-pattern (p)
   (list "test" p))
@@ -60,27 +54,28 @@
     ,@body))
 
 (defmacro defrule (name &body body)
+  "Creates or redefines a rule in the network."
   `(redefine-defrule ',name ',body))
 
 (defun redefine-defrule (name body)
   (multiple-value-bind (doc-string decls lhs rhs)
       (evaluate-defrule body)
-    (format t "name ~S, doc ~S, decls ~S, lhs ~S, rhs ~S~%"
-            name doc-string decls lhs rhs))
-  (values))
+    (let ((rule (make-defrule name :doc-string doc-string)))
+      (mapc #'(lambda (p)
+                (add-pattern rule p))
+            lhs)
+      (set-actions rule (compile-function rhs))
+      (values rule))))
       
 (defun evaluate-defrule (body)
-  (format t "evaluate-defrule: looking at ~S~%" body)
   (multiple-value-bind (doc-string decls remains)
       (extract-rule-headers body)
-    (format t "doc ~S, decls ~S, remains ~S~%" doc-string decls remains)
     (multiple-value-bind (lhs rhs)
         (parse-rulebody remains)
       (values doc-string decls lhs rhs))))
 
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers &key (doc nil))
-             (format t "extract-headers: looking at ~S~%" headers)
              (let ((obj (first headers)))
                (cond ((stringp obj)
                       (if (null doc)
@@ -96,9 +91,7 @@
     (extract-headers body)))
 
 (defun parse-rulebody (body)
-  (format t "parse-rulebody: looking at ~S~%" body)
   (labels ((parse-lhs (body &optional (patterns nil) (assign-to nil))
-             (format t "parse-lhs: looking at ~S~%" body)
              (let ((pattern (first body)))
                (cond ((consp pattern)
                       (parse-lhs (rest body)
@@ -121,7 +114,6 @@
 
 (defun make-rule-pattern (template &optional (assign-to nil))
   (labels ((parse-pattern (p)
-             (format t "parse-pattern: looking at ~S~%" p)
              (let ((head (first p)))
                (if (symbolp head)
                    (cond ((eq head 'test)
@@ -137,12 +129,10 @@
       (make-assignment-pattern (parse-pattern template)))))
         
 (defun parse-fact (fact)
-  (format t "parsed-unordered-fact: looking at ~S~%" fact)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (list name field constraint)))
            (parse-fact-body (body &optional (slots nil))
-             (format t "parse-fact-body: looking at ~S~%" body)
              (let ((slot (first body)))
                (cond ((consp slot)
                       (parse-fact-body (rest body)
@@ -151,6 +141,6 @@
                      ((null slot)
                       (values slots))
                      (t
-                      (error "parse-unordered-fact: parse error at ~S~%" body))))))
+                      (error "parse-fact: parse error at ~S~%" body))))))
     (list (first fact)
           (parse-fact-body (rest fact)))))
