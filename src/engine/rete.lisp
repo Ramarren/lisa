@@ -20,11 +20,11 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.56 2001/05/05 18:16:53 youngde Exp $
+;;; $Id: rete.lisp,v 1.57 2001/05/09 20:12:56 youngde Exp $
 
 (in-package "LISA")
 
-(defclass rete ()
+(defclass rete (synchronizable)
   ((rules :initform (make-hash-table)
           :accessor get-rules)
    (strategy :initarg :strategy
@@ -51,7 +51,7 @@
    "Represents the inference engine itself."))
 
 (defun add-rule (self rule)
-  (declare (type rete self) (type rule rule))
+  (declare (type rete self))
   (with-accessors ((rules get-rules)) self
     (add-rule-to-network (get-compiler self) rule)
     (setf (gethash (get-name rule) rules) rule)))
@@ -131,52 +131,57 @@
   (call-node-right (get-root-node (get-compiler self)) token))
 
 (defmethod assert-fact ((self rete) (fact fact))
-  (set-fact-id fact (next-fact-id self))
-  (increment-time self)
-  (record-fact self fact)
-  (watchpoint 'assert fact)
-  (insert-token self (make-add-token :initial-fact fact))
-  (values fact))
+  (with-synchronization (self)
+    (set-fact-id fact (next-fact-id self))
+    (increment-time self)
+    (record-fact self fact)
+    (watchpoint 'assert fact)
+    (insert-token self (make-add-token :initial-fact fact))
+    (values fact)))
 
 (defmethod assert-fact ((self rete) (fact shadow-fact))
   (bind-clos-instance self (instance-of-shadow-fact fact) fact)
   (call-next-method self fact))
 
 (defmethod retract-fact ((self rete) (fact fact))
-  (remove-fact self fact)
-  (increment-time self)
-  (watchpoint 'retract fact)
-  (insert-token self (make-remove-token :initial-fact fact))
-  (values fact))
+  (with-synchronization (self)
+    (remove-fact self fact)
+    (increment-time self)
+    (watchpoint 'retract fact)
+    (insert-token self (make-remove-token :initial-fact fact))
+    (values fact)))
   
 (defmethod retract-fact ((self rete) (fact shadow-fact))
   (unbind-clos-instance self (instance-of-shadow-fact fact))
   (call-next-method self fact))
   
 (defmethod retract-fact ((self rete) (fact-id integer))
-  (let ((fact (lookup-fact self fact-id)))
-    (unless (null fact)
-      (retract-fact self fact))
-    (values fact)))
+  (with-synchronization (self)
+    (let ((fact (lookup-fact self fact-id)))
+      (unless (null fact)
+        (retract-fact self fact))
+      (values fact))))
 
 (defmethod modify-fact ((self rete) fact slot-changes)
-  (insert-token self (make-remove-token :initial-fact fact))
-  (mapc #'(lambda (slot)
-            (set-slot-value fact (first slot) (second slot)))
-        slot-changes)
-  (insert-token self (make-add-token :initial-fact fact))
-  (values fact))
+  (with-synchronization (self)
+    (insert-token self (make-remove-token :initial-fact fact))
+    (mapc #'(lambda (slot)
+              (set-slot-value fact (first slot) (second slot)))
+          slot-changes)
+    (insert-token self (make-add-token :initial-fact fact))
+    (values fact)))
 
 (defmethod mark-clos-instance-as-changed ((self rete) instance
                                           &optional (slot-id nil))
-  (let ((shadow-fact (find-shadow-fact self instance)))
-    (cond ((null shadow-fact)
-           (warn "This instance is not known to LISA: ~S." instance))
-          (t
-           (insert-token self (make-remove-token :initial-fact shadow-fact))
-           (synchronize-with-instance shadow-fact slot-id)
-           (insert-token self (make-add-token :initial-fact shadow-fact))))
-    (values instance)))
+  (with-synchronization (self)
+    (let ((shadow-fact (find-shadow-fact self instance)))
+      (cond ((null shadow-fact)
+             (warn "This instance is not known to LISA: ~S." instance))
+            (t
+             (insert-token self (make-remove-token :initial-fact shadow-fact))
+             (synchronize-with-instance shadow-fact slot-id)
+             (insert-token self (make-add-token :initial-fact shadow-fact))))
+      (values instance))))
 
 (defun set-initial-state (self)
   (declare (type rete self))
@@ -232,13 +237,15 @@
       (prepare-for-run)
       (do ((count 0))
           ((or (eql count step) (engine-halted-p self)) count)
-        (let ((activation (next-activation strategy)))
-          (cond ((null activation)
-                 (halt-engine self))
-                ((eligible-p activation)
-                 (incf (slot-value self 'fired-rule-count))
-                 (fire-rule activation)
-                 (incf count))))))))
+        (with-synchronization (self)
+          (let ((activation (next-activation strategy)))
+            (cond ((null activation)
+                   (halt-engine self))
+                  ((eligible-p activation)
+                   (incf (slot-value self 'fired-rule-count))
+                   (fire-rule activation)
+                   (incf count)))))
+        (lmp:process-yield)))))
 
 (defun halt-engine (self)
   (declare (type rete self))

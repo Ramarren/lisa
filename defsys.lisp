@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.55 2001/05/05 17:46:42 youngde Exp $
+;;; $Id: defsys.lisp,v 1.56 2001/05/09 20:12:56 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -89,8 +89,9 @@
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "macros")
+                                       (:file "synchronizable")
                                        (:file "preamble"))
-                          :depends-on (packages))
+                          :depends-on (mp packages))
                  (:module "conditions"
                           :source-pathname "engine"
                           :binary-pathname "engine"
@@ -111,8 +112,6 @@
                                               :depends-on (fact))
                                        (:file "rete"
                                               :depends-on (fact shadow-fact))
-                                       (:file "rete-mp"
-                                              :depends-on (rete))
                                        (:file "clos"
                                               :depends-on (rete))
                                        (:file "clear-token"
