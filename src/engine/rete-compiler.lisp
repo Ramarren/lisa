@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.66 2001/04/24 18:00:26 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.67 2001/04/24 18:06:15 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,8 +47,9 @@
   (make-instance 'root-node))
 
 (defclass rete-compiler ()
-  ((root-node :reader get-root-node)
-   (terminals :initform (make-root-node)
+  ((root-node :reader get-root-node
+              :initform (make-root-node))
+   (terminals :initform nil
               :accessor get-terminals)
    (roots :initform nil
           :accessor get-roots))
