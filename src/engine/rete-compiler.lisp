@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.63 2001/04/21 18:18:52 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.64 2001/04/23 15:54:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -203,6 +203,11 @@
 (defmethod add-rule-to-network ((self rete-compiler) rule)
   "Adds a rule to the pattern network."
   (freeze-rule rule)
+  (format t "Adding rule ~S to network...~%" (get-name rule))
+  (mapc #'(lambda (pattern)
+            (format t "~S at ~D~%" pattern (get-location pattern)))
+        (get-patterns rule))
+  (break)
   (setf (get-terminals self) (make-array (get-pattern-count rule)))
   (setf (get-roots self) (make-array (get-pattern-count rule)))
   (create-single-nodes self rule (get-patterns rule))
