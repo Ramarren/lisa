@@ -27,7 +27,7 @@
 ;;; multiple inference engines and a single CLOS instance can reside in more
 ;;; than one.
 
-;;; $Id: clos.lisp,v 1.2 2001/04/30 20:23:52 youngde Exp $
+;;; $Id: clos.lisp,v 1.3 2001/05/01 19:13:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,44 +41,42 @@
 (defmacro with-clos-map-lock (&body body)
   `(lmp:with-lock (*clos-map-lock*) ,@body))
 
-(defun get-clos-bindings (instance)
-  (let ((bindings (gethash instance *clos-instance-map*)))
-    (when (null bindings)
-      (setf bindings (make-array 0 :initial-element nil
-                                 :adjustable t
-                                 :fill-pointer t))
-      (setf (gethash instance *clos-instance-map*) bindings))
-    (values bindings)))
+(defmacro with-writeable-clos-bindings ((bindings instance) &body body)
+  (let ((rval (gensym)))
+    `(with-clos-map-lock
+      (let* ((,bindings (gethash ,instance *clos-instance-map*))
+             (,rval (progn ,@body)))
+        (setf (gethash ,instance *clos-instance-map*) ,bindings)
+        (values ,rval)))))
+
+(defmacro with-readonly-clos-bindings ((bindings instance) &body body)
+  `(with-clos-map-lock
+    (let ((,bindings (gethash ,instance *clos-instance-map*)))
+      (progn ,@body))))
 
 (defun bind-clos-instance (engine instance fact)
-  (with-clos-map-lock
-      (vector-push-extend
-       (make-clos-instance-data :engine engine :fact fact)
-       (get-clos-bindings instance))))
+  (with-writeable-clos-bindings (bindings instance)
+    (setf bindings
+      (push (make-clos-instance-data :engine engine :fact fact) bindings))))
 
-(defun unbind-clos-instance (engine instance &optional (errorp t))
-  (with-clos-map-lock
-      (let* ((bindings (get-clos-bindings instance))
-             (position (position engine bindings 
-                                 :key #'clos-instance-data-engine)))
-        (when (and (null bindings) errorp)
-          (error "LISA doesn't know about this CLOS instance: ~S." instance))
-        (setf (aref bindings position) nil))))
+(defun unbind-clos-instance (engine instance)
+  (with-writeable-clos-bindings (bindings instance)
+    (setf bindings
+      (delete engine bindings :key #'clos-instance-data-engine))))
 
 (defun find-shadow-fact (engine instance &optional (errorp t))
-  (with-clos-map-lock
-      (let ((binding (find engine (get-clos-bindings instance)
-                           :key #'clos-instance-data-engine)))
+  (with-readonly-clos-bindings (bindings instance)
+    (let ((binding (find engine bindings
+                         :key #'clos-instance-data-engine)))
         (when (and (null binding) errorp)
           (error "LISA doesn't know about this CLOS instance: ~S." instance))
         (clos-instance-data-fact binding))))
 
-(defun map-instances (instance func &rest args)
-  (with-clos-map-lock
-      (map nil #'(lambda (binding)
-                   (unless (null binding)
-                     (apply func 
-                            (clos-instance-data-engine binding) instance args)))
-           (get-clos-bindings instance))))
+(defun map-clos-instances (instance func &rest args)
+  (with-readonly-clos-bindings (bindings instance)
+    (mapc #'(lambda (binding)
+              (apply func 
+                     (clos-instance-data-engine binding) instance args))
+          bindings)))
 
 
