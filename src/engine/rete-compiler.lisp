@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.19 2000/12/07 02:28:36 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.20 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -186,13 +186,15 @@
                (setf (aref terminals i) node)
                (values node)))
            (third-pass (patterns i)
-             (cond ((null patterns)
-                    (values t))
-                   (t
-                    (let ((node2 (make-node2 (get-engine rule))))
-                      (add-node2-tests rule node2 (get-slots (first patterns)))
-                      (add-join-node node2 i)
-                      (third-pass (rest patterns) (1+ i)))))))
+             (let ((pattern (first patterns)))
+               (cond ((null pattern)
+                      (values t))
+                     (t
+                      (let ((node2
+                             (make-join-node pattern (get-engine rule))))
+                        (add-node2-tests rule node2 (get-slots pattern))
+                        (add-join-node node2 i)
+                        (third-pass (rest patterns) (1+ i))))))))
     (third-pass (rest (get-patterns rule)) 1)))
 
 (defun create-terminal-node (compiler rule)
@@ -204,7 +206,6 @@
 (defmethod add-rule-to-network ((self rete-compiler) rule)
   "Adds a rule to the pattern network."
   (freeze-rule rule)
-  (format t "pattern count: ~D~%" (get-pattern-count rule))
   (setf (get-terminals self) (make-array (get-pattern-count rule)))
   (setf (get-roots self) (make-array (get-pattern-count rule)))
   (create-single-nodes self rule (get-patterns rule))

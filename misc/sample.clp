@@ -48,8 +48,11 @@
 ;   =>
 ;   (printout t "no-patterns!" crlf))
 
+(reset)
 (assert (rocky (name "boris")))
+(retract (fact-id 1))
+
 ;(assert (natasha (name "natasha") (nemesis "rocky")))
 ;(assert (natasha (name "natasha") (nemesis "natasha")))
 
-(run)
+;(run)

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.22 2000/12/11 16:49:47 youngde Exp $
+;;; $Id: parser.lisp,v 1.23 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -95,8 +95,9 @@
                    (cond ((eq head 'test)
                           (make-test-pattern (rest p)))
                          ((eq head 'not)
-                          (make-negated-pattern
-                           (parse-pattern (first (rest p)) binding)))
+                          (make-parsed-pattern
+                           :pattern (make-default-pattern (second p))
+                           :type :negated))
                          ((variablep head)
                           (if (null binding)
                               (parse-pattern (first (rest p)) head)
@@ -104,7 +105,8 @@
                          (t
                           (make-parsed-pattern
                            :pattern (make-default-pattern p)
-                           :binding binding)))
+                           :binding binding
+                           :type :generic)))
                  (error "Parse error at ~S~%" p)))))
     `(,(parse-pattern template nil))))
 
@@ -122,8 +124,7 @@
                       (values slots))
                      (t
                       (error "parse-unordered-pattern: parse error at ~S~%" body))))))
-    (list (first pattern)
-          (parse-pattern-body (rest pattern) nil))))
+    `(,(first pattern) ,(parse-pattern-body (rest pattern) nil))))
 
 (defun make-default-pattern (p)
   (parse-unordered-pattern p))

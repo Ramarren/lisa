@@ -20,13 +20,14 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.8 2000/12/04 20:12:19 youngde Exp $
+;;; $Id: pattern.lisp,v 1.9 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
 (defstruct parsed-pattern
   (pattern nil :type cons)
-  (binding nil :type symbol))
+  (binding nil :type symbol)
+  (type nil :type symbol))
 
 (defclass pattern ()
   ((name :initarg :name
@@ -45,3 +46,15 @@
 
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
+
+(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
+  (flet ((create-slot-tests (slot)
+           (remove-if #'null
+                      (mapcar #'(lambda (field)
+                                  (unless (null field)
+                                    (make-test1 field)))
+                              slot))))
+    (mapc #'(lambda (slot-desc)
+              (add-slot self (first slot-desc)
+                        (create-slot-tests (rest slot-desc))))
+          slot-list)))

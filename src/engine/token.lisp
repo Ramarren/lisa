@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.15 2000/12/11 21:29:23 youngde Exp $
+;;; $Id: token.lisp,v 1.16 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -65,8 +65,8 @@
 
 (defmethod decrement-negation-count ((self token))
   (with-accessors ((count get-negation-count)) self
-    (decf count)
-    (cl:assert (>= count 0))))
+    (cl:assert (> count 0))
+    (decf count)))
 
 (defmethod is-negated-p ((self token))
   (> (get-negation-count self) 0))
@@ -77,7 +77,7 @@
 (defmethod update-time ((self token) engine)
   (decf (get-clock self)
         (+ (get-time (get-top-fact self))
-           (get-time engine))))
+           (get-engine-time engine))))
 
 (defmethod equals ((self token) (tok token))
   (eql (get-fact-id (get-fact self))

@@ -21,9 +21,30 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.7 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: factories.lisp,v 1.8 2000/12/13 18:02:28 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
-(defun make-pattern (head body location binding)
-  (make-generic-pattern head body location binding))
+(defun make-pattern (pp location)
+  (let ((head (first (parsed-pattern-pattern pp)))
+        (body (second (parsed-pattern-pattern pp))))
+    (case (parsed-pattern-type pp)
+      (:generic
+       (make-generic-pattern head body location
+                             (parsed-pattern-binding pp)))
+      (:negated
+       (make-not-pattern head body location))
+      (otherwise
+       (error "The Pattern factory doesn't this raw pattern type ~S."
+              (parsed-pattern-type pp))))))
+
+(defmethod make-join-node ((pattern generic-pattern) engine)
+  (make-node2 engine))
+
+(defmethod make-join-node ((pattern not-pattern) engine)
+  (make-node2-not engine))
+
+(defmethod make-join-node (pattern engine)
+  (declare (ignore engine))
+  (error "The Join Node factory doesn't understand this pattern type: ~S~%"
+         (class-of pattern)))

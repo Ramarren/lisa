@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.23 2000/12/09 22:14:39 youngde Exp $
+;;; $Id: rule.lisp,v 1.24 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -128,14 +128,25 @@
                    (get-tests slot))))
     (mapc #'create-slot-bindings (get-slots pattern))))
 
+(defun add-new-pattern (rule pattern)
+  (with-accessors ((patterns get-patterns)) rule
+    (setf patterns (nconc patterns `(,pattern)))))
+
+(defmethod do-special-ce-handling ((self rule) (pattern not-pattern))
+  (unless (has-patterns-p self)
+    (add-new-pattern self (get-initial-pattern self))))
+
+(defmethod do-special-ce-handling ((self rule) (pattern generic-pattern))
+  (values))
+
 (defmethod add-pattern ((self rule) pattern)
   (when (has-binding-p pattern)
     (add-binding self (make-pattern-binding
                        (get-pattern-binding pattern)
                        (get-location pattern))))
   (record-slot-bindings self pattern)
-  (with-accessors ((patterns get-patterns)) self
-    (setf patterns (nconc patterns `(,pattern))))
+  (do-special-ce-handling self pattern)
+  (add-new-pattern self pattern)
   (values pattern))
 
 (defmethod freeze-rule ((self rule))
@@ -147,9 +158,20 @@
     (setf nodes (nconc nodes `(,node)))
     (increase-use-count node)))
 
+(defun has-patterns-p (rule)
+  (not (= (get-pattern-count rule) 0)))
+
 (defmethod get-pattern-count ((self rule))
   (length (get-patterns self)))
   
+(defmethod compile-patterns ((self rule) plist)
+  (flet ((compile-pattern (parsed-pattern)
+           (add-pattern self
+                        (make-pattern parsed-pattern
+                                      (get-pattern-count self)))))
+    (mapc #'compile-pattern plist)))
+
+#+ignore
 (defmethod compile-patterns ((self rule) plist)
   (flet ((compile-pattern (p)
            (let ((pattern (parsed-pattern-pattern p))

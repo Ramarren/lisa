@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.9 2000/12/08 02:04:18 youngde Exp $
+;;; $Id: fact.lisp,v 1.10 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,7 +29,7 @@
          :initform nil
          :reader get-class)
    (fact-id :initarg :fact-id
-            :initform nil
+            :initform -1
             :accessor get-fact-id)
    (slot-table :initform (make-hash-table)
                :accessor get-slot-table)

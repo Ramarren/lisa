@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.4 2000/12/12 00:09:32 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.5 2000/12/13 18:02:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -36,8 +36,9 @@
   (unless (is-negated-p left-token)
     (with-accessors ((engine get-engine)) self
       (let ((token (make-derived-token
-                    (class-of left-token) (get-null-fact engine))))
-        (update-time token engine self)
+                    (class-of left-token)
+                    left-token (get-null-fact engine))))
+        (update-time token engine)
         (increment-matches self left-token)
         (pass-along self token))))
   (values nil))
@@ -56,16 +57,16 @@
   (with-accessors ((engine get-engine)) self
     (let ((token (make-remove-token :parent left-token
                                     :initial-fact (get-null-fact engine))))
-      (update-time token self)
+      (update-time token engine)
       (pass-along self token)
-      (increment-negation-count token)))
+      (increment-negation-count left-token)))
   (values nil))
 
 (defmethod pass-token-from-left ((self node2-not) right-token left-token)
   (when (= (decrement-negation-count left-token) 0)
     (with-accessors ((engine get-engine)) self
       (let ((token (make-derived-token (class-of left-token)
-                                       (get-null-fact engine))))
+                                       right-token (get-null-fact engine))))
         (update-time token engine)
         (pass-along self token))))
   (values))
@@ -76,3 +77,6 @@
               (run-tests self left-token (get-top-fact right-token)))
       (pass-token-from-left self right-token left-token)))
   (values nil))
+
+(defun make-node2-not (engine)
+  (make-instance 'node2-not :engine engine))
