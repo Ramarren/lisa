@@ -20,13 +20,15 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.1 2002/11/18 20:14:50 youngde Exp $
+;;; $Id: context.lisp,v 1.2 2002/11/18 20:22:22 youngde Exp $
 
 (in-package "LISA")
 
 (defclass context ()
   ((name :initarg :name
          :reader context-name)
+   (rules :initform (make-hash-table)
+          :reader context-rules)
    (strategy :initarg :strategy
              :reader context-strategy)))
 
