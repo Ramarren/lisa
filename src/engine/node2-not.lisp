@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.3 2000/12/11 21:29:23 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.4 2000/12/12 00:09:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,11 +32,7 @@
 (defmethod call-node-left ((self node2-not) (token add-token))
   (call-next-method self (make-clone-token (class-of token) token)))
 
-(defmethod run-tests-vary-right ((self node2-not) left-token tree)
-  (with-tree-iterator (key right-token tree)
-    (when (or (not (has-tests-p self))
-              (run-tests self left-token (get-top-fact right-token)))
-      (increment-negation-count left-token)))
+(defmethod pass-token-from-right ((self node2-not) left-token)
   (unless (is-negated-p left-token)
     (with-accessors ((engine get-engine)) self
       (let ((token (make-derived-token
@@ -46,7 +42,17 @@
         (pass-along self token))))
   (values nil))
 
-(defmethod pass-new-token ((self node2-not) (right-token add-token) left-token)
+(defmethod run-tests-vary-right ((self node2-not) (left-token add-token) tree)
+  (with-tree-iterator (key right-token tree)
+    (when (or (not (has-tests-p self))
+              (run-tests self left-token (get-top-fact right-token)))
+      (increment-negation-count left-token)))
+  (pass-token-from-right self left-token))
+
+(defmethod run-tests-vary-right ((self node2-not) (left-token remove-token) tree)
+  (pass-token-from-right self left-token))
+
+(defmethod pass-token-from-left ((self node2-not) (right-token add-token) left-token)
   (with-accessors ((engine get-engine)) self
     (let ((token (make-remove-token :parent left-token
                                     :initial-fact (get-null-fact engine))))
@@ -55,7 +61,7 @@
       (increment-negation-count token)))
   (values nil))
 
-(defmethod pass-new-token ((self node2-not) (right-token clear-token) left-token)
+(defmethod pass-token-from-left ((self node2-not) right-token left-token)
   (when (= (decrement-negation-count left-token) 0)
     (with-accessors ((engine get-engine)) self
       (let ((token (make-derived-token (class-of left-token)
@@ -68,5 +74,5 @@
   (with-tree-iterator (key left-token tree)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))
-      (pass-new-token self right-token left-token)))
+      (pass-token-from-left self right-token left-token)))
   (values nil))
