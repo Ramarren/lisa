@@ -21,7 +21,7 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.15 2002/08/06 01:17:03 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.16 2002/08/06 13:43:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,8 +78,7 @@
 
 (defun canonicalize-slots (self)
   (declare (type pattern self))
-  (let ((slots (list))
-        (meta (find-meta-fact (get-name self))))
+  (let ((slots (list)))
     (mapc #'(lambda (slot-desc)
               (push
                (make-slot (first slot-desc)
