@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.12 2002/09/11 20:00:48 youngde Exp $
+;;; $Id: token.lisp,v 1.13 2002/09/11 23:56:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -63,16 +63,23 @@
       (setf contents (token-contents token)))
     contents))
 
-(defun replicate-token (token)
-  (let ((new-token (make-instance (class-of token))))
+(defun replicate-token (token &key (token-class nil))
+  (let ((new-token 
+         (make-instance 
+             (if (null token-class)
+                 (class-of token)
+               (find-class token-class)))))
     (with-slots ((existing-fact-vector facts)) token
       (dotimes (i (length existing-fact-vector))
         (token-push-fact new-token (aref existing-fact-vector i))))
     new-token))
 
-(defun make-add-token (fact)
+(defmethod make-add-token ((fact fact))
   (token-push-fact (make-instance 'add-token) fact))
 
-(defun make-remove-token (fact)
+(defmethod make-remove-token ((fact fact))
   (token-push-fact (make-instance 'remove-token) fact))
+
+(defmethod make-remove-token ((token token))
+  (replicate-token token 'remove-token))
 
