@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.10 2000/12/06 21:56:38 youngde Exp $
+;;; $Id: utils.lisp,v 1.11 2001/01/22 21:58:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -113,3 +113,12 @@
                      (setf seq
                        (nconc seq `(,obj)))))) ht)
     (values seq)))
+
+;;; Courtesy of Paul Graham...
+
+(defun flatten (x)
+  (labels ((rec (x acc)
+             (cond ((null x) acc)
+                   ((atom x) (cons x acc))
+                   (t (rec (car x) (rec (cdr x) acc))))))
+    (rec x nil)))

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.32 2001/01/22 20:38:44 youngde Exp $
+;;; $Id: pattern.lisp,v 1.33 2001/01/22 21:58:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,6 +69,7 @@
               `(eq ,,var ',,value)
             `(equal ,,var ,,value)))))
        
+#+ignore
 (defun canonicalize-slot (pattern slot bindings)
   (declare (type (pattern pattern) (slot slot)
                  (binding-table bindings)))
@@ -109,6 +110,46 @@
             (t (error "Funny slot format.")))
       (values))))
 
+(defun canonicalize-slot (pattern slot bindings)
+  (declare (type (pattern pattern) (slot slot)
+                 (binding-table bindings)))
+  (labels ((make-slot-variable ()
+             (make-lisa-defined-slot-variable
+              (intern (make-symbol (format nil "?~A" (gensym))))))
+           (new-slot-binding (var)
+             (unless (lookup-binding bindings var)
+               (make-slot-binding var (get-location pattern)
+                                  (get-name slot))
+               (add-binding bindings binding)))
+           (rewrite-slot (var value negated)
+             (let ((varname (get-variable-name var)))
+               (setf (get-value slot) varname)
+               (setf (get-constraint slot)
+                 (generate-test varname value negated))
+               (new-slot-binding var))))
+    (with-accessors ((slot-value get-value)
+                     (slot-constraint get-constraint)) slot
+      (cond ((literalp slot-value)
+             (rewrite-slot (make-slot-variable) slot-value nil))
+            ((negated-rewritable-constraintp slot-value)
+             (rewrite-slot (make-slot-variable) (second slot-value) t))
+            ((null slot-constraint)
+             (unless (new-slot-binding slot-value)
+               (rewrite-slot (make-slot-variable) slot-value nil)))
+            ((literalp slot-constraint)
+             (rewrite-slot slot-value slot-constraint nil))
+            ((negated-rewritable-constraintp slot-constraint)
+             (rewrite-slot slot-value (second slot-constraint) t))
+            ((variablep slot-value)
+             (new-slot-binding slot-value))
+            (t (error "Funny slot format.")))
+      (values))))
+
+(defun canonicalize-slots (pattern bindings)
+  (mapc #'(lambda (slot)
+            (canonicalize-slot self slot bindings))
+        (get-slots pattern)))
+  
 (defun set-slot-localities (pattern bindings)
   (labels ((is-localp (var)
              (let ((binding (lookup-binding bindings var)))
@@ -131,9 +172,22 @@
                     (get-constraint-locality (get-constraint slot))))))
     (mapc #'set-slot-locality (get-slots pattern))))
 
+(defun setup-pattern-bindings (pattern bindings)
+  (labels ((add-local-binding (var)
+             (let ((binding (lookup-binding bindings var)))
+               (cl:assert (not (null binding)) ())
+               (pushnew binding (slot-value pattern 'bindings))))
+           (add-constraint-bindings (constraint)
+             (dolist ((list (flatten constraint)))
+               (when (variablep obj)
+                 (add-local-binding obj)))))
+    (mapc #'(lambda (slot)
+              (add-local-binding (get-value slot))
+              (add-constraint-bindings (get-constraint slot)))
+          (get-slots pattern))))
+
 (defmethod finalize-pattern ((self pattern) bindings)
-  (mapc #'(lambda (slot)
-            (canonicalize-slot self slot bindings))
-        (get-slots self))
+  (canonicalize-slots self bindings)
   (set-slot-localities self bindings)
+  (setup-pattern-bindings self bindings)
   (values self))

@@ -19,6 +19,7 @@
 
 (defrule rocky-2
   (rocky (name ?name&:(eq ?name "rocky")))
+  (natasha)
   (boris (name ?schtum&:(eq ?schtum ?name)))
   =>
   (format t "rocky-2 fired: ?name = ~S~%" ?name))
