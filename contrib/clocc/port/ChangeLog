@@ -1,109 +1,141 @@
-Wed Mar 21 00:31:51 2001  Sam Steingold  <sds@david.kstream.com>
+2001-05-21  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp (probe-directory): CLISP: drop the second value
+
+2001-05-18  Sam Steingold  <sds@david.kstream.com>
+
+	* sys.lisp (probe-directory): CLISP: enclose in `ignore-errors'
+	 CMUCL: call `namestring' (thanks to Liam Healy)
+	 generic: fixed a typo
+
+2001-05-07  Sam Steingold  <sds@david.kstream.com>
+
+	* gray.lisp: FUNDAMENTAL-STREAM is defined in PCL, while
+	 FUNDAMENTAL-INPUT-STREAM is defined in GRAY (thanks to Raymond Toy)
+
+	* gray.lisp: load CMUCL "gray-streams-library" when
+	 EXT:FUNDAMENTAL-STREAM does not name a class
+
+2001-04-25  Sam Steingold  <sds@david.kstream.com>
+
+	* shell.lisp (run-prog):
+	in CLISP/lisp=cl, `ext:run-program' accepts :wait
+
+	* shell.lisp (run-prog): quote arguments passed to shell via format
+
+2001-04-11  Sam Steingold  <sds@david.kstream.com>
+
+	* shell.lisp, sys.lisp, ext.lisp, gray.lisp, net.lisp:
+	updated for CLISP #+LISP=CL
+
+2001-04-03  Sam Steingold  <sds@david.kstream.com>
+
+	* ext.lisp (code, case-error, not-implemented): added :documentation
+
+2001-03-21  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (rmdir): LispWorks: check whether
 	 `lw:delete-directory' is `fboundp'
 
-Mon Mar 19 16:03:50 2001  Sam Steingold  <sds@david.kstream.com>
+2001-03-19  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp: removed the last patch
 
-Sat Mar 17 22:50:30 2001  liam  <liam@david.kstream.com>
+2001-03-17  liam  <liam@david.kstream.com>
 
 	* sys.lisp:
 	Removed LispWorks from rmdir; function lw:delete-directory is not
 	defined.  Export mkdir, rmdir.
 
-Sat Mar 17 19:56:38 2001  Sam Steingold  <sds@david.kstream.com>
+2001-03-17  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-accept): ACL5 cannot change socket format
 
-Tue Mar 13 23:09:49 2001  Sam Steingold  <sds@david.kstream.com>
+2001-03-13  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (mkdir): fixed arg name
 
 	* ext.lisp (required-argument): export on non-CMUCL platforms
 
-Wed Mar  7 20:39:27 2001  Sam Steingold  <sds@david.kstream.com>
+2001-03-07  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (probe-directory):
 	fixed for LispWorks (thanks to David E. Young)
 	(mkdir, rmdir): new functions
 
-Fri Feb 23 23:29:28 2001  Sam Steingold  <sds@david.kstream.com>
+2001-02-23  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (required-argument): fix import/export for CMUCL
 
-Wed Feb  7 20:27:18 2001  Sam Steingold  <sds@david.kstream.com>
+2001-02-07  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (string-tokens): when `max' is nil,
 	 use `read-from-string' on the whole string
 
-Tue Feb  6 20:09:24 2001  Sam Steingold  <sds@david.kstream.com>
+2001-02-06  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (defpackage "PORT"): use string!
 
 	* ext.lisp (defpackage port): use strings instead of symbols
 
-Tue Jan 23 15:54:17 2001  Sam Steingold  <sds@david.kstream.com>
+2001-01-23  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-host/port): lispworks: use
-
 	 `comm:socket-stream-address' instead of the non-existant
-
 	 `comm:socket-stream-local-address'
 
-Mon Jan  8 22:14:11 2001  Sam Steingold  <sds@david.kstream.com>
+2001-01-08  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp: updated the (C) statement
 
 	* ext.lisp (required-argument): new function (from CMUCL)
 
-Sun Dec  3 06:01:11 2000  Sam Steingold  <sds@david.kstream.com>
+2000-12-03  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp: require :sys because of `getenv'
 
-Thu Nov 16 18:34:03 2000  Sam Steingold  <sds@david.kstream.com>
+2000-11-16  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp: Allegro uses feature :mswindows, not :win32
 
 	* sys.lisp (sysinfo): ported to the Allegro/win32 registry interface
 
-Wed Nov 15 17:56:12 2000  Sam Steingold  <sds@david.kstream.com>
+2000-11-15  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (class-slot-*, variable-special-p): works with ACL6 now
 
 	* net.lisp (socket-accept): ignore `bin' in ACL6
 
-Mon Nov 13 02:01:30 2000  Sam Steingold  <sds@david.kstream.com>
+2000-11-13  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-accept): in ALC6 all sockets are bivalent
 
-Fri Nov 10 19:49:14 2000  Sam Steingold  <sds@david.kstream.com>
+2000-11-10  Sam Steingold  <sds@david.kstream.com>
 
 	* shell.lisp (run-prog): wait defaults to T;
 	it now works on LispWorks and CLISP/UNIX too
 
-Mon Sep  4 19:29:13 2000  Sam Steingold  <sds@david.kstream.com>
+2000-09-04  Sam Steingold  <sds@david.kstream.com>
 
 	* shell.lisp (run-prog): CMUCL: forgot #'
 
-Sat Aug 19 21:32:46 2000  Sam Steingold  <sds@david.kstream.com>
+2000-08-19  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (slot-one-initarg): do not use slot-name
 
-Mon Aug 14 19:25:05 2000  Sam Steingold  <sds@david.kstream.com>
+2000-08-14  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (class-slot-initargs):
 	do not take `car' of `slot-one-initarg'
 
 	* sys.lisp (class-slot-initargs): new function; export it
 
-Mon Aug  7 19:00:52 2000  Sam Steingold  <sds@david.kstream.com>
+2000-08-07  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (class-slot-list): accept anything as the first arg,
 	not just a struct or a CLOS class instance
 
-Mon Jul 31 17:54:31 2000  Sam Steingold  <sds@david.kstream.com>
+2000-07-31  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (variable-special-p, arglist, class-slot-list):
 	support Lucid
@@ -114,20 +146,20 @@ Mon Jul 31 17:54:31 2000  Sam Steingold  <sds@david.kstream.com>
 
 	* proc.lisp (with-lock): support Lucid
 
-Thu Jul 20 18:20:20 2000  Sam Steingold  <sds@david.kstream.com>
+2000-07-20  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (open-socket-server): CMUCL: use 0 when port is nil
 	(socket-server-host/port): CMUCL: use `ext:get-socket-host-and-port'
 
-Wed May 31 20:17:24 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-31  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (pathname-ensure-name): new function
 
-Tue May 23 16:57:48 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-23  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-string): use `print-unreadable-object'
 
-Mon May 22 19:18:28 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-22  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-string): typo
 
@@ -137,24 +169,24 @@ Mon May 22 19:18:28 2000  Sam Steingold  <sds@david.kstream.com>
 	* sys.lisp (finalize): new function
 	(arglist): support CormanLisp
 
-Thu May 18 15:57:19 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-18  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (host/port-string): new function, "0.0.0.0"->"127.0.0.1"
 	(socket-string, socket-server-string): use it
 
-Mon May 15 20:58:12 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-15  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-accept): CLISP: fixed for null wait
 
 	* proc.lisp (with-lock): ignore `lock' when no threads
 
-Fri May 12 18:14:10 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-12  Sam Steingold  <sds@david.kstream.com>
 
 	* proc.lisp (with-timeout): added missing commas
 
 	* ext.lisp (defconst): drop `eval-when'
 
-Tue May  9 18:52:55 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-09  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-host/port): return both remote and local host&port
 
@@ -162,25 +194,25 @@ Tue May  9 18:52:55 2000  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (code): `proc' is not necessarily a symbol
 
-Mon May  8 17:11:08 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-08  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-host/port):
 	CLISP: use lisp:socket-stream-peer (thanks Don)
 
-Tue May  2 14:33:18 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-02  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp: export `hostent' and `servent' accessors
 
-Mon May  1 20:14:19 2000  Sam Steingold  <sds@david.kstream.com>
+2000-05-01  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp: fixed values declaration
 
-Thu Apr 27 23:35:34 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-27  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-accept):
 	`bin' is now a keyword; new keyword arg `wait'
 
-Wed Apr 19 16:49:25 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-19  Sam Steingold  <sds@david.kstream.com>
 
 	* proc.lisp: support CormanLisp
 
@@ -195,7 +227,7 @@ Wed Apr 19 16:49:25 2000  Sam Steingold  <sds@david.kstream.com>
 	* ext.lisp (gc): support CormanLisp
 	(quit): support CormanLisp and LispWorks
 
-Mon Apr 10 18:48:10 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-10  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (arglist): support LispWorks
 
@@ -207,15 +239,15 @@ Mon Apr 10 18:48:10 2000  Sam Steingold  <sds@david.kstream.com>
 	* shell.lisp (run-prog): support Liquid
 	(pipe-output, pipe-input): fixed for LispWorks
 
-Fri Apr  7 17:02:27 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-07  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp: use abbreviated package names consistently
 
-Thu Apr  6 14:42:48 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-06  Sam Steingold  <sds@david.kstream.com>
 
 	* proc.lisp (giveup-lock): support CMUCL
 
-Wed Apr  5 23:58:24 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-05  Sam Steingold  <sds@david.kstream.com>
 
 	* gray.lisp: support LispWorks
 
@@ -227,11 +259,11 @@ Wed Apr  5 23:58:24 2000  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (variable-special-p): support lispworks
 
-Tue Apr  4 22:14:57 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-04  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-server-host): fixed for CMUCL
 
-Mon Apr  3 21:33:57 2000  Sam Steingold  <sds@david.kstream.com>
+2000-04-03  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-accept): allegro: use `bin'
 
@@ -239,68 +271,68 @@ Mon Apr  3 21:33:57 2000  Sam Steingold  <sds@david.kstream.com>
 
 	* proc.lisp (with-timeout): fixed call to `with-gensyms'
 
-Thu Mar 30 17:11:48 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-30  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp (eof-p): new function
 
-Wed Mar 29 15:32:51 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-29  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp:
 	cannot use `call-next-method' in `define-condition' :report.
 	(report-network-condition): new function
 	(network, timeout): use it
 
-Tue Mar 28 18:24:45 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-28  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (servent): new defstruct
 	(socket-service-port): return it
 
 	* net.lisp (resolve-host-ipaddr): in clisp, it's `addrtype'
 
-Fri Mar 24 00:23:00 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-24  Sam Steingold  <sds@david.kstream.com>
 
 	* shell.lisp: comment
 
-Thu Mar 23 04:06:59 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-23  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (+whitespace+): moved to cllib/withtype
 
-Wed Mar 22 23:54:05 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-22  Sam Steingold  <sds@david.kstream.com>
 
 	* shell.lisp, sys.lisp: use package prefixes for CMU CL and GCL
 
 	* ext.lisp (quit): optional error code argument
 
-Thu Mar  9 20:27:33 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-09  Sam Steingold  <sds@david.kstream.com>
 
 	* gray.lisp: Gray streams unification
 
-Wed Mar  8 20:51:40 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-08  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-server-host, socket-server-port): exported
 
-Tue Mar  7 20:28:00 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-07  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (socket-server-host, socket-server-port): new functions
 	(socket-host, socket-accept): fixed for CMUCL
 
-Fri Mar  3 22:01:03 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-03  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp, net.lisp, proc.lisp, shell.lisp, sys.lisp:
 	fixed provide statements
 
-Wed Mar  1 20:01:36 2000  Sam Steingold  <sds@david.kstream.com>
+2000-03-01  Sam Steingold  <sds@david.kstream.com>
 
 	* sys.lisp (arglist, class-slot-list): new functions
 
 	* sys.lisp (variable-special-p): new function
 
-Fri Feb 18 21:16:45 2000  Sam Steingold  <sds@david.kstream.com>
+2000-02-18  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp, net.lisp, proc.lisp, shell.lisp, sys.lisp:
 	in-package :port now; make system works
 
-Thu Feb 10 17:55:50 2000  Sam Steingold  <sds@david.kstream.com>
+2000-02-10  Sam Steingold  <sds@david.kstream.com>
 
 	* net.lisp (hostent): new defstruct
 	(resolve-host-ipaddr): return a `hostent' instance
@@ -309,7 +341,7 @@ Thu Feb 10 17:55:50 2000  Sam Steingold  <sds@david.kstream.com>
 	* ext.lisp (+eof+): new constant (for `string-tokens')
 	(string-tokens): new function (for net)
 
-Wed Nov 24 17:07:09 1999  Sam Steingold  <sds@david.kstream.com>
+1999-11-24  Sam Steingold  <sds@david.kstream.com>
 
 	* ext.lisp, net.lisp, shell.lisp, sys.lisp:
 	Cross-implementation Portability System

@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: shell.lisp,v 1.3 2001/03/29 20:34:49 youngde Exp $
+;;; $Id: shell.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/shell.lisp,v $
 
 (eval-when (compile load eval)
@@ -23,19 +23,22 @@
 ;;;
 
 (defun run-prog (prog &rest opts &key args (wait t) &allow-other-keys)
-  "Common interface to shell. Doesn't return anything useful."
+  "Common interface to shell. Does not return anything useful."
   #+gcl (declare (ignore wait))
   (remf opts :args) (remf opts :wait)
   #+allegro (apply #'excl:run-shell-command (apply #'vector prog prog args)
                    :wait wait opts)
-  #+clisp (if wait
-              (apply #'lisp:run-program prog :arguments args opts)
-              (lisp:shell (format nil "~a~{ ~a~} &" prog args)))
+  #+(and clisp      lisp=cl)
+  (apply #'ext:run-program prog :arguments args :wait wait opts)
+  #+(and clisp (not lisp=cl))
+  (if wait
+      (apply #'lisp:run-program prog :arguments args opts)
+      (lisp:shell (format nil "~a~{ '~a'~} &" prog args)))
   #+cmu (apply #'ext:run-program prog args :wait wait opts)
   #+gcl (apply #'si:run-process prog args)
   #+liquid (apply #'lcl:run-program prog args)
   #+lispworks (apply #'sys::call-system
-                     (format nil "~a~{ ~a~}~@[ &~]" prog args (not wait))
+                     (format nil "~a~{ '~a'~}~@[ &~]" prog args (not wait))
                      opts)
   #+lucid (apply #'lcl:run-program prog :wait wait :arguments args opts)
   #-(or allegro clisp cmu gcl liquid lispworks lucid)
@@ -45,7 +48,9 @@
   "Return an output stream which will go to the command."
   #+allegro (excl:run-shell-command (format nil "~a~{ ~a~}" prog args)
                                     :input :stream :wait nil)
-  #+clisp (lisp:make-pipe-output-stream (format nil "~a~{ ~a~}" prog args))
+  #+clisp (#+lisp=cl ext:make-pipe-output-stream
+           #-lisp=cl lisp:make-pipe-output-stream
+                     (format nil "~a~{ ~a~}" prog args))
   #+cmu (ext:process-input (ext:run-program prog args :input :stream
                                             :output t :wait nil))
   #+gcl (si::fp-input-stream (apply #'si:run-process prog args))
@@ -59,7 +64,9 @@
   "Return an input stream from which the command output will be read."
   #+allegro (excl:run-shell-command (format nil "~a~{ ~a~}" prog args)
                                     :output :stream :wait nil)
-  #+clisp (lisp:make-pipe-input-stream (format nil "~a~{ ~a~}" prog args))
+  #+clisp (#+lisp=cl ext:make-pipe-input-stream
+           #-lisp=cl lisp:make-pipe-input-stream
+                     (format nil "~a~{ ~a~}" prog args))
   #+cmu (ext:process-output (ext:run-program prog args :output :stream
                                              :input t :wait nil))
   #+gcl (si::fp-output-stream (apply #'si:run-process prog args))

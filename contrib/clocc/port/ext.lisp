@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: ext.lisp,v 1.3 2001/03/29 20:34:49 youngde Exp $
+;;; $Id: ext.lisp,v 1.4 2001/06/26 18:08:30 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/ext.lisp,v $
 
 (defpackage "PORT"
@@ -36,6 +36,7 @@
   ((proc :reader code-proc :initarg :proc)
    (mesg :type simple-string :reader code-mesg :initarg :mesg)
    (args :type list :reader code-args :initarg :args))
+  (:documentation "An error in the user code.")
   (:report (lambda (cc out)
              (declare (stream out))
              (format out "[~s]~@[ ~?~]" (code-proc cc)
@@ -44,13 +45,16 @@
 
 (define-condition case-error (code)
   ((mesg :type simple-string :reader code-mesg :initform
-         "`~s' evaluated to `~s', not one of [~@{`~s'~^ ~}]")))
+         "`~s' evaluated to `~s', not one of [~@{`~s'~^ ~}]"))
+  (:documentation "An error in a case statement.
+This carries the function name which makes the error message more useful."))
 
 (define-condition not-implemented (code)
   ((mesg :type simple-string :reader code-mesg :initform
          "not implemented for ~a [~a]")
    (args :type list :reader code-args :initform
-         (list (lisp-implementation-type) (lisp-implementation-version)))))
+         (list (lisp-implementation-type) (lisp-implementation-version))))
+  (:documentation "Your implementation does not support this functionality."))
 
 ;;;
 ;;; Extensions
@@ -91,7 +95,7 @@ Inspired by Paul Graham, <On Lisp>, p. 145."
 (defun gc ()
   "Invoke the garbage collector."
   #+allegro (excl:gc)
-  #+clisp (lisp:gc)
+  #+clisp (#+lisp=cl ext:gc #-lisp=cl lisp:gc)
   #+cmu (ext:gc)
   #+cormanlisp (cl::gc)
   #+gcl (si::gbc)
@@ -102,7 +106,7 @@ Inspired by Paul Graham, <On Lisp>, p. 145."
 
 (defun quit (&optional code)
   #+allegro (excl:exit code)
-  #+clisp (lisp:quit code)
+  #+clisp (#+lisp=cl ext:quit #-lisp=cl lisp:quit code)
   #+cmu (ext:quit code)
   #+cormanlisp (win32:exitprocess code)
   #+gcl (lisp:bye code)
