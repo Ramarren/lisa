@@ -8,13 +8,13 @@
   (slot name)
   (slot nemesis))
 
-(defrule rocky-boris-natasha
-  ?f-1 <- (rocky (name "bullwinkle"))
-  (boris (name ?boris-name&"boris"))
-  (natasha (name "natasha") (nemesis ?boris-name))
-  =>
-  (printout t "rocky-boris-natasha fired (?boris-name = " ?name ")" crlf)
-  (retract ?f-1))
+; (defrule rocky-boris-natasha
+;   ?f-1 <- (rocky (name "bullwinkle"))
+;   (boris (name ?boris-name&"boris"))
+;   (natasha (name "natasha") (nemesis ?boris-name))
+;   =>
+;   (printout t "rocky-boris-natasha fired (?boris-name = " ?name ")" crlf)
+;   (retract ?f-1))
 
 ; (defrule not-rocky
 ;   (not (rocky (name "rocky")))
@@ -26,11 +26,11 @@
 ;   =>
 ;   (printout t "duplicate-vars fired!" crlf))
 
-; (defrule nemesis
-;   (natasha (name "natasha") (nemesis ?nemesis&"rocky"))
-;   (rocky (name ?nemesis))
-;   =>
-;   (printout t "nemesis fired!" crlf))
+(defrule nemesis
+  (natasha (name "natasha") (nemesis ?nemesis&"rocky"))
+  (rocky (name ?n&:(= (str-compare ?nemesis ?n) 0)))
+  =>
+  (printout t "nemesis fired!" crlf))
 
 ;  (defrule schtum
 ;    ?rocky <- (rocky (name "rocky"))
@@ -62,7 +62,7 @@
 ;(assert (boris (name "boris")))
 ;(assert (natasha (name "natasha")))
 
-;(assert (natasha (name "natasha") (nemesis "rocky")))
-;(assert (natasha (name "natasha") (nemesis "natasha")))
+(assert (natasha (name "natasha") (nemesis "rocky")))
+(assert (rocky (name "rocky")))
 
 ;(run)

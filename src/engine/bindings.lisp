@@ -22,9 +22,22 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.6 2001/01/09 21:27:19 youngde Exp $
+;;; $Id: bindings.lisp,v 1.7 2001/01/12 21:14:51 youngde Exp $
 
 (in-package :lisa)
+
+(defclass lisa-defined-slot-variable ()
+  ((varname :initarg :varname
+            :reader get-varname)))
+
+(defmethod get-variable-name ((self lisa-defined-slot-variable))
+  (get-varname self))
+
+(defmethod get-variable-name ((obj symbol))
+  (values obj))
+
+(defun make-lisa-defined-slot-variable (name)
+  (make-instance 'lisa-defined-slot-variable :varname name))
 
 (defclass binding ()
   ((name :initarg :name
@@ -60,9 +73,32 @@
     (format strm "(name = ~S ; location = ~D ; slot-name = ~S)"
             (get-name self) (get-location self) (get-slot-name self))))
 
-(defun make-slot-binding (binding-name location slot-name)
-  (make-instance 'slot-binding :name binding-name
-                 :location location :slot-name slot-name))
+(defclass local-slot-binding (slot-binding)
+  ()
+  (:documentation
+   "This class represents a slot variable whose scope is limited to the
+   pattern containing that variable."))
+
+(defun make-local-slot-binding (name location slot)
+  (make-instance 'local-slot-binding :name name :location location
+                 :slot-name slot)) 
+
+(defclass lexical-slot-binding (slot-binding)
+  ()
+  (:documentation
+   "This class represents a slot variable whose scope is beyond the pattern
+   containing that variable."))
+
+(defun make-lexical-slot-binding (name location slot)
+  (make-instance 'lexical-slot-binding :name name :location location
+                 :slot-name slot)) 
+
+(defmethod make-slot-binding ((variable lisa-defined-slot-variable)
+                              location slot-name)
+  (make-local-slot-binding (get-varname variable) location slot-name))
+
+(defmethod make-slot-binding ((variable symbol) location slot-name)
+  (make-lexical-slot-binding variable location slot-name))
 
 (defclass binding-table ()
   ((table :initform (make-hash-table)

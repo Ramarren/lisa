@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.33 2001/01/10 22:01:50 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.34 2001/01/12 21:14:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -59,8 +59,9 @@
 (defun add-simple-tests (pattern rule parent-node)
   (let ((last-node parent-node))
     (mapc #'(lambda (slot)
-              (when (or (is-localized-patternp pattern)
-                        (= (get-pattern-count rule) 1))
+              (when (and (has-constraintp slot)
+                         (or (is-localized-patternp pattern)
+                             (= (get-pattern-count rule) 1)))
                 (setf last-node
                   (merge-successor last-node
                                    (make-node1 slot pattern rule)
@@ -86,68 +87,12 @@
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 
-(defun find-multiple-references (compiler pattern rule)
-  (let ((occurrences (make-hash-table)))
-    (labels ((first-occurrence (varname)
-               (not (gethash varname occurrences)))
-             (add-occurrence (varname)
-               (setf (gethash varname occurrences) varname))
-             (add-multiple-reference-test (slot test reference)
-               (with-accessors ((terminals get-terminals)) compiler
-                 (let* ((location (get-location pattern))
-                        (node (aref terminals location))
-                        (ref-slot (car reference))
-                        (ref-test (cdr reference)))
-                   (setf (aref terminals location)
-                     (merge-successor node (make-node1-tev1 (get-name slot)
-                                                            (get-name ref-slot))
-                                      rule)))))
-             (add-multiple-reference-tests (slot test references)
-               (mapc #'(lambda (ref)
-                         (add-multiple-reference-test slot test ref))
-                     references))
-             (find-initial-reference (slot)
-               (find-if #'(lambda (test)
-                            (and (typep test 'test1-var)
-                                 (first-occurrence (get-value test))))
-                        (get-tests slot)))
-             (find-remaining-references (slots varname references)
-               (let ((slot (first slots)))
-                 (cond ((null slot)
-                        (values references))
-                       (t
-                        (let ((test (find-if #'(lambda (test)
-                                                 (eq (get-value test) varname))
-                                             (get-tests slot))))
-                          (find-remaining-references
-                           (rest slots) varname
-                           (if (null test)
-                               references
-                             (nconc references
-                                    `(,(cons slot test))))))))))
-             (find-multiple-references-aux (slots)
-               (let ((slot (first slots)))
-                 (cond ((null slot)
-                        (values))
-                       (t
-                        (let ((test (find-initial-reference slot)))
-                          (unless (null test)
-                            (add-occurrence (get-value test))
-                            (add-multiple-reference-tests 
-                             slot test (find-remaining-references
-                                   (rest slots) (get-value test) nil)))
-                          (find-multiple-references-aux (rest slots))))))))
-      (find-multiple-references-aux (get-slots pattern)))))
-  
-(defun search-for-multiple-variables (compiler rule)
+(defun add-right-to-left-node (compiler rule)
+  (declare (type (rete-compiler compiler) (rule rule)))
   (with-accessors ((terminals get-terminals)) compiler
-    (mapc #'(lambda (pattern)
-              (find-multiple-references compiler pattern rule))
-          (get-patterns rule))
     (setf (aref terminals 0)
-      (merge-successor (aref terminals 0)
-                       (make-node1-rtl) rule))))
-
+      (merge-successor (aref terminals 0) (make-node1-rtl) rule))))
+    
 (defun add-node2-tests (rule node2 pattern)
   (flet ((add-variable-test (slot)
            (let ((binding (find-binding rule (get-value slot))))
@@ -162,7 +107,7 @@
     (mapc #'(lambda (slot)
               (when (not (is-localized-patternp pattern))
                 (add-variable-test slot))
-              (unless (null (get-constraint slot))
+              (when (has-constraintp slot)
                 (add-constraint-test slot)))
           (get-slots pattern))
     (values node2)))
@@ -195,7 +140,7 @@
   (setf (get-terminals self) (make-array (get-pattern-count rule)))
   (setf (get-roots self) (make-array (get-pattern-count rule)))
   (create-single-nodes self rule (get-patterns rule))
-  (search-for-multiple-variables self rule)
+  (add-right-to-left-node self rule)
   (create-join-nodes self rule)
   (create-terminal-node self rule)
   (values rule))

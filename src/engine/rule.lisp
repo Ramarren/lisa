@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.32 2001/01/09 20:15:33 youngde Exp $
+;;; $Id: rule.lisp,v 1.33 2001/01/12 21:14:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,20 +58,18 @@
   (with-accessors ((actions get-actions)) self
     (format t "Firing rule ~S (token depth ~D)~%"
             (get-name self) (size token))
-    (evaluate (create-lexical-context self) token)))
-
-(defmethod create-lexical-context ((self rule))
-  (let ((bindings (list)))
-    (maphash #'(lambda (key binding)
-                 (push binding bindings))
-             (get-bindings self))
-    (make-function-call (get-actions self) bindings)))
+    (evaluate (make-function-call
+               (get-actions self) (get-bindings self))
+              (make-function-context token (get-top-fact token)))))
 
 (defmethod add-binding ((self rule) binding)
   (add-binding (get-binding-table self) binding))
 
 (defmethod find-binding ((self rule) varname)
   (lookup-binding (get-binding-table self) varname))
+
+(defmethod get-bindings ((self rule))
+  (get-binding-list (get-binding-table self)))
 
 (defmethod traverse-bindings ((self rule) token)
   (flet ((show-binding (b)

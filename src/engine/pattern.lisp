@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.23 2001/01/10 20:56:42 youngde Exp $
+;;; $Id: pattern.lisp,v 1.24 2001/01/12 21:14:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,29 +61,32 @@
 (defmacro generate-test (var value negated)
   `(cond (,negated
           (if (quotable ,value)
-              `(not (eq ,var ',value))
-            `(not (equal ,var ,value))))
+              `(not (eq ,,var ',,value))
+            `(not (equal ,,var ,,value))))
          (t
           (if (quotable ,value)
-              `(eq ,var ',value)
-            `(equal ,var ,value)))))
+              `(eq ,,var ',,value)
+            `(equal ,,var ,,value)))))
        
 (defun canonicalize-slot (pattern slot bindings)
   (declare (type (pattern pattern) (slot slot)
                  (binding-table bindings)))
   (labels ((make-slot-variable ()
-             (intern (make-symbol (format nil "?~A" (gensym)))))
+             (make-lisa-defined-slot-variable
+              (intern (make-symbol (format nil "?~A" (gensym))))))
            (new-slot-binding (var)
              (unless (lookup-binding bindings var)
                (add-binding bindings
                             (make-slot-binding
-                             var (get-location pattern)
+                             var
+                             (get-location pattern)
                              (get-name slot)))))
            (rewrite-slot (var value negated)
-             (setf (get-value slot) var)
-             (setf (get-constraint slot)
-               (generate-test var value negated))
-             (new-slot-binding var)))
+             (let ((varname (get-variable-name var)))
+               (setf (get-value slot) varname)
+               (setf (get-constraint slot)
+                 (generate-test varname value negated))
+               (new-slot-binding var))))
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
@@ -91,7 +94,7 @@
             ((negated-rewritable-constraintp slot-value)
              (rewrite-slot (make-slot-variable) (second slot-value) t))
             ((null slot-constraint)
-             (when (new-slot-binding slot-value)
+             (unless (new-slot-binding slot-value)
                (rewrite-slot (make-slot-variable) slot-value nil)))
             ((literalp slot-constraint)
              (rewrite-slot slot-value slot-constraint nil))

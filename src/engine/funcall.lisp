@@ -21,9 +21,18 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.6 2001/01/05 19:26:50 youngde Exp $
+;;; $Id: funcall.lisp,v 1.7 2001/01/12 21:14:51 youngde Exp $
 
 (in-package :lisa)
+
+(defclass function-call-context ()
+  ((token :initarg :token
+          :reader get-token)
+   (fact :initarg :fact
+         :reader get-fact)))
+
+(defun make-function-context (token &optional (fact nil))
+  (make-instance 'function-call-context :token token :fact fact))
 
 (defclass function-call ()
   ((forms :initarg :forms
@@ -40,26 +49,38 @@
       "No fact for location ~D." (get-location binding))
     `(,(get-name binding) ,fact)))
 
-(defmethod make-lexical-binding ((binding slot-binding) token)
-  (let ((fact (find-fact token (get-location binding))))
+(defmethod make-lexical-binding ((binding lexical-slot-binding) context)
+  (format t "making binding for ~S~%" binding)
+  (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
     `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
   
-(defun create-function-context (funcall token)
+(defmethod make-lexical-binding ((binding local-slot-binding) context)
+  (format t "making binding for ~S~%" binding)
+  `(,(get-name binding) ,(get-slot-value (get-fact context)
+                                         (get-slot-name binding))))
+
+(defun create-lexical-context (funcall context)
   (flet ((make-context ()
            `(lambda ()
               (let (,@(mapcar #'(lambda (binding)
-                                  (make-lexical-binding binding token))
+                                  (make-lexical-binding binding context))
                               (get-bindings funcall)))
                 ,@(get-forms funcall)))))
-    (eval (make-context))))
+    (let ((c (make-context)))
+      (format t "~S~%" c)
+      (eval c))))
 
-(defmethod evaluate ((self function-call) token)
-  (funcall (create-function-context self token)))
+(defmethod evaluate ((self function-call) context)
+  (funcall (create-lexical-context self context)))
 
 (defmethod equals ((self function-call) (obj function-call))
   (tree-equal (get-forms self) (get-forms obj)))
+
+(defmethod print-object ((self function-call) strm)
+  (print-unreadable-object (self strm :type t)
+    (format strm "~S" (get-forms self))))
 
 (defun make-function-call (forms bindings)
   (make-instance 'function-call :forms forms :bindings bindings))
