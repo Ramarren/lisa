@@ -20,9 +20,9 @@
 ;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.3 2000/11/07 01:57:49 youngde Exp $
+;;; $Id: load.lisp,v 1.4 2000/11/09 18:22:53 youngde Exp $
 
-(in-package "USER")
+(in-package :user)
 
 (defvar *lisa-root-pathname*
   (make-pathname :directory
@@ -36,17 +36,21 @@
                          '("src"))))
 
 (let ((files
-       '("packages/pkgdecl" "utils/utils" "utils/compose"
-         "engine/macros" "engine/rete" "engine/rete-compiler"
-         "engine/fact" "engine/token" "engine/add-token"
-         "engine/clear-token" "engine/node"
-         "engine/node1" "engine/node1-tect"
-         "engine/node1-teq" "engine/node1-rtl"
-         "engine/node-test" "engine/node2"
-         "engine/test1" "engine/factories"
-         "engine/generic-pattern" "engine/defrule"
-         "engine/parser" "engine/language")))
-  (dolist (file files)
-    (load (concatenate 'string
-            (directory-namestring *lisa-source-pathname*)
-            file))))
+       '(("packages" ("pkgdecl"))
+         ("utils" ("utils" "compose"))
+         ("engine" ("macros" "utils" "lisa-kb-class" "rete" "fact"
+                    "rete-compiler" "fact" "token" "add-token" "clear-token"
+                    "token-tree" "node" "node1" "node1-tect" "node1-teq"
+                    "node1-rtl" "node-test" "node2" "test1" "factories"
+                    "generic-pattern" "defrule" "parser" "language")))))
+  (labels ((load-files (path files)
+             (cond ((null files)
+                    (values t))
+                   (t
+                    (load (format nil "~A/~A" path (first files)))
+                    (load-files path (rest files))))))
+    (dolist (module files)
+      (load-files
+       (concatenate 'string
+         (directory-namestring *lisa-source-pathname*)
+         (first module)) (second module)))))

@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.6 2000/11/09 02:35:41 youngde Exp $
+;;; $Id: token.lisp,v 1.7 2000/11/09 18:22:53 youngde Exp $
 
 (in-package :lisa)
 
@@ -71,44 +71,48 @@
 
 (defmethod initialize-instance :after ((self token)
                                        &key (initial-fact nil)
-                                            (right-token nil) (parent nil)
-                                            (clone nil))
-  (flet ((init-derived (self fact parent)
+                                            (parent nil) (clone nil))
+  (flet ((init-new (initial-fact)
+           (setf (slot-value self 'fact) initial-fact)
+           (setf (slot-value self 'clock) (get-time initial-fact))
+           (setf (slot-value self 'sort-code) (get-fact-id initial-fact)))
+         (init-derived (fact parent)
+           (setf (slot-value self 'fact) fact)
            (setf (slot-value self 'depth) (1+ (get-depth parent)))
            (setf (slot-value self 'sort-code) 
              (+ (ash (get-sort-code parent) 3)
                 (get-fact-id fact)))
            (setf (slot-value self 'clock) (+ (get-time fact)
                                             (get-clock parent))))
-         (init-new (self fact)
-           (setf (slot-value self 'clock) (get-time fact))
-           (setf (slot-value self 'sort-code) (get-fact-id fact)))
-         (init-clone (self token)
+         (init-clone (token)
            (setf (slot-value self 'fact) (get-top-fact token))
            (setf (slot-value self 'parent) (get-parent token))
            (setf (slot-value self 'depth) (get-depth token))
            (setf (slot-value self 'sort-code) (get-sort-code token))
            (setf (slot-value self 'clock) (get-clock token))
            (setf (slot-value self 'neg-count) (get-neg-count token))))
-    (cond ((not (null initial-fact))
-           (init-new self initial-fact))
-          ((and (not (null right-token)
-                     (null parent)))
-           (init-derived self (get-top-fact right-token) parent))
-          ((not (null clone))
-           (init-clone self clone))
-          ((and (not (null parent))
+    (cond ((and (not (null parent))
                 (not (null initial-fact)))
-           (init-derived self initial-fact parent))
-          (t (init-new self))
-          (when (next-method-p)))
+           (init-derived initial-fact parent))
+          ((not (null clone))
+           (init-clone clone))
+          ((not (null initial-fact))
+           (init-new initial-fact))
+          (t
+           (error "In INITIALIZE-INSTANCE for class ~S: inconsistent keyword arguments."
+                  self)))
     (when (next-method-p)
       (call-next-method))))
 
-(defun make-new-token (class &key (initial-fact nil) (new-fact nil)
-                                  (parent nil) (clone nil))
-  (make-instance class :initial-fact initial-fact :parent parent :new-fact new-fact
-                 :clone clone))
+(defun make-token (class &key (initial-fact nil) (parent nil) (clone nil))
+  (make-instance class
+    :initial-fact initial-fact :parent parent :clone clone))
 
-(defmethod make-token ((class (eql 'token)) &rest args)
-  (apply #'make-new-token class args))
+(defun make-new-token (class initial-fact)
+  (make-token class :initial-fact initial-fact))
+
+(defun make-derived-token (class parent initial-fact)
+  (make-token class :parent parent :initial-fact initial-fact))
+
+(defun make-clone-token (class token)
+  (make-token class :clone token))

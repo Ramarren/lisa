@@ -21,7 +21,7 @@
 ;;; Description: Represents TOKENs used for add operations on the
 ;;; network.
 
-;;; $Id: add-token.lisp,v 1.4 2000/11/08 22:17:23 youngde Exp $
+;;; $Id: add-token.lisp,v 1.5 2000/11/09 18:22:53 youngde Exp $
 
 (in-package :lisa)
 
@@ -30,7 +30,7 @@
   (:documentation
    "Represents TOKENs used for add operations on the network."))
 
-(defmethod make-token ((class (eql 'add-token)) &rest args)
-  (apply #'make-new-token class args))
+(defun make-add-token (&rest args)
+  (apply #'make-token (find-class 'add-token) args))
 
 

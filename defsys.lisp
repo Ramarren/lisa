@@ -20,9 +20,9 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.6 2000/11/04 02:28:28 youngde Exp $
+;;; $Id: defsys.lisp,v 1.7 2000/11/09 18:22:52 youngde Exp $
 
-(in-package "USER")
+(in-package :user)
 
 (defvar *lisa-root-pathname*
   (make-pathname :directory
@@ -41,7 +41,8 @@
                          #+Allegro '("lib" "acl")
                          #+LispWorks '("lib" "lispworks")
                          #+CMU '("lib" "cmucl")
-                         #-(or Allegro LispWorks CMU) (error "Unsupported implementation."))))
+                         #-(or Allegro LispWorks CMU)
+                         (error "Unsupported implementation."))))
 
 (defun mkdir (path)
   #+CMU
@@ -94,6 +95,7 @@
                           :binary-pathname "engine"
                           :components ((:file "macros")
                                        (:file "token")
+                                       (:file "add-token")
                                        (:file "node")
                                        (:file "node1"
                                               :depends-on (node))

@@ -20,15 +20,15 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.1 2000/11/03 21:36:51 youngde Exp $
+;;; $Id: fact.lisp,v 1.2 2000/11/09 18:22:53 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass fact ()
-  ((name :initarg name
+  ((name :initarg :name
          :initform nil
          :reader get-name)
-   (fact-id :initarg fact-id
+   (fact-id :initarg :fact-id
             :initform nil
             :accessor get-fact-id)
    (clock :initarg :clock

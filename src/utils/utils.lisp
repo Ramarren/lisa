@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.5 2000/11/08 20:49:01 youngde Exp $
+;;; $Id: utils.lisp,v 1.6 2000/11/09 18:22:53 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,7 +47,7 @@
         (t (find-after item (rest sequence) :test test))))
 
 (defun compare2 (predicate lst1 lst2)
-  "Applies PREDICATE to every pair of elements in both lists, and
+  "Applies PREDICATE to corresponding pairs of elements in both lists, and
   returns T if PREDICATE was true for each pair, or NIL as soon as
   PREDICATE fails."
   (declare (type list lst1) (type list lst2))

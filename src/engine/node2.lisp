@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.6 2000/11/08 20:49:00 youngde Exp $
+;;; $Id: node2.lisp,v 1.7 2000/11/09 18:22:53 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,8 +33,9 @@
                :accessor get-right-tree)
    (pattern-matches :initform 0
                     :accessor get-pattern-matches)
-   (hashkey :initform nil
-            :accessor get-hashkey))
+   (engine :initform nil
+           :initarg :engine
+           :reader get-engine))
   (:documentation
    "Description: A non-negated, two-input node of the Rete network. Tests in
    this node compare slot values and types in facts from the left and right
@@ -56,7 +57,9 @@
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
   (flet ((eval-tests (left-token)
-           (pass-along self (make-token left-token right-token))))
+           (pass-along self (make-derived-token
+                             (find-class right-token)
+                             left-token (get-top-fact right-token)))))
     (maptree #'(lambda (tokens)
                  (mapcar #'eval-tests tokens)) tree)
     (values nil)))
@@ -69,6 +72,6 @@
                  (mapcar #'eval-tests tokens)) tree)
     (values nil)))
 
-(defun make-node2 (engine hash)
-  (make-instance 'node2 :engine engine :hashkey hash))
+(defun make-node2 (engine)
+  (make-instance 'node2 :engine engine))
 
