@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.47 2002/11/22 17:45:33 youngde Exp $
+;;; $Id: rete.lisp,v 1.48 2002/11/25 18:09:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -235,6 +235,9 @@
 
 (defun find-fact-using-instance (rete instance)
   (gethash instance (rete-instance-table rete)))
+
+(defun register-clos-instance (rete instance fact)
+  (setf (gethash instance (rete-instance-table rete)) fact))
 
 (defun forget-clos-instances (rete)
   (clrhash (rete-instance-table rete)))
