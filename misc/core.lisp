@@ -106,13 +106,13 @@
   =>
   )
 
-#+ignore
 (defrule simple ()
   (?f (gandalf (age 100)))
   =>
   (let ((?age 1000))
     (modify ?f (age ?age) (name (intern (make-symbol "gandalf"))))))
 
+#+ignore
 (defrule embedded-rule ()
   (gandalf (name gandalf) (age ?age))
   =>

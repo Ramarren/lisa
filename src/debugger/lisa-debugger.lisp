@@ -20,29 +20,67 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.1 2002/10/23 18:30:29 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.2 2002/10/24 14:28:17 youngde Exp $
 
 (in-package "LISA")
 
-(defvar *breakpoints* nil)
+(defvar *breakpoints* (list))
 (defvar *read-eval-print* nil)
-(defvar *current-rule* nil)
+(defvar *tokens* nil)
+(defvar *stepping* nil)
 
-(defun resume ()
+(defun has-breakpoint-p (rule)
+  (find (rule-name rule) *breakpoints*))
+
+(defun breakpoints ()
+  (format t "Current breakpoints:~%")
+  (dolist (rule-name *breakpoints*)
+    (format t "  ~A~%" rule-name))
+  (values))
+
+(defun set-break (rule-name)
+  (if (find-rule (inference-engine) rule-name)
+      (pushnew rule-name *breakpoints*)
+    (format t "There's no rule by this name (~A)~%" rule-name))
+  (values))
+
+(defun clear-break (rule-name)
+  (setf *breakpoints*
+    (delete rule-name *breakpoints*))
+  (values))
+
+(defun clear-breaks ()
+  (setf *breakpoints* (list))
+  (values))
+
+(defun next ()
+  (setf *stepping* t)
   (setf *read-eval-print* nil))
 
-(defun read-eval-print ()
-  (unwind-protect
-      (do ((*read-eval-print* t))
-          ((not *read-eval-print*))
-        (format t "(LISA-DEBUG): ")
-        (print (eval (read)))
-        (terpri))
-    (resume)))
+(defun resume ()
+  (setf *read-eval-print* nil)
+  (setf *stepping* nil)
+  (values))
+
+(defun debugger-read-eval-print ()
+  (let ((*terminal-io* *terminal-io*)
+        (*standard-input* *terminal-io*)
+        (*standard-output* *terminal-io*))
+    (do ((*read-eval-print* t)
+         (count 0 (incf count)))
+        ((not *read-eval-print*) (values))
+      (format t "LISA-DEBUG[~D]: " count)
+      (force-output)
+      (print (eval (read)))
+      (terpri))))
 
 (defmethod fire-rule :around ((self rule) tokens)
-  (let ((*current-rule* self))
-    (read-eval-print)
-    (call-next-method)))
+  (when (or *stepping*
+            (has-breakpoint-p self))
+    (let ((*active-rule* self)
+          (*tokens* tokens))
+      (format t "Stopping in rule ~S~%" (rule-name self))
+      (debugger-read-eval-print)))
+  (call-next-method))
 
 (provide 'lisa-debugger)
