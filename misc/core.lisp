@@ -21,7 +21,8 @@
   (slot name))
 
 (deftemplate samwise ()
-  (slot friend))
+  (slot friend)
+  (slot age))
 
 #+ignore
 (defrule simple-rule ()
@@ -31,6 +32,7 @@
   =>
   (format t "simple-rule fired.~%"))
 
+#+ignore
 (defrule variable-rule ()
   (frodo (name ?name))
   (not (gandalf))
@@ -38,7 +40,15 @@
   =>
   )
 
-(defvar *frodo* (assert (frodo (name frodo))))
-(defvar *bilbo* (assert (bilbo (name bilbo))))
-(defvar *samwise* (assert (samwise (friend frodo))))
-(defvar *gandalf* (assert (gandalf (name gandalf) (age 100))))
+(defrule test-rule ()
+  (frodo (name ?name))
+  (samwise (friend ?name) (age ?age))
+  (test (eq ?age 100))
+  (not (gandalf (age ?age)))
+  =>
+  )
+
+(defparameter *frodo* (assert (frodo (name frodo))))
+(defparameter *bilbo* (assert (bilbo (name bilbo))))
+(defparameter *samwise* (assert (samwise (friend frodo) (age 100))))
+(defparameter *gandalf* (assert (gandalf (name gandalf) (age 200))))

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.19 2002/09/13 20:23:19 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.20 2002/09/14 15:13:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,8 +52,8 @@
     root))
 
 (defmethod add-successor ((self t) new-node connector)
-  (declare (ignore new-node connector))
-  self)
+  (declare (ignore connector))
+  new-node)
 
 (defun make-intra-pattern-node (slot)
   (make-node1
@@ -140,9 +140,11 @@
     join-node))
 
 (defun make-join-node (pattern)
-  (if (negated-pattern-p pattern)
-      (make-node2-not)
-    (make-node2)))
+  (cond ((negated-pattern-p pattern)
+         (make-node2-not))
+        ((test-pattern-p pattern)
+         (make-node2-test))
+        (t (make-node2))))
 
 (defun make-left-join-connection (join-node node)
   (if (typep node 'shared-node)
