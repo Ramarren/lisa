@@ -21,7 +21,7 @@
 ;;; Description: A sample implementation of an RPC server capable of reasoning
 ;;; over remote objects.
 
-;;; $Id: rpc-server.lisp,v 1.1 2002/12/12 15:59:19 youngde Exp $
+;;; $Id: rpc-server.lisp,v 1.2 2002/12/12 20:10:54 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -37,26 +37,38 @@
 (defvar *lisa-server-port* 10000)
 (defvar *server-proc* nil)
 
-(defclass remote-frodo (rpc-remote-ref) ())
+(defclass remote-kb-class (standard-class)
+  ((proxy-class-name :reader proxy-class-name)))
+  
+(defclass remote-instance (rpc-remote-ref)
+  ()
+  (:metaclass remote-kb-class))
+
+(defmethod initialize-instance :after ((self remote-instance) &rest args)
+  (declare (ignore args))
+  (setf (slot-value (class-of self) 'proxy-class-name)
+    (intern (rr-type self) 'rpc))
+  (format t "proxy name is ~S~%" (proxy-class-name (class-of self))))
+
+(defmethod class-name ((class remote-kb-class))
+  (proxy-class-name class))
 
 (defun assert-object (object)
   (let ((*package* (find-package "RPC")))
     (format t "package is ~S~%" *package*)
     (format t "object is ~S~%" object)
     (format t "class of object is ~S~%" (class-of object))
-    (format t "class slots: ~S~%" (get-class-slots object))
-    (assert-instance object)
+    (format t "class name of object is ~S~%" (class-name (class-of object)))
+    ;;;(assert-instance object)
     object))
 
-(defmethod get-class-slots ((instance rpc-remote-ref))
-  (loop for slot in
-        (clos:class-slots
-         (find-class (intern (make-symbol (rr-type instance)))))
-        collect (clos:slot-definition-name slot)))
+(defmethod get-class-slots ((instance remote-instance))
+  (multiple-value-list
+   (rcall 'class-slots instance)))
 
 (defun initialize-client-environment (port)
   (format t "Initialising client environment~%")
-  (import-remote-class port 'remote-frodo "frodo"))
+  (import-remote-class port 'remote-instance "frodo"))
 
 (defun make-server ()
   (make-rpc-server
