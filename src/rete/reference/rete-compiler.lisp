@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.15 2002/09/05 01:58:53 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.16 2002/09/05 18:41:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -125,10 +125,15 @@
         (add-test-pattern-predicate)
       (add-generic-pattern-tests))
     join-node))
-    
+
+(defun make-join-node (pattern)
+  (if (negated-pattern-p pattern)
+      (make-node2-not)
+    (make-node2)))
+
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
-    (let ((join-node (make-node2))
+    (let ((join-node (make-join-node pattern))
           (address (parsed-pattern-address pattern)))
       (add-join-node-tests join-node pattern)
       (add-successor
