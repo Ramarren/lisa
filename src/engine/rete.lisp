@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.24 2000/12/08 02:04:18 youngde Exp $
+;;; $Id: rete.lisp,v 1.25 2000/12/08 02:25:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -82,25 +82,6 @@
 (defmethod record-fact ((self rete) fact)
   (with-accessors ((facts get-facts)) self
     (setf (gethash (get-fact-id fact) facts) fact)))
-
-#+ignore
-(defmethod find-fact ((self rete) (id integer))
-  (find-if #'(lambda (fact)
-               (= id (get-fact-id fact)))
-           (get-facts self)))
-
-#+ignore
-(defmethod remove-fact ((self rete) (f fact))
-  (let ((id (get-fact-id f)))
-    (with-accessors ((facts get-facts)) self
-      (setf facts
-        (delete-if #'(lambda (fact)
-                       (= id (get-fact-id fact)))
-                   facts)))))
-
-#+ignore
-(defmethod remove-facts ((self rete))
-  (setf (get-facts self) nil))
 
 (defmethod find-fact ((self rete) (id integer))
   (gethash id (get-facts self)))

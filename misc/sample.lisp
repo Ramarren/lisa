@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.21 2000/12/08 02:04:18 youngde Exp $
+;;; $Id: sample.lisp,v 1.22 2000/12/08 02:25:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -63,9 +63,10 @@
   (assert (boris (name ?nemesis))))
 
 (defrule boris
-  (?fact (boris (name "rocky")))
+  (?fact (boris (name ?name "rocky")))
   =>
   (format t "boris fired!~%")
+  (modify ?fact (name ?name))
   (retract ?fact))
 
 (defrule multiple-references

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.20 2000/12/08 02:04:18 youngde Exp $
+;;; $Id: rule.lisp,v 1.21 2000/12/08 02:25:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -106,9 +106,7 @@
                `(lambda ()
                   (let (,@bindings)
                     ,@(get-actions self))))))
-    (let ((context (make-context)))
-      (format t "context: ~S~%" context)
-      (eval context))))
+    (eval (make-context))))
 
 (defmethod add-binding ((self rule) binding)
   (with-accessors ((bindings get-bindings)) self
