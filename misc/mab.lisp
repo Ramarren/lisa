@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.37 2001/03/20 21:31:46 youngde Exp $
+;;; $Id: mab.lisp,v 1.38 2001/03/26 16:27:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -400,5 +400,5 @@
 
 #+LispWorks
 (defun profile-mab (&optional (ntimes 10))
-  (hcl:set-up-profiler :packages "LISA")
+  (hcl:set-up-profiler :packages '("LISA") :symbols '(delete-if))
   (hcl:profile (run-mab ntimes)))

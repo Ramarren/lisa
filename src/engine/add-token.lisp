@@ -21,7 +21,7 @@
 ;;; Description: Represents TOKENs used for add operations on the
 ;;; network.
 
-;;; $Id: add-token.lisp,v 1.10 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: add-token.lisp,v 1.11 2001/03/26 16:27:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,7 @@
 (defmethod print-object ((self add-token) strm)
   (print-unreadable-object (self strm :identity t :type t)
     (format strm "(class = ~S)"
-            (class-name (get-class (get-top-fact self))))))
+            (get-class (get-top-fact self)))))
 
 (defun make-add-token (&rest args)
   (apply #'make-token (find-class 'add-token) args))

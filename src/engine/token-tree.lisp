@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.21 2001/03/20 19:06:51 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.22 2001/03/26 16:27:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,6 +37,9 @@
   (:documentation
    "Maintains a hashed collection of tokens."))
 
+(defmacro use-sortcode-p (self)
+  `(get-use-sortcode ,self))
+
 (defun add-token (self token)
   (declare (type token-tree self) (type token token))
   (let* ((hash (create-hash-code self token))
@@ -49,24 +52,20 @@
 
 (defun remove-token (self token)
   (declare (type token-tree self) (type token token))
-  (with-accessors ((table get-table)) self
-    (let* ((key (create-hash-code self token))
-           (token-list (gethash key table))
-           (foundp nil))
-      (setf token-list
-            (delete-if #'(lambda (obj)
-                           (setf foundp (equals obj token)))
-                       token-list :count 1))
-      (when foundp
-        (if (null token-list)
-            (remhash key table)
-          (setf (gethash key table) token-list))
-        (decf (get-size self)))
-      (values foundp))))
-
-(defun use-sortcode-p (self)
-  (declare (type token-tree self))
-  (get-use-sortcode self))
+  (let* ((key (create-hash-code self token))
+         (table (get-table self))
+         (token-list (gethash key table))
+         (foundp nil))
+    (setf token-list
+      (delete-if #'(lambda (obj)
+                     (setf foundp (equals obj token)))
+                 token-list :count 1))
+    (when foundp
+      (if (null token-list)
+          (remhash key table)
+        (setf (gethash key table) token-list))
+      (decf (get-size self)))
+    (values foundp)))
 
 (defun create-hash-code (tree token)
   (declare (type token-tree tree) (type token token))

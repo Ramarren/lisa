@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.31 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: token.lisp,v 1.32 2001/03/26 16:27:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -87,17 +87,16 @@
            (get-engine-time engine))))
 
 (defmethod equals ((self token) (tok token))
-  (let ((rval (and (eql (get-fact-id (get-fact self))
-                        (get-fact-id (get-fact tok)))
-                   (eql (get-sort-code self)
-                        (get-sort-code tok))
-                   (or (eql (get-parent self)
-                            (get-parent tok))
-                       (and (not (null (get-parent self)))
-                            (not (null (get-parent tok)))
-                            (equals (get-parent self)
-                                    (get-parent tok)))))))
-    (values rval)))
+  (and (= (get-fact-id (get-fact self))
+          (get-fact-id (get-fact tok)))
+       (= (get-sort-code self)
+          (get-sort-code tok))
+       (or (eq (get-parent self)
+               (get-parent tok))
+           (and (not (null (get-parent self)))
+                (not (null (get-parent tok)))
+                (equals (get-parent self)
+                        (get-parent tok))))))
 
 (defmethod hash-code ((self token))
   (get-sort-code self))
