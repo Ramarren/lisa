@@ -20,7 +20,7 @@
 ;;; File: metaclass.lisp
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.2 2002/11/22 20:05:04 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.3 2002/11/22 20:14:57 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -33,7 +33,7 @@
 (defmethod shared-initialize :after ((self standard-kb-object) slot-names &rest initargs)
   (setf (slot-value self 'shared-initialize) nil))
 
-(defmethod (setf slot-value-using-class) :around 
+(defmethod (setf mop:slot-value-using-class) :around 
            (new-value (self standard-kb-class) instance slot)
   (break)
   (let ((initializing-p (slot-value instance 'shared-initialize)))
