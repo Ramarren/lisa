@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.22 2000/12/09 22:13:25 youngde Exp $
+;;; $Id: rule.lisp,v 1.23 2000/12/09 22:14:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -85,25 +85,6 @@
            `(lambda ()
               (let (,@(create-lexical-bindings (get-bindings self) token))
                 ,@(get-actions self)))))
-    (eval (make-context))))
-
-#+ignore
-(defmethod create-lexical-context ((self rule) token)
-  (labels ((create-local-bindings (bindings)
-             (with-accessors ((engine get-engine)) self
-               (clear-lexical-bindings engine)
-               (mapc #'(lambda (binding)
-                         (add-lexical-binding engine
-                                              (first binding)
-                                              (second binding)))
-                     bindings)))
-           (make-context ()
-             (let ((bindings (create-lexical-bindings
-                              (get-bindings self) token)))
-               (create-local-bindings bindings)
-               `(lambda ()
-                  (let (,@bindings)
-                    ,@(get-actions self))))))
     (eval (make-context))))
 
 (defmethod add-binding ((self rule) binding)

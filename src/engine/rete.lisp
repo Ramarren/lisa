@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.25 2000/12/08 02:25:49 youngde Exp $
+;;; $Id: rete.lisp,v 1.26 2000/12/09 22:14:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,8 +34,6 @@
              :reader get-compiler)
    (clock :initform 0
           :accessor get-clock)
-   (lexical-environment :initform (make-hash-table)
-                        :reader get-lexical-environment)
    (initial-fact :initform 
                  (make-fact (find-class 'initial-fact) nil)
                  :reader get-initial-fact)
@@ -56,15 +54,6 @@
   (with-accessors ((rules get-rules)) self
     (add-rule-to-network (get-compiler self) rule)
     (setf (gethash (get-name rule) rules) rule)))
-
-(defmethod add-lexical-binding ((self rete) varname value)
-  (setf (gethash varname (get-lexical-environment self)) value))
-
-(defmethod get-lexical-binding ((self rete) varname)
-  (gethash varname (get-lexical-environment self)))
-
-(defmethod clear-lexical-bindings ((self rete))
-  (clrhash (get-lexical-environment self)))
 
 (defmethod create-activation ((self rete) rule token)
   (add-activation (get-strategy self)
