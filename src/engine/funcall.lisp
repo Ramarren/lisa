@@ -21,27 +21,35 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code.
 
-;;; $Id: funcall.lisp,v 1.1 2001/01/04 21:23:41 youngde Exp $
+;;; $Id: funcall.lisp,v 1.2 2001/01/04 22:05:18 youngde Exp $
 
 (in-package :lisa)
 
 (defclass funcall ()
   ((forms :initarg :forms
           :reader get-forms)
-   (bindings :accessor get-bindings))
+   (bindings :initarg :bindings
+             :reader get-bindings))
   (:documentation
    "This class manages the mechanics of executing arbitrary Lisp code."))
 
-(defmethod initialize-instance :after ((self funcall) &key bindings level)
-  (flet ((save-bindingp (binding)
-           (and (typep binding 'slot-binding)
-                (<= (get-location binding) level))))
-    (with-accessors ((bindings get-bindings)) self
-      (maphash #'(lambda (key binding)
-                   (when (save-bindingp binding)
-                     (push binding bindings)))
-               bindings))))
+(defun create-function-context (funcall token)
+  (labels ((make-lexical-binding (binding token)
+             (let ((fact (find-fact token (get-location binding))))
+               (cl:assert (not (null fact)) ()
+                 "No fact for location ~D." (get-location binding))
+               `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
+           (make-context ()
+           `(lambda ()
+              (let (,@(mapcar #'(lambda (binding)
+                                  (make-lexical-binding binding))
+                              (get-bindings funcall)))
+                ,@(get-forms funcall)))))
+    (eval (make-context))))
 
-(defun make-funcall (forms bindings level)
-  (make-instance 'funcall :forms forms :bindings bindings :level level))
+(defmethod evaluate ((self funcall) token)
+  (funcall (create-function-context self token)))
+
+(defun make-funcall (forms bindings)
+  (make-instance 'funcall :forms forms :bindings bindings))
 
