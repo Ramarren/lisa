@@ -221,7 +221,7 @@ link="#0000ef" vlink="#52188c" style='tab-interval:.5in' alink="#FF0000">
   </td>
   <td width="110%" rowspan=2 style='height: 12.75pt; padding: .75pt' NOSAVE valign="middle">
   <p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
-  <h2><![if !supportEmptyParas]>&nbsp;LISA - Intelligent Software Agents for
+  <h2><![if !supportEmptyParas]>&nbsp;Lisa - Intelligent Software Agents for
   Common Lisp<![endif]><o:p></o:p></h2>
   <p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
   </td>
@@ -243,30 +243,28 @@ link="#0000ef" vlink="#52188c" style='tab-interval:.5in' alink="#FF0000">
 </table>
 
 <p><br>
-Welcome to the <a href="http://sourceforge.net/projects/lisa">LISA</a> project,
+Welcome to the <a href="http://sourceforge.net/projects/lisa">Lisa</a>  project,
 a platform for the development of <b>L</b>isp-based <b>I</b>ntelligent <b>S</b>oftware
-<b>A</b>gents. LISA is a production-rule system implemented in the Common Lisp
+<b>A</b>gents. Lisa is a production-rule system implemented in the Common Lisp
 Object System (CLOS), and is heavily influenced by CLIPS and the Java Expert
 System Shell (JESS). At its core is a reasoning engine based on an
 object-oriented implementation of the Rete algorithm, a very efficient
 mechanism for solving the difficult many-to-many matching problem (&quot;Rete:
 A Fast Algorithm for the Many Pattern/Many Object Pattern Match Problem&quot;,
-Charles L. Forgy, Artificial Intelligence 19(1982), 17-37.) Intrinsic to LISA
-is the ability to reason over CLOS objects without imposing special class
+Charles L. Forgy, Artificial Intelligence 19(1982), 17-37.) Intrinsic to Lisa is the ability to reason over CLOS objects without imposing special class
 hierarchy requirements; thus it should be possible to easily augment existing
-CLOS applications with reasoning capabilities. As LISA is an extension to
-Common Lisp, the full power of the Lisp environment is always available.
-LISA-enabled applications should run on any ANSI-compliant Common Lisp
+CLOS applications with reasoning capabilities. As Lisa is an extension to
+Common Lisp, the full power of the Lisp environment is always available. Lisa-enabled applications should run on any ANSI-compliant Common Lisp
 platform. </p>
 
 <h3>Project Goals</h3>
 
-<p class=MsoNormal>The LISA project is driven by a number of important goals: </p>
+<p class=MsoNormal>The Lisa project is driven by a number of important goals: </p>
 
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Unrestricted availability</i>:
-     The principal motivation for beginning LISA was the apparent dearth of
+     The principal motivation for beginning Lisa was the apparent dearth of
      lightweight, <i>current, freely-available</i> toolkits for constructing
      Lisp-based intelligent systems. There are a number of very fine commercial
      and restricted-use products out there (see the links below), but these
@@ -284,12 +282,14 @@ margin-left:.25in'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Portability</i>: Vendor
-     neutrality is a significant project goal. As previously mentioned, LISA is
+     neutrality is a significant project goal, not because I disapprove of
+  commercial software but to ensure Lisa is available on as many platforms as I
+  can manage.. As previously mentioned, Lisa is
      implemented in ANSI Common Lisp; currently, all development is being done
      on Windows 2000 using&nbsp; <a href="http://www.xanalys.com">Xanalys</a>'
      LispWorks. Every effort will be made to avoid the use of
      implementation-specific functionality; in the cases where a non-ANSI
-     feature must be used (e.g. multiprocessing support), LISA will attempt to
+     feature must be used (e.g. multiprocessing support), Lisa will attempt to
      support the major Lisp implementations either through conditional
      evaluation or the use of a common library such as <a
      href="http://clocc.sourceforge.net">CLOCC</a>.</li>
@@ -299,7 +299,7 @@ margin-left:.25in'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
 
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Familiarity</i>: LISA's
+     mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Familiarity</i>: Lisa's
      production-rule system has its roots in CLIPS and JESS, making it readily
      familiar to developers who've worked with either of these systems. Indeed,
      the CLIPS and JESS languages both have their roots in Lisp.</li>
@@ -310,10 +310,10 @@ margin-left:.25in'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Flexibility</i>: As
-     previously mentioned, LISA reasons over CLOS objects without requiring
+     previously mentioned, Lisa reasons over CLOS objects without requiring
      changes to an application's class hierarchy. In addition, the full power
      of Common Lisp is available for use within productions; there is no
-     dichotomy between LISA's programming language and her implementation.</li>
+     dichotomy between Lisa's programming language and her implementation.</li>
 </ul>
 
 <p class=MsoNormal style='margin-left:.5in'>&nbsp; </p>
@@ -322,8 +322,7 @@ margin-left:.25in'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo3;tab-stops:list .5in'><i>Simplicity</i>: Along with
      portability, the project is striving for simplicity and elegance at the
-     functional, architecture and source code levels. This doesn't mean LISA
-     should have limited usefulness; rather, it should be possible for new
+     functional, architecture and source code levels. This doesn't mean Lisa should have limited usefulness; rather, it should be possible for new
      developers to easily understand the code layout and behavior. Unless
      performance absolutely demands otherwise, clarity of design and implementation
      will take precedence.</li>
@@ -347,15 +346,15 @@ buggy. There's also a simplified install facility based on ASDF. </p>
 
 <p class=MsoNormal>&nbsp; </p>
 
-<p class=MsoNormal>The first production release for LISA 2.0, a major rewrite
+<p class=MsoNormal>The first production release for Lisa 2.0, a major rewrite
 of the system, was available as of 9 December, 2002. The Rete algorithm has been
 re-implemented from scratch; new conditional elements have been added; contexts
 have been introduced; and a production rule debugger is now available. There
 are also other features not listed here. </p>
 
-<p>LISA had its first production release (Version 1.0) on 31 August, 2001 and
+<p>Lisa had its first production release (Version 1.0) on 31 August, 2001 and
 is considered &quot;stable&quot; software; it should now be possible to develop
-reasonably sophisticated knowledge bases for &quot;real systems&quot;. LISA has
+reasonably sophisticated knowledge bases for &quot;real systems&quot;. Lisa has
 successfully run adaptations of the &quot;monkey and bananas&quot; (MAB)
 planning problem on all four target Lisp platforms, and full reasoning
 capabilities are available for CLOS objects in a multi-threaded environment.
@@ -367,23 +366,30 @@ including mailing lists, latest news and available downloads, see the <a
 href="http://sourceforge.net/projects/lisa">official project page</a>. If you
 prefer, you may contact the project staff directly (see <i>Project People</i>).</p>
 
+<h3>Supported Platforms</h3>
+
+<p>Lisa is known to run on LispWorks, ACL, CLISP, and the latest version of
+CMUCL (19a). I also know of an individual that has managed to get Lisa running
+on Armed Bear Common Lisp, a testimony to the quality of that member of the
+Common Lisp family.</p>
+
 <h3>Documentation</h3>
 
-<p class=MsoNormal>Currently, documentation for LISA is a work-in-progress.
-However, there is a beta-quality version of the <a href="ref-guide.html">LISA
+<p class=MsoNormal>Currently, documentation for Lisa is a work-in-progress.
+However, there is a beta-quality version of the <a href="ref-guide.html">Lisa</a> <a href="ref-guide.html">
 Reference Guide</a> that should help you get started. Also, you may see the
-source code for LISA's two versions of the MAB, <a
+source code for Lisa's two versions of the MAB, <a
 href="http://lisa.sourceforge.net/mab.lisp">mab.lisp</a> and <a
 href="http://lisa.sourceforge.net/mab-clos.lisp">mab-clos.lisp</a> (a
 &quot;CLOS-ified&quot; version of the default MAB implementation). </p>
 
 <h3>License</h3>
 
-<p>LISA is currently released under the GNU Lesser General Public License
+<p>Lisa is currently released under the GNU Lesser General Public License
 (LGPL), primarily because it seemed more versatile than the GPL. However, some
 sources indicate that the LGPL might inhibit commercial uses of Lisp
-applications like LISA. I've no idea if this is the case as I'm not a legal
-expert. So, if you're interested in using LISA commercially and decide the LGPL
+applications like Lisa. I've no idea if this is the case as I'm not a legal
+expert. So, if you're interested in using Lisa commercially and decide the LGPL
 gets in the way, feel free to contact me to discuss some other type of license
 arrangement.</p>
 
@@ -443,19 +449,19 @@ enhancements, including Contexts, a new conditional element and duplicate fact
 detection. Details are in the release notes.</p>
 
 <p><i>18 November, 2002</i>: Beta 2 is available. Lots of changes and
-enhancements in this version, including completion of LISA's truth maintenance
+enhancements in this version, including completion of Lisa's truth maintenance
 system. See the <a href="RELNOTES.html">release notes</a> for details.</p>
 
-<p><i>6 November, 2002</i>: The first beta release for LISA 2.0, 2.0b1. This
+<p><i>6 November, 2002</i>: The first beta release for Lisa 2.0, 2.0b1. This
 version introduces a form of truth maintenance via the LOGICAL conditional
 element. Details are in the reference guide in the distribution.</p>
 
-<p><i>4 November, 2002</i>: Alpha release 5 for LISA 2.0 is now available. This
+<p><i>4 November, 2002</i>: Alpha release 5 for Lisa 2.0 is now available. This
 version introduces the OR conditional element, along with some improvements to
 the debugger. Details are in the reference guide in the distribution.</p>
 
-<p><i>28 October, 2002</i>: Alpha release 4 for LISA 2.0 is now available. New
-to this version is the LISA debugger, a simple, interactive production rule
+<p><i>28 October, 2002</i>: Alpha release 4 for Lisa 2.0 is now available. New
+to this version is the Lisa debugger, a simple, interactive production rule
 monitoring/inspection facility. The Reference Guide in the distribution has a
 chapter explaining how to use it.</p>
 
@@ -464,9 +470,9 @@ chapter explaining how to use it.</p>
 <h3>Related Links</h3>
 
 <p class=MsoNormal>This section contains a small collection of topics related
-to LISA and its development environment. It will be updated periodically as the
+to Lisa and its development environment. It will be updated periodically as the
 need arises. NB: If your favorite Lisp/Environment/Tool was omitted here it was
-done without prejudice; I simply haven't had time to test LISA with every
+done without prejudice; I simply haven't had time to test Lisa with every
 mainstream Lisp implementation, or investigate every knowledge representation
 system, or... you get the idea. <br>
 &nbsp; <br>
