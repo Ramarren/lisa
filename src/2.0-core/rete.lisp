@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.17 2002/10/09 19:22:00 youngde Exp $
+;;; $Id: rete.lisp,v 1.18 2002/10/10 16:28:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -104,7 +104,7 @@
   (incf (rete-next-fact-id rete)))
 
 (defun add-autofact (rete deffact)
-  (push deffact (rete-autofacts rete)))
+  (pushnew deffact (rete-autofacts rete) :key #'deffacts-name))
 
 (defun remove-autofacts (rete)
   (setf (rete-autofacts rete) nil))
