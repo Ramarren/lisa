@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.2 2002/09/07 00:20:53 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.3 2002/09/09 20:50:20 uid35432 Exp $
 
 (in-package "LISA")
 
@@ -34,6 +34,32 @@
                            (funcall test left-tokens)) tests))
         (call-successor (join-node-successor self) left-tokens)
       (token-pop-fact left-tokens))))
+
+(defmethod test-against-right-memory ((self node2-not) left-tokens)
+  (loop for right-token being the hash-value 
+      of (join-node-right-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
+
+(defmethod test-against-left-memory ((self node2-not) right-token)
+  (loop for left-tokens being the hash-value 
+      of (join-node-left-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
+  
+(defmethod accept-tokens-from-left ((self node2-not) (left-tokens add-token))
+  (add-tokens-to-left-memory self left-tokens)
+  (test-against-right-memory self left-tokens))
+
+(defmethod accept-token-from-right ((self node2-not) (right-token add-token))
+  (add-token-to-right-memory self right-token)
+  (test-against-left-memory self right-token))
+
+(defmethod accept-tokens-from-left ((self node2-not) (left-tokens remove-token))
+  (when (remove-tokens-from-left-memory self left-tokens)
+    (test-against-right-memory self left-tokens)))
+
+(defmethod accept-token-from-right ((self node2-not) (right-token remove-token))
+  (when (remove-token-from-right-memory self right-token)
+    (test-against-left-memory self right-token)))
 
 (defun make-node2-not ()
   (make-instance 'node2-not))

@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.10 2002/09/07 23:52:43 youngde Exp $
+;;; $Id: node2.lisp,v 1.11 2002/09/09 20:50:20 uid35432 Exp $
 
 (in-package "LISA")
 
@@ -34,15 +34,15 @@
       (call-successor (join-node-successor self) left-tokens)
     (token-pop-fact left-tokens)))
 
-(defun test-against-right-memory (node2 left-tokens)
+(defmethod test-against-right-memory ((self node2) left-tokens)
   (loop for right-token being the hash-value 
-      of (join-node-right-memory node2)
-      do (test-and-pass-tokens node2 left-tokens right-token)))
+      of (join-node-right-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
 
-(defun test-against-left-memory (node2 right-token)
+(defmethod test-against-left-memory ((self node2) right-token)
   (loop for left-tokens being the hash-value 
-      of (join-node-left-memory node2)
-      do (test-and-pass-tokens node2 left-tokens right-token)))
+      of (join-node-left-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
   
 (defmethod accept-tokens-from-left ((self node2) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
