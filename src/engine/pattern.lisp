@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.20 2001/01/09 21:03:51 youngde Exp $
+;;; $Id: pattern.lisp,v 1.21 2001/01/09 21:14:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,6 +53,16 @@
              self (make-slot (first desc) (second desc) (third desc))))
         slot-list))
 
+(defmacro generate-test (var value negated)
+  `(cond (,negated
+          (if (quotable ,value)
+              `(not (eq ,var ',value))
+            `(not (equal ,var ,value))))
+         (t
+          (if (quotable ,value)
+              `(eq ,var ',value)
+            `(equal ,var ,value)))))
+       
 (defun canonicalize-slot (pattern slot bindings)
   (declare (type (pattern pattern) (slot slot)
                  (binding-table bindings)))
@@ -68,15 +78,8 @@
                              (get-name slot)))))
            (rewrite-slot (var value negated)
              (setf (get-value slot) var)
-             (if negated
-                 (setf (get-constraint slot)
-                   (if (quotable value)
-                       `(not (equal ,var ',value))
-                     `(not (equals ,var ,value))))
-               (setf (get-constraint slot)
-                 (if (quotable value)
-                     `(equal ,var ',value)
-                   `(equal ,var ,value))))
+             (setf (get-constraint slot)
+               (generate-test var value negated))
              (new-slot-binding var)))
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
