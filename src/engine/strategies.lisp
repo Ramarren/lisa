@@ -22,7 +22,7 @@
 ;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
 ;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.9 2000/12/15 21:20:32 youngde Exp $
+;;; $Id: strategies.lisp,v 1.10 2000/12/15 21:35:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,6 +38,7 @@
 (defgeneric find-activation (strategy token rule))
 (defgeneric next-activation (strategy))
 (defgeneric remove-activations (strategy))
+(defgeneric list-activations (strategy))
 
 (defclass indexed-priority-list ()
   ((priority-vector :reader get-priority-vector)
@@ -94,6 +95,14 @@
         (remhash (get-hash-code (get-token activation)) activations))
       (values activation))))
 
+(defun get-all-activations (plist)
+  (declare (type indexed-priority-list plist))
+  (let ((list nil))
+    (maphash #'(lambda (key val)
+                 (setf list (nconc list `(,val))))
+             (get-activations plist))
+    (values list)))
+
 (defun make-indexed-priority-list (func)
   (make-instance 'indexed-priority-list :insertion-function func))
 
@@ -117,6 +126,9 @@
 
 (defmethod remove-activations ((self depth-first-strategy))
   (initialize-queue self))
+
+(defmethod list-activations ((self depth-first-strategy))
+  (get-all-activations (get-priority-queue self)))
 
 (defmethod initialize-queue ((self depth-first-strategy))
   (setf (slot-value self 'priority-queue)

@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.1 2000/12/14 21:43:41 youngde Exp $
+;;; $Id: watch.lisp,v 1.2 2000/12/15 21:35:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,8 +56,8 @@
     (show-activation "==>" act))
   (values))
 
-(defmethod retract-activation :after ((s strategy) (act activation))
-  (declare (ignore s))
+(defmethod disable-activation :after ((engine rete) (act activation))
+  (declare (ignore rete))
   (when (watching-p :activations)
     (show-activation "<==" act))
   (values))
