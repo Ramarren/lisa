@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.45 2001/01/28 20:03:26 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.46 2001/01/30 22:18:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,7 +61,8 @@
 
 (defun add-simple-tests (pattern rule parent-node)
   (macrolet ((simple-slotp (slot)
-               `(or (typep ,slot 'optimisable-slot)
+               `(or (and (typep ,slot 'optimisable-slot)
+                         (is-literal-slotp ,slot))
                     (and (has-constraintp ,slot)
                          (or (localized-slotp ,slot)
                              (= (get-pattern-count rule) 1))))))

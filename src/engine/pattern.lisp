@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.41 2001/01/28 20:29:32 youngde Exp $
+;;; $Id: pattern.lisp,v 1.42 2001/01/30 22:18:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,7 +69,7 @@
               `(eq ,,var ',,value)
             `(equal ,,var ,,value)))))
        
-(defun canonicalize-slot (pattern slot global-bindings)
+(defun canonicalize-slot (slot global-bindings)
   (labels ((make-slot-variable ()
              (intern (format nil "?_~A" (symbol-name (gensym)))))
            (rewrite-slot (var value negated)
@@ -87,9 +87,11 @@
             ;; Then the slot value must be a variable...
             ((null slot-constraint)
              (when (lookup-binding global-bindings slot-value)
-               (rewrite-slot (make-slot-variable) slot-value nil)))
+               (change-class slot 'optimisable-slot)))
             ((literalp slot-constraint)
-             (rewrite-slot slot-value slot-constraint nil))
+             (change-class slot 'optimisable-slot))
+            ((negated-rewritable-literal-constraintp slot-constraint)
+             (change-class slot 'optimisable-negated-slot))
             ((negated-rewritable-constraintp slot-constraint)
              (rewrite-slot slot-value (second slot-constraint) t))
             ((variablep slot-constraint)
@@ -98,7 +100,7 @@
 
 (defun canonicalize-slots (pattern bindings)
   (mapc #'(lambda (slot)
-            (canonicalize-slot pattern slot bindings))
+            (canonicalize-slot slot bindings))
         (get-slots pattern)))
 
 (defun setup-pattern-bindings (pattern global-bindings)

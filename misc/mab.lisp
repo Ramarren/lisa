@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.17 2001/01/29 16:35:23 youngde Exp $
+;;; $Id: mab.lisp,v 1.18 2001/01/30 22:18:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -350,7 +350,7 @@
 (defrule startup
   =>
   (assert (monkey (location t5-7) (on-top-of green-couch)
-                  (location green-counch) (holding blank)))
+                  (location green-couch) (holding blank)))
   (assert (thing (name green-couch) (location t5-7) (weight heavy)
                  (on-top-of floor)))
   (assert (thing (name red-couch) (location t2-2) 
@@ -377,6 +377,7 @@
 (defun run-mab (&optional (ntimes 1))
   (let ((start (get-internal-real-time)))
     (dotimes (i ntimes)
+      (format t "Starting run.~%")
       (reset)
       (run))
     (format t "Elapsed time: ~F~%"

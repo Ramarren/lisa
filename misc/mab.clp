@@ -14,9 +14,9 @@
 ;;; modified EJFH 4/11/96 for JES Java Expert System
 ;;; produces identical output under CLIPS
 
-(set-node-index-hash 1)
-(set-fact-duplication TRUE)
-(set-multithreaded-io TRUE)
+;;;(set-node-index-hash 1)
+;;;(set-fact-duplication TRUE)
+;;;(set-multithreaded-io TRUE)
 ;;;*************
 ;;;* TEMPLATES *
 ;;;*************
@@ -53,7 +53,7 @@
 
 (defrule hold-chest-to-put-on-floor "" 
   (goal-is-to (action unlock) (argument-1 ?chest))
-  (unique (thing (name ?chest) (on-top-of ~floor) (weight light)))
+  (thing (name ?chest) (on-top-of ~floor) (weight light))
   (monkey (holding ~?chest))
   (not (goal-is-to (action hold) (argument-1 ?chest)))
   =>
@@ -62,7 +62,7 @@
 (defrule put-chest-on-floor "" 
   (goal-is-to (action unlock) (argument-1 ?chest))
   ?monkey <- (monkey (location ?place) (on-top-of ?on) (holding ?chest))
-  ?thing <- (unique (thing (name ?chest)))
+  ?thing <- (thing (name ?chest))
   =>
   (printout t "Monkey throws the " ?chest " off the " 
               ?on " onto the floor." crlf)
@@ -71,8 +71,8 @@
 
 (defrule get-key-to-unlock "" 
   (goal-is-to (action unlock) (argument-1 ?obj))
-  (unique (thing (name ?obj) (on-top-of floor)))
-  (unique (chest (name ?obj) (unlocked-by ?key)))
+  (thing (name ?obj) (on-top-of floor))
+  (chest (name ?obj) (unlocked-by ?key))
   (monkey (holding ~?key))
   (not (goal-is-to (action hold) (argument-1 ?key)))
   =>
@@ -82,17 +82,17 @@
 
 (defrule move-to-chest-with-key "" 
   (goal-is-to (action unlock) (argument-1 ?chest))
-  (unique (thing (name ?chest) (location ?cplace) (on-top-of floor)))
+  (thing (name ?chest) (location ?cplace) (on-top-of floor))
   (monkey (location ~?cplace) (holding ?key))
-  (unique (chest (name ?chest) (unlocked-by ?key)))
+  (chest (name ?chest) (unlocked-by ?key))
   (not (goal-is-to (action walk-to) (argument-1 ?cplace)))
   =>
   (assert (goal-is-to (action walk-to) (argument-1 ?cplace))))
 
 (defrule unlock-chest-with-key "" 
   ?goal <- (goal-is-to (action unlock) (argument-1 ?name))
-  ?chest <- (unique (chest (name ?name) (contents ?contents) (unlocked-by ?key)))
-  (unique (thing (name ?name) (location ?place) (on-top-of ?on)))
+  ?chest <- (chest (name ?name) (contents ?contents) (unlocked-by ?key))
+  (thing (name ?name) (location ?place) (on-top-of ?on))
   (monkey (location ?place) (on-top-of ?on) (holding ?key))
   =>
   (printout t "Monkey opens the " ?name " with the " ?key 
@@ -114,7 +114,7 @@
 
 (defrule use-ladder-to-hold ""
   (goal-is-to (action hold) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light)))
+  (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light))
   (not (thing (name ladder) (location ?place)))
   (not (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place)))
   =>
@@ -122,7 +122,7 @@
 
 (defrule climb-ladder-to-hold ""
   (goal-is-to (action hold) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light)))
+  (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light))
   (thing (name ladder) (location ?place) (on-top-of floor))
   (monkey (on-top-of ~ladder))
   (not (goal-is-to (action on) (argument-1 ladder)))
@@ -131,8 +131,8 @@
 
 (defrule grab-object-from-ladder "" 
   ?goal <- (goal-is-to (action hold) (argument-1 ?name))
-  ?thing <- (unique (thing (name ?name) (location ?place) 
-                           (on-top-of ceiling) (weight light)))
+  ?thing <- (thing (name ?name) (location ?place) 
+                   (on-top-of ceiling) (weight light))
   (thing (name ladder) (location ?place))
   ?monkey <- (monkey (location ?place) (on-top-of ladder) (holding blank))
   =>
@@ -143,7 +143,7 @@
 
 (defrule climb-to-hold ""
   (goal-is-to (action hold) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place&~ceiling) (on-top-of ?on) (weight light)))
+  (thing (name ?obj) (location ?place&~ceiling) (on-top-of ?on) (weight light))
   (monkey (location ?place) (on-top-of ~?on))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
@@ -151,7 +151,7 @@
 
 (defrule walk-to-hold ""
   (goal-is-to (action hold) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ~ceiling) (weight light)))
+  (thing (name ?obj) (location ?place) (on-top-of ~ceiling) (weight light))
   (monkey (location ~?place))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
@@ -159,7 +159,7 @@
 
 (defrule drop-to-hold ""
   (goal-is-to (action hold) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ?on) (weight light)))
+  (thing (name ?obj) (location ?place) (on-top-of ?on) (weight light))
   (monkey (location ?place) (on-top-of ?on) (holding ~blank))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
@@ -167,8 +167,8 @@
 
 (defrule grab-object "" 
   ?goal <- (goal-is-to (action hold) (argument-1 ?name))
-  ?thing <- (unique (thing (name ?name) (location ?place) 
-                           (on-top-of ?on) (weight light)))
+  ?thing <- (thing (name ?name) (location ?place) 
+                   (on-top-of ?on) (weight light))
   ?monkey <- (monkey (location ?place) (on-top-of ?on) (holding blank))
   =>
   (printout t "Monkey grabs the " ?name "." crlf)
@@ -181,7 +181,7 @@
   ?monkey <- (monkey (location ?place) 
                      (on-top-of ?on) 
                      (holding ?name&~blank))
-  ?thing <- (unique (thing (name ?name)))
+  ?thing <- (thing (name ?name))
   =>
   (printout t "Monkey drops the " ?name "." crlf)
   (modify ?monkey (holding blank))
@@ -194,14 +194,14 @@
 
 (defrule unlock-chest-to-move-object "" 
   (goal-is-to (action move) (argument-1 ?obj))
-  (unique (chest (name ?chest) (contents ?obj)))
+  (chest (name ?chest) (contents ?obj))
   (not (goal-is-to (action unlock) (argument-1 ?chest)))
   =>
   (assert (goal-is-to (action unlock) (argument-1 ?chest))))
 
 (defrule hold-object-to-move ""  
   (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
-  (unique (thing (name ?obj) (location ~?place) (weight light)))
+  (thing (name ?obj) (location ~?place) (weight light))
   (monkey (holding ~?obj))
   (not (goal-is-to (action hold) (argument-1  ?obj)))
   =>
@@ -217,7 +217,7 @@
 (defrule drop-object-once-moved "" 
   ?goal <- (goal-is-to (action move) (argument-1 ?name) (argument-2 ?place))
   ?monkey <- (monkey (location ?place) (holding ?obj))
-  ?thing <- (unique (thing (name ?name) (weight light)))
+  ?thing <- (thing (name ?name) (weight light))
   =>
   (printout t "Monkey drops the " ?name "." crlf)
   (modify ?monkey (holding blank))
@@ -226,7 +226,7 @@
 
 (defrule already-moved-object ""
   ?goal <- (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
-  (unique (thing (name ?obj) (location ?place)))
+  (thing (name ?obj) (location ?place))
   =>
   (retract ?goal))
 
@@ -258,7 +258,7 @@
 (defrule walk-holding-object ""
   ?goal <- (goal-is-to (action walk-to) (argument-1 ?place))
   ?monkey <- (monkey (location ~?place) (on-top-of floor) (holding ?obj))
-  (unique (thing (name ?obj)))
+  (thing (name ?obj))
   =>
   (printout t "Monkey walks to " ?place " holding the " ?obj "." crlf)
   (modify ?monkey (location ?place))
@@ -278,7 +278,7 @@
 
 (defrule walk-to-place-to-climb "" 
   (goal-is-to (action on) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place)))
+  (thing (name ?obj) (location ?place))
   (monkey (location ~?place))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
@@ -286,7 +286,7 @@
 
 (defrule drop-to-climb "" 
   (goal-is-to (action on) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place)))
+  (thing (name ?obj) (location ?place))
   (monkey (location ?place) (holding ~blank))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
@@ -294,7 +294,7 @@
 
 (defrule climb-indirectly "" 
   (goal-is-to (action on) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ?on)))
+  (thing (name ?obj) (location ?place) (on-top-of ?on))
   (monkey (location ?place) (on-top-of ~?on&~obj) (holding blank))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
@@ -302,7 +302,7 @@
 
 (defrule climb-directly ""  
   ?goal <- (goal-is-to (action on) (argument-1 ?obj))
-  (unique (thing (name ?obj) (location ?place) (on-top-of ?on)))
+  (thing (name ?obj) (location ?place) (on-top-of ?on))
   ?monkey <- (monkey (location ?place) (on-top-of ?on) (holding blank))
   =>
   (printout t "Monkey climbs onto the " ?obj "." crlf)
@@ -328,7 +328,7 @@
 (defrule satisfy-hunger ""
   ?goal <- (goal-is-to (action eat) (argument-1 ?name))
   ?monkey <- (monkey (holding ?name))
-  ?thing <- (unique (thing (name ?name)))
+  ?thing <- (thing (name ?name))
   =>
   (printout t "Monkey eats the " ?name "." crlf)
   (modify ?monkey (holding blank))

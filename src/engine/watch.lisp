@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.4 2001/01/23 21:34:29 youngde Exp $
+;;; $Id: watch.lisp,v 1.5 2001/01/30 22:18:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -42,15 +42,18 @@
 (defun get-watches ()
   (values *watch-list*))
 
+(defun activation-fact-list (activation)
+  (mapcar #'(lambda (fact)
+              (get-symbolic-id fact))
+          (remove-if #'(lambda (fact)
+                         (= (get-fact-id fact) -1))
+                     (get-all-facts (get-token activation)))))
+  
 (defun show-activation (direction activation)
   (format t "~A Activation: ~S : ~S~%"
           direction
           (get-name (get-rule activation))
-          (mapcar #'(lambda (fact)
-                      (get-symbolic-id fact))
-                  (remove-if #'(lambda (fact)
-                                 (= (get-fact-id fact) -1))
-                             (get-all-facts (get-token activation))))))
+          (activation-fact-list activation)))
   
 (defmethod add-activation :after ((s strategy) (act activation))
   (when (watching-p :activations)
@@ -65,8 +68,10 @@
 (defmethod disable-activation :after ((engine rete) (act activation))
   (show-activation-maybe act))
 
-(defmethod fire-rule :after ((act activation))
-  (show-activation-maybe act))
+(defmethod fire-rule :before ((act activation))
+  (when (watching-p :rules)
+    (format t "FIRE: ~S ~S~%"
+            (get-name (get-rule act)) (activation-fact-list act))))
 
 (defun show-fact-detail (direction fact)
   (format t "~A f-~D ~S~%" direction (get-fact-id fact)

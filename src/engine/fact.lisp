@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.16 2001/01/27 00:26:58 youngde Exp $
+;;; $Id: fact.lisp,v 1.17 2001/01/30 22:18:44 youngde Exp $
 
 (in-package :lisa)
 
@@ -53,14 +53,43 @@
 (defun set-slot-value (fact slot value)
   (declare (type fact fact) (type symbol slot))
   (with-accessors ((slot-table get-slot-table)) fact
-    (setf slot-table
-      (acons slot value slot-table))))
+    (let ((sv (assoc slot slot-table)))
+      (if (null sv)
+          (setf slot-table
+            (acons slot value slot-table))
+        (rplacd sv value)))))
+
+(defun get-slot-values (fact)
+  (declare (type fact fact))
+  (mapcar #'(lambda (slot)
+              `(,(car slot) ,(cdr slot)))
+          (get-slot-table fact)))
 
 (defun get-slot-value (fact slot)
   (declare (type fact fact)
            (type symbol slot))
   (cdr (assoc slot (get-slot-table fact))))
-  
+
+#|
+(defun set-slot-value (fact slot value)
+  (declare (type fact fact) (type symbol slot))
+  (with-accessors ((slot-table get-slot-table)) fact
+    (setf (gethash slot slot-table) value)))
+
+(defun get-slot-values (fact)
+  (declare (type fact fact))
+  (let ((slots nil))
+    (maphash #'(lambda (key val)
+                 (push slots `(,key ,val)))
+             (get-slot-table fact))
+    (values slots)))
+
+(defun get-slot-value (fact slot)
+  (declare (type fact fact)
+           (type symbol slot))
+  (gethash slot (get-slot-table fact)))
+|#
+
 (defmethod get-time ((self fact))
   (get-clock self))
 
@@ -68,15 +97,16 @@
   (setf (get-clock self) (get-engine-time engine)))
 
 (defmethod reconstruct-fact ((self fact))
-  `(,(class-name (get-class self)) ,@(get-slot-source self)))
+  `(,(class-name (get-class self)) ,@(get-slot-values self)))
 
 (defmethod equals ((self fact) (obj fact))
   (equal (get-class self) (get-class obj)))
 
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "f-~D (~S)" (get-fact-id self)
-            (class-name (get-class self)))))
+    (format strm "f-~D ; ~S ; ~S" (get-fact-id self)
+            (class-name (get-class self))
+            (get-slot-values self))))
 
 (defmethod initialize-instance :after ((self fact) &key (slots nil))
   (mapc #'(lambda (pair)
