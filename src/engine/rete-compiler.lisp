@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.38 2001/01/18 19:49:12 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.39 2001/01/19 22:15:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,7 @@
   (let ((last-node parent-node))
     (mapc #'(lambda (slot)
               (when (and (has-constraintp slot)
-                         (or (is-localized-patternp pattern)
+                         (or (localized-slotp slot)
                              (= (get-pattern-count rule) 1)))
                 (setf last-node
                   (merge-successor last-node
@@ -105,7 +105,7 @@
                      (make-test2-eval
                       (make-node-function-call slot pattern rule)))))
     (mapc #'(lambda (slot)
-              (unless (or (is-localized-patternp pattern)
+              (unless (or (localized-slotp slot)
                           (not (has-constraintp slot)))
                 (add-constraint-test slot)))
           (get-slots pattern))
@@ -115,7 +115,7 @@
 
 (defun create-join-nodes (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler
-    (labels ((resolve-node (node2)
+    (labels ((resolve-node (node2 location)
                (let ((clone-1 (resolve (aref terminals (1- location)) node2)))
                  (cond ((eq node2 clone-1)
                         (values node2 nil))
@@ -124,7 +124,7 @@
                        (t (values node2 nil)))))
              (add-join-node (node2 location)
                (multiple-value-bind (new-node existsp)
-                   (resolve-node node2)
+                   (resolve-node node2 location)
                  (unless existsp
                    (add-successor (aref terminals (1- location)) new-node rule)
                    (add-successor (aref terminals location) new-node rule))

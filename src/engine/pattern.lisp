@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.29 2001/01/18 19:49:12 youngde Exp $
+;;; $Id: pattern.lisp,v 1.30 2001/01/19 22:15:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,6 @@
          :reader get-name)
    (slots :initform nil
           :accessor get-slots)
-   (locality :reader get-locality)
    (location :initarg :location
              :reader get-location))
   (:documentation
@@ -47,10 +46,6 @@
 
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
-
-(defun is-localized-patternp (pattern)
-  (declare (type (pattern pattern)))
-  (get-locality pattern))
 
 (defmethod print-object ((self pattern) strm)
   (print-unreadable-object (self strm :identity t :type t)
@@ -109,7 +104,7 @@
             (t (error "Funny slot format.")))
       (values))))
 
-(defun set-pattern-locality (pattern bindings)
+(defun set-slot-localities (pattern bindings)
   (labels ((is-localp (var)
              (let ((binding (lookup-binding bindings var)))
                (cl:assert (not (null binding)) ())
@@ -125,22 +120,15 @@
                       (values nil))
                      (t
                       (get-constraint-locality (rest constraint))))))
-           (get-slot-locality (slots)
-             (let ((slot (first slots)))
-               (cond ((null slot)
-                      (values t))
-                     ((or (not (is-localp (get-value slot)))
-                          (not (get-constraint-locality (get-constraint slot))))
-                      (values nil))
-                     (t
-                      (get-slot-locality (rest slots)))))))
-    (setf (slot-value pattern 'locality)
-      (get-slot-locality (get-slots pattern))))
-  (values))
+           (set-slot-locality (slot)
+             (setf (get-locality slot)
+               (and (is-localp (get-value slot))
+                    (get-constraint-locality (get-constraint slot))))))
+    (mapc #'set-slot-locality (get-slots pattern))))
 
 (defmethod finalize-pattern ((self pattern) bindings)
   (mapc #'(lambda (slot)
             (canonicalize-slot self slot bindings))
         (get-slots self))
-  (set-pattern-locality self bindings)
+  (set-slot-localities self bindings)
   (values self))

@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.10 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: slot.lisp,v 1.11 2001/01/19 22:15:28 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,13 +32,17 @@
           :accessor get-value)
    (constraint :initarg :constraint
                :initform nil
-               :accessor get-constraint))
+               :accessor get-constraint)
+   (locality :accessor get-locality))
   (:documentation
    "Represents a single slot within a pattern."))
 
 (defun has-constraintp (slot)
   (declare (type slot slot))
   (not (null (get-constraint slot))))
+
+(defun localized-slotp (slot)
+  (get-locality slot))
 
 (defmethod print-object ((self slot) strm)
   (print-unreadable-object (self strm :type t :identity t)
