@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.4 2002/11/19 19:04:45 youngde Exp $
+;;; $Id: context.lisp,v 1.5 2002/11/19 19:53:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,7 +34,9 @@
 
 (defmethod print-object ((self context) strm)
   (print-unreadable-object (self strm :type t)
-    (format strm "~A" (context-name self))))
+    (if (initial-context-p self)
+        (format strm "~S" "The Initial Context")
+      (format strm "~A" (context-name self)))))
 
 (defun find-rule-in-context (context rule-name)
   (values (gethash rule-name (context-rules context))))

@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.17 2002/11/19 19:41:13 youngde Exp $
+;;; $Id: language.lisp,v 1.18 2002/11/19 19:53:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,9 +49,11 @@
      (register-new-context (inference-engine) 
                            (make-context ,context-name))))
 
-(defmacro focus (context-name)
-  `(push-context 
-    (inference-engine) (find-context (inference-engine) ,context-name)))
+(defmacro focus (&optional context-name)
+  `(if (null ,context-name)
+       (active-context)
+     (push-context 
+      (inference-engine) (find-context (inference-engine) ',context-name))))
 
 (defmacro refocus ()
   `(pop-context (inference-engine)))
