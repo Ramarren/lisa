@@ -9,8 +9,8 @@
   (slot nemesis))
 
 (defrule nemesis
-  (rocky (name ?n&"rocky"))
-  (natasha (name "natasha") (nemesis ?n))
+  (natasha (name "natasha") (nemesis ?nemesis&"rocky"))
+  (rocky (name ?nemesis))
   =>
   (printout t "nemesis fired!" crlf))
 

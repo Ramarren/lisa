@@ -21,7 +21,7 @@
 ;;; Description: This class holds an individual test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-simple.lisp,v 1.1 2000/12/05 16:02:36 youngde Exp $
+;;; $Id: test2-simple.lisp,v 1.2 2000/12/05 21:37:21 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,6 +34,8 @@
                     :reader get-right-slot-name))
   (:documentation
    "This class holds an individual test performed by two-input nodes."))
+
+(defmethod do-test ((self test2-simple) token &optional (fact nil)))
 
 (defun make-test2-simple (fact-location left-slot right-slot)
   (make-instance 'test2-simple :fact-location fact-location

@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.8 2000/11/30 20:00:26 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.9 2000/12/05 21:37:21 youngde Exp $
 
 (in-package :lisa)
 
@@ -65,6 +65,15 @@
                (declare (ignore key))
                (funcall function val))
            (get-table tree)))
+
+(defmacro with-tree-iterator ((key value tree) &body body)
+  (let ((generator (gensym))
+        (endp (gensym)))
+    `(with-hash-table-iterator (,generator ,tree)
+       (loop
+         (multiple-value-bind (,endp ,key ,val)
+             (,generator)
+           ,@body)))))
 
 (defun make-token-tree (&key (use-sortcode-p nil))
   (make-instance 'token-tree :use-sortcode use-sortcode-p))

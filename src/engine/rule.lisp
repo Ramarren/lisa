@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.16 2000/12/04 20:12:19 youngde Exp $
+;;; $Id: rule.lisp,v 1.17 2000/12/05 21:37:21 youngde Exp $
 
 (in-package :lisa)
 
@@ -86,6 +86,9 @@
   (with-accessors ((bindings get-bindings)) self
     (unless (gethash (get-name binding) bindings)
       (setf (gethash (get-name binding) bindings) binding))))
+
+(defmethod find-binding ((self rule) varname)
+  (gethash varname (get-bindings self)))
 
 (defmethod traverse-bindings ((self rule) token)
   (flet ((show-binding (b)

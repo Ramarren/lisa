@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.15 2000/11/29 01:07:45 youngde Exp $
+;;; $Id: node2.lisp,v 1.16 2000/12/05 21:37:21 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,6 +46,12 @@
 
 (defmethod increment-matches ((self node2) (tok token))
   (incf (get-pattern-matches self)))
+
+(defmethod add-binding-test ((self node2) binding right-slot)
+  (declare (type slot-binding binding))
+  (add-test self (make-test2-simple (get-location binding)
+                                    (get-slot-name binding)
+                                    right-slot)))
 
 (defmethod add-to-left-tree ((self node2) token)
   (add-token (get-left-tree self) token))
@@ -81,30 +87,34 @@
   (values t))
 
 (defmethod run-tests-vary-left ((self node2) right-token tree)
-  (flet ((eval-tests (left-token)
-           (pass-along self (make-derived-token 
-                             (class-of right-token)
-                             left-token
-                             (get-top-fact right-token)))))
-    (maptree #'eval-tests tree)
+  (with-tree-iterator (key left-token tree)
+    (when ((or (not (has-tests-p self))
+               (run-tests self left-token (get-top-fact right-token))))
+      (pass-along self (make-derived-token 
+                        (class-of right-token)
+                        left-token
+                        (get-top-fact right-token)))
+      (return t))
     (values nil)))
 
 (defmethod run-tests-vary-right ((self node2) left-token tree)
-  (flet ((eval-tests (right-token)
-           (increment-matches self left-token)
-           (pass-along self
-                       (make-derived-token
+  (with-tree-iterator (key right-token tree)
+    (when (or (not (has-tests-p self))
+              (run-tests self left-token (get-top-fact right-token)))
+      (increment-matches self left-token)
+      (pass-along self (make-derived-token
                         (class-of left-token)
                         left-token
-                        (get-top-fact right-token)))))
-    (maptree #'eval-tests tree)
+                        (get-top-fact right-token)))
+      (return t))
     (values nil)))
 
 (defmethod print-object ((self node2) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(left = ~D, right = ~D)"
+    (format strm "(left = ~D ; right = ~D ; tests = ~D)"
             (token-tree-count (get-left-tree self))
-            (token-tree-count (get-right-tree self)))))
+            (token-tree-count (get-right-tree self))
+            (get-test-count self))))
 
 (defun make-node2 (engine)
   (make-instance 'node2 :engine engine))
