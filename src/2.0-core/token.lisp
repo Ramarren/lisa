@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.13 2002/09/11 23:56:34 youngde Exp $
+;;; $Id: token.lisp,v 1.14 2002/09/12 23:42:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,15 +52,12 @@
     (unless (zerop (fill-pointer fact-vector))
       (aref fact-fector (decf (fill-pointer fact-vector))))))
 
-(defun token-contents (token)
-  (coerce (token-facts token) 'list))
-
 (defun token-terminal-contents (token)
   "Danger! This function should only be called after the token has reached its
   terminal node."
   (with-slots ((contents contents)) token
     (when (null contents)
-      (setf contents (token-contents token)))
+      (setf contents (coerce (token-contents token) 'list)))
     contents))
 
 (defun replicate-token (token &key (token-class nil))
@@ -81,5 +78,5 @@
   (token-push-fact (make-instance 'remove-token) fact))
 
 (defmethod make-remove-token ((token token))
-  (replicate-token token 'remove-token))
+  (replicate-token token :token-class 'remove-token))
 

@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.13 2002/09/12 19:52:55 youngde Exp $
+;;; $Id: node2.lisp,v 1.14 2002/09/12 23:42:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,10 +31,13 @@
 
 (defmethod test-tokens ((self node2) left-tokens right-token)
   (token-push-fact left-tokens (token-top-fact right-token))
-  (unless (every #'(lambda (test)
-                     (funcall test left-tokens))
-                 (join-node-tests self))
-    (token-pop-fact left-tokens)))
+  (let ((test-results
+         (every #'(lambda (test)
+                    (funcall test left-tokens))
+                (join-node-tests self))))
+    (unless test-results
+      (token-pop-fact left-tokens))
+    test-results))
 
 (defmethod test-against-right-memory ((self node2) left-tokens)
   (loop for right-token being the hash-value 

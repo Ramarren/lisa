@@ -20,6 +20,9 @@
 (deftemplate saruman ()
   (slot name))
 
+(deftemplate samwise ()
+  (slot friend))
+
 #+ignore
 (defrule simple-rule ()
   (frodo (name frodo))
@@ -30,11 +33,11 @@
 
 (defrule variable-rule ()
   (frodo (name ?name))
-  (bilbo (name ?name))
-;;;  (bilbo (name ?bname (eq ?name ?bname)))
+  (samwise (friend ?name))
   =>
   )
 
 (defvar *frodo* (assert (frodo (name frodo))))
 (defvar *bilbo* (assert (bilbo (name bilbo))))
+(defvar *samwise* (assert (samwise (friend frodo))))
 (defvar *gandalf* (assert (gandalf (name gandalf) (age 100))))
