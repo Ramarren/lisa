@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.73 2001/05/23 21:47:34 youngde Exp $
+;;; $Id: parser.lisp,v 1.74 2001/07/09 17:57:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -149,25 +149,8 @@
                          pattern "Found one or more structural problems."))))))
     `(,head ,(parse-pattern-body (rest pattern) nil)))))
 
-#+ignore
 (defun normalize-slots (slots)
-  (flet ((normalize (slot)
-           (let ((slot-name (first slot))
-                 (slot-value (second slot)))
-             (cond ((and (symbolp slot-name)
-                         (or (literalp slot-value)
-                             (multifieldp slot-value)
-                             (variablep slot-value)))
-                    (if (quotablep slot-value)
-                        ``(,',slot-name ,',slot-value)
-                      ``(,',slot-name ,,slot-value)))
-                   (t
-                    (parsing-error
-                     "There's a type problem in this slot: ~S." slot))))))
-    `(list ,@(mapcar #'normalize slots))))
-
-(defun normalize-slots (slots)
-  (flet ((normalize (slot)
+  (flet ((normalize-slot (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
              (cond ((symbolp slot-name)
@@ -177,7 +160,7 @@
                    (t
                     (parsing-error
                      "There's a type problem in this slot: ~S." slot))))))
-    `(list ,@(mapcar #'normalize slots))))
+    `(list ,@(mapcar #'normalize-slot slots))))
 
 (defun canonicalize-slot-names (meta-class slots)
   (mapcar #'(lambda (slot)
@@ -262,3 +245,27 @@
 (defun parse-and-retract-instance (instance)
   (let ((engine (current-engine)))
     (retract-fact engine (find-shadow-fact engine instance))))
+
+(defun show-deffacts (deffact)
+  (format t "~S~%" deffact)
+  (values deffact))
+
+(defun parse-and-insert-deffacts (name body)
+  `(let ((deffacts '()))
+     (dolist (fact ',body)
+       (let* ((head (first fact))
+              (meta-class (find-meta-class head)))
+         (push (make-fact 
+                head
+                (canonicalize-slot-names
+                 meta-class
+                 (mapcar #'(lambda (slot)
+                             (let ((name (first slot))
+                                   (value (second slot)))
+                               (if (quotablep value)
+                                   `(,name ',value)
+                                 `(,name ,value))))
+                         (rest fact))))
+               deffacts)))
+     (show-deffacts (make-deffacts ',name (nreverse deffacts)))))
+       
