@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.33 2001/06/25 17:07:25 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.34 2001/06/27 01:40:13 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -76,14 +76,11 @@
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
-  #+(or Allegro CMU LispWorks)
+  #+(or Allegro LispWorks)
   (:import-from "CLOS"
                 "FINALIZE-INHERITANCE"
                 "ENSURE-CLASS"
                 "CLASS-FINALIZED-P")
-  #+CLISP
-  (:import-from "CLOS"
-                "ENSURE-CLASS")
   (:export "CLASS-SLOT-LIST"
            "FINALIZE-INHERITANCE"
            "ENSURE-CLASS"

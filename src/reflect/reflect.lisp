@@ -21,9 +21,13 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation details.
 
-;;; $Id: reflect.lisp,v 1.5 2001/04/18 14:05:08 youngde Exp $
+;;; $Id: reflect.lisp,v 1.6 2001/06/27 01:40:13 youngde Exp $
 
 (in-package "LISA.REFLECT")
+
+#+(or CLISP CMUCL)
+(defun ensure-class (name &key (direct-superclasses '()))
+  (eval `(defclass ,name ,direct-superclasses ())))
 
 #+CLISP
 (defun class-finalized-p (class)
