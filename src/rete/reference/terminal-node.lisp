@@ -20,35 +20,32 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.10 2002/10/03 14:47:45 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.11 2002/11/05 18:10:41 youngde Exp $
 
 (in-package "LISA")
 
 (defclass terminal-node ()
   ((rule :initarg :rule
          :initform nil
-         :reader terminal-node-rule)
-   (rule-activations :initform (make-hash-table :test #'equal)
-                     :accessor terminal-node-rule-activations)))
+         :reader terminal-node-rule)))
 
 (defmethod accept-token ((self terminal-node) (tokens add-token))
   (let* ((rule (terminal-node-rule self))
          (activation (make-activation rule tokens)))
     (add-activation (rule-engine rule) activation)
-    (setf (gethash (hash-key tokens) (terminal-node-rule-activations self))
-      activation)
+    (bind-rule-activation rule activation tokens)
     t))
 
 (defmethod accept-token ((self terminal-node) (tokens remove-token))
-  (with-accessors ((activations terminal-node-rule-activations)) self
-    (let ((activation (gethash (hash-key tokens) activations)))
-      (unless (null activation)
-        (disable-activation (rule-engine (terminal-node-rule self)) activation)
-        (remhash (hash-key tokens) activations)))
+  (let* ((rule (terminal-node-rule self))
+         (activation (find-activation-binding rule tokens)))
+    (unless (null activation)
+      (disable-activation (rule-engine rule) activation)
+      (unbind-rule-activation rule tokens))
     t))
 
 (defmethod accept-token ((self terminal-node) (token reset-token))
-  (clrhash (terminal-node-rule-activations self))
+  (clear-activation-bindings (terminal-node-rule self))
   t)
 
 (defmethod print-object ((self terminal-node) strm)

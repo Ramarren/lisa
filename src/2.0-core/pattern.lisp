@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.26 2002/11/04 18:55:28 youngde Exp $
+;;; $Id: pattern.lisp,v 1.27 2002/11/05 18:10:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -58,8 +58,11 @@
 ;;; is the variable to which a fact matching the pattern will be bound during
 ;;; the match process; TEST-BINDINGS is a list of BINDING objects present if
 ;;; the pattern is a TEST CE; BINDING-SET is the set of variable bindings used
-;;; by the pattern; TYPE is one of (:GENERIC :NEGATED :TEST) and indicates
-;;; the kind of pattern represented.
+;;; by the pattern; TYPE is one of (:GENERIC :NEGATED :TEST :OR) and indicates
+;;; the kind of pattern represented; SUB-PATTERNS, if non-NIL, is set for an
+;;; OR CE and is a list of PARSED-PATTERN objects that represent the branches
+;;; within the OR; LOGICAL, if non-NIL, indicates this pattern participates in
+;;; truth maintenance.
 
 (defstruct parsed-pattern
   "Represents the canonical form of a pattern analysed by the DEFRULE parser."

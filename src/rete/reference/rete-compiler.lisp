@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.40 2002/10/30 20:34:26 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.41 2002/11/05 18:10:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -190,15 +190,14 @@
 (defun add-terminal-node (rule)
   (add-successor (leaf-node) (make-terminal-node rule) #'pass-token))
 
-(defun compile-rule-into-network (rete-network patterns &optional (rule nil))
+(defun compile-rule-into-network (rete-network patterns rule)
   (let ((*root-nodes* (rete-roots rete-network))
         (*rule-specific-nodes* (list))
         (*leaf-nodes* (make-array (length patterns))))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
     (add-terminal-node rule)
-    (unless (null rule)
-      (attach-rule-nodes rule (nreverse *rule-specific-nodes*)))
+    (attach-rule-nodes rule (nreverse *rule-specific-nodes*))
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)
     rete-network))
 
@@ -209,11 +208,3 @@
       (funcall loader from-network))
     (attach-rule-nodes rule (merge-networks from-network to-network))
     to-network))
-
-(defvar *test-network* nil)
-
-(defun make-test-network (patterns)
-  (when (null *test-network*)
-    (setf *test-network* (make-rete-network)))
-  (compile-rule-into-network *test-network* patterns)
-  *test-network*)

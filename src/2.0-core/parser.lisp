@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.52 2002/11/04 19:25:48 youngde Exp $
+;;; $Id: parser.lisp,v 1.53 2002/11/05 18:10:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -154,7 +154,7 @@
                    "This pattern is malformed: ~S" pattern)
                  (cond ((endp body)
                         (unless *in-logical-pattern-p*
-                          (reverse patterns)))
+                          (nreverse patterns)))
                        ((eq (first pattern) 'logical)
                         (let ((*in-logical-pattern-p* t))
                           (parse-lhs (rest pattern)))
@@ -202,6 +202,8 @@
                           #'build-parsed-pattern
                         (parse-test-pattern p) :test))
                      ((eq head 'not)
+                      (cl:assert (not *in-logical-pattern-p*) nil
+                        "Negated patterns aren't allowed within LOGICAL forms.")
                       (multiple-value-call
                           #'build-parsed-pattern
                         (parse-default-pattern (second p) location) :negated))

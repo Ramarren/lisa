@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.12 2002/11/04 18:55:28 youngde Exp $
+;;; $Id: rule.lisp,v 1.13 2002/11/05 18:10:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,6 +44,8 @@
                 :reader rule-binding-set)
    (node-list :initform nil
               :reader rule-node-list)
+   (activations :initform (make-hash-table :test #'equal)
+                :accessor rule-activations)
    (subrules :initform nil
              :accessor rule-subrules)
    (logicals :initform nil
@@ -59,7 +61,21 @@
   (let ((*active-rule* self)
         (*active-engine* (rule-engine self))
         (*active-tokens* tokens))
+    (unbind-rule-activation self tokens)
     (funcall (rule-behavior self) tokens)))
+
+(defun bind-rule-activation (rule activation tokens)
+  (setf (gethash (hash-key tokens) (rule-activations rule))
+    activation))
+
+(defun unbind-rule-activation (rule tokens)
+  (remhash (hash-key tokens) (rule-activations rule)))
+
+(defun clear-activation-bindings (rule)
+  (clrhash (rule-activations rule)))
+
+(defun find-activation-binding (rule tokens)
+  (gethash (hash-key tokens) (rule-activations rule)))
 
 (defun attach-rule-nodes (rule nodes)
   (setf (slot-value rule 'node-list) nodes))
