@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.1 2001/05/05 21:00:52 youngde Exp $
+;;; $Id: pumps.lisp,v 1.2 2001/05/07 15:49:23 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -43,18 +43,121 @@
    (name :initarg :name
          :reader get-name)))
 
-(defimport pump (lisa-user::pump) ())
-(defimport tank (lisa-user::tank) ())
-
 (defun set-flow-rate (self new-rate)
   (declare (type pump self))
   (with-accessors ((rate get-flow-rate)) self
-    (when (and (>= new-rate 0) (not (= rate new-rate)))
+    (when (and (not (minusp new-rate)) (not (eql rate new-rate)))
       (setf rate new-rate)
       (mark-instance-as-changed self 'flow-rate))))
 
 (defun run-pump (self)
-  (declare (type pump self)))
+  (declare (type pump self))
+  (flet ((add-water-to-tank ()
+           (with-accessors ((tank get-tank)) self
+             (do ()
+                 ((not (intact-p tank)) t)
+               (add-water tank (get-flow-rate self))
+               (lmp:process-sleep 0.10)))))
+    (lmp:make-process
+     (concatenate 'string "Pump Process " (get-name self))
+     #'add-water-to-tank)))
 
 (defun make-pump (name tank)
   (make-instance 'pump :name name :tank tank))
+
+(defun high-p (self)
+  (declare (type tank self))
+  (> (get-level self) 750))
+
+(defun low-p (self)
+  (declare (type tank self))
+  (< (get-level self) 250))
+
+(defun intact-p (self)
+  (declare (type tank self))
+  (with-accessors ((level get-level)) self
+    (and (< level 1000) (> level 0))))
+
+(defun add-water (self amount)
+  (declare (type tank self) (type integer amount))
+  (unless (zerop amount)
+    (incf (get-level self) amount)
+    (mark-instance-as-changed self 'level)))
+
+(defun run-tank (self)
+  (declare (type tank self))
+  (flet ((adjust-tank-level ()
+           (do ()
+               ((not (intact-p self)))
+             (add-water self -1)
+             (lmp:process-sleep 0.025))
+           (cond ((>= (get-level self) 1000)
+                  (format t "Tank ~S exploded!~%" self))
+                 ((<= (get-level self) 0)
+                  (format t "Tank ~S ran dry and caught fire!~%" self)))))
+    (lmp:make-process
+     (concatenate 'string "Tank Process " (get-name self))
+     #'adjust-tank-level)))
+
+(defimport pump (lisa-user::pump) ())
+(defimport tank (lisa-user::tank) ())
+
+(defrule warn-if-low ()
+  (tank (name ?name) (:object ?tank))
+  (test (and (low-p ?tank) (intact-p ?tank)))
+  (not (low-level-warning (tank ?tank)))
+  =>
+  (assert (low-level-warning (tank ?tank)))
+  (format t "Warning: Tank ~S is low!~%" ?name))
+
+(defrule raise-rate-if-low ()
+  (?warning (low-level-warning (tank ?tank)))
+  (pump (name ?name) (tank ?tank) (flow-rate ?flow-rate (< ?flow-rate 25))
+        (:object ?pump))
+  =>
+  (retract ?warning)
+  (set-flow-rate ?pump (1+ ?flow-rate))
+  (format t "Raised pumping rate of pump ~S to ~D~%" 
+          ?name (get-flow-rate ?pump)))
+
+(defrule warn-if-high ()
+  (tank (name ?name) (:object ?tank))
+  (test (and (high-p ?tank) (intact-p ?tank)))
+  (not (high-level-warning (tank ?tank)))
+  =>
+  (assert (high-level-warning (tank ?tank)))
+  (format t "Warning: Tank ~S is high!~%" ?name))
+
+(defrule lower-rate-if-high ()
+  (?warning (high-level-warning (tank ?tank)))
+  (pump (name ?name) (flow-rate ?flow-rate (plusp ?flow-rate))
+        (:object ?pump))
+  =>
+  (retract ?warning)
+  (set-flow-rate ?pump (1- ?flow-rate))
+  (format t "Lowered pumping rate of pump ~S to ~D~%"
+          ?name (get-flow-rate ?pump)))
+
+(defrule notify-if-ok ()
+  (?warning (level-warning))
+  (tank (name ?name) (:object ?tank))
+  (test (and (not (high-p ?tank)) (not (low-p ?tank))))
+  =>
+  (retract ?warning)
+  (format t "Tank ~S is now OK.~%" ?name))
+
+(defrule report-fire ()
+  (?fact (tank (name ?name) (:object ?tank)))
+  (test (and (low-p ?tank) (not (intact-p ?tank))))
+  =>
+  (format t "*********************************************~%")
+  (format t "* Tank ~S has run dry and caught fire.~%" ?name)
+  (format t "*********************************************~%"))
+
+(defrule report-explosion ()
+  (?fact (tank (name ?name) (:object ?tank)))
+  (test (and (high-p ?tank) (not (intact-p ?tank))))
+  =>
+  (format t "*********************************************~%")
+  (format t "* Tank ~S has overfilled and exploded.~%" ?name)
+  (format t "*********************************************~%"))
