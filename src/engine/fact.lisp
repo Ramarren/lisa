@@ -20,10 +20,92 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.28 2001/03/29 18:54:53 youngde Exp $
+;;; $Id: fact.lisp,v 1.29 2001/03/30 14:30:40 youngde Exp $
 
 (in-package "LISA")
 
+(defstruct (fact
+             (:constructor
+              create-fact (&key name)))
+  (name nil :type symbol)
+  (fact-id -1 :type integer)
+  (symbolic-id nil)
+  (slot-table nil)
+  (clock 0 :type fixnum))
+
+(defun get-fact-id (self)
+  (declare (type fact self))
+  (fact-fact-id self))
+
+(defun set-fact-id (self id)
+  (declare (type fact self) (type integer id))
+  (setf (fact-fact-id self) id))
+
+(defun set-slot-value (self slot-name value)
+  (declare (type fact self) (type slot-name slot-name))
+  (setf (aref (fact-slot-table self) (slot-name-position slot-name)) value))
+
+(defun get-symbolic-id (self)
+  (declare (type fact self))
+  (let ((id (fact-symbolic-id self)))
+    (when (null id)
+      (setf id
+        (intern (symbol-name
+                 (make-symbol (format nil "F-~D" (get-fact-id self))))))
+      (setf (fact-symbolic-id self) id))
+    (values id)))
+
+(defun get-slot-values (self)
+  (declare (type fact self))
+  (let ((meta (find-meta-class (fact-name self)))
+        (table (fact-slot-table self)))
+    (mapcar #'(lambda (meta-slot)
+                `(,(slot-name-name meta-slot)
+                  ,(aref table (slot-name-position meta-slot))))
+            (meta-slot-list meta))))
+
+(defun get-slot-value (self slot-name)
+  (declare (type fact self) (type slot-name slot-name))
+  (aref (fact-slot-table self) (slot-name-position slot-name)))
+
+(defun get-time (self)
+  (declare (type fact self))
+  (fact-clock self))
+
+(defmethod update-time ((self fact) engine)
+  (setf (fact-clock self) (get-engine-time engine)))
+
+(defun reconstruct-fact (self)
+  (declare (type fact self))
+  `(,(fact-name self) ,@(get-slot-values self)))
+
+(defun write-fact (self strm)
+  (declare (type fact self))
+  (when (> (fact-fact-id self) 0)
+    (print `(assert ,(reconstruct-fact self)) strm)))
+
+(defmethod equals ((self fact) (obj fact))
+  (cl:assert nil () "Why is FACT.EQUALS being called?")
+  (and (equal (fact-name self) (fact-name obj))
+       (equal (get-slot-table self) (get-slot-table obj))))
+
+(defmethod print-object ((self fact) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "f-~D ; ~S ; ~S" (fact-fact-id self)
+            (fact-name self) (get-slot-values self))))
+
+(defun make-fact (name slots)
+  (let ((fact (create-fact :name name))
+        (meta (find-meta-class name)))
+    (setf (fact-slot-table fact)
+      (make-array (meta-slot-count meta)
+                  :initial-element nil))
+    (mapc #'(lambda (pair)
+              (set-slot-value fact (first pair) (second pair)))
+          slots)
+    (values fact)))
+
+#|
 (defclass fact ()
   ((class :initarg :class
          :initform nil
@@ -106,3 +188,4 @@
 
 (defun make-fact (class slots)
   (make-instance 'fact :class class :slots slots))
+|#

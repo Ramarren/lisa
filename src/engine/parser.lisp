@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.43 2001/03/17 01:04:42 youngde Exp $
+;;; $Id: parser.lisp,v 1.44 2001/03/30 14:30:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -162,7 +162,7 @@
 
 (defun parse-and-modify-fact (fact body)
   `(modify-fact (current-engine) ,fact
-    (canonicalize-slot-names (find-meta-class (get-class ,fact))
+    (canonicalize-slot-names (find-meta-class (fact-name ,fact))
      (,@(normalize-slots body)))))
 
 (defun redefine-deftemplate (name body)
