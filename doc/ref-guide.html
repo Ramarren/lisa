@@ -171,7 +171,7 @@ evaluated at execution time.</blockquote>
 </table>
 
 <blockquote>Creates a rule identified by <i>name</i> and compiles it into
-the Rete network. The keyword arguments modify the rule as follows:
+the Rete network. <i>Name</i> is any Lisp form that evaluates to a symbol. The keyword arguments modify the rule as follows:
 <pre>:salience <i>integer</i></pre>
 
 <blockquote>Assigns a priority to the rule that will affect the firing
@@ -182,6 +182,9 @@ By default, all rules have salience 0.</blockquote>
 
 <blockquote>Binds the rule to a module identified by the symbol <i>name</i>.
 Currently unimplemented.</blockquote>
+
+  <p>If the rule identified by <i>name</i> already exists in the Rete network it
+  is replaced by the new definition.</p>
 
 <h5>
 Patterns</h5>
@@ -603,11 +606,53 @@ for <i>watch</i> to see the allowable event types.</blockquote>
 <h3>
 II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
 
-<p><br>For application developers, LISA makes available the LISA-USER package.
+<p>For application developers, LISA makes available the LISA-USER package.
 Generally, all user-level work should be done in this package; see the
 various examples provided in "lisa:misc;".
+
+<h3>III. <a name="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
+
+<p>In addition to statically declared rules, LISA supports the definition of
+rules at runtime. That is, it is possible to create new rules from the RHSs of
+existing rules as they fire. These <i>dynamically defined</i> rules become
+immediately available to the inference engine for potential activation. As a
+simple example, consider the following rule:
+<blockquote>
+
+<p>(defrule rocky ()<br>
+&nbsp; (rocky (name ?name))<br>
+&nbsp; =&gt;<br>
+&nbsp; (defrule boris ()<br>
+&nbsp;&nbsp;&nbsp; (boris (name ?name))<br>
+&nbsp;&nbsp;&nbsp; =&gt;<br>
+&nbsp;&nbsp;&nbsp; (format t &quot;Dynamic rule BORIS fired; NAME is ~S~%&quot;
+?name)))
+</blockquote>
+<p>When rule ROCKY fires, its RHS creates a dynamically defined rule named
+BORIS. This new rule is inserted into the inference engine and immediately
+becomes part of the Rete network. Variables bound on the LHS of ROCKY behave as
+expected within the context of BORIS; this means that ?NAME in BORIS is bound to
+the same object as that found in ROCKY.<p>Here's a more complicated example:
+<blockquote>
+  <p>(defrule rocky ()<br>
+  &nbsp; (rocky (name ?name))<br>
+  &nbsp; =&gt;<br>
+  &nbsp; (let ((dynamic-rule<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (defrule
+  (gensym) ()<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  (boris (name ?name))<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  =&gt;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  (format t &quot;Dynamic rule ~A fired; name is ~S~%&quot; (get-name (rule))
+  ?name))))<br>
+  &nbsp;&nbsp;&nbsp; (format t &quot;Rule ROCKY added dynamic rule ~A~%&quot;
+  (get-name dynamic-rule))))
+</blockquote>
+<p>&nbsp;
 <h3>
-III.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
+IV.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
 Conflict Resolution (CR) is the mechanism LISA employs to determine the
 order in which multiple activations will fire. Currently, LISA offers two
 "built-in" strategies; <i>breadth-first</i> and <i>depth-first</i>. It
@@ -657,7 +702,7 @@ of this new strategy can then be given to <i>make-inference-engine</i>.
 Documentation for the CR interface is still fairly light. Look for improvements
 in upcoming releases.
 <h3>
-IV.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
+V.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 for your convenience, a copy is included in the distribution. Building
 LISA should be straight-forward. First, either load "lisa:lisa.system" or change
@@ -677,7 +722,7 @@ for the examples in "lisa:misc;".
 support enabled. Also, the baseline version with which LISA has been tested
 is 2.25.1. Earlier releases might work as well, but no guarantees.
 <h3>
-V.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+VI.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 This section is a list (albeit incomplete) of features that would improve
 LISA significantly.
 <ol>
@@ -713,7 +758,7 @@ for information. Something similar to Loom's query language would be very
 nice.</li>
 </ol>
 
-<h3><a name="Supported Platforms">VI. Supported Platforms</a>.</h3>
+<h3><a name="Supported Platforms">VII. Supported Platforms</a>.</h3>
 <p>LISA has been tested, and is known to run, on the following Common Lisp
 implementations:</p>
 <ul>
