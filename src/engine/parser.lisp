@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.1 2000/10/25 15:15:19 youngde Exp $
+;;; $Id: parser.lisp,v 1.2 2000/10/25 15:18:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,10 +32,6 @@
 
 (defun make-negated-pattern (p)
   (list p))
-
-(defmacro defrule (name &body body)
-  "Creates or redefines a rule in the network."
-  `(redefine-defrule ',name ',body))
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot

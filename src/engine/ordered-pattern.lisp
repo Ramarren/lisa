@@ -20,12 +20,15 @@
 ;;; File: ordered-pattern.lisp
 ;;; Description:
 
-;;; $Id: ordered-pattern.lisp,v 1.1 2000/10/24 18:55:57 youngde Exp $
+;;; $Id: ordered-pattern.lisp,v 1.2 2000/10/25 15:18:29 youngde Exp $
 
 
 (in-package "LISA")
 
-(defclass ordered-pattern (pattern))
+(defclass ordered-pattern (pattern)
+  ()
+  (:documentation
+   "Class representing ordered patterns on the rule LHS."))
 
 (defun make-ordered-pattern (head body)
   (let ((pattern (make-instance 'ordered-pattern :name head)))

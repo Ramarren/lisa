@@ -20,11 +20,11 @@
 ;;; File: defrule.lisp
 ;;; Description: The DEFRULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.5 2000/10/24 18:58:50 youngde Exp $
+;;; $Id: defrule.lisp,v 1.6 2000/10/25 15:18:29 youngde Exp $
 
 (in-package "LISA")
 
-(defvar *rete* (list))
+(defvar *rete* (make-hash-table))
 
 (defclass defrule ()
   ((name :initarg :name
@@ -49,18 +49,22 @@
 (defmethod compile-patterns ((rule defrule) plist)
   (with-accessors ((patterns get-patterns)) rule
     (mapc #'(lambda (p)
+              (format t "compiling pattern: ~S~%" p)
               (setf patterns
-                (append patterns `(,(make-pattern (first p) (rest p))))))
+                (append patterns `(,(make-pattern (first p) (second p))))))
           plist)))
 
-(defmethod compile-actions ((rule defrule) function)
-  (setf (get-actions rule) function))
+(defmethod compile-actions ((rule defrule) rhs)
+  (setf (get-actions rule) (compile-function rhs)))
+
+(defmethod finalize-rule-definition ((rule defrule) lhs rhs)
+  (compile-patterns rule lhs)
+  (compile-actions rule rhs)
+  (setf (gethash (get-name rule) *rete*) rule)
+  (values rule))
 
 (defun make-defrule (name &key (doc-string nil) (salience 0) (source nil))
   "Constructor for class DEFRULE."
-  (let ((rule
-         (make-instance 'defrule :name name :comment doc-string
-                        :salience salience :rule-source source)))
-    (push rule *rete*)
-    (values rule)))
+  (make-instance 'defrule :name name :comment doc-string
+                 :salience salience :rule-source source))
 
