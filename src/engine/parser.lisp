@@ -18,9 +18,13 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: parser.lisp
-;;; Description: The LISA programming language parser.
+;;; Description: The LISA programming language parser. Basic parsing and
+;;; validation is done here, but it isn't comprehensive. Additional parsing
+;;; work (and error discovery) for some constructs (such as defrule, assert,
+;;; modify) is performed elsewhere as these constructs undergo additional
+;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.44 2001/03/30 14:30:40 youngde Exp $
+;;; $Id: parser.lisp,v 1.45 2001/03/30 18:35:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,11 +41,16 @@
          ,@body))))
 
 (defun redefine-defrule (name body)
-  (with-rule-components ((doc-string decls lhs rhs) body)
-    (let ((rule (make-rule name (current-engine)
-                           :doc-string doc-string :source body)))
-      (finalize-rule-definition rule lhs rhs)
-      (add-rule (current-engine) rule))))
+  (flet ((redefine-rule ()
+           (with-rule-components ((doc-string decls lhs rhs) body)
+             (let ((rule (make-rule name (current-engine)
+                                    :doc-string doc-string :source body)))
+               (finalize-rule-definition rule lhs rhs)
+               (add-rule (current-engine) rule)))))
+    (handler-case
+        (redefine-rule)
+      (syntactical-error (condition)
+        (rule-structure-error name condition)))))
 
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers doc)
@@ -49,7 +58,8 @@
                (cond ((stringp obj)
                       (if (null doc)
                           (extract-headers (rest headers) obj)
-                        (error "Parse error at ~S~%" headers)))
+                        (parsing-error
+                         "Too many documentation strings: ~S" obj)))
                      ((consp obj)
                       (let ((decl (first obj)))
                         (if (and (symbolp decl)
@@ -64,8 +74,8 @@
              (let ((pattern (first body)))
                (cond ((consp pattern)
                       (parse-lhs (rest body)
-                                 (append patterns
-                                         (make-rule-pattern pattern))))
+                                 (nconc patterns
+                                        (make-rule-pattern pattern))))
                      ((null pattern)
                       (values patterns))
                      (t (error "parse-rule-body: parsing error on LHS at ~S~%" patterns)))))
