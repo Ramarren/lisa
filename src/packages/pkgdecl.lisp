@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.46 2002/07/29 17:24:56 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.47 2002/08/20 18:21:55 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -32,8 +32,14 @@
     (rename-package (find-package 'pcl) 'pcl
                     `(clos ,@(package-nicknames 'pcl)))))
 
-(defpackage "LISA"
+(defpackage "LISA.RETE"
   (:use "COMMON-LISP")
+  (:export "RETE-NETWORK" "TOKEN" "FACT" "SLOT" "GENERIC-PATTERN"
+           "NOT-PATTERN" "TEST-PATTERN" "PATTERN" "ADD-TOKEN" "REMOVE-TOKEN"
+           "CLEAR-TOKEN"))
+
+(defpackage "LISA"
+  (:use "LISA.RETE")
   (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
            "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
            "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
