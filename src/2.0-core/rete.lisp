@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.38 2002/11/19 19:41:14 youngde Exp $
+;;; $Id: rete.lisp,v 1.39 2002/11/19 20:07:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -180,7 +180,7 @@
 
 (defun reset-focus-stack (rete)
   (setf (rete-focus-stack rete)
-    (list (find-context rete :initial-context) (rete-focus-stack rete))))
+    (list (find-context rete :initial-context))))
 
 (defun set-initial-state (rete)
   (forget-all-facts rete)
@@ -254,7 +254,7 @@
 (defmethod add-activation ((self rete) activation)
   (trace-enable-activation activation)
   (add-activation
-   (context-strategy (activation-rule activation)) activation))
+   (context-strategy (rule-context (activation-rule activation))) activation))
 
 (defmethod disable-activation ((self rete) activation)
   (when (eligible-p activation)
