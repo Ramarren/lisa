@@ -1,3 +1,12 @@
+2001-06-28    <youngde@nc.rr.com>
+
+	Third Beta release. Enhancements to the system definition file
+	suggested by Paul Werkowski: LISA creates the binary directory
+	hierarchy for all supported implementations, if necessary; other
+	minor changes. Addressed implementation differences in
+	ENSURE-CLASS. Updated PORT. Tested LISA with Windows versions of
+	ACL, LispWorks and CLISP 2.26.
+
 2001-05-31  David E. Young  <youngde@nc.rr.com>
 
 	Second Beta release. Includes a fix to the Rete compiler resulting
