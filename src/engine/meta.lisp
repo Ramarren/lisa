@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.16 2001/04/07 20:46:01 youngde Exp $
+;;; $Id: meta.lisp,v 1.17 2001/04/09 18:37:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -89,11 +89,11 @@
          "This fact name does not have a registered meta class: ~S" name))
       (values meta-object))))
 
-(defun import-class (symbolic-name real-name slots)
+(defun import-class (symbolic-name real-name slot-specs)
   (print symbolic-name)
   (print real-name)
-  (print slots)
-  (terpri))
+  (print slot-specs)
+  (values))
 
 (defun create-class-template (name slots)
   (let* ((class (eval `(defclass ,name (deftemplate) ())))

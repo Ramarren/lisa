@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.59 2001/04/06 20:10:14 youngde Exp $
+;;; $Id: parser.lisp,v 1.60 2001/04/09 18:37:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -54,6 +54,22 @@
       (syntactical-error (condition)
         (rule-structure-error name condition)))))
 
+(defun extract-rule-headers (body)
+  (let ((doc nil)
+        (decls nil)
+        (remains body))
+    (when (stringp (first remains))
+      (setf doc (first remains))
+      (setf remains (rest remains)))
+    (setf decls (first remains))
+    (cond ((and (consp decls)
+                (eq (first decls) 'declare))
+           (setf decls (rest decls))
+           (setf remains (rest remains)))
+          (t (setf decls nil)))
+    (values doc decls remains)))
+
+#+ignore
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers doc)
              (let ((obj (first headers)))
