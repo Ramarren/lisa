@@ -24,12 +24,19 @@
   (slot friend)
   (slot age))
 
+(defrule negated-slot-rule ()
+  (frodo (name (not frodo)))
+  =>
+  )
+
+#+ignore
 (defrule shared-rule-a ()
   (frodo (name frodo))
   (gandalf (name gandalf) (age 100))
   =>
   )
 
+#+ignore
 (defrule shared-rule-b ()
   (frodo (name frodo))
   (gandalf (name gandalf) (age 200))

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.21 2002/09/14 15:55:10 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.22 2002/09/14 21:06:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -56,10 +56,7 @@
   new-node)
 
 (defun make-intra-pattern-node (slot)
-  (make-node1
-   (make-simple-slot-test
-    (pattern-slot-name slot)
-    (pattern-slot-value slot))))
+  (make-node1 (make-simple-slot-test slot)))
 
 (defun distribute-token (rete-network token)
   (maphash #'(lambda (key root-node)

@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.16 2002/09/03 15:48:07 youngde Exp $
+;;; $Id: parser.lisp,v 1.17 2002/09/14 21:06:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -172,6 +172,7 @@
                        (field (second slot))
                        (constraint (third slot))
                        (slot-binding nil)
+                       (negated nil)
                        (constraint-bindings (list)))
                    (cl:assert (and (symbolp name)
                                    (slot-valuep field)
@@ -180,12 +181,18 @@
                    (when (variablep field)
                      (setf slot-binding
                        (find-or-set-slot-binding field name location)))
+                   (when (and (consp field)
+                              (eq (first field) 'not)
+                              (not (consp (second field))))
+                     (setf field (second field))
+                     (setf negated t))
                    (when (consp constraint)
                      (collect-constraint-bindings constraint 
                                                   constraint-bindings))
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
+                                      :negated negated
                                       :constraint constraint
                                       :constraint-bindings
                                       (nreverse constraint-bindings))))
