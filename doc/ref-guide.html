@@ -48,7 +48,8 @@ Abbreviated Table of Contents</h2></center>
 <br><a href="#Queries">Queries</a>
 
 <br><a href="#Conflict Resolution">Conflict Resolution</a><a href="#The LISA Debugger"><br>
-The LISA Debugger</a>
+The LISA Debugger<br>
+</a><a href="auto-notify.html">Auto Notification</a>
 
 <br><a href="#Getting Started">Getting Started</a>
 
@@ -208,6 +209,8 @@ knowledge base. There are two forms of ASSERT; the first operates on
   <dl>
     <dd>(assert (frodo (name frodo) (age 100))</dd>
   </dl>
+  <p>If the template associated with a fact has not been declared prior to its
+  assertion, LISA will signal a continuable error.</p>
   <p>For instances of user-defined classes, ASSERT takes a form that must
   evaluate to a CLOS instance:</p>
   <dl>
@@ -218,8 +221,14 @@ knowledge base. There are two forms of ASSERT; the first operates on
     <dd>(let ((?instance (make-instance 'frodo :name 'frodo)))</dd>
     <dd>&nbsp;&nbsp;&nbsp; (assert (?instance)))</dd>
   </dl>
-  <p>If the template associated with a fact has not been declared prior to its
-  assertion, LISA will signal a continuable error.</p>
+  <p>or:</p>
+  <dl>
+    <dd>(defun add-my-instance (frodo-object)<br>
+      &nbsp; (assert (#?frodo-object)))</dd>
+  </dl>
+  <p>This last example makes use of the #? reader macro, which LISA offers as a
+  user-customisable feature. It's simply a short-hand notation for <i>(identity
+  frodo-object)</i>.</p>
 </blockquote>
 
 
@@ -264,11 +273,7 @@ knowledge base. There are two forms of ASSERT; the first operates on
 
 
 
-<blockquote><i>Deprecated</i>. Inserts a CLOS instance into the knowledge base. The class
-
-of <i>instance</i> should already exist and have been identified to LISA
-
-via a <i>defimport</i>.</blockquote>
+<blockquote>Inserts a CLOS instance into the knowledge base.</blockquote>
 
 
 
@@ -288,11 +293,7 @@ via a <i>defimport</i>.</blockquote>
 
 
 
-<blockquote><i>Deprecated</i>. Removes a CLOS instance from the knowledge base. The class
-
-of <i>instance</i> should already exist and have been identified to LISA
-
-via a <i>defimport</i>.</blockquote>
+<blockquote>Removes a CLOS instance from the knowledge base.</blockquote>
 
 
 
@@ -574,7 +575,7 @@ HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
     </dl>
     <p>When rule FRODO fires, it asserts a PIPPIN fact that is dependent on the
     existence of BILBO and the absence of GANDALF. If either BILBO is retracted or GANDALF
-    asserted, PIPPIN will be removed also.</p>
+    asserted, PIPPIN will be removed as a consequence.</p>
     <p>A LOGICAL conditional element must be the first pattern in a rule.
     Multiple LOGICAL forms within the same rule are allowed, but they must be
     contiguous.</p>
@@ -771,9 +772,15 @@ by LISA for each firing.</blockquote>
 
 <a NAME="CLOS-Related Operators"></a>CLOS-Related Operators</h4>
 
-There are a few special operators and functions that LISA provides for
-
-managing CLOS instances within the knowledge base.
+There are a few special features that LISA provides for keeping CLOS instances
+synchronised with their corresponding facts in working memory. If an instance is
+altered outside of LISA's control, then LISA must somehow be informed of the
+change to maintain working memory consistency. The basic mechanism is manual
+notification, in which an application explicitly invokes a special function to
+initiate synchronisation. Users of the two commercial Lisps supported by LISA
+also have the option of employing <a href="auto-notify.html">Auto Notification</a>,
+an experimental feature that removes the burden of synchronisation from the
+application.
 
 <br>&nbsp;
 
@@ -1053,6 +1060,25 @@ attempts to assert a duplicate fact, LISA signals a DUPLICATE-FACT error.</p>
 
 
 
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(use-fancy-assert)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+
+
+
+<p>
+
+Returns the current setting for fancy assertions. If enabled (the default), the
+#? reader macro is installed in the global readtable.</p>
+
+</blockquote>
+
+
+
 <h4>
 
 <a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
@@ -1253,6 +1279,10 @@ LISA environment into user-defined packages:
 COMMON-LISP packages. See the
 
 various examples provided in "lisa:misc;".</p>
+
+<p>There are a few aspects of LISA that may be customised prior to building. The
+file &quot;lisa:src;config;config.lisp&quot; contains a set of default
+behaviors; feel free to edit this file to your liking.</p>
 
 <h3>
 

@@ -1,6 +1,41 @@
 
-<h1>Release Notes for LISA 2.0 (beta)</h1>
+
+<head>
+<title></title>
+</head>
+
+<body background="hierarchy-background.gif">
+
+<h1>Release Notes for LISA 2.0</h1>
 <h2>The LISA Project</h2>
+<h3>9 December, 2002</h3>
+<p>The first production release for LISA 2.0. One major new feature, and some
+small enhancements:</p>
+<ul>
+  <li>Auto Notification (AN), a mechanism used to monitor changes to CLOS
+    instances in working memory that occur outside of LISA (i.e. somewhere else
+    in the application). Normally, LISA must be explicitly told about these
+    changes via the function <i>lisa:mark-instance-as-changed</i>; when an
+    application alters the contents of an instance’s slots, it must inform
+    LISA about the changes so the inference engine can maintain the consistency
+    of working memory. Auto Notification obviates this requirement; LISA hooks
+    into the MOP slot access protocol and notices slot changes without
+    application intervention. This is an experimental feature, and requires a
+    Common Lisp with a robust MOP implementation. As of this writing, only
+    Allegro (6.2) and LispWorks (4.2) are supported [note that earlier versions
+    of ACL and LW will probably also work; I just haven't tested AN with
+    anything else]. AN for CLISP will <i>not</i> be available until CLISP's MOP
+    is more complete; AN for CMUCL is also not supported as I don't have ready
+    access to a platform that runs CMUCL. There's more on Auto Notification in
+    the reference guide.<br>
+    <br>
+  </li>
+  <li>Both <i>assert-instance</i> and <i>retract-instance</i>, deprecated in
+    2.0b2, have been &quot;undeprecated&quot;. I've also added the #? dispatch
+    macro character to offer yet another way to add CLOS instances to working
+    memory via <i>assert</i>. See the documentation for <i>assert</i> in the
+    reference guide.</li>
+</ul>
 <h3>25 November, 2002</h3>
 <p>The third beta release for 2.0 further extends LISA's capabilities. New to
 this version:</p>
@@ -8,12 +43,15 @@ this version:</p>
   <li>Contexts, a mechanism for partitioning a knowledge base into distinct
     collections of related rules, each with its own agenda and conflict set.
     Contexts are similar to Jess and CLIPS modules.<br>
+    <br>
   </li>
   <li>The EXISTS conditional element.<br>
+    <br>
   </li>
   <li>Duplicate fact detection. LISA now offers the option of performing
     duplicate detection during fact assertion, bringing its behavior more in
     line with CLIPS and Jess.<br>
+    <br>
   </li>
   <li>Some new &quot;introspection&quot; functions in the API.</li>
 </ul>
