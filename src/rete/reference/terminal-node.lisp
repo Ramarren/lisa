@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.4 2002/09/23 17:28:33 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.5 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,6 +34,7 @@
 (defmethod accept-token ((self terminal-node) (tokens add-token))
   (let* ((rule (terminal-node-rule self))
          (activation (make-activation rule tokens)))
+    (format t "addition activation for ~S~%" tokens)
     (add-activation (rule-engine rule) activation)
     (setf (gethash (hash-code tokens) (terminal-node-rule-activations self))
       activation)

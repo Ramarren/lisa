@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.10 2002/09/23 17:28:26 youngde Exp $
+;;; $Id: rete.lisp,v 1.11 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -116,6 +116,15 @@
     (and (not (null fact))
          (retract-fact self fact))))
 
+(defmethod modify-fact ((self rete) fact slot-changes)
+  (let ((network (rete-network self)))
+    (remove-fact-from-network network fact)
+    (mapc #'(lambda (slot)
+              (set-slot-value fact (first slot) (second slot)))
+          slot-changes)
+    (add-fact-to-network network fact)
+    fact))
+
 (defun set-initial-state (rete)
   (forget-all-facts rete)
   (remove-activations (rete-strategy rete))
@@ -145,13 +154,14 @@
 
 (defmethod mark-clos-instance-as-changed ((self rete) instance
                                           &optional (slot-id nil))
-  (let ((fact (find-fact-using-instance self instance)))
+  (let ((fact (find-fact-using-instance self instance))
+        (network (rete-network self)))
     (cond ((null fact)
            (warn "This instance is not known to LISA: ~S." instance))
           (t
-           ;;(insert-token self (make-remove-token :initial-fact fact))
-           (synchronize-with-instance fact slot-id)))
-           ;;(insert-token self (make-add-token :initial-fact fact))))
+           (remove-fact-from-network network fact)
+           (synchronize-with-instance fact slot-id)
+           (add-fact-to-network network fact)))
     instance))
 
 (defmethod add-activation ((self rete) activation)

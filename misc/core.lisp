@@ -21,6 +21,7 @@
   (slot name))
 
 (deftemplate samwise ()
+  (slot name)
   (slot friend)
   (slot age))
 
@@ -59,10 +60,15 @@
 
 (defrule variable-rule ()
   (frodo (name ?name))
-  (samwise (friend ?name))
+  (?sam (samwise (name sam) (friend ?name)))
   =>
-  (format t "variable-rule fired.~%")
-  )
+  (format t "variable-rule fired: ~S~%" ?sam)
+  (modify ?sam (name samwise)))
+
+(defrule samwise ()
+  (samwise (name samwise))
+  =>
+  (format t "Rule samwise fired.~%"))
 
 #+ignore
 (defrule test-rule ()

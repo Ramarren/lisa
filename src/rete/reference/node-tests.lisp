@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.12 2002/09/19 19:14:56 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.13 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -100,10 +100,13 @@
        (progv
            `(,@special-vars)
            `(,@(mapcar #'(lambda (binding)
-                           (get-slot-value
-                            (token-find-fact 
-                             tokens (binding-address binding))
-                            (binding-slot-name binding)))
+                           (if (pattern-binding-p binding)
+                               (token-find-fact 
+                                tokens (binding-address binding))
+                             (get-slot-value
+                              (token-find-fact 
+                               tokens (binding-address binding))
+                              (binding-slot-name binding))))
                        bindings))
          (funcall predicate))))))
          

@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.24 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: parser.lisp,v 1.25 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,7 @@
     (unless existsp
       (setf binding
         (setf (gethash var *binding-table*)
-          (make-binding var slot-name location))))
+          (make-binding var location slot-name))))
     (values binding existsp)))
 
 (defun find-slot-binding (var &key (errorp t))
@@ -47,6 +47,12 @@
       (cl:assert (not (null binding)) nil
         "There's no slot binding for variable ~S" var))
     binding))
+
+(defun set-pattern-binding (var location)
+  (cl:assert (null (gethash var *binding-table*)) nil
+    "This is a duplicate pattern binding: ~S" var)
+  (setf (gethash var *binding-table*)
+    (make-binding var location :pattern)))
 
 (defun collect-bindings (forms &key (errorp t))
   (loop for obj in (utils:flatten forms)
@@ -146,9 +152,8 @@
                           #'build-parsed-pattern
                         (parse-default-pattern (second p) location) :negated))
                      ((variablep head)
-                      (cl:assert (null binding) nil
-                        "Too many pattern variables: ~S" head)
-                      (parse-pattern (first (rest p)) head))
+                      (parse-pattern (second p)
+                                     (set-pattern-binding head location)))
                      (t
                       (multiple-value-call
                           #'build-parsed-pattern

@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.3 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: activation.lisp,v 1.4 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,7 +49,7 @@
   (let ((tokens (activation-tokens self))
         (rule (activation-rule self)))
     (print-unreadable-object (self strm :identity t :type t)
-      (format strm "(~S ~S ; salience = ~D)"
+      (format strm "(~A ~A ; salience = ~D)"
               (rule-name rule)
               (mapcar #'fact-symbolic-id 
                       (token-make-fact-list tokens))

@@ -20,18 +20,21 @@
 ;;; File: binding.lisp
 ;;; Description:
 
-;;; $Id: binding.lisp,v 1.2 2002/09/03 15:48:05 youngde Exp $
+;;; $Id: binding.lisp,v 1.3 2002/09/24 15:26:42 youngde Exp $
 
 (in-package "LISA")
 
-(defun make-binding (var slot-name address)
-  (list var slot-name address))
+(defun make-binding (var address slot-name)
+  (list var address slot-name))
 
 (defun binding-variable (binding)
   (first binding))
 
-(defun binding-slot-name (binding)
+(defun binding-address (binding)
   (second binding))
 
-(defun binding-address (binding)
+(defun binding-slot-name (binding)
   (third binding))
+
+(defun pattern-binding-p (binding)
+  (eq (binding-slot-name binding) :pattern))
