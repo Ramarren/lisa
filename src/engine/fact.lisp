@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.26 2001/03/16 21:07:28 youngde Exp $
+;;; $Id: fact.lisp,v 1.27 2001/03/17 21:41:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,7 +85,7 @@
     (format strm "f-~D ; ~S ; ~S" (get-fact-id self)
             (get-class self) (get-slot-values self))))
 
-(defmethod initialize-instance :after ((self fact) &key slots)
+(defmethod initialize-instance :after ((self fact) &key slots #+CLISP &allow-other-keys)
   (let ((meta (find-meta-class (get-class self))))
     (setf (slot-value self 'slot-table)
       (make-array (meta-slot-count meta)
