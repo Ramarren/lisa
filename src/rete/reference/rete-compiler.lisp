@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.36 2002/10/09 19:22:07 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.37 2002/10/10 15:05:37 youngde Exp $
 
 (in-package "LISA")
 
@@ -45,8 +45,8 @@
                :reader rete-roots)))
 
 (defun record-node (node parent)
-  (when (typep node 'shared-node)
-    (increment-use-count node))
+  (when (typep parent 'shared-node)
+    (increment-use-count parent))
   (push (make-node-pair node parent) *rule-specific-nodes*)
   node)
 
@@ -69,9 +69,9 @@
   (declare (ignore connector))
   new-node)
 
-(defmethod add-successor :after ((parent shared-node) new-node connector)
+(defmethod add-successor :around ((parent shared-node) new-node connector)
   (declare (ignore connector))
-  (record-node new-node parent))
+  (record-node (call-next-method) parent))
 
 (defun make-intra-pattern-node (slot)
   (let ((test
@@ -203,7 +203,6 @@
     rete-network))
 
 (defun merge-rule-into-network (to-network patterns rule &key (loader nil))
-  (break)
   (let ((from-network
          (compile-rule-into-network (make-rete-network) patterns rule)))
     (unless (null loader)

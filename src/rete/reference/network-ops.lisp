@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.18 2002/10/09 14:35:08 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.19 2002/10/10 15:05:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,6 +42,7 @@
    rete-network #'(lambda () (make-reset-token t))))
 
 (defmethod decrement-use-count ((node join-node)) 0)
+(defmethod decrement-use-count ((node terminal-node)) 0)
 
 (defun remove-rule-from-network (rete-network rule)
   (labels ((remove-nodes (nodes)
