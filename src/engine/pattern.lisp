@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.12 2001/01/03 17:08:16 youngde Exp $
+;;; $Id: pattern.lisp,v 1.13 2001/01/03 21:31:48 youngde Exp $
 
 (in-package :lisa)
 
@@ -65,14 +65,12 @@
              (cond ((literalp constraint)
                     (make-test1-eq constraint))
                    ((consp constraint)
-                    (let ((head (first constraint)))
-                      (if (eq (first constraint) 'not)
-                          (make-test1-neq (second constraint))
-                        (make-test1-eq constraint))))
+                    (if (eq (first constraint) 'not)
+                        (make-test1-neq (second constraint))
+                      (make-test1-eq constraint)))
                    (t
                     (error "Unrecognizable slot format."))))
            (create-slot-tests (slot)
-             (format t "slot = ~S~%" slot)
              (let* ((value (first slot))
                     (constraint (second slot))
                     (tests `(,(make-test1-eq value))))
@@ -80,7 +78,6 @@
                  (setf tests
                    (append tests
                            `(,(create-constraint-test constraint)))))
-               (format t "tests for slot: ~S~%" tests)
                (values tests))))
     (mapc #'(lambda (slot-desc)
               (add-slot self (first slot-desc)

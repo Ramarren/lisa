@@ -8,13 +8,13 @@
   (slot name)
   (slot nemesis))
 
-(defrule rocky-boris-natasha
-  ?f-1 <- (rocky (name ?name&"boris"))
-  (boris (name "boris"))
-  (natasha (name "natasha"))
-  =>
-  (printout t "rocky-boris-natasha fired (name = " ?name ")" crlf)
-  (retract ?f-1))
+; (defrule rocky-boris-natasha
+;   ?f-1 <- (rocky (name ?name&"boris"))
+;   (boris (name "boris"))
+;   (natasha (name "natasha"))
+;   =>
+;   (printout t "rocky-boris-natasha fired (name = " ?name ")" crlf)
+;   (retract ?f-1))
 
 ; (defrule not-rocky
 ;   (not (rocky (name "rocky")))
@@ -46,11 +46,10 @@
 ;   =>
 ;   (printout t "schtum-shared!" crlf))
 
-; (defrule schtum-simple
-;   ?f <- (rocky (name "rocky"))
-;   =>
-;   (retract ?f)
-;   (printout t "schtum-simple!" crlf))
+(defrule schtum-simple
+  (rocky (name ?name&:(stringp ?name)))
+  =>
+  (printout t "schtum-simple!" crlf))
 
 ; (defrule no-patterns
 ;   =>
@@ -58,10 +57,10 @@
 
 ;(reset)
 (assert (rocky (name "boris")))
-(assert (boris (name "boris")))
-(assert (natasha (name "natasha")))
+;(assert (boris (name "boris")))
+;(assert (natasha (name "natasha")))
 
 ;(assert (natasha (name "natasha") (nemesis "rocky")))
 ;(assert (natasha (name "natasha") (nemesis "natasha")))
 
-;(run)
+(run)

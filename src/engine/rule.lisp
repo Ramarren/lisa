@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.25 2000/12/14 18:18:12 youngde Exp $
+;;; $Id: rule.lisp,v 1.26 2001/01/03 21:31:48 youngde Exp $
 
 (in-package :lisa)
 
@@ -76,7 +76,8 @@
   (let ((vars nil))
     (maphash #'(lambda (key val)
                  (declare (ignore key))
-                 (setf vars (nconc vars `(,(create-lexical-binding val token)))))
+                 (setf vars
+                   (nconc vars `(,(create-lexical-binding val token)))))
              bindings)
     (values vars)))
   
