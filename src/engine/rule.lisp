@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.12 2000/11/30 15:31:41 youngde Exp $
+;;; $Id: rule.lisp,v 1.13 2000/11/30 15:59:40 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,8 +58,7 @@
   (with-accessors ((actions get-actions)) self
     (format t "Firing rule ~S (token depth ~D)~%"
             (get-name self) (size token))
-    (format t "Lexical env ~S~%" (create-lexical-context self token))
-    (funcall actions)))
+    (funcall (create-lexical-context self token))))
 
 (defun create-lexical-bindings (bindings token)
   (flet ((create-binding (pb)
@@ -74,10 +73,13 @@
       (values vars))))
   
 (defmethod create-lexical-context ((self rule) token)
-  `(lambda ()
-     (progn
-       (let (,@(create-lexical-bindings (get-bindings self) token))
-         (funcall ,(get-actions self))))))
+  (flet ((make-context ()
+           `(lambda ()
+              (let (,@(create-lexical-bindings (get-bindings self) token))
+                ,@(get-actions self)))))
+    (let ((context (make-context)))
+      (format t "context: ~S~%" context)
+      (eval context))))
 
 (defmethod add-binding ((self rule) name)
   (setf (gethash name (get-bindings self))
@@ -128,8 +130,12 @@
                                         (second pattern) binding)))))
     (mapc #'compile-pattern plist)))
 
+#+ignore
 (defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self) (compile-function rhs)))
+
+(defmethod compile-actions ((self rule) rhs)
+  (setf (get-actions self) rhs))
 
 (defmethod finalize-rule-definition ((self rule) lhs rhs)
   (compile-patterns self lhs)
