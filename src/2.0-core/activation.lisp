@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.7 2002/10/18 17:51:45 youngde Exp $
+;;; $Id: activation.lisp,v 1.8 2002/11/05 18:13:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,7 @@
    (tokens :initarg :tokens
            :initform nil
            :reader activation-tokens)
+   (schtum)
    (eligible :initform t
              :accessor activation-eligible))
   (:documentation
