@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.4 2002/09/06 01:41:54 youngde Exp $
+;;; $Id: fact.lisp,v 1.5 2002/09/20 21:28:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,6 +44,9 @@
               "The META-FACT instance associated with this fact."))
   (:documentation
    "This class represents all facts in the knowledge base."))
+
+(defun fact-symbolic-id (fact)
+  (format nil "F-~D" (fact-id fact)))
 
 (defun set-slot-value (fact slot-name value)
   "Assigns a new value to a slot in a fact and its associated CLOS

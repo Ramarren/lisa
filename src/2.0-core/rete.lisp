@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.8 2002/09/20 18:52:14 youngde Exp $
+;;; $Id: rete.lisp,v 1.9 2002/09/20 21:28:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,10 +31,18 @@
                :reader rete-rule-table)
    (fact-table :initform (make-hash-table)
                :reader rete-fact-table)
+   (instance-table :initform (make-hash-table)
+                   :reader rete-instance-table)
    (network :initform (make-rete-network)
             :reader rete-network)
    (next-fact-id :initform -1
                  :accessor rete-next-fact-id)
+   (autofacts :initform (list)
+              :accessor rete-autofacts)
+   (halted :initform nil
+           :accessor rete-halted)
+   (firing-count :initform 0
+                 :accessor rete-firing-count)
    (strategy :initarg :strategy
              :initform nil
              :reader rete-strategy)))
@@ -48,25 +56,25 @@
     rete))
 
 (defun meta-fact-map (rete)
-  (meta-data-fact-map (get-meta-data rete)))
+  (meta-data-fact-map (rete-meta-data rete)))
 
 (defun meta-class-map (rete)
-  (meta-data-class-map (get-meta-data rete)))
+  (meta-data-class-map (rete-meta-data rete)))
 
 (defmethod add-new-rule ((self rete) rule)
-  (setf (gethash (rule-name rule) (rete-rule-table rete)) rule)
+  (setf (gethash (rule-name rule) (rete-rule-table self)) rule)
   rule)
 
-(defun record-fact (rete fact)
+(defun remember-fact (rete fact)
   (setf (gethash (fact-id fact) (rete-fact-table rete)) fact))
 
-(defun lookup-fact (rete fact-id)
-  (gethash id (rete-fact-table rete)))
-
-(defun remove-fact (rete fact)
+(defun forget-fact (rete fact)
   (remhash (fact-id fact) (rete-fact-table rete)))
 
-(defun remove-facts (rete)
+(defun find-fact-by-id (rete fact-id)
+  (gethash fact-id (rete-fact-table rete)))
+
+(defun forget-all-facts (rete)
   (clrhash (rete-fact-table rete)))
 
 (defun make-fact-list (rete)
@@ -77,10 +85,23 @@
        (< (fact-id f1) (fact-id f2)))))
 
 (defun next-fact-id (rete)
-  (incf (rete-fact-id rete)))
+  (incf (rete-next-fact-id rete)))
+
+(defun add-autofact (rete deffact)
+  (push deffact (rete-autofacts rete)))
+
+(defun remove-autofacts (rete)
+  (setf (rete-autofacts rete) nil))
+
+(defun assert-autofacts (rete)
+  (mapc #'(lambda (deffact)
+            (mapc #'(lambda (fact)
+                      (assert-fact rete (make-fact-from-template fact)))
+                  (deffacts-fact-list deffact)))
+        (rete-autofacts rete)))
 
 (defmethod assert-fact ((self rete) fact)
-  (set-fact-id fact (next-fact-id self))
+  (setf (fact-id fact) (next-fact-id self))
   (remember-fact self fact)
   (add-fact-to-network (rete-network self) fact)
   fact)
@@ -95,36 +116,62 @@
     (and (not (null fact))
          (retract-fact self fact))))
 
-(defun reset-engine ((self rete))
-  (reset-network (rete-network self))
-  (set-initial-state rete)
-  (assert (initial-fact))
-  (assert-autofacts rete)
+(defun set-initial-state (rete)
+  (forget-all-facts rete)
+  (remove-activations (rete-strategy rete))
+  (setf (rete-next-fact-id rete) -1)
+  (setf (rete-firing-count rete) 0)
   t)
 
-(defun get-activation-list (rete)
-  (list-activations (get-strategy rete)))
+(defmethod reset-engine ((self rete))
+  (reset-network (rete-network self))
+  (set-initial-state self)
+  (assert (initial-fact))
+  (assert-autofacts self)
+  t)
+
+(defun make-rule-list (rete)
+  (loop for rule being the hash-value of (rete-rule-table rete)
+      collect rule))
+
+(defun make-activation-list (rete)
+  (list-activations (rete-strategy rete)))
+
+(defun find-fact-using-instance (rete instance)
+  (gethash instance (rete-instance-table rete)))
+
+(defun forget-clos-instances (rete)
+  (clrhash (rete-instance-table rete)))
+
+(defmethod mark-clos-instance-as-changed ((self rete) instance
+                                          &optional (slot-id nil))
+  (let ((fact (find-fact-using-instance self instance)))
+    (cond ((null fact)
+           (warn "This instance is not known to LISA: ~S." instance))
+          (t
+           ;;(insert-token self (make-remove-token :initial-fact fact))
+           (synchronize-with-instance fact slot-id)))
+           ;;(insert-token self (make-add-token :initial-fact fact))))
+    instance))
 
 (defmethod run-engine ((self rete) &optional (step -1))
-  (flet ((prepare-for-run ()
-           (setf (slot-value self 'halted-p) nil)))
-    (let ((strategy (rete-strategy self)))
-      (prepare-for-run)
-      (do ((count 0))
-          ((or (= count step) (engine-halted-p self)) count)
-        (let ((activation (next-activation strategy)))
-          (cond ((null activation)
-                 (halt-engine self))
-                ((eligible-p activation)
-                 (increment-fired-rule-count self)
-                 (fire-activation activation)
-                 (incf count))))))))
+  (let ((strategy (rete-strategy self)))
+    (setf (rete-halted self) nil)
+    (do ((count 0))
+        ((or (= count step) (rete-halted self)) count)
+      (let ((activation (next-activation strategy)))
+        (cond ((null activation)
+               (halt-engine self))
+              ((eligible-p activation)
+               (incf (rete-firing-count self))
+               (fire-activation activation)
+               (incf count)))))))
 
 (defun halt-engine (rete)
-  (setf (slot-value rete 'halted-p) t))
+  (setf (rete-halted rete) t))
 
 (defun make-rete (strategy)
   (make-instance 'rete :strategy strategy))
 
 (defun make-inference-engine ()
-  (make-rete nil))
+  (make-rete (make-breadth-first-strategy)))

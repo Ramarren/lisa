@@ -17,21 +17,28 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: network-ops.lisp
-;;; Description:
+;;; File: deffacts.lisp
+;;; Description: This class represents "autoloaded" facts that are asserted
+;;; automatically as part of an engine reset.
 
-;;; $Id: network-ops.lisp,v 1.3 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: deffacts.lisp,v 1.1 2002/09/20 21:28:45 youngde Exp $
 
 (in-package "LISA")
 
-(defun add-fact-to-network (rete-network fact)
-  (loop for root-node being the hash-value
-      of (rete-roots rete-network)
-      do (accept-token root-node (make-add-token fact))))
+(defclass deffacts ()
+  ((name :initarg :name
+         :reader deffacts-name)
+   (fact-list :initarg :fact-list
+              :initform nil
+              :reader deffacts-fact-list))
+  (:documentation
+   "This class represents 'autoloaded' facts that are asserted automatically
+  as part of an inference engine reset."))
 
-(defun remove-fact-from-network (rete-network fact)
-  (loop for root-node being the hash-value
-      of (rete-roots rete-network)
-      do (accept-token root-node (make-remove-token fact))))
+(defmethod print-object ((self deffacts) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "~S ; ~S" (deffacts-name self) (deffacts-fact-list self))))
 
-(defun reset-network (rete-network))
+(defun make-deffacts (name facts)
+  (make-instance 'deffacts :name name :fact-list (copy-list facts)))
+

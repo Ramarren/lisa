@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.23 2002/09/19 20:08:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.24 2002/09/20 21:28:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -71,8 +71,7 @@
      (make-rule name (inference-engine) lhs rhs
                 :doc-string doc-string
                 :salience salience
-                :module module))
-    rule))
+                :module module))))
 
 (defvar *network* nil)
 
@@ -261,14 +260,9 @@
                               (,@(normalize-slots slots)))))))
 
 (defun parse-and-modify-fact (fact body)
-  (flet ((generate-modify ()
-           `(modify-fact (current-engine) ,fact
-                         (canonicalize-slot-names 
-                          (,@(normalize-slots body))))))
-    (handler-case
-        (generate-modify)
-      (lisa-error (condition)
-        (command-structure-error 'modify-fact condition)))))
+  `(modify-fact (current-engine) ,fact
+                (canonicalize-slot-names 
+                 (,@(normalize-slots body)))))
 
 (defun create-template-class-slots (class-name slot-list)
   (labels ((determine-default (default-form)
@@ -314,12 +308,14 @@
   (values deffact))
 
 (defun parse-and-insert-deffacts (name body)
-  `(let ((deffacts '()))
-     (dolist (fact ',body)
-       (let ((head (first fact)))
-         (push (make-fact 
-                head (canonicalize-slot-names (rest fact)))
-               deffacts)))
-     (add-autofact (current-engine)
-                   (make-deffacts ',name (nreverse deffacts)))))
+  (let ((deffacts (gensym)))
+    `(let ((,deffacts (list)))
+       (dolist (fact ',body)
+         (let ((head (first fact)))
+           (push 
+            (make-fact head
+                       (canonicalize-slot-names (rest fact)))
+            ,deffacts)))
+       (add-autofact (inference-engine)
+                     (make-deffacts ',name (nreverse ,deffacts))))))
        

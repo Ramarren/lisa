@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.3 2002/08/28 20:18:34 youngde Exp $
+;;; $Id: language.lisp,v 1.4 2002/09/20 21:28:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,8 +40,92 @@
 (defmacro defimport (class-name &key (use-inheritancep t))
   `(import-class ,class-name ,use-inheritancep))
 
+(defmacro assert ((&body body))
+  (parse-and-insert-fact body))
+
+(defmacro deffacts (name (&key &allow-other-keys) &body body)
+  (parse-and-insert-deffacts name body))
+
+(defun engine ()
+  *active-engine*)
+
+(defun rule ()
+  *active-rule*)
+
 (defun assert-instance (instance)
   (parse-and-insert-instance instance))
 
-(defmacro assert ((&body body))
-  (parse-and-insert-fact body))
+(defun retract-instance (instance)
+  (parse-and-retract-instance instance))
+
+(defun assert-from-string (str)
+  (eval (read-from-string str)))
+
+(defun facts (&optional (engine *active-engine*))
+  (print-fact-list engine))
+
+(defun rules (&optional (engine *active-engine*))
+  (print-rule-list engine))
+
+(defun agenda (&optional (engine *active-engine*))
+  (print-activation-list engine))
+
+(defun reset (&optional (engine *active-engine*))
+  (reset-engine engine))
+
+(defun clear (&optional (engine *active-engine*))
+  (clear-environment engine))
+
+(defun run (&optional (engine *active-engine*))
+  (run-engine engine))
+
+(defun walk (&optional (engine *active-engine*) (step 1))
+  (run-engine engine step))
+
+(defun retract (fact &optional (engine *active-engine*))
+  (retract-fact engine fact))
+
+(defmacro modify (fact &body body)
+  (parse-and-modify-fact fact body))
+
+(defun watch (event)
+  (watch-event event))
+
+(defun unwatch (event)
+  (unwatch-event event))
+
+(defun watching ()
+  (format t "Watching: ~S~%" (get-watches)))
+
+(defun halt (&optional (engine *active-engine*))
+  (halt-engine engine))
+
+(defun mark-instance-as-changed (instance &key (engine *active-engine*)
+                                               (slot-id nil)) 
+  (mark-clos-instance-as-changed engine instance slot-id))
+
+(defun print-activation-list (engine)
+  (let ((activations (make-activation-list engine)))
+    (mapc #'(lambda (act)
+              (format t "~S~%" act))
+          activations)
+    (format t "For a total of ~D activation~:P.~%"
+            (length activations))
+    (values)))
+
+(defun print-rule-list (engine)
+  (let ((rules (make-rule-list engine)))
+    (mapc #'(lambda (rule)
+              (format t "~S~%" rule))
+          rules)
+    (format t "For a total of ~D rule~:P.~%" (length rules))
+    (values)))
+
+(defun print-fact-list (engine)
+  (let ((facts (make-fact-list engine)))
+    (mapc #'(lambda (fact)
+              (format t "~S~%" fact))
+          facts)
+    (format t "For a total of ~D fact~:P.~%" (length facts))
+    (values)))
+
