@@ -21,7 +21,7 @@
 ;;; Description: This class represents network nodes that test whether
 ;;; two slots in the same fact have the same type and value.
 
-;;; $Id: node1-tev1.lisp,v 1.1 2000/12/06 21:56:38 youngde Exp $
+;;; $Id: node1-tev1.lisp,v 1.2 2000/12/06 22:52:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -45,7 +45,11 @@
                   (values t))
                  (t (values nil)))))))
 
-(defmethod equals ((self node1-tev1) node))
+(defmethod equals ((self node1-tev1) (node node1-tev1))
+  (and (eq (get-initial-slot self)
+           (get-initial-slot node))
+       (eq (get-reference-slot self)
+           (get-reference-slot node))))
   
 (defmethod print-object ((self node1-tev1) strm)
   (print-unreadable-object (self strm :type t :identity t)

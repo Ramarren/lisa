@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.17 2000/12/06 21:56:38 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.18 2000/12/06 22:52:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -111,7 +111,9 @@
                         (ref-slot (car reference))
                         (ref-test (cdr reference)))
                    (setf (aref terminals location)
-                     (merge-successor node (make-node1tev1 slot ref-slot) rule)))))
+                     (merge-successor node (make-node1-tev1 (get-name slot)
+                                                            (get-name ref-slot))
+                                      rule)))))
              (add-multiple-reference-tests (slot test references)
                (mapc #'(lambda (ref)
                          (add-multiple-reference-test slot test ref))
@@ -147,7 +149,7 @@
                              slot test (find-remaining-references
                                    (rest slots) (get-value test) nil)))
                           (find-multiple-references-aux (rest slots))))))))
-      (find-multiple-references (get-slots pattern)))))
+      (find-multiple-references-aux (get-slots pattern)))))
   
 (defun search-for-multiple-variables (compiler rule)
   (with-accessors ((terminals get-terminals)
