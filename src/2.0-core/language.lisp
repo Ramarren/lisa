@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.31 2004/09/16 19:43:47 youngde Exp $
+;;; $Id: language.lisp,v 1.32 2004/09/16 20:04:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -98,8 +98,7 @@
 
 (defmacro assert ((name &body body) &key (cf nil))
   (let ((fact (gensym))
-        (fact-object (gensym))
-        (actual-cf (gensym)))
+        (fact-object (gensym)))
     `(let ((,fact-object 
             ,@(if (or (consp name)
                       (variablep name))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.64 2004/09/16 19:43:47 youngde Exp $
+;;; $Id: rete.lisp,v 1.65 2004/09/16 20:04:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -199,16 +199,14 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
-(defmethod assert-fact (rete fact (fact-cf number))
-   (cl:assert (not (in-rule-firing-p)) nil
-     "Supplying a CF inside a rule firing does not make sense.")
+(defmethod recalculate-fact-cf (rete fact (fact-cf number))
    (cl:assert (cf:cf-p fact-cf) nil
      "This is not a legal certainty factor: ~S" fact-cf)
-   (setf (cf fact) fact-cf)
-   (with-unique-fact (self fact)
-     (assert-fact-aux rete fact)))
+   (with-unique-fact (rete fact)
+     (setf (cf fact) fact-cf))
+   t)
 
-(defmethod assert-fact (rete fact (fact-cf t))
+(defmethod recalculate-fact-cf (rete fact (fact-cf t))
   (cl:assert (null fact-cf) nil
     "This is not a legal certainty factor: ~S" fact-cf)
   (let ((conjunct-cf (cf:conjunct-cf (token-facts *active-tokens*)))
@@ -217,13 +215,19 @@
     (cond (dup
            (if (plusp rule-cf)
                (setf (cf dup) (* rule-cf (cf:combine conjunct-cf (cf dup))))
-             (setf (cf dup) (cf:combine conjunct-cf (cf dup)))))
+             (setf (cf dup) (cf:combine conjunct-cf (cf dup))))
+           nil)
           (t
            (if (plusp rule-cf)
                (setf (cf fact) (* conjunct-cf rule-cf))
              (setf (cf fact) conjunct-cf))
-           (assert-fact-aux rete fact)))))
-     
+           t))))
+
+(defmethod assert-fact ((self rete) fact &key cf)
+  (when (recalculate-fact-cf self fact cf)
+    (assert-fact-aux self fact))
+  fact)
+
 (defmethod retract-fact ((self rete) (fact fact))
   (with-truth-maintenance (self)
     (forget-fact self fact)
