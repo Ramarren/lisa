@@ -18,14 +18,26 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: node1.lisp
-;;; Description: Single-input node of the Rete pattern network.
+;;; Description: Single-input node of the Rete pattern network. NODE1
+;;; is intended to be abstract.
 
-;;; $Id: node1.lisp,v 1.1 2000/10/25 23:58:53 youngde Exp $
+;;; $Id: node1.lisp,v 1.2 2000/11/03 19:23:26 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node1 (node)
   ()
   (:documentation
-   "Single-input node of the Rete pattern network."))
+   "Single-input node of the Rete pattern network. NODE1 is intended
+   to be abstract."))
 
+(defmethod call-node-right ((self node1) (token clear-token))
+  (pass-along token)
+  (values t))
+
+(defmethod call-node-right ((self node1) (token token))
+  (values nil))
+
+(defmethod pass-along ((self node1) token)
+  (mapcar #'(lambda (n) (call-node-right n token))
+        (get-successors self)))

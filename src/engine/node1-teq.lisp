@@ -20,11 +20,36 @@
 ;;; File: node1-teq.lisp
 ;;; Description: A one-input node that tests a slot's value.
 
-;;; $Id: node1-teq.lisp,v 1.1 2000/11/02 21:12:34 youngde Exp $
+;;; $Id: node1-teq.lisp,v 1.2 2000/11/03 19:23:26 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node1-teq (node1)
-  ()
+  ((value :initarg :value
+          :initform :nil
+          :reader get-value)
+   (slot :initarg :slot
+         :initform nil
+         :reader get-slot))
   (:documentation
    "A one-input node that tests a slot's value."))
+
+(defmethod call-node-right ((self node1-teq) token)
+  (flet ((call-right (self token)
+           (with-accessors ((value get-value)
+                            (slot get-slot)) self
+             (cond ((equals (get-slot-value (get-top-fact token) slot)
+                            value)
+                    (pass-along token)
+                    (values t))
+                   (t (values nil))))))
+  (if (call-next-method self token)
+      (values nil)
+    (call-right self token))))
+
+(defmethod equals ((self node1-teq) (obj node1-teq))
+  (and (equal (get-slot self) (get-slot obj))
+       (equal (get-value self) (get-value obj))))
+
+(defun make-node1-teq (slot value)
+  (make-instance 'node1-teq :slot slot :value value))

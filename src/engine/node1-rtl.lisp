@@ -21,7 +21,7 @@
 ;;; Description: A node whose test always passes, but which transfers calls
 ;;; from the "right" side to the "left".
 
-;;; $Id: node1-rtl.lisp,v 1.1 2000/11/02 21:12:34 youngde Exp $
+;;; $Id: node1-rtl.lisp,v 1.2 2000/11/03 19:23:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,3 +31,14 @@
    "A node whose test always passes, but which transfers calls from the
    'right' side to the 'left'."))
 
+(defmethod call-node-right ((self node1-rtl) token)
+  (call-next-method self token)
+  (pass-along self token)
+  (values t))
+
+(defmethod pass-along ((self node1-rtl) token)
+  (mapcar #'(lambda (node) (call-node-left node token))
+          (get-successors self)))
+
+(defmethod equals ((self node1-rtl) (obj node1-rtl))
+  (values t))
