@@ -20,7 +20,7 @@
 ;;; File: TODO
 ;;; Description: Ongoing list of things that need to be done.
 
-;;; $Id: TODO,v 1.5 2001/05/31 20:20:26 youngde Exp $
+;;; $Id: TODO,v 1.6 2001/10/03 21:24:18 youngde Exp $
 
 ;;; Absolutely necessary...
 
@@ -43,7 +43,7 @@
 
 * Module support.
 
-* A DEFFACTS macro, like that offered in CLIPS and Jess.
+* A DEFFACTS macro, like that offered in CLIPS and Jess. -- DONE
 
 * A query language. Perhaps something similar to Loom's.
 
@@ -51,7 +51,7 @@
 
 * Cleaner language/engine interface.
 
-* Rule redefinition.
+* Rule redefinition. -- DONE
 
 * Expanded slot-value types (including lists). -- DONE
 

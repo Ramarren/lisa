@@ -1,15 +1,21 @@
-2001-08-31    <youngde@nc.rr.com>
+2001-10-03    <de.young@computer.org>
+
+	LISA release 1.1. Support for dynamic rule definition; small
+	additions to the programming interface; additions to
+	documentation.
+
+2001-08-31    <de.young@computer.org>
 
 	LISA's first production release, Version 1.0. Support for rule
 	redefinition regardless of inference engine state; augmented
 	documentation; enhancements to web page.
 
-2001-07-20    <youngde@nc.rr.com>
+2001-07-20    <de.young@computer.org>
 
 	Fourth Beta release. Addition of DEFFACTS macro and associated
 	documentation.
 
-2001-06-28    <youngde@nc.rr.com>
+2001-06-28    <de.young@computer.org>
 
 	Third Beta release. Enhancements to the system definition file
 	suggested by Paul Werkowski: LISA creates the binary directory
@@ -18,19 +24,19 @@
 	ENSURE-CLASS. Updated PORT. Tested LISA with Windows versions of
 	ACL, LispWorks and CLISP 2.26.
 
-2001-05-31  David E. Young  <youngde@nc.rr.com>
+2001-05-31  David E. Young  <de.young@computer.org>
 
 	Second Beta release. Includes a fix to the Rete compiler resulting
 	from a bug reported by Art Nuzzo; object ancestry reasoning;
 	updated Reference Guide.
 
-2001-05-22  David E. Young  <youngde@nc.rr.com>
+2001-05-22  David E. Young  <de.young@computer.org>
 
 	First official Beta release. This distribution adds a reasonable
 	LISA Reference Guide that should do a better job of documentation
 	than what previously existed. Some small code improvements.
 
-2001-05-10  David E. Young  <youngde@nc.rr.com>
+2001-05-10  David E. Young  <de.young@computer.org>
 
 	Fairly comprehensive multi-processing (thread) support. It should
 	now be possible to 1) run multiple inference engines within a Lisp
@@ -47,7 +53,7 @@
 	    (slot ...)
 	    (...))
 
-2001-04-25  David E. Young  <youngde@nc.rr.com>
+2001-04-25  David E. Young  <de.young@computer.org>
 
 	LISA's last alpha release (0.8.2), and the birth of this
 	ChangeLog. Latest features include full CLOS reasoning support;
