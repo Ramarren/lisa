@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.31 2002/11/18 15:59:19 youngde Exp $
+;;; $Id: token.lisp,v 1.32 2002/11/18 20:49:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,9 +60,10 @@
   (plusp (token-not-counter token)))
 
 (defun token-make-fact-list (token &key (detailp t) (debugp nil))
-  (let ((facts (list))
-        (vector (token-facts token)))
-    (dotimes (i (length vector))
+  (let* ((facts (list))
+         (vector (token-facts token))
+         (length (length vector)))
+    (dotimes (i length)
       (let ((fact (aref vector i)))
         (if debugp
             (push fact facts)
@@ -97,8 +98,9 @@
                  (class-of token)
                (find-class token-class)))))
     (with-slots ((existing-fact-vector facts)) token
-      (dotimes (i (length existing-fact-vector))
-        (token-push-fact new-token (aref existing-fact-vector i))))
+      (let ((length (length existing-fact-vector)))
+        (dotimes (i length)
+          (token-push-fact new-token (aref existing-fact-vector i)))))
     new-token))
 
 (defmethod hash-key ((self token))
