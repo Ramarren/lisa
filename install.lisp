@@ -22,7 +22,7 @@
 ;;; File: install.lisp
 ;;; Description: 
 
-;;; $Id: install.lisp,v 1.2 2004/06/07 18:35:17 youngde Exp $
+;;; $Id: install.lisp,v 1.3 2004/06/07 19:00:58 youngde Exp $
 
 (in-package :cl-user)
 
@@ -113,3 +113,8 @@
                           :name "config" :type "asd" :case :local))
     (asdf:operate 'asdf:load-op :lisa)))
   
+(defun compile-lisa ()
+  (asdf:operate 'asdf:compile-op :lisa))
+
+(defun load-lisa ()
+  (asdf:operate 'asdf:load-op :lisa))

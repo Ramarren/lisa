@@ -22,7 +22,7 @@
 ;;; File: core.asd
 ;;; Description: System definition file.
 
-;;; $Id: core.asd,v 1.4 2004/06/07 18:35:20 youngde Exp $
+;;; $Id: core.asd,v 1.5 2004/06/07 19:01:13 youngde Exp $
 
 (in-package :cl-user)
 
@@ -57,4 +57,4 @@
 
 (asdf:defsystem lisa.epilogue
   :components ((:file "epilogue"))
-  :depends-on ("lisa.config"))
+  :depends-on ("lisa.config" "lisa.rete"))
