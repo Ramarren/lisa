@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.13 2001/01/03 21:31:48 youngde Exp $
+;;; $Id: pattern.lisp,v 1.14 2001/01/05 19:46:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -66,8 +66,8 @@
                     (make-test1-eq constraint))
                    ((consp constraint)
                     (if (eq (first constraint) 'not)
-                        (make-test1-neq (second constraint))
-                      (make-test1-eq constraint)))
+                        (make-test1-neq `(,(second constraint)))
+                      (make-test1-eq `(,constraint))))
                    (t
                     (error "Unrecognizable slot format."))))
            (create-slot-tests (slot)

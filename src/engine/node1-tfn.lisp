@@ -21,7 +21,7 @@
 ;;; Description: This class represents a single-input Rete node that evaluates
 ;;; a function to test a slot's value.
 
-;;; $Id: node1-tfn.lisp,v 1.1 2001/01/05 19:22:39 youngde Exp $
+;;; $Id: node1-tfn.lisp,v 1.2 2001/01/05 19:46:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,9 +35,12 @@
    to test a slot's value."))
 
 (defmethod call-node-right ((self node1-tfn) token)
-  (if (call-next-method self token)
-      (values nil)
-    (evaluate (get-predicate self) token)))
+  (cond ((call-next-method self token)
+         (values nil))
+        ((evaluate (get-predicate self) token)
+         (pass-along self token)
+         (values t))
+        (t (values nil))))
 
 (defmethod equals ((self node1-tfn) (obj node1-tfn))
   (and (equal (get-slot-name self) (get-slot-name obj))
