@@ -22,14 +22,14 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.3 2000/11/07 01:59:11 youngde Exp $
+;;; $Id: node2.lisp,v 1.2 2000/11/07 01:57:50 youngde Exp $
 
 (in-package :lisa)
 
 (defclass node2 (node-test)
-  ((left-tree :initform (make-hash-table)
+  ((left-tree :initform (make-token-tree)
               :accessor get-left-tree)
-   (right-tree :initform (make-hash-table)
+   (right-tree :initform (make-token-tree)
                :accessor get-right-tree)
    (hashkey :initform nil
             :accessor get-hashkey))
