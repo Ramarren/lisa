@@ -20,11 +20,9 @@
 ;;; File: metaclass.lisp
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.4 2002/11/22 20:23:49 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.5 2002/11/23 01:10:10 youngde Exp $
 
 (in-package "CL-USER")
-
-(defclass standard-kb-class (standard-class) ())
 
 (defclass standard-kb-object () ())
 
@@ -34,7 +32,7 @@
     (call-next-method)))
 
 (defmethod (setf mop:slot-value-using-class) :around 
-           (new-value (self standard-kb-class) instance slot)
+           (new-value class (instance standard-kb-object) slot)
   (let ((initializing-p (and (boundp '*kb-instance*)
                              (eq instance *kb-instance*))))
     (call-next-method)
@@ -46,6 +44,5 @@
 (defclass frodo (standard-kb-object)
   ((name :initarg :name
          :initform nil
-         :accessor frodo-name))
-  (:metaclass standard-kb-class))
+         :accessor frodo-name)))
 
