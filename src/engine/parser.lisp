@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.60 2001/04/09 18:37:10 youngde Exp $
+;;; $Id: parser.lisp,v 1.61 2001/04/09 19:52:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -228,3 +228,27 @@
         (define-template)
       (lisa-error (condition)
         (command-structure-error 'deftemplate condition)))))
+
+(defun redefine-defimport (symbolic-name class-name slot-specs)
+  (flet ((check-slot-spec (slot)
+           (unless (and (consp slot)
+                        (= (length slot) 2)
+                        (symbolp (first slot))
+                        (symbolp (second slot)))
+             (syntactical-error
+              'defimport
+              "The format of this slot specification is wrong: ~S." slot))))
+    (unless (symbolp symbolic-name)
+      (syntactical-error 
+       'defimport "The symbolic name must be a symbol: ~S." symbolic-name))
+    (unless (find-class class-name nil)
+      (syntactical-error
+       'defimport "The symbol ~S does not identify a class." class-name))
+    (if (consp slot-specs)
+        (mapc #'check-slot-spec slot-specs)
+      (syntactical-error
+       'defimport "The slot specification must be a list: ~S."
+       slot-specs))
+    `(import-class ',symbolic-name ',class-name ',slot-specs)))
+             
+                       

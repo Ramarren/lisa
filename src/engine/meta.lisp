@@ -18,9 +18,10 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: meta.lisp
-;;; Description: Meta operations that LISA uses to inspect fact classes.
+;;; Description: Meta operations that LISA uses to support the manipulation of
+;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.17 2001/04/09 18:37:10 youngde Exp $
+;;; $Id: meta.lisp,v 1.18 2001/04/09 19:52:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,6 +54,7 @@
   (declare (type meta-fact self))
   (let ((slots '()))
     (maphash #'(lambda (key slot-name)
+                 (declare (ignore key))
                  (push slot-name slots))
              (get-slots self))
     (values slots)))
@@ -68,6 +70,34 @@
 (defun make-meta-fact (name class-name slots)
   (make-instance 'meta-fact :symbolic-name name
                  :class-name class-name :slots slots))
+
+(defclass meta-shadow-fact (meta-fact)
+  ((set-methods :reader get-set-methods))
+  (:documentation
+   "This class represents meta information for the class shadow-fact."))
+
+(defmethod initialize-instance :after ((self meta-shadow-fact) &key (methods nil))
+  (let ((method-table (list)))
+    (flet ((add-set-method (slot)
+             (setf method-table
+               (acons (first slot) (second slot) method-table))))
+      (mapc #'(lambda (slot)
+                (add-set-method slot))
+            methods))
+    (setf (slot-value self 'set-methods) method-table)))
+
+(defun find-set-method (self slot)
+  (declare (type meta-shadow-fact self))
+  (let ((method (assoc slot (get-set-methods self))))
+    (cl:assert (not (null method)) ()
+      "No set method for slot ~S of class ~S" slot (get-class-name self))
+    (rest method)))
+
+(defun make-meta-shadow-fact (symbolic-name class-name methods)
+  (make-instance 'meta-shadow-fact :symbolic-name symbolic-name
+                 :class-name class-name
+                 :slots (mapcar #'(lambda (slot) (first slot)) methods)
+                 :methods methods))
 
 (let ((meta-map (make-hash-table)))
   (defun register-meta-class (name meta-object)
@@ -89,9 +119,9 @@
          "This fact name does not have a registered meta class: ~S" name))
       (values meta-object))))
 
-(defun import-class (symbolic-name real-name slot-specs)
+(defun import-class (symbolic-name class-name slot-specs)
   (print symbolic-name)
-  (print real-name)
+  (print class-name)
   (print slot-specs)
   (values))
 
