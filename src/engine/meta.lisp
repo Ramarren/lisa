@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.13 2001/04/02 16:10:55 youngde Exp $
+;;; $Id: meta.lisp,v 1.14 2001/04/06 15:54:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -120,7 +120,3 @@
     (when (null not-or-test-fact)
       (setf not-or-test-fact (make-special-fact 'not-or-test-fact)))
     (values not-or-test-fact)))
-
-
-  
-  

@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.13 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: environment.lisp,v 1.14 2001/04/06 15:54:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -45,4 +45,6 @@
        (setf (current-engine) ,old-engine)
        (values ,rval))))
 
-
+(defun clear-environment (engine)
+  (clear-engine engine)
+  (values))

@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.13 2001/04/03 19:22:25 youngde Exp $
+;;; $Id: conditions.lisp,v 1.14 2001/04/06 15:54:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -80,9 +80,8 @@
               :reader evaluation-error-condition))
   (:report
    (lambda (condition strm)
-     (format strm "While evaluation these forms:~%")
+     (format strm "While evaluating these forms:~%")
      (format strm "~S~%" (evaluation-error-forms condition))
-     (format strm "LISA encountered an error:~%")
      (princ (evaluation-error-condition condition) strm)))
   (:documentation
    "This condition represents errors encountered while Lisa is evaluating
