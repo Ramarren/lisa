@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.24 2001/03/28 00:08:50 youngde Exp $
+;;; $Id: strategies.lisp,v 1.25 2001/03/28 15:29:32 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,7 +39,7 @@
 
 (defclass indexed-priority-list ()
   ((priority-vector :reader get-priority-vector)
-   (inodes :initform nil
+   (inodes :initform '()
            :accessor get-inodes)
    (delta :accessor get-delta)
    (insertion-function :initarg :insertion-function
@@ -55,6 +55,14 @@
   (setf (slot-value self 'priority-vector)
     (make-array (1+ priorities) :initial-element nil))
   (setf (slot-value self 'delta) (/ priorities 2)))
+
+(defun reset-activations (self)
+  (declare (type indexed-priority-list self))
+  (let ((queue (get-priority-vector self)))
+    (mapc #'(lambda (inode)
+              (setf (aref queue inode) nil))
+          (get-inodes self))
+    (setf (get-inodes self) '())))
 
 (defun insert-activation (plist activation)
   (declare (type indexed-priority-list plist))
@@ -109,66 +117,50 @@
 (defun make-indexed-priority-list (func)
   (make-instance 'indexed-priority-list :insertion-function func))
 
-(defclass depth-first-strategy (strategy)
+(defclass builtin-strategy (strategy)
   ((priority-queue :reader get-priority-queue))
+  (:documentation
+   "A base class for all LISA builtin conflict resolution strategies."))
+  
+(defmethod add-activation ((self builtin-strategy) activation)
+  (insert-activation (get-priority-queue self) activation))
+
+(defmethod find-activation ((self builtin-strategy) rule token)
+  (lookup-activation (get-priority-queue self) rule token))
+
+(defmethod next-activation ((self builtin-strategy))
+  (get-next-activation (get-priority-queue self)))
+
+(defmethod remove-activations ((self builtin-strategy))
+  (reset-activations (get-priority-queue self)))
+
+(defmethod list-activations ((self builtin-strategy))
+  (get-all-activations (get-priority-queue self)))
+
+(defclass depth-first-strategy (builtin-strategy)
+  ()
   (:documentation
    "A depth-first conflict resolution strategy."))
 
-(defmethod add-activation ((self depth-first-strategy) activation)
-  (insert-activation (get-priority-queue self) activation))
-
-(defmethod find-activation ((self depth-first-strategy) rule token)
-  (lookup-activation (get-priority-queue self) rule token))
-
-(defmethod next-activation ((self depth-first-strategy))
-  (get-next-activation (get-priority-queue self)))
-
-(defmethod remove-activations ((self depth-first-strategy))
-  (initialize-queue self))
-
-(defmethod list-activations ((self depth-first-strategy))
-  (get-all-activations (get-priority-queue self)))
-
-(defmethod initialize-queue ((self depth-first-strategy))
+(defmethod initialize-instance :after ((self depth-first-strategy) &rest args)
+  (declare (ignore args))
   (setf (slot-value self 'priority-queue)
     (make-indexed-priority-list
      #'(lambda (obj place) (push obj place)))))
 
-(defmethod initialize-instance :after ((self depth-first-strategy) &rest args)
-  (declare (ignore args))
-  (initialize-queue self))
-
 (defun make-depth-first-strategy ()
   (make-instance 'depth-first-strategy))
 
-(defclass breadth-first-strategy (strategy)
-  ((priority-queue :reader get-priority-queue))
+(defclass breadth-first-strategy (builtin-strategy)
+  ()
   (:documentation
    "A breadth-first conflict resolution strategy."))
 
-(defmethod add-activation ((self breadth-first-strategy) activation)
-  (insert-activation (get-priority-queue self) activation))
-
-(defmethod find-activation ((self breadth-first-strategy) rule token)
-  (lookup-activation (get-priority-queue self) rule token))
-
-(defmethod next-activation ((self breadth-first-strategy))
-  (get-next-activation (get-priority-queue self)))
-
-(defmethod remove-activations ((self breadth-first-strategy))
-  (initialize-queue self))
-
-(defmethod list-activations ((self breadth-first-strategy))
-  (get-all-activations (get-priority-queue self)))
-
-(defmethod initialize-queue ((self breadth-first-strategy))
-  (setf (slot-value self 'priority-queue)
-    (make-indexed-priority-list
-     #'(lambda (obj place) (append place `(,obj))))))
-
 (defmethod initialize-instance :after ((self breadth-first-strategy) &rest args)
   (declare (ignore args))
-  (initialize-queue self))
+  (setf (slot-value self 'priority-queue)
+    (make-indexed-priority-list
+     #'(lambda (obj place) (nconc place `(,obj))))))
 
 (defun make-breadth-first-strategy ()
   (make-instance 'breadth-first-strategy))
