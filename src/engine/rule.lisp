@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.38 2001/01/26 20:42:02 youngde Exp $
+;;; $Id: rule.lisp,v 1.39 2001/01/29 16:35:23 youngde Exp $
 
 (in-package :lisa)
 
@@ -54,13 +54,6 @@
   (:documentation
    "This class represents LISA production rules."))
 
-#+ignore
-(defmethod fire ((self rule) token)
-  (with-accessors ((actions get-actions)) self
-    (evaluate (make-function-call
-               (get-actions self) (get-bindings self))
-              (make-function-context token (get-top-fact token)))))
-
 (defmethod fire ((self rule) token)
   (evaluate (get-actions self)
             (make-function-context token (get-top-fact token))))
@@ -73,24 +66,6 @@
 
 (defmethod get-bindings ((self rule))
   (get-binding-list (get-binding-table self)))
-
-(defmethod traverse-bindings ((self rule) token)
-  (flet ((show-binding (b)
-           (let ((fact (find-fact token (get-location b))))
-             (format t "~S, ~S~%" b fact))))
-    (maphash #'(lambda (key val)
-                 (declare (ignore key))
-                 (show-binding val))
-             (get-bindings self))))
-
-(defmethod traverse-token ((self rule) token)
-  (labels ((traverse (token)
-             (cond ((null token)
-                    (values))
-                   (t
-                    (format t "~S~%" token)
-                    (traverse (get-parent token))))))
-    (traverse token)))
 
 (defun add-new-pattern (rule pattern)
   (with-accessors ((patterns get-patterns)) rule
@@ -145,11 +120,22 @@
 
 #+ignore
 (defmethod compile-actions ((self rule) rhs)
-  (setf (get-actions self) rhs))
-
-(defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self)
     (make-function-call rhs (get-bindings self))))
+
+(defmethod compile-actions ((self rule) rhs)
+  (let ((global-bindings (get-binding-table self))
+        (action-bindings nil))
+    (flet ((add-binding (var)
+             (let ((binding (lookup-binding global-bindings var)))
+               (cl:assert (not (null binding)) ())
+               (pushnew binding action-bindings
+                        :key #'get-name))))
+      (mapc #'(lambda (var) (add-binding var))
+            (collect #'(lambda (obj) (variablep obj))
+                     (flatten rhs)))
+      (setf (get-actions self)
+        (make-function-call rhs action-bindings)))))
 
 (defmethod finalize-rule-definition ((self rule) lhs rhs)
   (compile-patterns self lhs)
