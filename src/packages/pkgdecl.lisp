@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.29 2001/05/08 20:37:46 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.30 2001/05/11 19:19:06 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -60,17 +60,17 @@
   (:nicknames "LMP")
   (:import-from "PORT"
                 "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
-                "WITH-TIMEOUT" "PROCESS-YIELD" "KILL-PROCESS"
-                "INTERRUPT-PROCESS" "RESTART-PROCESS" "PROCESSP"
-                "PROCESS-NAME" "PROCESS-ACTIVE-P" "PROCESS-WHOSTATE"
-                "CURRENT-PROCESS" "ALL-PROCESSES" "SHOW-PROCESSES")
+                "WITH-TIMEOUT" "KILL-PROCESS" "INTERRUPT-PROCESS"
+                "RESTART-PROCESS" "PROCESSP" "PROCESS-NAME" "PROCESS-ACTIVE-P"
+                "PROCESS-WHOSTATE" "CURRENT-PROCESS" "ALL-PROCESSES"
+                "SHOW-PROCESSES")
   (:export "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
                 "WITH-TIMEOUT" "PROCESS-YIELD" "KILL-PROCESS"
                 "INTERRUPT-PROCESS" "RESTART-PROCESS" "PROCESSP"
                 "PROCESS-NAME" "PROCESS-ACTIVE-P" "PROCESS-WHOSTATE"
                 "CURRENT-PROCESS" "ALL-PROCESSES" "SHOW-PROCESSES"
                 "MAKE-LOCK" "GET-LOCK" "GIVEUP-LOCK" "WITH-LOCK"
-                "WITHOUT-SCHEDULING"))
+                "WITHOUT-SCHEDULING" "PROCESS-YIELD"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
