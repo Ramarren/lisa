@@ -26,13 +26,9 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.4 2002/10/16 14:58:22 youngde Exp $
+;;; $Id: meta.lisp,v 1.5 2002/10/16 14:59:44 youngde Exp $
 
 (in-package "LISA")
-
-(defstruct meta-data
-  (fact-map (make-hash-table))
-  (class-map (make-hash-table)))
 
 (defclass meta-fact ()
   ((symbolic-name :initarg :symbolic-name
