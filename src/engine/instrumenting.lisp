@@ -22,6 +22,56 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.1 2001/02/08 17:06:16 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.2 2001/02/08 17:35:08 youngde Exp $
 
 (in-package :lisa)
+
+(defmacro symbol-of (instance)
+  `(class-name (class-of ,instance)))
+
+(defmacro instrumentedp (node)
+  `(get (class-name (class-of ,node)) 'instrumented))
+
+(defun maprule (func rule-name)
+  (mapc #'(lambda (path)
+            (mapc #'func path))
+        (find-paths-to-rule rule-name)))
+
+(defun instrument-rule (rule-name)
+  "Instruments each node in the network that leads to the rule
+  identified by RULE-NAME."
+  (maprule #'(lambda (node)
+               (setf (get (symbol-of node) 'instrumented) t))
+           rule-name))
+
+(defun un-instrument-rule (rule-name)
+  "Deactivates instrumenting of the rule identified by RULE-NAME."
+  (maprule #'(lambda (node)
+               (remprop (symbol-of node) 'instrumented))
+           rule-name))
+
+(defmethod call-node-right :around ((self node2) (token add-token))
+  (let ((rval (call-next-method self token)))
+    (when (instrumentedp self)
+      (format t "call-node-right for (~S, ~S) returning ~S~%"
+              self token rval))
+    (values rval)))
+
+(defmethod call-node-left :around ((self node2) (token add-token))
+  (let ((rval (call-next-method self token)))
+    (when (instrumentedp self)           
+      (format t "call-node-left for (~S, ~S) returning ~S~%"
+              self token rval))
+    (values rval)))
+
+(defmethod call-node-left :around ((self terminal-node) (token add-token))
+  (when (instrumentedp self)
+    (format t "Reaching activation for rule ~S, token ~S~%"
+            (get-name (get-rule self)) token))
+  (call-next-method self token))
+
+(defmethod call-node-left :around ((self terminal-node) (token remove-token))
+  (when (instrumentedp self)
+    (format t "Removing activation for rule ~S, token ~S~%"
+            (get-name (get-rule self)) token))
+  (call-next-method self token))
