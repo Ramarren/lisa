@@ -93,7 +93,6 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
-#+ignore
 (defrule or-rule ()
   (frodo)
   (or (gandalf)
@@ -101,6 +100,7 @@
   =>
   (format t "or-rule~%"))
 
+#+ignore
 (defrule or-rule ()
   (or (samwise (name sam))
       (gandalf (name gandalf)))
