@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.6 2001/05/08 22:53:52 youngde Exp $
+;;; $Id: pumps.lisp,v 1.7 2001/05/08 22:54:47 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -49,9 +49,9 @@
 
 (defmacro with-new-process ((name) &body body)
   `(port:make-process
-    name #'(lambda ()
-             (let ((*package* (find-package "LISA-USER")))
-               (progn ,@body)))))
+    ,name #'(lambda ()
+              (let ((*package* (find-package "LISA-USER")))
+                (progn ,@body)))))
 
 (defun set-flow-rate (self new-rate)
   (declare (type pump self))
@@ -126,8 +126,8 @@
 (defvar *equipment* '())
 
 (defun start-run ()
-  (let* ((tank (make-tank "Tank Main"))
-         (pump (make-pump "Pump Main" tank)))
+  (let* ((tank (make-tank "TankMain"))
+         (pump (make-pump "PumpMain" tank)))
     (setf *equipment* nil)
     (push (cons tank (run-tank tank)) *equipment*)
     (push (cons pump (run-pump pump)) *equipment*)
