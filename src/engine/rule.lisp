@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.50 2001/04/20 15:29:42 youngde Exp $
+;;; $Id: rule.lisp,v 1.51 2001/04/20 18:35:15 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,19 +77,28 @@
   (with-accessors ((patterns get-patterns)) rule
     (setf patterns (nconc patterns `(,pattern)))))
 
+(defgeneric do-special-ce-handling (rule pattern)
+  (:method (rule pattern)
+           (declare (ignore rule pattern))
+           (values)))
+
 (defmethod do-special-ce-handling ((self rule) (pattern not-pattern))
   (unless (has-patterns-p self)
     (add-new-pattern self (get-initial-pattern self))))
 
-(defmethod do-special-ce-handling ((self rule) (pattern generic-pattern))
-  (values))
+(defgeneric setup-any-pattern-bindings (rule pattern)
+  (:method (rule pattern)
+           (declare (ignore rule pattern))
+           (values)))
+
+(defmethod setup-any-pattern-bindings ((self rule) (pattern bound-pattern))
+  (add-binding 
+   self (make-pattern-binding 
+         (get-pattern-binding pattern) (get-location pattern))))
 
 (defmethod add-pattern ((self rule) pattern)
   (finalize-pattern pattern (get-binding-table self))
-  (when (typep pattern 'bound-pattern)
-    (add-binding self (make-pattern-binding
-                       (get-pattern-binding pattern)
-                       (get-location pattern))))
+  (setup-any-pattern-bindings self pattern)
   (do-special-ce-handling self pattern)
   (add-new-pattern self pattern)
   (values pattern))

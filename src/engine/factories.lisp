@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.32 2001/04/20 15:29:42 youngde Exp $
+;;; $Id: factories.lisp,v 1.33 2001/04/20 18:35:15 youngde Exp $
 
 (in-package "LISA")
 
@@ -68,6 +68,7 @@
 
 (defgeneric make-conditional-element (class location pattern)
   (:method (class location pattern)
+           (declare (ignore location pattern))
            (error "The pattern factory doesn't recognize this pattern class:"
                   class)))
 
