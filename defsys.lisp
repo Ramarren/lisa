@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.21 2001/03/05 16:35:17 youngde Exp $
+;;; $Id: defsys.lisp,v 1.22 2001/03/05 18:31:47 youngde Exp $
 
 (in-package :user)
 
@@ -45,14 +45,6 @@
                          #-(or Allegro LispWorks CMU CLISP)
                          (error "Unsupported implementation."))))
 
-(defun directoryp (path)
-  #+(or Allegro Lispworks CMU)
-  (probe-file path)
-  #+CLISP
-  (lisp:probe-directory path)
-  #-(or Allegro LispWorks CMU CLISP)
-  (error "No implementation for DIRECTORYP"))
-
 (defun mkdir (path)
   #+CMU
   (unix:unix-mkdir
@@ -67,18 +59,18 @@
   #+CLISP
   (lisp:make-dir path))
   
-;; Make sure the binary directory structure exists, creating it if
-;; necessary...
+;;; Make sure the binary directory structure exists, creating it if
+;;; necessary...
 
 (let ((dirlist '("packages" "engine" "utils")))
-  (unless (directoryp *lisa-binary-pathname*)
+  (unless (directory *lisa-binary-pathname*)
     (mkdir *lisa-binary-pathname*))
   (dolist (dir dirlist)
     (let ((path (make-pathname
                  :directory (append (pathname-directory
                                      *lisa-binary-pathname*)
                                     `(,dir)))))
-      (unless (directoryp path)
+      (unless (directory path)
         (mkdir path)))))
 
 #+CMU
