@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab-kw.lisp,v 1.3 2001/03/23 20:02:32 youngde Exp $
+;;; $Id: mab-kw.lisp,v 1.4 2001/03/26 19:26:32 youngde Exp $
 
 (require "kw")
 
@@ -375,3 +375,7 @@
              (startup)
              (infer :contexts '(mab)))))
     (time (repeat-mab))))
+
+(defun profile-mab (&optional (ntimes 10))
+  (hcl:set-up-profiler :packages '("KW"))
+  (hcl:profile (run-mab ntimes)))
