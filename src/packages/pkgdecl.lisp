@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.76 2004/09/16 18:28:02 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.77 2004/09/17 18:04:36 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -104,7 +104,7 @@
 (defpackage "LISA.CF"
   (:use "COMMON-LISP")
   (:nicknames "CF")
-  (:export "COMBINE" "CF-P" "CONJUNCT-CF"))
+  (:export "COMBINE" "CF-P" "CONJUNCT-CF" "RECALCULATE-CF"))
 
 (defpackage "LISA.UTILS"
   (:use "COMMON-LISP")
