@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.15 2002/09/13 15:12:34 youngde Exp $
+;;; $Id: token.lisp,v 1.16 2002/09/19 23:04:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -70,6 +70,9 @@
       (dotimes (i (length existing-fact-vector))
         (token-push-fact new-token (aref existing-fact-vector i))))
     new-token))
+
+(defmethod hash-code ((self token))
+  self)
 
 (defmethod make-add-token ((fact fact))
   (token-push-fact (make-instance 'add-token) fact))

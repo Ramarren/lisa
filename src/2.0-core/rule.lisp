@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.2 2002/09/19 20:08:44 youngde Exp $
+;;; $Id: rule.lisp,v 1.3 2002/09/19 23:04:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,7 +50,12 @@
   (compile-rule-into-network (rete-network (rule-engine self)) patterns)
   (compile-rule-behavior self actions)
   self)
-  
+
+(defmethod fire-rule ((self rule) tokens)
+  (let ((*active-rule* self)
+        (*active-engine* (rule-engine self)))
+    (funcall (rule-behavior self) tokens)))
+
 (defun compile-rule-behavior (rule actions)
   (setf (rule-behavior rule)
     (make-predicate-test (rule-actions-actions actions)

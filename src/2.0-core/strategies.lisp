@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.1 2002/09/19 22:50:05 youngde Exp $
+;;; $Id: strategies.lisp,v 1.2 2002/09/19 23:04:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -74,7 +74,7 @@
                      #'(lambda (p1 p2) (> p1 p2)))))))
     (with-accessors ((vector get-priority-vector)
                      (activations get-activations)) plist
-    (let* ((salience (get-salience (get-rule activation)))
+    (let* ((salience (rule-salience (activation-rule activation)))
            (inode (+ salience (get-delta plist)))
            (queue (aref vector inode)))
       (when (null queue)
@@ -83,34 +83,33 @@
         (apply (get-insertion-function plist)
                `(,activation ,queue)))))))
 
-(defun lookup-activation (self rule token)
+(defun lookup-activation (self rule tokens)
   (declare (type indexed-priority-list self))
   (find-if #'(lambda (act)
-               (and (= (hash-code act) (hash-code token))
-                    (eq (get-rule act) rule)))
+               (and (eql (hash-code act) (hash-code tokens))
+                    (eq (activation-rule act) rule)))
            (aref (get-priority-vector self)
-                 (+ (get-salience rule) (get-delta self)))))
+                 (+ (rule-salience rule) (get-delta self)))))
 
 (defun lookup-activations (self rule)
   (declare (type indexed-priority-list self))
-  (let ((rule-name (get-name rule)))
-    (utils:collect #'(lambda (activation)
-                       (eql rule-name (get-name (get-rule activation))))
-                   (aref (get-priority-vector self)
-                         (+ (get-salience rule) (get-delta self))))))
+  (loop for activation
+      in (aref (get-priority-vector self)
+               (+ (rule-salience rule) (get-delta self)))
+      if (eq rule (rule-name activation))
+      collect activation))
 
 (defun get-next-activation (plist)
   (declare (type indexed-priority-list plist))
   (with-accessors ((inodes get-inodes)
                    (vector get-priority-vector)) plist
     (let ((inode (first inodes)))
-      (cond ((null inode)
-             (values nil))
+      (cond ((null inode) nil)
             (t
              (let ((activation (pop (aref vector inode))))
                (when (null (aref vector inode))
                  (pop inodes))
-               (values activation)))))))
+               activation))))))
 
 (defun get-all-activations (plist)
   (let ((activations (list)))
