@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.17 2002/11/22 17:26:38 youngde Exp $
+;;; $Id: lisa.system,v 1.18 2002/11/22 17:45:25 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -114,7 +114,8 @@
                  (:module "preamble"
                           :source-pathname "2.0-core"
                           :binary-pathname "core20"
-                          :components ((:file "preamble"))
+                          :components ((:file "preamble")
+                                       (:file "conditions"))
                           :depends-on (packages))
                  (:module "core20"
                           :source-pathname "2.0-core"

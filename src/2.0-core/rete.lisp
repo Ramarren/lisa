@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.46 2002/11/22 15:10:27 youngde Exp $
+;;; $Id: rete.lisp,v 1.47 2002/11/22 17:45:33 youngde Exp $
 
 (in-package "LISA")
 
@@ -142,10 +142,10 @@
   (let ((existing-fact (gensym)))
     `(unless *allow-duplicate-facts*
        (let ((,existing-fact (find-fact-by-name ,rete (fact-name ,fact))))
-         (cl:assert (or (null ,existing-fact)
-                        (not (equals ,fact ,existing-fact))) nil
-           "~S is a duplicate of ~S.~%If you want to allow duplicate facts, set the special variable *ALLOW-DUPLICATE-FACTS* to a non-NIL value."
-        ,fact ,existing-fact)))))
+         (unless (or (null ,existing-fact)
+                     (not (equals ,fact ,existing-fact)))
+           (error (make-condition 'duplicate-fact
+                    :existing-fact ,existing-fact)))))))
 
 (defun next-fact-id (rete)
   (incf (rete-next-fact-id rete)))
