@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.7 2002/09/06 01:41:54 youngde Exp $
+;;; $Id: node2.lisp,v 1.8 2002/09/06 14:20:01 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,7 +52,6 @@
     (token-pop-fact left-tokens)))
   
 (defmethod accept-tokens-from-left ((self node2) left-tokens)
-  (print "accept-tokens-from-left")
   (add-tokens-to-left-memory self left-tokens)
   (loop for right-token being the hash-value of (node2-right-memory self)
       do (test-and-pass-tokens self left-tokens right-token)))
