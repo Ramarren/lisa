@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.24 2004/09/13 19:27:47 youngde Exp $
+;;; $Id: fact.lisp,v 1.25 2004/09/14 17:35:10 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,7 +32,7 @@
    (slot-table :reader fact-slot-table
                :initform (make-hash-table :test #'equal))
    (cf :initarg :cf
-       :initform 0.0
+       :initform nil
        :accessor cf)
    (clos-instance :reader fact-clos-instance)
    (shadows :initform nil
