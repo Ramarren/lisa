@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.2 2000/12/15 21:35:00 youngde Exp $
+;;; $Id: watch.lisp,v 1.3 2000/12/22 03:21:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,9 +46,11 @@
   (format t "~A Activation: ~S : ~S~%"
           direction
           (get-name (get-rule activation))
-          (remove-if #'(lambda (fact)
-                         (= (get-fact-id fact) -1))
-                     (get-all-facts (get-token activation)))))
+          (mapcar #'(lambda (fact)
+                      (get-symbolic-id fact))
+                  (remove-if #'(lambda (fact)
+                                 (= (get-fact-id fact) -1))
+                             (get-all-facts (get-token activation))))))
   
 (defmethod add-activation :after ((s strategy) (act activation))
   (declare (ignore s))
@@ -56,11 +58,17 @@
     (show-activation "==>" act))
   (values))
 
+(defun show-activation-maybe (activation)
+  (when (watching-p :activations)
+    (show-activation "<==" activation))
+  (values))
+
 (defmethod disable-activation :after ((engine rete) (act activation))
   (declare (ignore rete))
-  (when (watching-p :activations)
-    (show-activation "<==" act))
-  (values))
+  (show-activation-maybe act))
+
+(defmethod fire-rule :after ((act activation))
+  (show-activation-maybe act))
 
 (defun show-fact-detail (direction fact)
   (format t "~A f-~D ~S~%" direction (get-fact-id fact)

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.29 2000/12/15 21:34:59 youngde Exp $
+;;; $Id: rete.lisp,v 1.30 2000/12/22 03:21:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -102,7 +102,7 @@
   (call-node-right (get-root-node (get-compiler self)) token))
 
 (defmethod assert-fact ((self rete) fact)
-  (setf (get-fact-id fact) (next-fact-id self))
+  (set-fact-id fact (next-fact-id self))
   (increment-time self)
   (update-time fact self)
   (record-fact self fact)
