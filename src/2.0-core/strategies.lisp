@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.3 2002/09/24 23:48:02 youngde Exp $
+;;; $Id: strategies.lisp,v 1.4 2002/09/25 15:30:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -134,9 +134,11 @@
   (insert-activation (get-priority-queue self) activation))
 
 (defmethod find-activation ((self builtin-strategy) rule token)
+  (cl:assert nil nil "Why are we calling FIND-ACTIVATION?")
   (lookup-activation (get-priority-queue self) rule token))
 
 (defmethod find-activations ((self builtin-strategy) rule)
+  (cl:assert nil nil "Why are we calling FIND-ACTIVATIONS?")
   (lookup-activations (get-priority-queue self) rule))
 
 (defmethod next-activation ((self builtin-strategy))

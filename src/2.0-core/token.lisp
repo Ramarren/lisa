@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.22 2002/09/25 15:09:29 youngde Exp $
+;;; $Id: token.lisp,v 1.23 2002/09/25 15:30:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -76,6 +76,10 @@
 
 (defmethod hash-key ((self token))
   (coerce (token-facts self) 'list))
+
+#+ignore
+(defmethod hash-key ((self token))
+  (token-facts self))
 
 (defmethod make-add-token ((fact fact))
   (token-push-fact (make-instance 'add-token) fact))
