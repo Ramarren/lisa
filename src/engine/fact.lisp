@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.36 2002/05/26 16:02:07 youngde Exp $
+;;; $Id: fact.lisp,v 1.37 2002/06/06 01:54:20 youngde Exp $
 
 (in-package "LISA")
 
@@ -151,6 +151,9 @@
 
 (defmethod equals ((self fact) (obj fact))
   (cl:assert nil () "Why is FACT.EQUALS being called?"))
+
+(defun reconstruct-fact (fact)
+  `(,(fact-name fact) ,@(get-slot-values fact)))
 
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
