@@ -20,13 +20,14 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: contexts.lisp,v 1.2 2002/11/21 15:54:38 youngde Exp $
+;;; $Id: contexts.lisp,v 1.3 2002/11/21 16:10:53 youngde Exp $
 
 (in-package "LISA-USER")
 
 (defcontext :hobbits)
 (defcontext :wizards)
 (defcontext :elves)
+(defcontext :dwarves)
 
 (deftemplate frodo ()
   (slot name))
@@ -35,6 +36,9 @@
   (slot name))
 
 (deftemplate legolas ()
+  (slot name))
+
+(deftemplate gimli ()
   (slot name))
 
 (defrule frodo (:context :hobbits)
@@ -47,14 +51,25 @@
 (defrule gandalf (:context :wizards)
   (gandalf (name gandalf))
   =>
-  (format t "gandalf fired; refocusing on :hobbits.~%")
+  (format t "gandalf fired; gimli should fire now.~%")
   (assert (legolas))
-  (refocus))
+  (assert (gimli)))
 
 (defrule legolas (:context :elves)
   (legolas)
   =>
   (format t "legolas firing; hopefully this was a manual focus.~%"))
+
+(defrule gimli (:context :dwarves :auto-focus t :salience 100)
+  (gimli)
+  =>
+  (format t "gimli (an auto-focus rule) fired.~%")
+  (refocus))
+
+(defrule should-not-fire (:context :dwarves)
+  (gimli)
+  =>
+  (error "This rule should not have fired!"))
 
 (defrule start (:salience 100)
   =>
@@ -62,7 +77,9 @@
   (focus :hobbits))
 
 (defrule finish ()
+  (?gimli (gimli))
   =>
+  (retract ?gimli)
   (format t "finished.~%"))
 
 (reset)
