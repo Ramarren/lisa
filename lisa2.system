@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.19 2002/09/17 18:09:21 youngde Exp $
+;;; $Id: lisa2.system,v 1.20 2002/09/20 18:52:11 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -96,19 +96,16 @@
                           ((:file "reflect"))
                           :depends-on (utils))
                  (:module "preamble"
-                          :source-pathname "engine"
-                          :binary-pathname "engine"
-                          :components ((:file "macros")
-                                       (:file "inference-engine-object")
-                                       (:file "preamble"))
+                          :source-pathname "2.0-core"
+                          :binary-pathname "core20"
+                          :components ((:file "preamble"))
                           :depends-on (packages))
                  (:module "core20"
                           :source-pathname "2.0-core"
                           :binary-pathname "core20"
-                          :components ((:file "environment")
-                                       (:file "meta")
+                          :components ((:file "meta")
                                        (:file "rete"
-                                              :depends-on (environment language))
+                                              :depends-on (language))
                                        (:file "rule")
                                        (:file "binding")
                                        (:file "pattern")

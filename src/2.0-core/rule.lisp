@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.3 2002/09/19 23:04:35 youngde Exp $
+;;; $Id: rule.lisp,v 1.4 2002/09/20 18:52:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,7 +47,8 @@
   parser."))
 
 (defmethod initialize-instance :after ((self rule) &key patterns actions)
-  (compile-rule-into-network (rete-network (rule-engine self)) patterns)
+  (compile-rule-into-network 
+   (rete-network (rule-engine self)) patterns self)
   (compile-rule-behavior self actions)
   self)
 

@@ -20,11 +20,14 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.2 2002/09/08 23:51:59 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.3 2002/09/20 18:52:15 youngde Exp $
 
 (in-package "LISA")
 
-(defclass terminal-node () ())
+(defclass terminal-node ()
+  ((rule :initarg rule
+         :initform nil
+         :reader terminal-node-rule)))
 
 (defmethod accept-token ((self terminal-node) (token add-token))
   (format t "Passed: ~S~%" token)
@@ -34,5 +37,5 @@
   (format t "Removed: ~S~%" token)
   t)
 
-(defun make-terminal-node ()
-  (make-instance 'terminal-node))
+(defun make-terminal-node (rule)
+  (make-instance 'terminal-node :rule rule))
