@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.15 2001/01/23 21:05:00 youngde Exp $
+;;; $Id: fact.lisp,v 1.16 2001/01/27 00:26:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,7 @@
    (symbolic-id :reader get-symbolic-id)
    (slot-source :initarg :slot-source
                 :reader get-slot-source)
-   (slot-table :initform (make-hash-table)
+   (slot-table :initform nil
                :accessor get-slot-table)
    (clock :initarg :clock
           :initform 0
@@ -50,11 +50,16 @@
   (setf (slot-value self 'symbolic-id)
     (intern (symbol-name (make-symbol (format nil "F-~D" id))))))
   
-(defmethod set-slot-value ((self fact) slot value)
-  (setf (gethash slot (get-slot-table self)) value))
+(defun set-slot-value (fact slot value)
+  (declare (type fact fact) (type symbol slot))
+  (with-accessors ((slot-table get-slot-table)) fact
+    (setf slot-table
+      (acons slot value slot-table))))
 
-(defmethod get-slot-value ((self fact) slot)
-  (gethash slot (get-slot-table self)))
+(defun get-slot-value (fact slot)
+  (declare (type fact fact)
+           (type symbol slot))
+  (cdr (assoc slot (get-slot-table fact))))
   
 (defmethod get-time ((self fact))
   (get-clock self))
@@ -74,10 +79,9 @@
             (class-name (get-class self)))))
 
 (defmethod initialize-instance :after ((self fact) &key (slots nil))
-  (let ((map (slot-value self 'slot-table)))
-    (mapc #'(lambda (slot)
-              (setf (gethash (first slot) map) (second slot)))
-          slots)))
+  (mapc #'(lambda (pair)
+            (set-slot-value self (first pair) (second pair)))
+        slots))
 
 (defun make-fact (class slots)
   (make-instance 'fact :class class :slot-source slots :slots slots))
