@@ -3,28 +3,22 @@
 
 (use-default-engine)
 
-#+ignore
-(deftemplate frodo ()
-  (slot name (default frodo))
-  (slot has-ring (default nil))
-  (slot age (default 0)))
-
 (deftemplate frodo ()
   (slot name)
   (slot has-ring)
-  (slot age (default 0)))
+  (slot age))
 
 (deftemplate bilbo ()
-  (slot name (default bilbo))
+  (slot name)
   (slot relative)
-  (slot age (default 0)))
+  (slot age))
 
 (deftemplate gandalf ()
-  (slot name (default gandalf))
-  (slot age (default 0)))
+  (slot name)
+  (slot age))
 
 (deftemplate saruman ()
-  (slot name (default saruman)))
+  (slot name))
 
 #+ignore
 (defrule frodo ()
@@ -42,3 +36,7 @@
   (gandalf (name gandalf) (age 100))
   =>
   (format t "simple-rule fired.~%"))
+
+(defvar *frodo* (assert (frodo (name frodo))))
+(defvar *bilbo* (assert (bilbo (name bilbo))))
+(defvar *gandalf* (assert (gandalf (name gandalf))))

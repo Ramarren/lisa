@@ -17,28 +17,18 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: node2.lisp
+;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.2 2002/08/29 15:29:25 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.1 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
 
-(defclass node2 ()
-  ((successor :initform nil
-              :accessor node2-successor)
-   (tests :initform
-          (make-array nil :adjustable t :fill-pointer t)
-          :reader node2-tests)
-   (left-memory :initform (make-hash-table)
-                :reader node2-left-memory)
-   (right-memory :initform (make-hash-table)
-                 :reader node2-right-memory)))
+(defclass terminal-node () ())
 
-(defmethod accept-tokens-from-left ((self node2) tokens))
+(defmethod accept-token ((self terminal-node) token)
+  (format t "Passed: ~S~%" token)
+  t)
 
-(defmethod accept-token-from-right ((self node2) token))
-
-(defun make-node2 ()
-  (make-instance 'node2))
-
+(defun make-terminal-node ()
+  (make-instance 'terminal-node))

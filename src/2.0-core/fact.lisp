@@ -20,9 +20,11 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.2 2002/08/28 20:18:34 youngde Exp $
+;;; $Id: fact.lisp,v 1.3 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
+
+(defvar *show-hidden-fact-slots* nil)
 
 (defclass fact ()
   ((name :initarg :name
@@ -73,7 +75,9 @@
   a fact instance."
   (let ((slots (list)))
     (maphash #'(lambda (slot value)
-                 (push (list slot value) slots))
+                 (when (or (not (eq slot :object))
+                           *show-hidden-fact-slots*)
+                   (push (list slot value) slots)))
              (fact-slot-table fact))
     slots))
 

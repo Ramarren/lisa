@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.3 2002/08/28 19:32:36 youngde Exp $
+;;; $Id: node1.lisp,v 1.4 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,9 +53,9 @@
                         token))
        (node1-successors node1)))
 
-(defun accept-token (node1 token)
-  (if (funcall (node1-test node1) token)
-      (pass-token-to-successors node1 token)
+(defmethod accept-token ((self node1) token)
+  (if (funcall (node1-test self) token)
+      (pass-token-to-successors self token)
     nil))
 
 (defun make-node1 (test)

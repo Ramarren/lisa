@@ -20,21 +20,33 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.2 2002/08/27 17:58:06 youngde Exp $
+;;; $Id: token.lisp,v 1.3 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
 
-(defun make-token (fact)
-  (let ((token
-         (make-array 1 :adjustable t :fill-pointer t)))
-    (setf (aref token 0) fact)
-    token))
+(defclass token ()
+  ((facts :initform
+          (make-array 0 :adjustable t :fill-pointer t))))
 
-(defun get-fact-from-token (token address)
-  (aref token address))
+(defmethod initialize-instance :after ((self token) &key fact)
+  (vector-push-extend fact (slot-value self 'facts))
+  self)
 
-(defun get-top-fact-from-token (token)
-  (aref token (1- (length token))))
+(defclass add-token (token) ())
+(defclass remove-token (token) ())
+
+(defun make-add-token (fact)
+  (make-instance 'add-token :fact fact))
+
+(defun make-remove-token (fact)
+  (make-instance 'remove-token :fact fact))
+
+(defun find-fact-in-token (token address)
+  (aref (slot-value token 'facts) address))
+
+(defun peek-fact-in-token (token)
+  (with-slots ((fact-vector facts)) token
+    (aref fact-vector (1- (length fact-vector)))))
 
 (defun push-fact-on-token (token fact)
-  (vector-push-extend token fact))
+  (vector-push-extend (slot-value token 'facts) fact))

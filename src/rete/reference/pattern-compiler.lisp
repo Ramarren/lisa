@@ -20,7 +20,7 @@
 ;;; File: pattern-compiler.lisp
 ;;; Description:
 
-;;; $Id: pattern-compiler.lisp,v 1.2 2002/08/28 00:28:26 youngde Exp $
+;;; $Id: pattern-compiler.lisp,v 1.3 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,14 +33,14 @@
    (lambda (token)
      (eq class-name
          (fact-name
-          (get-top-fact-from-token token))))))
+          (peek-fact-in-token token))))))
 
 (defun make-simple-slot-test (slot-name value)
   (function
    (lambda (token)
      (equal value
             (get-slot-value
-             (get-top-fact-from-token token)
+             (peek-fact-in-token token)
              slot-name)))))
 
 (defun compile-pattern (parsed-pattern))

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.3 2002/08/28 19:32:36 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.4 2002/08/29 15:29:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,6 +33,11 @@
   (let ((node (make-node1 (make-class-test class))))
     (vector-push-extend node (rete-roots rete-network))
     node))
+
+(defun distribute-token (rete-network token)
+  (map nil #'(lambda (root-node)
+               (accept-token root-node token))
+       (rete-roots rete-network)))
 
 (defun make-rete-network ()
   (make-instance 'rete-network))
@@ -57,7 +62,8 @@
                  (make-simple-slot-test
                   (pattern-slot-name slot)
                   (pattern-slot-value slot)))
-           #'pass-token))))))
+           #'pass-token)))
+      (add-successor node (make-terminal-node) #'pass-token))))
 
 (defun make-test-network (patterns)
   (let ((network (make-rete-network)))
