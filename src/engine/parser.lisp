@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.46 2001/03/30 20:25:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.47 2001/03/30 21:58:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -170,28 +170,44 @@
           slots))
 
 (defun parse-and-insert-fact (body)
-  (let ((head (first body))
-        (slots (rest body)))
-    (cond ((symbolp head)
-           (let ((class (find-meta-class head)))
-             `(assert-fact (current-engine)
-               (make-fact ',(get-name class)
-                (canonicalize-slot-names ,class
-                 (,@(normalize-slots slots)))))))
-          (t
-           (parsing-error "A fact must begin with a symbol: ~S" head)))))
+  (flet ((generate-assert ()
+           (let ((head (first body))
+                 (slots (rest body)))
+             (cond ((symbolp head)
+                    (let ((class (find-meta-class head)))
+                      `(assert-fact (current-engine)
+                        (make-fact ',(get-name class)
+                         (canonicalize-slot-names ,class
+                          (,@(normalize-slots slots)))))))
+                   (t
+                    (parsing-error
+                     "A fact must begin with a symbol: ~S" head))))))
+    (handler-case
+        (generate-assert)
+      (lisa-condition (condition)
+        (command-structure-error 'assert-fact condition)))))
 
 (defun parse-and-modify-fact (fact body)
-  `(modify-fact (current-engine) ,fact
-    (canonicalize-slot-names (find-meta-class (fact-name ,fact))
-     (,@(normalize-slots body)))))
+  (flet ((generate-modify ()
+           `(modify-fact (current-engine) ,fact
+             (canonicalize-slot-names (find-meta-class (fact-name ,fact))
+              (,@(normalize-slots body))))))
+    (handler-case
+        (generate-modify)
+      (lisa-condition (condition)
+        (command-structure-error 'modify-fact condition)))))
 
 (defun redefine-deftemplate (name body)
-  (flet ((extract-slot (slot)
-           (cond ((or (not (consp slot))
-                      (not (eql (first slot) 'slot))
-                      (not (= (length slot) 2)))
-                  (parsing-error
-                   "This slot has a structural problem: ~S" slot))
-                 (t (second slot)))))
-    (create-class-template name (mapcar #'extract-slot body))))
+  (labels ((extract-slot (slot)
+             (cond ((or (not (consp slot))
+                        (not (eql (first slot) 'slot))
+                        (not (= (length slot) 2)))
+                    (parsing-error
+                     "This slot has a structural problem: ~S" slot))
+                   (t (second slot))))
+           (define-template ()
+               (create-class-template name (mapcar #'extract-slot body))))
+    (handler-case
+        (define-template)
+      (lisa-condition (condition)
+        (command-structure-error 'deftemplate condition)))))

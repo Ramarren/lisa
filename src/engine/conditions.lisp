@@ -21,24 +21,29 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.4 2001/03/30 20:25:44 youngde Exp $
+;;; $Id: conditions.lisp,v 1.5 2001/03/30 21:58:52 youngde Exp $
 
 (in-package "LISA")
 
 (define-condition lisa-condition (error)
-  ()
+  ((text :initarg :text
+         :initform nil))
   (:documentation
    "The base class of the LISA condition hierarchy."))
 
 (define-condition syntactical-error (lisa-condition)
-  ((text :initarg :text))
+  ()
   (:documentation
    "This condition represents syntactical errors discovered during the initial
    parsing pass."))
 
+(define-condition environment-error (lisa-condition)
+  ()
+  (:documentation
+   "This condition represents LISA environmental errors."))
+
 (define-condition rule-structure-error (lisa-condition)
-  ((rule-name :initarg :rule-name)
-   (text :initarg :text))
+  ((rule-name :initarg :rule-name))
   (:report
    (lambda (condition strm)
      (with-slots (rule-name text) condition
@@ -49,8 +54,7 @@
    forms."))
 
 (define-condition command-structure-error (lisa-condition)
-  ((command-name :initarg :command-name)
-   (text :initarg :text))
+  ((command-name :initarg :command-name))
   (:report
    (lambda (condition strm)
      (with-slots (command-name text) condition
@@ -60,9 +64,12 @@
    "This condition represents structural errors found while parsing specific
    LISA functions."))
 
-(defmacro parsing-error (format-string &rest args)
-  `(error 'syntactical-error
+(defmacro make-lisa-condition (cond-name format-string args)
+  `(error ,cond-name
     :text (apply #'format nil ,format-string `(,,@args))))
+
+(defmacro parsing-error (format-string &rest args)
+  `(make-lisa-condition 'syntactical-error ,format-string ,args))
 
 (defmacro rule-structure-error (rule-name parse-condition)
   `(with-slots (text) ,parse-condition
@@ -73,3 +80,6 @@
   `(with-slots (text) ,parse-condition
     (error 'command-structure-error
      :command-name ,command-name :text text)))
+
+(defmacro environment-error (format-string &rest args)
+  `(make-lisa-condition 'environment-error ,format-string ,args))

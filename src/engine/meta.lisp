@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.10 2001/03/17 21:41:38 youngde Exp $
+;;; $Id: meta.lisp,v 1.11 2001/03/30 21:58:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,7 +36,7 @@
   (declare (type meta-fact self))
   (let ((slot (gethash slot-name (get-slots self))))
     (when (and (null slot) errorp)
-      (error "No meta slot for symbol ~S." slot-name))
+      (environment-error "This slot-name has no meta slot: ~S." slot-name))
     (values slot)))
 
 (defun meta-slot-count (self)
@@ -79,7 +79,8 @@
   (defun find-meta-class (name &optional (errorp t))
     (let ((meta-object (gethash name meta-map)))
       (when (and (null meta-object) errorp)
-        (error "Fact ~S does not have a registered metaclass." name))
+        (environment-error
+         "This fact name does not have a registered meta class: ~S" name))
       (values meta-object))))
 
 (defun import-and-register-class (symbolic-name real-name)
