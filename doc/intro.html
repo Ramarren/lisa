@@ -1,0 +1,94 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; Linux 2.2.14-5.0 i586) [Netscape]">
+</head>
+<body background="hierarchy-background.gif">
+
+<center>
+<h3>
+LISA Project Documentation</h3></center>
+
+<p><br>This page is a haphazard attempt to generate some early documentation
+for LISA, in preparation for an alpha release. It is nowhere near comprehensive,
+and at some point in the near future will be completely rewritten.
+<br>&nbsp;
+<h4>
+I. What can LISA do right now?</h4>
+As of this writing, LISA is capabile of running "smallish" rulesets similar
+in composition to the "monkey and bananas" (MAB) planning problem, a version
+of which can be found in the project's <i>misc</i> directory. It is possible
+to interact with LISA in much the way one interacts with JESS and CLIPS;
+there's a fairly decent programming and command language (mentioned later)
+that one can use to inspect the knowledge base, fire rules, save facts
+to a file, etc. It is <i>not</i> possible, I believe, to build even a small
+system suitable for deployment; there are simply too many missing features.
+However, one can get a good feel for the environment right now, so I think
+in that sense a software release at this point is reasonable.
+<br>&nbsp;
+<h4>
+II. What can't LISA do right now?</h4>
+This list is long, but development continues at a pretty good clip. In
+no particular order, missing features include but are not limited to:
+<ol>
+<li>
+<i>True reasoning over CLOS objects</i>: Right now LISA performs what I
+call "symbolic reasoning". This means that rule patterns (and facts in
+the knowledge base) manipulate the equivalent of JESS <i>unordered facts</i>,
+or <i>deftemplates</i>. Although each fact name must be backed by a CLOS
+class, LISA doesn't do anything with these classes right now. You'll see
+how this works in the MAB example.</li>
+
+<br>&nbsp;
+<li>
+<i>Rule salience</i>: All rules operate at the same salience, or priority.
+LISA's conflict resolution strategy is ready for this feature; I just need
+to tweak the rule parser a bit.<br>
+<BR></li>
+
+<li>
+<i>No TEST conditional element</i>.<br>
+<BR></li>
+
+<li>
+<i>No rule redefinition</i>: LISA doesn't yet support dynamic redefinition
+of rules. Before reloading an existing knowledge base one must first CLEAR
+the inference engine.&nbsp;Failing to do this will hose the Rete network
+pretty good.<br>
+<BR></li>
+
+<li>
+<i>No multiprocessing support</i>: LISA will eventually support this feature
+but the implementation requires some thought.<br>
+<BR></li>
+
+<li>
+<i>Limited fact slot values</i>: Right now LISA limits the values fact
+slots can possess to '(string, number, symbol). In particular, lists are
+not yet supported.<br>
+<BR></li>
+
+<li>
+<i>Patterns like this</i>: LISA currently doesn't support patterns like
+(<b>pattern-1 (slot-1 ?var) (slot-2 ?var))</b>, where <b>?var</b> first
+occurs in <b>pattern-1</b> and multiple times within its slots.&nbsp;Is
+this clear enough?<br>
+<BR></li>
+
+<li>
+<i>No ruleset partitioning</i>: LISA doesn't yet support the notion of
+rule "modules" or "packets".<br>
+<BR></li>
+
+<li>
+<i>No backward chaining</i>: LISA employs a forward-chaining inference
+engine. I might support backward-chaining in the future.<br>
+<BR></li>
+
+<li>
+</li>
+</ol>
+
+</body>
+</html>
