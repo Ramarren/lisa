@@ -21,11 +21,12 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.51 2002/06/04 00:31:07 youngde Exp $
+;;; $Id: mab.lisp,v 1.52 2002/08/09 21:06:12 youngde Exp $
 
-(when (not (find-package "LISA-MAB"))
-  (defpackage "LISA-MAB"
-    (:use "LISA-LISP")))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (when (not (find-package "LISA-MAB"))
+    (defpackage "LISA-MAB"
+      (:use "LISA-LISP"))))
 
 (in-package "LISA-MAB")
 
