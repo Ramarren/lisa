@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.61 2001/04/09 19:52:06 youngde Exp $
+;;; $Id: parser.lisp,v 1.62 2001/04/09 20:32:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,7 +46,9 @@
   (flet ((redefine-rule ()
            (with-rule-components ((doc-string decls lhs rhs) body)
              (let ((rule (make-rule name (current-engine)
-                                    :doc-string doc-string :source body)))
+                                    :doc-string doc-string 
+                                    :directives decls
+                                    :source body)))
                (finalize-rule-definition rule lhs rhs)
                (add-rule (current-engine) rule)))))
     (handler-case
@@ -55,19 +57,22 @@
         (rule-structure-error name condition)))))
 
 (defun extract-rule-headers (body)
-  (let ((doc nil)
-        (decls nil)
-        (remains body))
-    (when (stringp (first remains))
-      (setf doc (first remains))
-      (setf remains (rest remains)))
-    (setf decls (first remains))
-    (cond ((and (consp decls)
-                (eq (first decls) 'declare))
-           (setf decls (rest decls))
-           (setf remains (rest remains)))
-          (t (setf decls nil)))
-    (values doc decls remains)))
+  (flet ((create-directives (spec)
+           (make-directive (first spec) (rest spec))))
+    (let ((doc nil)
+          (decls nil)
+          (remains body))
+      (when (stringp (first remains))
+        (setf doc (first remains))
+        (setf remains (rest remains)))
+      (setf decls (first remains))
+      (cond ((and (consp decls)
+                  (eq (first decls) 'declare))
+             (setf decls 
+               (mapcar #'create-directives (rest decls)))
+             (setf remains (rest remains)))
+            (t (setf decls nil)))
+      (values doc decls remains))))
 
 #+ignore
 (defun extract-rule-headers (body)
