@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.20 2002/09/17 14:42:43 youngde Exp $
+;;; $Id: parser.lisp,v 1.21 2002/09/17 17:59:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,13 +33,13 @@
 (defvar *binding-table* nil)
 
 (defun find-or-set-slot-binding (var slot-name location)
-  (let ((binding
-         (gethash var *binding-table*)))
-    (when (null binding)
+  (multiple-value-bind (binding existsp)
+      (gethash var *binding-table*)
+    (unless existsp
       (setf binding
         (setf (gethash var *binding-table*)
           (make-binding var slot-name location))))
-    binding))
+    (values binding existsp)))
 
 (defun find-slot-binding (var &key (errorp t))
   (let ((binding (gethash var *binding-table*)))
@@ -80,6 +80,7 @@
   (with-rule-components ((doc-string lhs rhs) body)
     (format t "LHS: ~S~%" lhs)
     (format t "RHS: ~S~%" rhs)
+    (break)
     (setf *network* (make-test-network lhs))
     *network*))
 
@@ -96,18 +97,9 @@
     (values nil body)))
 
 (defun preprocess-left-side (lhs)
-  (flet ((check-intra-pattern-bindings ()
-           (let ((bindings
-                  (loop for obj in (utils:flatten (first lhs))
-                      if (variablep obj)
-                      collect obj)))
-             (if (equal bindings (remove-duplicates bindings))
-                 lhs
-               (push (list 'unconditional-fact) lhs)))))
-    (cond ((null lhs)
-           (push (list 'initial-fact) lhs))
-          (t
-           (check-intra-pattern-bindings)))))
+  (if (null lhs)
+      (push (list 'initial-fact) lhs)
+    lhs))
 
 (defun parse-rulebody (body)
   (let ((location -1))
@@ -177,36 +169,54 @@
     (cl:assert (find-meta-fact head nil) nil
       "This pattern has no meta data: ~S" pattern)
     (macrolet ((collect-constraint-bindings (constraint list)
-                 `(dolist (obj (utils:flatten ,constraint))
-                    (when (variablep obj)
-                      (pushnew (find-slot-binding obj)
-                               ,list :key #'first)))))
+                 `(progn
+                    (dolist (obj (utils:flatten ,constraint))
+                      (when (variablep obj)
+                        (pushnew (find-slot-binding obj)
+                                 ,list :key #'first)))
+                    ,list))
+               (simple-negated-field-p (field)
+                 `(and (consp ,field)
+                       (eq (first ,field) 'not)
+                       (not (consp (second ,field)))))
+               (check-for-intra-pattern-bindings (bindings)
+                 `(and (consp ,bindings)
+                       (every #'(lambda (b)
+                                  (= location (binding-address b)))
+                              ,bindings))))
       (labels ((parse-slot (slot)
                  (let ((name (first slot))
                        (field (second slot))
                        (constraint (third slot))
                        (slot-binding nil)
                        (negated nil)
+                       (existing-bindings (list))
                        (constraint-bindings (list)))
                    (cl:assert (and (symbolp name)
                                    (slot-valuep field)
                                    (constraintp constraint))
                        nil "This pattern has a malformed slot: ~S" pattern)
-                   (when (and (consp field)
-                              (eq (first field) 'not)
-                              (not (consp (second field))))
+                   (when (simple-negated-field-p field)
                      (setf field (second field))
                      (setf negated t))
                    (when (variablep field)
-                     (setf slot-binding
-                       (find-or-set-slot-binding field name location)))
+                     (multiple-value-bind (binding exists-p)
+                         (find-or-set-slot-binding field name location)
+                       (setf slot-binding binding)
+                       (when exists-p
+                         (push binding existing-bindings))))
                    (when (consp constraint)
-                     (collect-constraint-bindings constraint 
-                                                  constraint-bindings))
+                     (setf existing-bindings
+                       (append existing-bindings
+                               (collect-constraint-bindings 
+                                constraint constraint-bindings))))
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
                                       :negated negated
+                                      :intra-pattern-bindings
+                                      (check-for-intra-pattern-bindings
+                                       existing-bindings)
                                       :constraint constraint
                                       :constraint-bindings constraint-bindings)))
                (parse-pattern-body (body slots)

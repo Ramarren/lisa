@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.5 2002/09/17 14:42:43 youngde Exp $
+;;; $Id: rete.lisp,v 1.6 2002/09/17 17:59:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,6 @@
 (defun initialize-internal-concepts (rete)
   (with-inference-engine (rete)
     (deftemplate initial-fact ())
-    (deftemplate unconditional-fact ())
     rete))
 
 (defun meta-fact-map (rete)
