@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.27 2001/01/04 22:45:09 youngde Exp $
+;;; $Id: rule.lisp,v 1.28 2001/01/05 17:38:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -178,7 +178,7 @@
   (add-new-node self node))
 
 (defun has-patterns-p (rule)
-  (not (= (get-pattern-count rule) 0)))
+  (plusp (get-pattern-count rule)))
 
 (defmethod get-pattern-count ((self rule))
   (length (get-patterns self)))

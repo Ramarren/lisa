@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.25 2001/01/05 02:35:23 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.26 2001/01/05 17:38:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,6 +56,7 @@
   (:documentation
    "Generates the Rete pattern network."))
 
+#+ignore
 (defun add-simple-tests (slots rule node)
   (labels ((add-test-maybe (node slot-name tests)
              (let ((test (first tests)))
@@ -68,14 +69,61 @@
                                          node (make-node1-teq slot-name
                                                               (get-value test))
                                          rule)
-                         slot-name (rest tests)))))))
+                                        slot-name (rest tests)))))))
            (add-tests (node slot)
              (add-test-maybe node (get-name slot) (get-tests slot))))
     (if (null slots)
         (values node)
       (add-simple-tests (rest slots) rule
                         (add-tests node (first slots))))))
-           
+
+#+ignore
+(defun add-simple-tests (pattern rule parent-node)
+  (labels ((add-test-maybe (node slot-name tests)
+             (let ((test (first tests)))
+               (cond ((null test)
+                      (values node))
+                     ((value-is-variable-p test)
+                      (add-test-maybe node slot-name (rest tests)))
+                     ((and (value-is-predicate-p test)
+                           (> (get-pattern-count rule) 1))
+                      (add-test-maybe node slot-name (rest tests)))
+                     (t
+                      (add-test-maybe
+                       (merge-successor node
+                                        (make-node1-teq slot-name
+                                                        (get-value test))
+                                        rule)
+                       slot-name (rest tests))))))
+           (add-simple-node-tests (slots last-node)
+             (let ((slot (first slots)))
+               (if (null slot)
+                   (values last-node)
+                 (add-simple-node-tests
+                  (rest slots)
+                  (add-test-maybe last-node (get-name slot)
+                                  (get-tests slot)))))))
+    (add-simple-node-tests (get-slots pattern) parent-node)))
+
+(defun add-simple-tests (pattern rule parent-node)
+  (let ((last-node parent-node))
+    (macrolet ((node1-needed-p (test)
+                 `(or (not (value-is-variable-p ,test))
+                      (and (value-is-predicate-p ,test)
+                           (= (get-pattern-count ,rule) 1))))
+               (add-test-maybe (slot test)
+                 `(if (node1-needed-p ,test)
+                      (setq ,last-node
+                        (merge-successor ,last-node
+                                         (make-node1 ,test ,slot ,rule ,pattern)
+                                         ,rule)))))
+      (mapc #'(lambda (slot)
+                (mapc #'(lambda (test)
+                          (setf last-node (add-test-maybe slot test)))
+                      (get-tests slot)))
+            (get-slots pattern)))
+    (values last-node)))
+
 (defun create-single-nodes (compiler rule patterns)
   (with-accessors ((terminals get-terminals)
                    (roots get-roots)) compiler
@@ -90,7 +138,7 @@
                                       (get-name pattern)) rule)))
                           (setf (aref roots i) last)
                           (setf (aref terminals i)
-                            (add-simple-tests (get-slots pattern) rule last))
+                            (add-simple-tests pattern rule last))
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 
@@ -156,61 +204,21 @@
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
 
-#+ignore
-(defun add-node2-tests (rule node2 slots)
-  (labels ((add-tests (slot tests)
-             (let ((test (first tests)))
-               (cond ((null test)
-                      (values))
-                     ((value-is-variable-p test)
-                      (let ((binding (find-binding rule (get-value test))))
-                        (cl:assert (typep binding 'slot-binding))
-                        (add-binding-test node2 binding (get-name slot))
-                        (add-tests slot (rest tests))))
-                     (t
-                      (add-tests slot (rest tests)))))))
-    (unless (null slots)
-      (let ((slot (first slots)))
-        (add-tests slot (get-tests slot))
-        (add-node2-tests rule node2 (rest slots))))
-    (values node2)))
-
 (defun add-node2-tests (rule node2 pattern)
-  (flet ((add-tests (slot tests)
-           (mapc #'(lambda (test)
-                     (when (value-is-variable-p test)
-                       (let ((binding (find-binding rule (get-value test))))
-                         (cl:assert (typep binding 'slot-binding))
-                         (unless (= (get-location binding)
-                                    (get-location pattern))
-                           (add-binding-test node2 binding 
-                                             (get-name slot))))))
-                   tests)))
+  (flet ((add-test (slot test)
+           (when (value-is-variable-p test)
+             (let ((binding (find-binding rule (get-value test))))
+               (cl:assert (typep binding 'slot-binding))
+               (unless (= (get-location binding)
+                          (get-location pattern))
+                 (add-binding-test node2 binding 
+                                   (get-name slot)))))))
     (mapc #'(lambda (slot)
-              (add-tests slot (get-tests slot)))
+              (mapc #'(lambda (test) (add-test slot test))
+                    (get-tests slot)))
           (get-slots pattern))
     (values node2)))
 
-#+ignore
-(defun add-node2-tests (rule node2 pattern)
-  (labels ((add-tests (slot tests)
-             (let ((test (first tests)))
-               (cond ((null test)
-                      (values))
-                     ((value-is-variable-p test)
-                      (let ((binding (find-binding rule (get-value test))))
-                        (cl:assert (typep binding 'slot-binding))
-                        (unless (= (get-location binding)
-                                   (get-location pattern))
-                          (add-binding-test node2 binding (get-name slot)))
-                        (add-tests slot (rest tests))))
-                     (t
-                      (add-tests slot (rest tests)))))))
-    (mapc #'(lambda (slot)
-              (add-tests slot (get-tests slot)))
-          (get-slots pattern))
-    (values node2)))
-                      
 (defun create-join-nodes (compiler rule)
   (labels ((add-join-node (node i)
              (with-accessors ((terminals get-terminals)) compiler
@@ -227,7 +235,6 @@
                      (t
                       (let ((node2
                              (make-join-node pattern (get-engine rule))))
-;                        (add-node2-tests rule node2 (get-slots pattern))
                         (add-node2-tests rule node2 pattern)
                         (add-join-node node2 i)
                         (third-pass (rest patterns) (1+ i))))))))

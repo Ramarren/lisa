@@ -19,10 +19,9 @@
 
 ;;; File: strategies.lisp
 ;;; Description: Classes that implement the various default conflict
-;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
-;;; raw and inefficient; it will change soon.
+;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.14 2001/01/03 17:08:16 youngde Exp $
+;;; $Id: strategies.lisp,v 1.15 2001/01/05 17:38:06 youngde Exp $
 
 (in-package :lisa)
 

@@ -22,7 +22,7 @@
 ;;; element. They serve as nothing more than "holders" for tests waiting to be
 ;;; compiled by the Rete compiler.
 
-;;; $Id: test1.lisp,v 1.7 2001/01/04 17:03:11 youngde Exp $
+;;; $Id: test1.lisp,v 1.8 2001/01/05 17:38:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -36,6 +36,9 @@
 
 (defmethod value-is-variable-p ((self test1))
   (variablep (get-value self)))
+
+(defmethod value-is-predicate-p ((self test1))
+  (consp (get-value self)))
 
 (defclass test1-eq (test1)
   ()
