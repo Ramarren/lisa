@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.5 2002/08/29 19:21:54 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.6 2002/08/29 22:59:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,26 +28,27 @@
 (defvar *terminals* nil)
 (defvar *shared-nodes* nil)
 
-(defmacro add-new-root (node)
-  `(vector-push-extend ,node *root-nodes*))
-
 (defmacro add-new-terminal (node)
   `(vector-push-extend ,node *terminals*))
 
 (defclass rete-network ()
-  ((root-nodes :initform nil
+  ((root-nodes :initform (make-hash-table :test #'equal)
                :reader rete-roots)
    (shared-nodes :initform (make-hash-table :test #'equal)
                  :reader rete-shared-nodes)))
 
 (defun add-root-node (class)
   (let* ((key `(:class ,class))
-         (node (gethash key *shared-nodes*)))
-    (when (null node)
-      (setf node (make-node1 (make-class-test class)))
-      (add-new-root node)
-      (setf (gethash key *shared-nodes*) node))
-    node))
+         (root (gethash key *shared-nodes*)))
+    (when (null root)
+      (setf root (make-root-node class))
+      (setf (gethash key *root-nodes*) root)
+      (setf (gethash key *shared-nodes*) root))
+    root))
+
+(defun find-root-for-token (rete-network token)
+  (gethash `(:class ,(fact-name (token-peek-fact token)))
+           (rete-roots rete-network)))
 
 (defun add-intra-pattern-node (slot)
   (let* ((key `(,(pattern-slot-name slot)
@@ -60,9 +61,11 @@
     node))
 
 (defun distribute-token (rete-network token)
-  (map nil #'(lambda (root-node)
-               (accept-token root-node token))
-       (rete-roots rete-network)))
+  (let ((root (find-root-for-token rete-network token)))
+    (cl:assert (not (null root)) nil
+      "There's no root node in the network for this fact: ~S"
+      (token-peek-fact token))
+    (accept-token root token)))
 
 (defun make-rete-network ()
   (make-instance 'rete-network))
@@ -96,7 +99,7 @@
       (add-new-terminal node))))
 
 (defun compile-rule-into-network (rete-network patterns)
-  (let ((*root-nodes* (make-array 0 :adjustable t :fill-pointer t))
+  (let ((*root-nodes* (rete-roots rete-network))
         (*terminals* (make-array 0 :adjustable t :fill-pointer t))
         (*shared-nodes* (rete-shared-nodes rete-network)))
     (add-intra-pattern-nodes patterns)

@@ -17,17 +17,20 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: pattern-compiler.lisp
+;;; File: root-node.lisp
 ;;; Description:
 
-;;; $Id: pattern-compiler.lisp,v 1.4 2002/08/29 22:59:56 youngde Exp $
+;;; $Id: root-node.lisp,v 1.1 2002/08/29 22:59:56 youngde Exp $
 
 (in-package "LISA")
 
-(defun make-simple-slot-test (slot-name value)
-  (function
-   (lambda (token)
-     (equal value
-            (get-slot-value
-             (token-peek-fact token)
-             slot-name)))))
+(defclass root-node (shared-node)
+  ((class :initarg :class
+          :reader root-node-class)))
+
+(defmethod accept-token ((self shared-node) token)
+  (pass-token-to-successors self token))
+
+(defun make-root-node (class)
+  (make-instance 'root-node :class class))
+
