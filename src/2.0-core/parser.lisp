@@ -24,13 +24,17 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.42 2002/10/19 18:45:45 youngde Exp $
+;;; $Id: parser.lisp,v 1.43 2002/10/24 19:24:56 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
 
 (defvar *binding-table* nil)
+
+(defun make-binding-set ()
+  (loop for binding being the hash-value of *binding-table*
+      collect binding))
 
 (defun find-or-set-slot-binding (var slot-name location)
   (multiple-value-bind (binding existsp)
@@ -142,6 +146,7 @@
               :slots (rest form)
               :type type
               :pattern-binding binding
+              :binding-set (make-binding-set)
               :address location))
            (parse-pattern (p binding)
              (let ((head (first p)))

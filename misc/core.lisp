@@ -77,10 +77,9 @@
   =>
   (format t "constraints: ~S ~S~%" ?name ?friend))
 
-#+ignore
 (defrule variable-rule ()
   (frodo (name ?name))
-  (?sam (samwise (name sam) (friend ?name)))
+  (?sam (samwise (name ?name) (friend ?name)))
   =>
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
@@ -106,6 +105,7 @@
   =>
   )
 
+#+ignore
 (defrule simple ()
   (?f (gandalf (age 100)))
   =>

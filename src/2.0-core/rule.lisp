@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.8 2002/10/11 15:53:28 youngde Exp $
+;;; $Id: rule.lisp,v 1.9 2002/10/24 19:24:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,6 +39,9 @@
            :reader rule-module)
    (behavior :initform nil
              :accessor rule-behavior)
+   (binding-set :initarg :binding-set
+                :initform nil
+                :reader rule-binding-set)
    (node-list :initform nil
               :reader rule-node-list)
    (engine :initarg :engine
@@ -72,11 +75,16 @@
 
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
-  (compile-rule
-   (make-instance 'rule 
-     :name name 
-     :engine engine
-     :comment doc-string
-     :salience salience
-     :module module)
-   patterns actions))
+  (flet ((make-rule-binding-set ()
+           (delete-duplicates
+            (loop for pattern in patterns
+                append (parsed-pattern-binding-set pattern)))))
+    (compile-rule
+     (make-instance 'rule 
+       :name name 
+       :engine engine
+       :comment doc-string
+       :salience salience
+       :module module
+       :binding-set (make-rule-binding-set))
+     patterns actions)))

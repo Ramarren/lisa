@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.20 2002/09/26 01:54:25 youngde Exp $
+;;; $Id: pattern.lisp,v 1.21 2002/10/24 19:24:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,6 +60,7 @@
   (address 0 :type integer)
   (pattern-binding nil :type symbol)
   (test-bindings nil :type list)
+  (binding-set nil :type list)
   (type :generic :type symbol))
 
 (defstruct rule-actions
