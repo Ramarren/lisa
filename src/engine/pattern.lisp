@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.19 2001/01/09 20:15:33 youngde Exp $
+;;; $Id: pattern.lisp,v 1.20 2001/01/09 21:03:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,16 +70,20 @@
              (setf (get-value slot) var)
              (if negated
                  (setf (get-constraint slot)
-                   `(not (equal ,var ,value)))
+                   (if (quotable value)
+                       `(not (equal ,var ',value))
+                     `(not (equals ,var ,value))))
                (setf (get-constraint slot)
-                 `(equal ,var ,value)))
+                 (if (quotable value)
+                     `(equal ,var ',value)
+                   `(equal ,var ,value))))
              (new-slot-binding var)))
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
              (rewrite-slot (make-slot-variable) slot-value nil))
             ((negated-rewritable-constraintp slot-value)
-             (rewrite-slot (make-slot-variable) (second slot-constraint) t))
+             (rewrite-slot (make-slot-variable) (second slot-value) t))
             ((null slot-constraint)
              (if (first-occurrence slot-value)
                  (new-slot-binding slot-value)

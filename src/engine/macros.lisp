@@ -20,13 +20,20 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.10 2001/01/09 20:15:33 youngde Exp $
+;;; $Id: macros.lisp,v 1.11 2001/01/09 21:03:51 youngde Exp $
 
 (in-package :lisa)
 
+(defmacro starts-with-? (sym)
+  `(eq (elt (symbol-name ,sym) 0) #\?))
+
 (defmacro variablep (sym)
   `(and (symbolp ,sym)
-    (eq (elt (symbol-name ,sym) 0) #\?)))
+    (starts-with-? ,sym)))
+
+(defmacro quotable (obj)
+  `(and (symbolp ,obj)
+        (not (starts-with-? ,obj))))
 
 (defmacro literalp (sym)
   `(or (and (symbolp ,sym)
@@ -49,6 +56,7 @@
        (consp ,constraint)))
 
 (defmacro normalize-field (obj)
+  (print obj)
   `(if (and (not (variablep ,obj))
             (not (null ,obj))
             (symbolp ,obj))

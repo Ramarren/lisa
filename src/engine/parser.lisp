@@ -20,13 +20,13 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.30 2001/01/09 20:15:33 youngde Exp $
+;;; $Id: parser.lisp,v 1.31 2001/01/09 21:03:51 youngde Exp $
 
 (in-package :lisa)
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
-    ,@body))
+     ,@body))
 
 (defmacro with-rule-components (((doc-string decls lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
@@ -109,8 +109,7 @@
                (assert-conditions ((symbolp name)
                                    (slot-valuep field)
                                    (constraintp constraint)))
-               `(,name ,(normalize-field field)
-                       ,(normalize-field constraint))))
+               `(,name ,field ,constraint)))
            (parse-pattern-body (body slots)
              (let ((slot (first body)))
                (cond ((consp slot)
