@@ -21,8 +21,26 @@
 ;;; Description: Macros and functions implementing LISA's early attempt at a
 ;;; query language.
 
-;;; $Id: retrieve.lisp,v 1.1 2001/11/27 22:18:29 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.2 2002/01/09 16:25:12 youngde Exp $
 
 (in-package "LISA")
 
-(defmacro retrieve ((varlist) &body body))
+(defun define-query (name varlist body)
+  (print name)
+  (print varlist)
+  (print body)
+  (values))
+
+(defmacro defquery (name (&key varlist) &body body)
+  (let ((rule-name (gensym)))
+    `(let ((,rule-name
+            (if (consp ',name) ,name ',name)))
+       (define-query ,rule-name ',varlist ',body))))
+
+(defmacro retrieve ((&rest varlist) &body body)
+  (flet ((make-rhs (var)
+           `(push (cons ',var ,var) *result*)))
+    `(defquery (gensym) (:varlist ,varlist)
+       ,@body
+       =>
+       ,@(mapcar #'make-rhs varlist))))

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.6 2001/10/03 19:24:47 youngde Exp $
+;;; $Id: lisa.system,v 1.7 2002/01/09 16:25:31 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -207,7 +207,12 @@
                                        (:file "debug")
                                        (:file "instrumenting"))
                           :depends-on (packages reflection mp conditions utils
-                                                preamble)))
+                                                preamble))
+                 (:module "query"
+                          :source-pathname "query"
+                          :binary-pathname "engine"
+                          :components ((:file "retrieve"))
+                          :depends-on (engine)))
     :depends-on (port)
     :initially-do
     (progn
