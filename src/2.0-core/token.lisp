@@ -20,6 +20,21 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.1 2002/08/27 17:19:38 youngde Exp $
+;;; $Id: token.lisp,v 1.2 2002/08/27 17:58:06 youngde Exp $
 
 (in-package "LISA")
+
+(defun make-token (fact)
+  (let ((token
+         (make-array 1 :adjustable t :fill-pointer t)))
+    (setf (aref token 0) fact)
+    token))
+
+(defun get-fact-from-token (token address)
+  (aref token address))
+
+(defun get-top-fact-from-token (token)
+  (aref token (1- (length token))))
+
+(defun push-fact-on-token (token fact)
+  (vector-push-extend token fact))
