@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.15 2002/10/08 18:54:45 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.16 2002/10/08 19:36:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,4 +111,5 @@
       (loop for new-root being the hash-value
           of (rete-roots from-rete)
           do (merge-root-node new-root))
+      (format t "The new node-set is ~S~%" (nreverse *node-set*))
       (nreverse *node-set*))))
