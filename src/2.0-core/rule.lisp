@@ -20,54 +20,54 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.1 2002/08/23 15:47:07 youngde Exp $
+;;; $Id: rule.lisp,v 1.2 2002/09/19 20:08:44 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rule ()
   ((name :initarg :name
          :initform nil
-         :reader get-name)
+         :reader rule-name)
    (comment :initform nil
             :initarg :comment
-            :accessor get-comment)
+            :reader rule-comment)
    (salience :initform 0
              :initarg :salience
-             :accessor get-salience)
+             :reader rule-salience)
    (module :initform nil
            :initarg :module
-           :reader get-module)
-   (patterns :initform nil
-             :accessor get-patterns)
-   (actions :initform nil
-            :accessor get-actions)
-   (binding-table :initform (make-hash-table)
-                  :accessor get-binding-table)
+           :reader rule-module)
+   (behavior :initform nil
+             :accessor rule-behavior)
    (engine :initarg :engine
            :initform nil
-           :reader get-engine))
+           :reader rule-engine))
   (:documentation
    "Represents production rules after they've been analysed by the language
   parser."))
 
-(defun compile-rule-patterns (rule patterns)
-  (setf (get-patterns rule) patterns))
-
-(defun compile-rule-actions (rule actions))
-
-(defun finalize-rule-definition (rule patterns actions)
-  (compile-rule-patterns rule patterns)
-  (compile-rule-actions rule actions)
-  rule)
+(defmethod initialize-instance :after ((self rule) &key patterns actions)
+  (compile-rule-into-network (rete-network (rule-engine self)) patterns)
+  (compile-rule-behavior self actions)
+  self)
+  
+(defun compile-rule-behavior (rule actions)
+  (setf (rule-behavior rule)
+    (make-predicate-test (rule-actions-actions actions)
+                         (rule-actions-bindings actions))))
 
 (defmethod print-object ((self rule) strm)
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (get-name self))))
 
-(defun make-rule (name engine &key (doc-string nil)
-                  (salience 0) (module nil))
-  (make-instance 'rule :name name :engine engine
-                 :comment doc-string :salience salience
-                 :module module))
-
+(defun make-rule (name engine patterns actions 
+                  &key (doc-string nil) (salience 0) (module nil))
+  (make-instance 'rule 
+    :name name 
+    :engine engine
+    :comment doc-string
+    :salience salience
+    :module module
+    :patterns patterns
+    :actions actions))
 
