@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.21 2000/11/30 16:10:02 youngde Exp $
+;;; $Id: rete.lisp,v 1.22 2000/11/30 20:00:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -104,10 +104,12 @@
   (clrhash (get-facts self)))
 
 (defmethod get-fact-list ((self rete))
-  (sort (hash-to-list #'(lambda (key val) val)
-                      (get-facts self))
-        #'(lambda (f1 f2)
-            (< (get-fact-id f1) (get-fact-id f2)))))
+  (flet ((retrieve-value (key val)
+           (declare (ignore key))
+           (values val)))
+    (sort (hash-to-list #'retrieve-value (get-facts self))
+          #'(lambda (f1 f2)
+              (< (get-fact-id f1) (get-fact-id f2))))))
 
 (defmethod next-fact-id ((self rete))
   (with-accessors ((next-fact-id get-next-fact-id)) self
@@ -161,6 +163,7 @@
 (defmethod get-rule-list ((self rete))
   (let ((rules (list)))
     (maphash #'(lambda (key val)
+                 (declare (ignore key))
                  (push val rules))
              (get-rules self))
     (values rules)))

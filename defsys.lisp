@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.7 2000/11/09 18:22:52 youngde Exp $
+;;; $Id: defsys.lisp,v 1.8 2000/11/30 20:00:23 youngde Exp $
 
 (in-package :user)
 
@@ -70,13 +70,7 @@
       (unless (probe-file path)
         (mkdir path)))))
 
-#+ignore
-(load (make-pathname :directory
-                     (append (pathname-directory *lisa-root-pathname*)
-                             '("contrib" "zebu-3.5.5"))
-                     :name "defsys"))
-
-(mk:defsystem "lisa"
+(mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
     :binary-pathname *lisa-binary-pathname*
     :source-extension "lisp"
@@ -94,31 +88,36 @@
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "macros")
+                                       (:file "utils")
+                                       (:file "lisa-kb-class")
+                                       (:file "special-facts")
+                                       (:file "strategies")
                                        (:file "token")
                                        (:file "add-token")
+                                       (:file "fact")
+                                       (:file "clear-token")
+                                       (:file "remove-token")
+                                       (:file "token-tree")
                                        (:file "node")
-                                       (:file "node1"
-                                              :depends-on (node))
-                                       (:file "node1-tect"
-                                              :depends-on (node1))
-                                       (:file "node1-teq"
-                                              :depends-on (node1))
-                                       (:file "node1-rtl"
-                                              :depends-on (node1))
-                                       (:file "node-test"
-                                              :depends-on (node))
-                                       (:file "node2"
-                                              :depends-on (node-test))
+                                       (:file "node1")
+                                       (:file "node1-tect")
+                                       (:file "node1-teq")
+                                       (:file "node1-rtl")
+                                       (:file "node-test")
+                                       (:file "node2")
+                                       (:file "terminal-node")
                                        (:file "test1")
+                                       (:file "slot")
                                        (:file "pattern")
-                                       (:file "generic-pattern"
-                                              :depends-on (test1 pattern))
-                                       (:file "factories"
-                                              :depends-on (generic-pattern))
-                                       (:file "defrule"
-                                              :depends-on (factories))
-                                       (:file "parser"
-                                              :depends-on (defrule macros))
-                                       (:file "language"
-                                              :depends-on (parser)))
+                                       (:file "generic-pattern")
+                                       (:file "bindings")
+                                       (:file "factories")
+                                       (:file "rule")
+                                       (:file "activation")
+                                       (:file "rete-compiler")
+                                       (:file "rete")
+                                       (:file "environment")
+                                       (:file "parser")
+                                       (:file "language")
+                                       (:file "debug"))
                           :depends-on (packages utils))))

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.13 2000/11/30 15:59:40 youngde Exp $
+;;; $Id: rule.lisp,v 1.14 2000/11/30 20:00:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -68,6 +68,7 @@
              `(,(get-name pb) ,fact))))
     (let ((vars nil))
       (maphash #'(lambda (key val)
+                   (declare (ignore key))
                    (setf vars (nconc vars `(,(create-binding val)))))
                bindings)
       (values vars))))
@@ -90,6 +91,7 @@
            (let ((fact (find-fact token (get-location b))))
              (format t "~S, ~S~%" b fact))))
     (maphash #'(lambda (key val)
+                 (declare (ignore key))
                  (show-binding val))
              (get-bindings self))))
 

@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.7 2000/11/17 16:34:45 youngde Exp $
+;;; $Id: environment.lisp,v 1.8 2000/11/30 20:00:26 youngde Exp $
 
 (in-package :lisa)
 
@@ -28,18 +28,19 @@
 ;;; names. LISA uses this map to locate class objects that represent facts in
 ;;; the knowledge base.
 
-(let ((class-map (make-hash-table)))
-  (defun import-class (name class)
-    (setf (gethash name class-map) (class-name class)))
+(eval-when (:compile-toplevel :load-toplevel)
+  (let ((class-map (make-hash-table)))
+    (defun import-class (name class)
+      (setf (gethash name class-map) (class-name class)))
 
-  (defun find-imported-class (name &optional (errorp t))
-    (let ((val (gethash name class-map)))
-      (cond ((null val)
-             (if errorp
-                 (error "No imported class for symbol ~S." name)))
-            (t
-             (setf val (find-class val errorp))))
-      (values val))))
+    (defun find-imported-class (name &optional (errorp t))
+      (let ((val (gethash name class-map)))
+        (cond ((null val)
+               (if errorp
+                   (error "No imported class for symbol ~S." name)))
+              (t
+               (setf val (find-class val errorp))))
+        (values val)))))
 
 (defun import-and-register-class (name binding)
   (if (and (symbolp name)
