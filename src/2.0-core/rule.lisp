@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.25 2004/02/28 17:40:23 youngde Exp $
+;;; $Id: rule.lisp,v 1.26 2004/03/16 19:40:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,8 +49,16 @@
               :reader rule-node-list)
    (activations :initform (make-hash-table :test #'equal)
                 :accessor rule-activations)
+   (patterns :initform (list)
+             :initarg :patterns
+             :reader rule-patterns)
+   (actions :initform nil
+            :initarg :actions
+            :reader rule-actions)
    (subrules :initform nil
              :accessor rule-subrules)
+   (subrule-p :initform nil
+              :accessor subrule-p)
    (logical-marker :initform nil
                    :initarg :logical-marker
                    :reader rule-logical-marker)
@@ -115,6 +123,7 @@
   (consp (rule-subrules rule)))
 
 (defun add-subrule (rule subrule)
+  (setf (subrule-p subrule) t)
   (push subrule (rule-subrules rule)))
 
 (defun logical-rule-p (rule)
@@ -167,6 +176,8 @@
      (make-instance 'rule 
        :short-name name 
        :engine engine
+       :patterns patterns
+       :actions actions
        :comment doc-string
        :salience salience
        :context (if (null context)
@@ -192,3 +203,22 @@
                 (make-composite-name (incf index))
                 engine pattern actions args))))))
     
+(defun copy-rule (rule engine)
+  (let ((initargs `(:doc-string ,(rule-comment rule)
+                    :salience ,(rule-salience rule)
+                    :context ,(rule-context rule)
+                    :auto-focus ,(rule-auto-focus rule))))
+    (if (composite-rule-p rule)
+        (apply #'make-composite-rule
+               (rule-short-name rule)
+               engine
+               (append `(,(rule-patterns rule))
+                       `(,@(mapcar #'rule-patterns (rule-subrules rule))))
+               (rule-actions rule)
+               initargs)
+      (apply #'make-rule
+             (rule-short-name rule)
+             engine
+             (rule-patterns rule)
+             (rule-actions rule)
+             initargs))))
