@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.58 2004/09/14 17:35:10 youngde Exp $
+;;; $Id: rete.lisp,v 1.59 2004/09/14 21:07:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -154,6 +154,16 @@
            (error (make-condition 'duplicate-fact
                     :existing-fact ,existing-fact)))))))
 
+(defmacro with-unique-fact (rete fact)
+  (let ((existing-fact (gensym)))
+    `(unless *allow-duplicate-facts*
+       (let ((,existing-fact
+              (gethash (hash-key ,fact) (rete-fact-table ,rete))))
+         (unless (or (null ,existing-fact)
+                     (not (equals ,fact ,existing-fact)))
+           (error (make-condition 'duplicate-fact
+                    :existing-fact ,existing-fact)))))))
+  
 (defun next-fact-id (rete)
   (incf (rete-next-fact-id rete)))
 
@@ -170,8 +180,7 @@
                   (deffacts-fact-list deffact)))
         (rete-autofacts rete)))
 
-(defmethod assert-fact ((self rete) fact &key cf)
-  (declare (ignore cf))
+(defmethod assert-fact-aux ((self rete) fact)
   (ensure-fact-is-unique self fact)
   (with-truth-maintenance (self)
     (setf (fact-id fact) (next-fact-id self))
@@ -180,8 +189,14 @@
     (trace-assert fact)
     (add-fact-to-network (rete-network self) fact)
     (when (fact-shadowsp fact)
-      (register-clos-instance self (find-instance-of-fact fact) fact))
-    fact))
+      (register-clos-instance self (find-instance-of-fact fact) fact)))
+  fact)
+  
+(defmethod assert-fact ((self rete) fact &key cf)
+  (if (null cf)
+      (assert-fact-aux self fact)
+    (calculate-cf self fact cf))
+  fact)
 
 (defmethod retract-fact ((self rete) (fact fact))
   (with-truth-maintenance (self)
