@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.4.2-2 i586) [Netscape]">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -61,8 +61,8 @@ in terms of time and size.</blockquote>
 
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(defimport <i>symbolic-name</i> (<i>class-name</i>)
-(<i>slot-name</i>*))</td>
+<td WIDTH="80%" NOSAVE>(defimport <i>symbolic-name</i> (<i>class-name</i>
+&amp;optional ancestors) (<i>slot-name</i>*))</td>
 
 <td>Macro</td>
 </tr>
@@ -71,10 +71,13 @@ in terms of time and size.</blockquote>
 <blockquote>Makes a CLOS class known to LISA and allows instances of this
 class to be asserted into the knowledge base. The <i>symbolic-name</i>
 is the name that will be used in rules and during pattern matching; <i>class-name</i>
-is the fully-qualified name of the class as it is known to Lisp. To limit
-the slots available for pattern matching, include a list of relevant <i>slot-name</i>s.
-If no slot-names are specified LISA will examine the meta class for <i>class-name</i>
-and make all of the slots in the class hierarchy available.</blockquote>
+is the fully-qualified name of the class as it is known to Lisp. If the
+class's ancestry is to be considered during pattern matching, <i>ancestors</i>
+will represent a list containing the <i>symbolic-name</i>s of those classes.
+To limit the slots available for pattern matching, include a list of relevant
+<i>slot-name</i>s. If no slot-names are specified LISA will examine the
+meta class for <i>class-name</i> and make all of the slots in the class
+hierarchy available.</blockquote>
 
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
@@ -258,11 +261,51 @@ any other:
 <br>&nbsp;
 <dd>
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
-</blockquote>
+
+<p><br>Once bound, method and function calls can be made on this object
+from the rule's LHS and RHS.
+<p>When reasoning over CLOS objects, LISA is capable of considering an
+instance's object hierarchy during pattern matching. In other words, it
+is possible to write rules that apply to many facts that share a common
+ancestry. The following code fragment provides an example:
+<br>&nbsp;
+<dd>
+(defclass fundamental ()&nbsp;())</dd>
 
 <dd>
-Once bound, method and function calls can be made on this object from the
-rule's LHS and RHS.</dd>
+(defclass rocky (fundamental)&nbsp;())</dd>
+
+<dd>
+(defclass boris (fundamental)&nbsp;())</dd>
+
+<br>&nbsp;
+<dd>
+(defimport fundamental (lisa-user::fundamental)&nbsp;())</dd>
+
+<dd>
+(defimport rocky (lisa-user::rocky (fundamental))&nbsp;())</dd>
+
+<dd>
+(defimport boris (lisa-user::boris (fundamental))&nbsp;())</dd>
+
+<br>&nbsp;
+<dd>
+(defrule cleanup (:salience -100)</dd>
+
+<dd>
+&nbsp;&nbsp;&nbsp; (?fact (fundamental))</dd>
+
+<dd>
+&nbsp;&nbsp;&nbsp;&nbsp; =></dd>
+
+<dd>
+&nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
+
+<p><br>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
+and <i>boris</i> in the knowledge base, retracting each in turn. Note how
+the <i>defimport</i> forms for <i>rocky</i> and <i>boris</i> specify the
+symbolic name of the ancestor class <i>fundamental</i>, rather than the
+CLOS identifier.</blockquote>
 
 <blockquote>
 <h5>
@@ -581,13 +624,6 @@ comes with LISA, write a new one. That sort of thing.</li>
 <i>Query language</i>: There should be a way to query the knowlege base
 for information. Something similar to Loom's query language would be very
 nice.</li>
-
-<br>&nbsp;
-<li>
-<i>Better CLOS pattern matching</i>: LISA needs to offer better support
-for matching on a class's hierarchy, rather than just the class itself.
-Currently, LISA doesn't consider the object hierarchy when performing pattern
-matching.</li>
 </ol>
 
 </body>

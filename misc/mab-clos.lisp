@@ -20,9 +20,10 @@
 ;;; File: mab-clos.lisp
 ;;; Description: A "CLOS-ified" version of the "Monkey And Bananas" sample
 ;;; implementation, a common AI planning problem. The monkey's objective is to
-;;; find and eat some bananas.
+;;; find and eat some bananas. This iteration also illustrates the use of
+;;; pattern matching on an object hierarchy.
 
-;;; $Id: mab-clos.lisp,v 1.7 2001/05/31 19:13:56 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.8 2001/05/31 20:14:16 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -397,6 +398,8 @@
   (monkey (satisfied t) (:object ?monkey))
   =>
   (format t "Monkey is satisfied: ~S~%" ?monkey))
+
+;;; Retract every object whose ancestor is an instance of MAB-FUNDAMENTAL...
 
 (defrule cleanup (:salience -100)
   (?fact (mab-fundamental))
