@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.7 2000/11/17 02:52:30 youngde Exp $
+;;; $Id: utils.lisp,v 1.8 2000/11/27 16:22:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -91,3 +91,17 @@
 
 (defun make-interned-symbol (&rest args)
   (intern (make-symbol (apply #'format nil args))))
+
+(defun hash-to-list (func ht)
+  "Applies FUNC to each entry in hashtable HT and, if FUNC so
+  indicates, appends the object to a LIST. If NIL is an acceptible
+  object, then FUNC should return two values; NIL and T."
+  (let ((seq (list)))
+    (maphash #'(lambda (key val)
+                 (multiple-value-bind (obj use-p)
+                     (funcall func key val)
+                   (unless (and (null obj)
+                                (not use-p))
+                     (setf seq
+                       (nconc seq `(,obj)))))) ht)
+    (values seq)))

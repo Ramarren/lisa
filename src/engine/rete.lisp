@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.18 2000/11/19 23:55:19 youngde Exp $
+;;; $Id: rete.lisp,v 1.19 2000/11/27 16:22:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,8 +46,8 @@
    (null-fact :initform
               (make-fact (find-class 'not-or-test-fact) nil)
               :reader get-null-fact)
-   (fact-list :initform nil
-              :accessor get-fact-list)
+   (fact-list :initform (make-hash-table)
+              :accessor get-facts)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id))
   (:documentation
@@ -69,25 +69,42 @@
   (get-clock self))
 
 (defmethod record-fact ((self rete) fact)
-  (with-accessors ((facts get-fact-list)) self
-    (setf facts
-      (nconc facts `(,fact)))))
+  (with-accessors ((facts get-facts)) self
+    (setf (gethash (get-fact-id fact) facts) fact)))
 
+#+ignore
 (defmethod find-fact ((self rete) (id integer))
   (find-if #'(lambda (fact)
                (= id (get-fact-id fact)))
-           (get-fact-list self)))
+           (get-facts self)))
 
+#+ignore
 (defmethod remove-fact ((self rete) (f fact))
   (let ((id (get-fact-id f)))
-    (with-accessors ((facts get-fact-list)) self
+    (with-accessors ((facts get-facts)) self
       (setf facts
         (delete-if #'(lambda (fact)
                        (= id (get-fact-id fact)))
                    facts)))))
 
+#+ignore
 (defmethod remove-facts ((self rete))
-  (setf (get-fact-list self) nil))
+  (setf (get-facts self) nil))
+
+(defmethod find-fact ((self rete) (id integer))
+  (gethash id (get-facts self)))
+
+(defmethod remove-fact ((self rete) fact)
+  (remhash (get-fact-id fact) (get-facts self)))
+
+(defmethod remove-facts ((self rete))
+  (clrhash (get-facts self)))
+
+(defmethod get-fact-list ((self rete))
+  (sort (hash-to-list #'(lambda (key val) val)
+                      (get-facts self))
+        #'(lambda (f1 f2)
+            (< (get-fact-id f1) (get-fact-id f2)))))
 
 (defmethod next-fact-id ((self rete))
   (with-accessors ((next-fact-id get-next-fact-id)) self

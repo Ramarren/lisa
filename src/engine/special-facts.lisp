@@ -21,7 +21,7 @@
 ;;; Description: Classes that represents special facts internal to
 ;;; LISA.
 
-;;; $Id: special-facts.lisp,v 1.1 2000/11/19 21:13:09 youngde Exp $
+;;; $Id: special-facts.lisp,v 1.2 2000/11/27 16:22:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,8 +35,8 @@
   (:documentation
    "Represents the special fact CLEAR-FACT."))
 
-(defclass not-or-clear-fact (lisa-kb-class)
+(defclass not-or-test-fact (lisa-kb-class)
   ()
   (:documentation
-   "Represents the special fact NOT-OR-CLEAR."))
+   "Represents the special fact NOT-OR-TEST."))
 
