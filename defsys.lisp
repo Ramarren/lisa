@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.17 2001/02/12 19:22:51 youngde Exp $
+;;; $Id: defsys.lisp,v 1.18 2001/03/01 16:31:51 youngde Exp $
 
 (in-package :user)
 
@@ -110,24 +110,33 @@
                                        (:file "clear-token")
                                        (:file "remove-token")
                                        (:file "token-tree")
-                                       (:file "node")
-                                       (:file "node1")
+                                       (:file "instrumentable")
+                                       (:file "node"
+                                              :depends-on (instrumentable))
+                                       (:file "node1"
+                                              :depends-on (node))
                                        (:file "rete-compiler")
-                                       (:file "node1-tect")
-                                       (:file "node1-tfn")
-                                       (:file "node1-teq")
-                                       (:file "node1-neq")
-                                       (:file "node1-rtl")
+                                       (:file "node1-tect"
+                                              :depends-on (node))
+                                       (:file "node1-tfn"
+                                              :depends-on (node))
+                                       (:file "node1-teq"
+                                              :depends-on (node))
+                                       (:file "node1-neq"
+                                              :depends-on (node))
+                                       (:file "node1-rtl"
+                                              :depends-on (node))
                                        (:file "test")
                                        (:file "node-test")
                                        (:file "test2-eq")
                                        (:file "test2-neq")
                                        (:file "test2-eval")
                                        (:file "node2"
-                                              :depends-on (token-tree))
+                                              :depends-on (node token-tree))
                                        (:file "node2-not"
                                               :depends-on (node2))
-                                       (:file "terminal-node")
+                                       (:file "terminal-node"
+                                              :depends-on (node))
                                        (:file "slot")
                                        (:file "pattern")
                                        (:file "generic-pattern")

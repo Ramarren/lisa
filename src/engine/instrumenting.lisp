@@ -22,22 +22,18 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.5 2001/02/12 19:22:52 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.6 2001/03/01 16:31:51 youngde Exp $
 
 (in-package :lisa)
 
-(let ((instruments (make-hash-table)))
-  (defun instrument-object (obj)
-    (setf (gethash obj instruments) obj))
+(defun instrument (obj)
+  (setf (get-instrumented obj) t))
 
-  (defun instrumentedp (obj)
-    (gethash obj instruments))
+(defun instrumentedp (obj)
+  (get-instrumented obj))
 
-  (defun un-instrument-object (obj)
-    (remhash obj instruments))
-
-  (defun clear-instrumenting ()
-    (clrhash instruments)))
+(defun uninstrument (obj)
+  (setf (get-instrumented obj) nil))
 
 (defun maprule (func rule-name)
   (mapc #'(lambda (path)
@@ -47,19 +43,27 @@
 (defun instrument-rule (rule-name)
   "Instruments each node in the network that leads to the rule
   identified by RULE-NAME."
-  (maprule #'instrument-object rule-name)
+  (maprule #'instrument rule-name)
   (values))
 
 (defun un-instrument-rule (rule-name)
   "Deactivates instrumenting of the rule identified by RULE-NAME."
-  (maprule #'un-instrument-object rule-name)
+  (maprule #'uninstrument rule-name)
   (values))
 
 (defun instrument-path (path)
-  (mapc #'instrument-object path)
+  (mapc #'instrument path)
   (values))
 
 (defun un-instrument-path (path)
-  (mapc #'un-instrument-object path)
+  (mapc #'uninstrument path)
   (values))
+
+(defun ibreak (obj &rest args)
+  (when (instrumentedp obj)
+    (apply #'break args)))
   
+#+ignore
+(defmacro ibreak(obj &rest args)
+  `(when (instrumentedp ,obj)
+    (funcall #'break ,@args)))

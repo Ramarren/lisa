@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.18 2001/02/09 22:11:30 youngde Exp $
+;;; $Id: fact.lisp,v 1.19 2001/03/01 16:31:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -98,6 +98,10 @@
 
 (defmethod reconstruct-fact ((self fact))
   `(,(class-name (get-class self)) ,@(get-slot-values self)))
+
+(defmethod write-fact ((self fact) strm)
+  (when (> (get-fact-id self) 0)
+    (print `(assert ,(reconstruct-fact self)) strm)))
 
 (defmethod equals ((self fact) (obj fact))
   (and (equal (get-class self) (get-class obj))

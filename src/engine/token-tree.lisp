@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.17 2001/02/22 21:26:12 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.18 2001/03/01 16:31:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -43,7 +43,7 @@
          (table (get-table self))
          (tokens (gethash hash table)))
     (setf (gethash hash table)
-          (push token tokens))
+          (append tokens `(,token)))
     (incf (get-size self))
     (values)))
 
