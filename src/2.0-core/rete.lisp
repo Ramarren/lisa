@@ -20,13 +20,15 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.54 2004/03/16 22:04:49 youngde Exp $
+;;; $Id: rete.lisp,v 1.55 2004/06/06 18:46:21 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete ()
   ((fact-table :initform (make-hash-table :test #'equalp)
                :accessor rete-fact-table)
+   (fact-id-table :initform (make-hash-table)
+                  :accessor fact-id-table)
    (instance-table :initform (make-hash-table)
                    :reader rete-instance-table)
    (rete-network :initform (make-rete-network)
@@ -77,9 +79,10 @@
 
 (defun add-rule-to-network (rete rule patterns)
   (flet ((load-facts (network)
-           (loop for fact being the hash-value
-               of (rete-fact-table rete)
-               do (add-fact-to-network network fact))))
+           (maphash #'(lambda (key fact)
+                        (unless (integerp key)
+                          (add-fact-to-network network fact)))
+                    (rete-fact-table rete))))
     (when (find-rule rete (rule-name rule))
       (forget-rule rete rule))
     (if (zerop (rete-fact-count rete))
@@ -113,23 +116,26 @@
   (forget-rule self (find-symbol rule-name)))
 
 (defun remember-fact (rete fact)
-  (with-accessors ((fact-table rete-fact-table)) rete
+  (with-accessors ((fact-table rete-fact-table)
+                   (id-table fact-id-table)) rete
     (setf (gethash (hash-key fact) fact-table) fact)
-    (setf (gethash (fact-id fact) fact-table) fact)))
+    (setf (gethash (fact-id fact) id-table) fact)))
 
 (defun forget-fact (rete fact)
-  (with-accessors ((fact-table rete-fact-table)) rete
+  (with-accessors ((fact-table rete-fact-table)
+                   (id-table fact-id-table)) rete
     (remhash (hash-key fact) fact-table)
-    (remhash (fact-id fact) fact-table)))
+    (remhash (fact-id fact) id-table)))
 
 (defun find-fact-by-id (rete fact-id)
-  (gethash fact-id (rete-fact-table rete)))
+  (gethash fact-id (fact-id-table rete)))
 
 (defun find-fact-by-name (rete fact-name)
   (gethash fact-name (rete-fact-table rete)))
 
 (defun forget-all-facts (rete)
-  (clrhash (rete-fact-table rete)))
+  (clrhash (rete-fact-table rete))
+  (clrhash (fact-id-table rete)))
 
 (defun get-fact-list (rete)
   (delete-duplicates
@@ -137,16 +143,6 @@
     (loop for fact being the hash-value of (rete-fact-table rete)
         collect fact)
     #'(lambda (f1 f2) (< (fact-id f1) (fact-id f2))))))
-
-#+ignore
-(defmacro ensure-fact-is-unique (rete fact)
-  (let ((existing-fact (gensym)))
-    `(unless *allow-duplicate-facts*
-       (let ((,existing-fact (find-fact-by-name ,rete (fact-name ,fact))))
-         (unless (or (null ,existing-fact)
-                     (not (equals ,fact ,existing-fact)))
-           (error (make-condition 'duplicate-fact
-                    :existing-fact ,existing-fact)))))))
 
 (defmacro ensure-fact-is-unique (rete fact)
   (let ((existing-fact (gensym)))
