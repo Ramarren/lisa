@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.23 2001/04/10 21:14:23 youngde Exp $
+;;; $Id: meta.lisp,v 1.24 2001/04/11 14:20:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -83,12 +83,14 @@
           effective-slots)
     (setf (slot-value self 'effective-slots) slot-table)))
     
-(defun find-effective-slot (self slot-name)
-  (declare (type meta-shadow-fact self) (type symbol slot-name))
+(defmethod find-effective-slot ((self meta-shadow-fact) (slot-name symbol))
   (let ((effective-slot (gethash slot-name (get-effective-slots self))))
     (cl:assert (not (null effective-slot)) ()
       "No effective slot for symbol ~S." slot-name)
     (values effective-slot)))
+
+(defmethod find-effective-slot ((self meta-shadow-fact) (slot-name slot-name))
+  (find-effective-slot self (slot-name-name slot-name)))
 
 (defun make-meta-shadow-fact (symbolic-name class-name slots)
   (make-instance 'meta-shadow-fact
@@ -134,16 +136,6 @@
          "The class of this instance is not known to LISA: ~S." instance))
       (values name))))
 
-(defun import-class (symbolic-name class slot-specs)
-  (let ((meta (make-meta-shadow-fact
-               symbolic-name (class-name class) slot-specs)))
-    (print symbolic-name)
-    (print class)
-    (print slot-specs)
-    (terpri)
-    (values meta)))
-
-#+ignore
 (defun import-class (symbolic-name class slot-specs)
   (let ((meta (make-meta-shadow-fact
                symbolic-name (class-name class) slot-specs)))
