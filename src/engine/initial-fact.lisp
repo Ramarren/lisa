@@ -20,7 +20,7 @@
 ;;; File: initial-fact.lisp
 ;;; Description: Class that represents the special fact INITIAL-FACT.
 
-;;; $Id: initial-fact.lisp,v 1.1 2000/11/17 19:04:17 youngde Exp $
+;;; $Id: initial-fact.lisp,v 1.2 2000/11/18 02:42:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -28,4 +28,9 @@
   ()
   (:documentation
    "Represents the special fact INITIAL-FACT."))
+
+(defclass clear-fact (lisa-kb-class)
+  ()
+  (:documentation
+   "Represents the special fact CLEAR-FACT."))
 

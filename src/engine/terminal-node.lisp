@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.5 2000/11/17 23:13:40 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.6 2000/11/18 02:42:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -39,7 +39,7 @@
     (values t)))
 
 (defmethod call-node-left ((self terminal-node) (token clear-token))
-  (format t "~S: received CLEAR token." (class-name (class-of self)))
+  (format t "~S: received CLEAR token.~%" (class-name (class-of self)))
   (values t))
 
 (defmethod print-object ((self terminal-node) strm)

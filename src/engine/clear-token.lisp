@@ -21,7 +21,7 @@
 ;;; Description: Represents TOKENs used for clear operations on the
 ;;; network.
 
-;;; $Id: clear-token.lisp,v 1.2 2000/11/16 14:31:54 youngde Exp $
+;;; $Id: clear-token.lisp,v 1.3 2000/11/18 02:42:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,3 +29,6 @@
   ()
   (:documentation
    "Represents TOKENs used for clear operations on the network."))
+
+(defun make-clear-token (&rest args)
+  (apply #'make-token (find-class 'clear-token) args))

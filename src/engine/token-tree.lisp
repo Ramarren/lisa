@@ -21,7 +21,7 @@
 ;;; Description: Maintains a collection of tokens. Each hash location
 ;;; yields a LIST of tokens.
 
-;;; $Id: token-tree.lisp,v 1.4 2000/11/16 19:07:45 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.5 2000/11/18 02:42:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,6 +51,9 @@
 
 (defmethod make-hash-code ((self token-tree) token)
   (sxhash (get-sort-code token)))
+
+(defmethod token-tree-count ((self token-tree))
+  (hash-table-count (get-table self)))
 
 (defmacro with-token-tree-iterator ((mname tree) &body body)
   `(with-hash-table-iterator (,mname (get-table tree))

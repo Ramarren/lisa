@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.13 2000/11/17 23:13:40 youngde Exp $
+;;; $Id: rete.lisp,v 1.14 2000/11/18 02:42:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -40,6 +40,9 @@
    (initial-fact :initform 
                  (make-fact (find-class 'initial-fact) nil)
                  :reader get-initial-fact)
+   (clear-fact :initform
+               (make-fact (find-class 'clear-fact) nil)
+               :reader get-clear-fact)
    (fact-list :initform nil
               :accessor get-fact-list)
    (next-fact-id :initform 0
@@ -76,7 +79,7 @@
         (values next-fact-id)
       (incf next-fact-id))))
 
-(defmethod insert-token ((self rete) (token add-token))
+(defmethod insert-token ((self rete) token)
   (call-node-right (get-root-node (get-compiler self)) token))
 
 (defmethod assert-fact ((self rete) fact)
@@ -95,13 +98,15 @@
   (values t))
 
 (defmethod reset-engine ((self rete))
+  (insert-token self (make-clear-token
+                      :initial-fact (get-clear-fact self)))
   (set-initial-state self)
   (assert-fact self (get-initial-fact self))
   (values t))
 
 (defmethod clear-engine ((self rete))
-  (set-initial-state (self))
-  (setf (slot-value 'compiler self) (make-rete-compiler))
+  (set-initial-state self)
+  (setf (slot-value self 'compiler) (make-rete-compiler))
   (values t))
 
 (defmethod run-engine ((self rete))
