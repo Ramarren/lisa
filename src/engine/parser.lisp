@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.77 2001/09/06 00:05:12 youngde Exp $
+;;; $Id: parser.lisp,v 1.78 2002/01/09 19:13:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,6 +42,23 @@
            (parse-rulebody ,remains)
          ,@body))))
 
+(defun define-rule (name body &optional (salience 0) (module nil))
+  (handler-case
+      (with-rule-components ((doc-string lhs rhs) body)
+        (let ((rule (make-rule name (current-engine)
+                               :doc-string doc-string
+                               :salience salience
+                               :module module
+                               :source body)))
+          (finalize-rule-definition rule lhs rhs)
+          (values rule)))
+    (syntactical-error (condition)
+      (rule-structure-error name condition))))
+  
+(defun redefine-defrule (name body &key (salience 0) (module nil))
+  (add-rule (current-engine) (define-rule name body salience module)))
+
+#+ignore
 (defun redefine-defrule (name body &key (salience 0) (module nil))
   (flet ((redefine-rule ()
            (with-rule-components ((doc-string lhs rhs) body)
