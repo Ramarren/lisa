@@ -20,12 +20,13 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.7 2002/10/29 17:51:06 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.8 2002/11/02 17:30:46 youngde Exp $
 
 (in-package "LISA")
 
-(defvar *breakpoints* (list))
+(defvar *breakpoints* (make-hash-table))
 (defvar *stepping* nil)
+(defvar *break-on-subrules* nil)
 
 (defvar *read-eval-print*)
 (defvar *suspended-rule*)
@@ -39,27 +40,42 @@
   (setf *stepping* nil))
 
 (defun has-breakpoint-p (rule)
-  (find (rule-name rule) *breakpoints*))
+  (gethash (rule-name rule) *breakpoints*))
 
 (defun breakpoints ()
   (format t "Current breakpoints:~%")
-  (dolist (rule-name *breakpoints*)
-    (format t "  ~A~%" rule-name))
+  (loop for rule-name being the hash-value of *breakpoints*
+      do (format t "  ~A~%" rule-name))
   (values))
 
-(defun set-break (rule-name)
-  (if (find-rule (inference-engine) rule-name)
-      (pushnew rule-name *breakpoints*)
-    (format t "There's no rule by this name (~A)~%" rule-name))
-  *breakpoints*)
+(defun breakpoint-operation (rule-name op)
+  (let ((rule (find-rule (inference-engine) rule-name)))
+    (cond ((null rule)
+           (format t "There's no rule by this name (~A)~%" rule-name))
+          (t
+           (funcall op rule-name)
+           (when (and (composite-rule-p rule)
+                      *break-on-subrules*)
+             (dolist (subrule (rule-subrules rule))
+               (funcall op (rule-name subrule))))))
+    rule-name))
 
+(defun set-break (rule-name)
+  (breakpoint-operation 
+   rule-name #'(lambda (rule-name)
+                 (setf (gethash rule-name *breakpoints*)
+                   rule-name)))
+  rule-name)
+                        
 (defun clear-break (rule-name)
-  (setf *breakpoints*
-    (delete rule-name *breakpoints*))
-  *breakpoints*)
+  (breakpoint-operation
+   rule-name #'(lambda (rule-name)
+                 (remhash rule-name *breakpoints*)))
+  rule-name)
 
 (defun clear-breaks ()
-  (setf *breakpoints* (list)))
+  (clrhash *breakpoints*)
+  nil)
 
 (defun next ()
   (in-debugger-p)
@@ -147,5 +163,8 @@
 
 (defmethod run-engine :after ((self rete) &optional step)
   (leave-debugger))
+
+(defmethod forget-rule :before ((self rete) (rule-name symbol))
+  (clear-break rule-name))
 
 (provide 'lisa-debugger)

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.22 2002/10/18 16:54:54 youngde Exp $
+;;; $Id: rete.lisp,v 1.23 2002/11/02 17:30:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,6 +77,9 @@
       (remove-rule-from-network (rete-network self) rule)
       (remhash rule-name (rete-rule-table self))
       (disable-activations self rule)
+      (when (composite-rule-p rule)
+        (dolist (subrule (rule-subrules rule))
+          (forget-rule self subrule)))
       rule)))
 
 (defmethod forget-rule ((self rete) (rule rule))

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.10 2002/11/02 02:17:53 youngde Exp $
+;;; $Id: rule.lisp,v 1.11 2002/11/02 17:30:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -75,6 +75,9 @@
   (add-rule-to-network (rule-engine rule) rule patterns)
   rule)
 
+(defun composite-rule-p (rule)
+  (consp (rule-subrules rule)))
+
 (defun add-subrule (rule subrule)
   (push subrule (rule-subrules rule)))
 
@@ -97,10 +100,15 @@
 (defun make-composite-rule (name engine patterns actions
                             &rest args
                             &key &allow-other-keys)
-  (let ((primary-rule
-         (apply #'make-rule name engine (first patterns) actions args)))
-    (dolist (pattern (rest patterns) primary-rule)
-      (add-subrule 
-       primary-rule (apply #'make-rule 
-                           (gensym) engine pattern actions args)))))
+  (flet ((make-composite-name (index)
+           (intern (format nil "~S..~D" name index))))
+    (let ((primary-rule
+           (apply #'make-rule name engine (first patterns) actions args))
+          (index 0))
+      (dolist (pattern (rest patterns) primary-rule)
+        (add-subrule 
+         primary-rule
+         (apply #'make-rule
+                (make-composite-name (incf index))
+                engine pattern actions args))))))
     
