@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.59 2001/09/15 00:09:20 youngde Exp $
+;;; $Id: rule.lisp,v 1.60 2002/07/29 17:24:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,7 +111,8 @@
     (add-new-pattern self (get-initial-pattern self))))
 
 (defun add-new-node (self node)
-  (declare (type rule self))
+  (declare (type rule self)
+           (ignorable self))
   #+ignore (pushnew node (get-nodes self) :test #'equals)
   (increase-use-count node))
 
@@ -136,28 +137,6 @@
   (push (make-special-binding +lisa-engine-var+ (get-engine self)) bindings)
   (push (make-special-binding +lisa-rule-var+ self) bindings)
   (values bindings))
-
-#+ignore
-(defmethod compile-actions ((self rule) rhs)
-  (let ((global-bindings (get-binding-table self))
-        (action-bindings nil))
-    (flet ((add-binding (var)
-             (let ((binding (lookup-binding global-bindings var)))
-               (cond ((null binding)
-                      (when *show-lisa-warnings*
-                        (warn "On the RHS of rule ~S; no binding for variable ~S."
-                              (get-name self) var)))
-                     (t
-                      (setf action-bindings
-                        (pushnew binding action-bindings
-                                 :key #'get-name)))))))
-      (mapc #'(lambda (var) (add-binding var))
-            (collect #'(lambda (obj) (variablep obj))
-                     (flatten rhs)))
-      (setf action-bindings
-        (add-special-bindings self action-bindings))
-      (setf (get-actions self)
-        (make-function-call rhs action-bindings)))))
 
 (defmethod compile-actions ((self rule) rhs)
   (let ((global-bindings (get-binding-table self))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.68 2002/06/01 01:30:11 youngde Exp $
+;;; $Id: rete.lisp,v 1.69 2002/07/29 17:24:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -184,7 +184,7 @@
   (flet ((retrieve-value (key val)
            (declare (ignore key))
            (values val)))
-    (sort (lsthash #'retrieve-value (get-facts rete))
+    (sort (utils:lsthash #'retrieve-value (get-facts rete))
           #'(lambda (f1 f2)
               (< (get-fact-id f1) (get-fact-id f2))))))
 

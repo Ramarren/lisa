@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.11 2002/06/04 00:31:06 youngde Exp $
+;;; $Id: lisa.system,v 1.12 2002/07/29 17:24:44 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -62,7 +62,7 @@
 ;;; Make sure the binary directory structure exists...
 
 (let ((lisa-binary-directories
-       '("engine" "mp" "packages" "reflect" "utils"))
+       '("engine" "packages" "reflect" "utils" "implementations"))
       (lisa-supported-lisps
        '("acl" "lispworks" "cmucl" "clisp")))
   (dolist (lisp lisa-supported-lisps)
@@ -72,11 +72,6 @@
 
 (push (translate-logical-pathname "clocc:src;port;")
       mk:*central-registry*)
-
-;;; The CLOCC Port module requires OLE when on ACL and Windows...
-
-#+(and Allegro MSWindows)
-(require 'ole)
 
 (mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
@@ -89,15 +84,11 @@
                           ((:file "pkgdecl")
                            (:file "lisa-package"
                                   :depends-on (pkgdecl))))
-                 (:module "reflection"
-                          :source-pathname "reflect"
-                          :binary-pathname "reflect"
-                          :components ((:file "reflect"))
-                          :depends-on (packages))
-                 (:module "mp"
-                          :source-pathname "mp"
-                          :binary-pathname "mp"
-                          :components ((:file "mp"))
+                 (:module "implementations"
+                          :source-pathname "implementations"
+                          :binary-pathname "implementations"
+                          :components
+                          ((:file "workarounds"))
                           :depends-on (packages))
                  (:module "utils"
                           :source-pathname "utils"
@@ -105,14 +96,19 @@
                           :components ((:file "compose")
                                        (:file "utils"))
                           :depends-on (packages))
+                 (:module "reflect"
+                          :source-pathname "reflect"
+                          :binary-pathname "reflect"
+                          :components
+                          ((:file "reflect"))
+                          :depends-on (utils))
                  (:module "preamble"
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "macros")
                                        (:file "inference-engine-object")
-                                       (:file "synchronizable")
                                        (:file "preamble"))
-                          :depends-on (mp packages))
+                          :depends-on (packages))
                  (:module "conditions"
                           :source-pathname "engine"
                           :binary-pathname "engine"
@@ -208,14 +204,12 @@
                                        (:file "watch")
                                        (:file "debug")
                                        (:file "instrumenting"))
-                          :depends-on (packages reflection mp conditions utils
-                                                preamble))
+                          :depends-on (packages conditions reflect utils preamble))
                  (:module "query"
                           :source-pathname "query"
                           :binary-pathname "engine"
                           :components ((:file "retrieve"))
                           :depends-on (engine)))
-    :depends-on (port)
     :initially-do
     (progn
       (mk:system-source-size :lisa :all)

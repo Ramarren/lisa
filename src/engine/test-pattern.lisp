@@ -20,7 +20,7 @@
 ;;; File: test-pattern.lisp
 ;;; Description: This class represents the TEST conditional element.
 
-;;; $Id: test-pattern.lisp,v 1.3 2001/04/20 18:35:15 youngde Exp $
+;;; $Id: test-pattern.lisp,v 1.4 2002/07/29 17:24:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,8 +38,8 @@
                  "No global binding for variable ~S." var)
                (pushnew binding bindings))))
       (mapc #'add-local-binding
-            (collect #'(lambda (obj) (variablep obj))
-                     (flatten (get-form self)))))
+            (utils:collect #'(lambda (obj) (variablep obj))
+                           (utils:flatten (get-form self)))))
     (setf (slot-value self 'bindings) bindings)
     (values self)))
 

@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.45 2002/06/06 21:12:34 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.46 2002/07/29 17:24:56 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -58,23 +58,6 @@
                 "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
                 "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK")) 
 
-(defpackage "LISA.MULTIPROCESSING"
-  (:use "COMMON-LISP")
-  (:nicknames "LMP")
-  (:import-from "PORT"
-                "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
-                "WITH-TIMEOUT" "KILL-PROCESS" "INTERRUPT-PROCESS"
-                "RESTART-PROCESS" "PROCESSP" "PROCESS-NAME" "PROCESS-ACTIVE-P"
-                "PROCESS-WHOSTATE" "CURRENT-PROCESS" "ALL-PROCESSES"
-                "SHOW-PROCESSES")
-  (:export "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
-                "WITH-TIMEOUT" "PROCESS-YIELD" "KILL-PROCESS"
-                "INTERRUPT-PROCESS" "RESTART-PROCESS" "PROCESSP"
-                "PROCESS-NAME" "PROCESS-ACTIVE-P" "PROCESS-WHOSTATE"
-                "CURRENT-PROCESS" "ALL-PROCESSES" "SHOW-PROCESSES"
-                "MAKE-LOCK" "GET-LOCK" "GIVEUP-LOCK" "WITH-LOCK"
-                "WITHOUT-SCHEDULING" "PROCESS-YIELD"))
-
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
@@ -94,6 +77,21 @@
            "CLASS-FINALIZED-P"
            "FIND-DIRECT-SUPERCLASSES"
            "CLASS-ALL-SUPERCLASSES"))
+
+(defpackage "LISA.UTILS"
+  (:use "COMMON-LISP")
+  (:nicknames "UTILS")
+  (:export "FIND-BEFORE"
+           "FIND-AFTER"
+           "FIND-IF-AFTER"
+           "LSTHASH"
+           "COLLECT"
+           "FLATTEN"
+           "MAP-IN"
+           "STRING-TOKENS"
+           "COMPOSE"
+           "COMPOSE-F"
+           "COMPOSE-ALL"))
 
 ;;; This macro is courtesy of Paul Werkowski. A very nice idea.
 

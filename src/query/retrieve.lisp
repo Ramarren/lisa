@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.20 2002/06/04 00:31:07 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.21 2002/07/29 17:24:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -162,7 +162,7 @@
                      ((stringp obj) obj)
                      (t (prin1-to-string obj)))))
       (mapcar #'(lambda (pattern)
-                  (sort (mapcar #'transform (flatten pattern))
+                  (sort (mapcar #'transform (utils:flatten pattern))
                         #'string<))
               body))))
 

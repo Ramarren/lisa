@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.83 2002/06/01 01:30:11 youngde Exp $
+;;; $Id: parser.lisp,v 1.84 2002/07/29 17:24:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -73,10 +73,10 @@
            (parse-rhs (actions)
              (values actions)))
     (multiple-value-bind (lhs remains)
-        (find-before *rule-separator* body :test #'eq)
+        (utils:find-before *rule-separator* body :test #'eq)
       (if (not (null remains))
           (values (parse-lhs lhs nil)
-                  (parse-rhs (find-after *rule-separator* remains :test #'eq)))
+                  (parse-rhs (utils:find-after *rule-separator* remains :test #'eq)))
         (parsing-error "Missing rule separator.")))))
 
 (defun make-rule-pattern (template)

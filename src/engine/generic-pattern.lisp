@@ -21,7 +21,7 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.13 2002/05/22 21:03:24 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.14 2002/07/29 17:24:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -67,8 +67,8 @@
            (add-constraint-bindings (slot)
              (mapc #'(lambda (var)
                        (add-new-binding var slot))
-                   (collect #'(lambda (obj) (variablep obj))
-                            (flatten (get-constraint slot))))))
+                   (utils:collect #'(lambda (obj) (variablep obj))
+                                  (utils:flatten (get-constraint slot))))))
     (mapc #'(lambda (slot)
               (unless (typep slot 'literal-slot)
                 (add-new-binding (get-value slot) slot))
