@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.4 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.5 2000/11/14 20:45:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,13 +60,19 @@
          (make-array (get-pattern-count rule))
         (rule-roots
          (make-array (get-pattern-count rule)))))
-    (flet ((first-pass (patterns i)
-             (let ((last (merge-successor
-                          (get-root-node self)
-                          (make-node1-tect
-                           (get-name pattern) rule))))
-               (setf (aref rule-roots i) last)
-               (find-multifields)))))))
+    (labels ((first-pass (patterns &optional (i 0))
+               (let ((pattern (first patterns)))
+                 (cond ((null pattern)
+                        (values t))
+                       (t
+                        (let ((last (merge-successor
+                                     (get-root-node self)
+                                     (make-node1-tect
+                                      (get-name pattern)) rule)))
+                          (setf (aref rule-roots i) last)
+                          (find-multifields)
+                          (setf (aref terminals i)
+                            (add-tests last)))))))))))
                
                
                
