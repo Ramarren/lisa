@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.5 2000/11/14 20:45:58 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.6 2000/11/14 21:29:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,17 @@
          (make-array (get-pattern-count rule))
         (rule-roots
          (make-array (get-pattern-count rule)))))
-    (labels ((first-pass (patterns &optional (i 0))
+    (labels ((add-simple-test (node slot)
+               (merge-successor
+                node (make-node1-teq (get-name slot)
+                                     (get-value (get-test slot)))
+                rule))
+             (add-tests (slots node)
+               (if (null slots)
+                   (values node)
+                 (add-tests (rest slots)
+                            (add-simple-test node (first slots)))))
+             (first-pass (patterns &optional (i 0))
                (let ((pattern (first patterns)))
                  (cond ((null pattern)
                         (values t))
@@ -70,9 +80,23 @@
                                      (make-node1-tect
                                       (get-name pattern)) rule)))
                           (setf (aref rule-roots i) last)
-                          (find-multifields)
+                          ;(find-multifields)
                           (setf (aref terminals i)
-                            (add-tests last)))))))))))
+                            (add-tests (get-slots pattern) last))
+                          (first-pass (rest patterns) (1+ i)))))))
+             (second-pass ()
+               (setf (aref terminals 0)
+                 (merge-successor 
+                  (aref terminals 0) (make-node1-rtl) rule)))
+             (third-pass ()
+               (setf (aref terminals 0)
+                 (merge-successor
+                  (aref terminals 0) (make-terminal-node rule) rule))))
+      (first-pass (get-patterns rule))
+      (second-pass)
+      (third-pass)
+      (values rule))))
+                                  
                
                
                
