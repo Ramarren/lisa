@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.33 2001/03/15 20:53:28 youngde Exp $
+;;; $Id: defsys.lisp,v 1.34 2001/03/16 16:02:05 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -41,7 +41,8 @@
     ("clocc;port;**;*.*" ,(make-lisa-path "contrib/clocc/port/**/"))))
 
 (setf (logical-pathname-translations "clocc")
-      `(("src;port;**;*.*" ,(translate-logical-pathname "lisa:clocc;port;**;*.*"))))
+  `(("src;port;**;*.*" ,(translate-logical-pathname
+                         "lisa:clocc;port;**;*.*"))))
 
 (defvar *lisa-source-pathname*
   (translate-logical-pathname "lisa:src;"))
@@ -58,7 +59,10 @@
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
+#-CLISP
 (load "lisa:clocc;port;port.system")
+#+CLISP
+(load (translate-logical-pathname "lisa:clocc;port;port.system"))
 
 #+CMU
 (progn
