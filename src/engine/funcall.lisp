@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.10 2001/01/13 21:00:29 youngde Exp $
+;;; $Id: funcall.lisp,v 1.11 2001/01/18 15:49:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,7 +38,8 @@
   ((forms :initarg :forms
           :reader get-forms)
    (bindings :initarg :bindings
-             :reader get-bindings))
+             :reader get-bindings)
+   (function :reader get-function))
   (:documentation
    "This class manages the mechanics of executing arbitrary Lisp code from
    conditional elements and rule RHSs."))
@@ -47,33 +48,24 @@
   (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
-    `(,(get-name binding) ,fact)))
+    (values fact)))
 
 (defmethod make-lexical-binding ((binding lexical-slot-binding) context)
   (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
-    (let ((name (get-name binding))
-          (value (get-slot-value fact (get-slot-name binding))))
-      `(,name ,@(if (quotablep value) `(',value) `(,value))))))
+    (get-slot-value fact (get-slot-name binding))))
   
 (defmethod make-lexical-binding ((binding local-slot-binding) context)
-  (let ((name (get-name binding))
-        (value (get-slot-value (get-fact context)
-                               (get-slot-name binding))))
-    `(,name ,@(if (quotablep value) `(',value) `(,value)))))
-
-(defun create-lexical-context (funcall context)
-  (flet ((make-context ()
-           `(lambda ()
-              (let (,@(mapcar #'(lambda (binding)
-                                  (make-lexical-binding binding context))
-                              (get-bindings funcall)))
-                ,@(get-forms funcall)))))
-    (eval (make-context))))
+  (get-slot-value (get-fact context)
+                  (get-slot-name binding)))
 
 (defmethod evaluate ((self function-call) context)
-  (funcall (create-lexical-context self context)))
+  (flet ((build-arglist ()
+           (mapcar #'(lambda (binding)
+                       (make-lexical-binding binding context))
+                   (get-bindings self))))
+    (apply (get-function self) (build-arglist))))
 
 (defmethod equals ((self function-call) (obj function-call))
   (tree-equal (get-forms self) (get-forms obj)))
@@ -82,6 +74,13 @@
   (print-unreadable-object (self strm :type t)
     (format strm "~S" (get-forms self))))
 
+(defmethod initialize-instance :after ((self function-call) &rest args)
+  (setf (slot-value self 'function)
+    (let ((lambda-list (mapcar #'get-name (get-bindings self))))
+      (compile nil `(lambda (,@lambda-list)
+                      (declare (special ,@lambda-list))
+                      (progn ,@(get-forms self)))))))
+             
 (defun make-function-call (forms bindings)
   (make-instance 'function-call :forms forms :bindings bindings))
 
