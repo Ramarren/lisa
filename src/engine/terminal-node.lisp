@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.12 2000/12/15 21:35:00 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.13 2000/12/16 02:16:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -42,9 +42,9 @@
 (defmethod call-node-left ((self terminal-node) (token remove-token))
   (let* ((engine (get-engine (get-rule self)))n
          (activation (find-activation engine token)))
-    (cl:assert (not (null activation)))
-    (disable-activation engine activation))
-  (values t))
+    (unless (null activation)
+      (disable-activation engine activation))
+    (values t)))
 
 (defmethod print-object ((self terminal-node) strm)
   (print-unreadable-object (self strm :type t :identity t)
