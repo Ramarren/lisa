@@ -541,6 +541,33 @@ HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
     every related sub-rule is also eliminated.</p>
   </blockquote>
 
+    <pre>logical pattern</pre>
+  <blockquote>
+    <p>The <i>logical</i> conditional element implements LISA's notion of truth
+    maintenance. Patterns appearing within a LOGICAL form in a rule are
+    conditionally bound to facts asserted from that rule's RHS. If during
+    inferencing one or more logical facts are retracted, all facts bound to
+    those logical facts are also retracted. Here's an example:</p>
+    <dl>
+      <dd>(defrule frodo ()&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (frodo)&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (logical (bilbo)&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (gandalf))</dd>
+      <dd>=&gt;</dd>
+      <dd>(assert (pippin)))</dd>
+    </dl>
+    <p>When rule FRODO fires, it asserts a PIPPIN fact that is dependent on the
+    existence of the BILBO and GANDALF facts matched on the LHS. If either BILBO
+    or GANDALF are retracted, PIPPIN will be removed also.</p>
+    <p>LISA's implementation of LOGICAL is not as powerful as
+    that found in other production rule systems (notably Jess and CLIPS).
+    Specifically, negated patterns are not allowed within a LOGICAL form,
+    primarily because I'm not quite sure how to implement this aspect. However,
+    LOGICAL forms may appear anywhere within a rule's LHS, and multiple LOGICAL
+    forms within the same rule are legal.</p>
+  </blockquote>
+
 </blockquote>
 
 
@@ -575,19 +602,17 @@ rule will always activate after each reset:</p>
 
 
 
-<dt>&nbsp;</dt>
+  </dl>
 
-<p>When a CLOS instance is asserted into the knowledge-base, LISA creates
+  <pre>CLOS instances</pre>
 
-a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
+<p>Every fact asserted into working memory is backed by a corresponding CLOS
+instance. In the case of DEFTEMPLATEs, LISA creates an internal class mirroring
+the template; user-defined class instances are simply bound to a fact during
+assertions. Instances associated with facts are accessible on rule LHSs via the
+:OBJECT special slot:
 
-contains a special slot named <i>:object</i> that is bound to the corresponding
-
-CLOS instance. It is possible to bind this slot to a variable just like
-
-any other:
-
-<br>&nbsp;
+<dl>
 
 <dd>
 
@@ -595,11 +620,15 @@ any other:
 
 
 
-<dt>&nbsp;</dt>
+  </dl>
+
+
 
 <p>Once bound, method and function calls can be made on this object from
 
 the rule's LHS and RHS.
+
+<dl>
 
 <p>When reasoning over CLOS objects, LISA is capable of considering an
 
@@ -693,9 +722,7 @@ Actions</h5>
 
 Following any conditional elements are the rule's actions, if any. Collectively
 
-known as the Right Hand Side (RHS), actions consist of arbitrary Lisp forms;
-
-all variables declared on the LHS are available, along with the special
+known as the Right Hand Side (RHS), actions consist of arbitrary Lisp forms. All variables declared on the LHS are available, along with the special
 
 operator <i>engine</i>, which evaluates to the rule's inference engine
 
@@ -1898,34 +1925,16 @@ LISA significantly.
 packages that could be inserted and removed as necessary. Or, perhaps a
 
 mechanism akin to the CLIPS module system would be more useful. Or both...<br>
-
-<BR></li>
-
-
-
-<li>
-
-<i>Better language/engine interface</i>: This is a sore point that I intend
-
-to address eventually. I really want LISA to have clean separation between
-
-the rule language implementation and the inference engine. In other words,
-
-I'd like to have a "generic" Rete implementation upon which one can attach
-
-different rule programming languages. If you don't like the language that
-
-comes with LISA, write a new one. That sort of thing.<br>
-
-<BR></li>
+</li>
 
 
 
 <li>
 
-<i>Truth maintenance</i>: LISA needs to support some mechanism similar
+<i>Backward chaining</i>: Perhaps an implementation of Prolog's backchaining
+algorithm that has concurrent access to working memory (i.e. along with Rete).</li>
 
-to CLIPS' LOGICAL construct.</li>
+
 
 </ol>
 
