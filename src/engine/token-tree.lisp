@@ -20,12 +20,13 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.25 2001/03/28 19:15:05 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.26 2001/03/29 20:10:22 youngde Exp $
 
 (in-package "LISA")
 
 (defstruct (token-tree
-            (:constructor create-token-tree))
+            (:constructor
+             make-token-tree (&key (sortcodep nil))))
   (table (make-hash-table))
   (sortcodep nil)
   (index 0)
@@ -90,9 +91,6 @@
                  (when ,rval
                    (return ,rval)))
              (return nil)))))))
-
-(defun make-token-tree (&key (use-sortcode-p nil))
-  (create-token-tree :sortcodep use-sortcode-p))
 
 #|
 (defclass token-tree ()
