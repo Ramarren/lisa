@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.21 2003/11/01 18:05:51 youngde Exp $
+;;; $Id: fact.lisp,v 1.22 2004/02/28 17:23:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,6 +32,8 @@
    (slot-table :reader fact-slot-table
                :initform (make-hash-table :test #'equal))
    (clos-instance :reader fact-clos-instance)
+   (hash-key :initform nil
+             :accessor hash-key)
    (shadows :initform nil
             :reader fact-shadowsp)
    (meta-data :reader fact-meta-data))
@@ -41,6 +43,15 @@
 (defmethod equals ((fact-1 fact) (fact-2 fact))
   (and (eq (fact-name fact-1) (fact-name fact-2))
        (equalp (fact-slot-table fact-1) (fact-slot-table fact-2))))
+
+(defmethod rehash ((self fact))
+  (with-accessors ((key hash-key)) self
+    (maphash #'(lambda (slot value)
+                 (declare (ignore slot))
+                 (push value key))
+             (fact-slot-table self))
+    (push (fact-name self) key)
+    key))
 
 (defmethod slot-value-of-instance ((object t) slot-name)
   (slot-value object slot-name))
@@ -144,6 +155,7 @@
     (if (null instance)
         (initialize-fact-from-template self slots meta-data)
       (initialize-fact-from-instance self instance meta-data))
+    (rehash self)
     self))
 
 (defun initialize-fact-from-template (fact slots meta-data)

@@ -20,12 +20,12 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.49 2003/06/02 15:02:57 youngde Exp $
+;;; $Id: rete.lisp,v 1.50 2004/02/28 17:23:48 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete ()
-  ((fact-table :initform (make-hash-table)
+  ((fact-table :initform (make-hash-table :test #'equalp)
                :accessor rete-fact-table)
    (instance-table :initform (make-hash-table)
                    :reader rete-instance-table)
@@ -114,12 +114,12 @@
 
 (defun remember-fact (rete fact)
   (with-accessors ((fact-table rete-fact-table)) rete
-    (setf (gethash (fact-name fact) fact-table) fact)
+    (setf (gethash (hash-key fact) fact-table) fact)
     (setf (gethash (fact-id fact) fact-table) fact)))
 
 (defun forget-fact (rete fact)
   (with-accessors ((fact-table rete-fact-table)) rete
-    (remhash (fact-name fact) fact-table)
+    (remhash (hash-key fact) fact-table)
     (remhash (fact-id fact) fact-table)))
 
 (defun find-fact-by-id (rete fact-id)
@@ -138,10 +138,21 @@
         collect fact)
     #'(lambda (f1 f2) (< (fact-id f1) (fact-id f2))))))
 
+#+ignore
 (defmacro ensure-fact-is-unique (rete fact)
   (let ((existing-fact (gensym)))
     `(unless *allow-duplicate-facts*
        (let ((,existing-fact (find-fact-by-name ,rete (fact-name ,fact))))
+         (unless (or (null ,existing-fact)
+                     (not (equals ,fact ,existing-fact)))
+           (error (make-condition 'duplicate-fact
+                    :existing-fact ,existing-fact)))))))
+
+(defmacro ensure-fact-is-unique (rete fact)
+  (let ((existing-fact (gensym)))
+    `(unless *allow-duplicate-facts*
+       (let ((,existing-fact
+              (gethash (hash-key ,fact) (rete-fact-table ,rete))))
          (unless (or (null ,existing-fact)
                      (not (equals ,fact ,existing-fact)))
            (error (make-condition 'duplicate-fact
