@@ -1,391 +1,784 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+
 <html>
+
 <head>
+
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
    <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+
 </head>
+
 <body text="#000000" bgcolor="#FFFFFF" link="#0000EF" vlink="#52188C" alink="#FF0000" background="hierarchy-background.gif">
+
 &nbsp;
+
 <table COLS=2 WIDTH="100%" NOSAVE height="38" >
+
 <tr NOSAVE>
+
 <td NOSAVE width="70%" height="33" rowspan="2"><img SRC="http://sourceforge.net/sflogo.php?group_id=12453&type=1" NOSAVE height=31 width=88></td>
 
+
+
 <td align="left" valign="baseline" height="17">
-<font size="3"><i>Current production release is 1.2</i></font>
+
+<font size="3"><i>Current production release is 1.3</i></font>
+
 </td>
+
 </tr>
+
 <tr NOSAVE>
+
+
 
 <td align="left" valign="baseline" height="16">
-<font size="3"><i>Current snapshot is 1.3a</i></font>
+
 </td>
+
 </tr>
+
 </table>
+
+
 
 <center>
+
 <h2>
+
 <b>LISA - Intelligent Software Agents for Common Lisp</b></h2></center>
 
+
+
 <p><br>Welcome to the <a href="http://sourceforge.net/projects/lisa">LISA</a>
+
 project, a platform for the development of <b>L</b>isp-based <b>I</b>ntelligent
+
 <b>S</b>oftware
+
 <b>A</b>gents.
+
 LISA is a production-rule system implemented in the Common Lisp Object
+
 System (CLOS), and is heavily influenced by CLIPS and the Java Expert System
+
 Shell (JESS). At its core is a reasoning engine based on an object-oriented
+
 implementation of the Rete algorithm, a very efficient mechanism for solving
+
 the difficult many-to-many matching problem ("Rete: A Fast Algorithm for
+
 the Many Pattern/Many Object Pattern Match Problem", Charles L. Forgy,
+
 Artificial Intelligence 19(1982), 17-37.) Intrinsic to LISA is the ability
+
 to reason over CLOS objects without imposing special class hierarchy requirements;
+
 thus it should be possible to easily augment existing CLOS applications
+
 with reasoning capabilities. As LISA is an extension to Common Lisp, the
+
 full power of the Lisp environment is always available. LISA-enabled applications
+
 should run on any ANSI-compliant Common Lisp platform.
+
 <h3>
+
 <b>Project Goals</b></h3>
+
 The LISA project is driven by a number of important goals:
+
 <ul>
+
 <li>
+
 <i>Unrestricted availability</i>: The principal motivation for beginning
+
 LISA was the apparent dearth of lightweight, <i>current, freely-available</i>
+
 toolkits for constructing Lisp-based intelligent systems. There are a number
+
 of very fine commercial and restricted-use products out there (see the
+
 links below), but these systems do not necessarily address the needs of
+
 the Open Source community.</li>
 
+
+
 <br>&nbsp;
+
 <li>
+
 <i>Portability</i>: Vendor neutrality is a significant project goal. As
+
 previously mentioned, LISA is implemented in ANSI Common Lisp; currently,
+
 all development is being done on Linux using&nbsp; <a href="http://www.xanalys.com">Xanalys</a>'
+
 LispWorks and <a href="http://www.franz.com">Franz</a>'s Allegro Common
+
 Lisp. In addition, concurrent validation is performed with&nbsp; <a href="http://www.cons.org/cmucl">CMU
+
 Common Lisp</a> (CMUCL) and <a href="http://clisp.cons.org">CLISP</a>&nbsp;
+
 to gain more complete coverage. Every effort will be made to avoid the
+
 use of implementation-specific functionality; in the cases where a non-ANSI
+
 feature must be used (e.g. multiprocessing support), LISA will attempt
+
 to support the major Lisp implementations either through conditional evaluation
+
 or the use of a common library such as <a href="http://clocc.sourceforge.net">CLOCC</a>.</li>
 
+
+
 <br>&nbsp;
+
 <li>
+
 <i>Familiarity</i>: LISA's production-rule system has its roots in CLIPS
+
 and JESS, making it readily familiar to developers who've worked with either
+
 of these systems. Indeed, the CLIPS and JESS languages both have their
+
 roots in Lisp.</li>
 
+
+
 <br>&nbsp;
+
 <li>
+
 <i>Flexibility</i>: As previously mentioned, LISA reasons over CLOS objects
+
 without requiring changes to an application's class hierarchy. In addition,
+
 the full power of Common Lisp is available for use within productions;
+
 there is no dichotomy between LISA's programming language and her implementation.</li>
 
+
+
 <br>&nbsp;
+
 <li>
+
 <i>Simplicity</i>: Along with portability, the project is striving for
+
 simplicity and elegance at the functional, architecture and source code
+
 levels. This doesn't mean LISA should have limited usefulness; rather,
+
 it should be possible for new developers to easily understand the code
+
 layout
+
 and behavior. Unless performance absolutely demands otherwise, clarity
+
 of design and implementation will take precedence.</li>
+
 </ul>
 
+
+
 <h3>
+
 Project People</h3>
 
+
+
 <ul>
+
 <li>
+
 <a href="mailto:de.young@computer.org">David E. Young</a>: Presently a
+
 knowledge engineer at Bloodhound Software, Inc.</li>
+
 </ul>
 
+
+
 <h3>
+
 Project Status</h3>
+
 LISA had its first production release (Version 1.0) on 31 August, 2001
+
 and is considered "stable" software; it should now be possible to develop
+
 reasonably sophisticated knowledge bases for Real Systems. LISA has successfully
+
 run adaptations of the "monkey and bananas" (MAB) planning problem on all
+
 four target Lisp platforms, and full reasoning capabilities are available
+
 for CLOS objects in a multi-threaded environment. Release 1.1 offers support
+
 for <i>dynamic rule definition</i>, the ability to create new rules from
+
 existing rules at runtime; version 1.2 includes a new query facility that
+
 allows interactive and programatic retrieval of CLOS instances from a knowledge
+
 base. Currently, development efforts are concentrated on completely documenting
+
 the source code. For the most current information on the project, including
+
 mailing lists, latest news and available downloads, see the <a href="http://sourceforge.net/projects/lisa">official
+
 project page</a>. If you prefer, you may contact the project staff directly
+
 (see
+
 <i>Project People</i>).
+
 <h3>
+
 Documentation</h3>
+
 Currently, documentation for LISA is a work-in-progress. However, there
+
 is a beta-quality version of the <a href="ref-guide.html">LISA Reference
+
 Guide</a> that should help you get started. Also, you may see the source
+
 code for LISA's two versions of the MAB, <a href="http://lisa.sourceforge.net/mab.lisp">mab.lisp</a>
+
 and <a href="http://lisa.sourceforge.net/mab-clos.lisp">mab-clos.lisp</a>
+
 (a "CLOS-ified" version of the default MAB implementation).
+
 <h3>
+
 News</h3>
+
+<i>22 July, 2002</i>: LISA release 1.3 is now available. See the project
+ChangeLog for details; there are numerous significant changes and enhancements.
+<p>
+
 <i>1 June, 2002</i>: There's a release 1.3 on the horizon, incorporating major
-overhauls in several areas. Among the changes,
+
+overhauls in several areas. Among the changes,</p>
+
 <ol>
+
   <li><i>Release snapshots</i>: I've decided to begin releasing interim
+
     snapshots that will be available via anonymous CVS through the LISA project
+
     page. I know of at least one individual that acquires LISA this way via the
+
     release tags I've applied to the code base. This is a clean way to offer
+
     early access to upcoming releases without cluttering up the download page
+
     with tons of transient files.<br>
+
     <br>
+
   </li>
+
   <li><i>Internal fact representation</i>: I've merged the CLOS and template
+
     representations of facts into a single model. Gone are SHADOW-FACTS and
+
     separate methods of handling DEFTEMPLATE and DEFIMPORT facts. A unified view
+
     is now in place. The immediate ramifications are 1) queries now function
+
     with both types of facts, as LISA creates a class representing each template
+
     and instantiates it for each fact; 2) the ASSERT macro can be used with
+
     DEFIMPORTS, in addition to the traditional ASSERT-INSTANCE. Point (2) was a
+
     surprising side-effect; I hadn't anticipated this.<br>
+
     <br>
+
   </li>
+
   <li><i>DEFIMPORT changes</i>: DEFIMPORT has been completely rewritten and
+
     simplified. The new specification requires only a class name and an optional
+
     keyword argument that indicates whether or not the class hierarchy should be
+
     considered during pattern matching. By default, LISA will make available all
+
     slots and all classes in the hierarchy. This change will break existing
+
     code, but I believe the simplified interface is much improved and makes
+
     better sense.<br>
+
     <br>
+
   </li>
+
   <li><i>Documentation</i>: The code base is being completely documented. I've
+
     only done a handful of files but work is proceeding. A tedious but necessary
+
     task, and it is reacquainting me with aspects of LISA that have been stable
+
     for over a year.<br>
+
     <br>
+
   </li>
+
   <li><i>MP support</i>: I want to remove MP synchronization code from LISA, and
+
     place the burden of multi-thread access on the developer (for now). My
+
     current approach to MP is not the way it should be done. This doesn't mean
+
     LISA won't be re-entrant; multiple threads may be in LISA as long as each
+
     thread is operating on a different inference engine instance. However, if an
+
     application has several threads that operate concurrently within <i>the same</i>
+
     engine then the application must manage synchronization. No more than one
+
     thread may be running within the same engine at any one time. To assist
+
     developers here, the macro WITH-INFERENCE-ENGINE will remain, and I'll also
+
     export a special variable, representing the &quot;active inference
+
     engine&quot;, that may be let-bound. In the future, I might employ the
+
     concept of multiple working memories; i.e. each thread would own its working
+
     memory and thus multiple threads could be running concurrently within the
+
     same engine. This will need exploration.</li>
+
 </ol>
+
 <p>
+
 <i>18 May, 2002</i>: I've decided to change the way facts are represented
+
 internally. Currently, LISA makes a distinction between facts defined by <i>deftemplate</i>
+
 and facts represented as CLOS instances, primarily for a bit of efficiency when
+
 CLOS reasoning isn't required. However, this makes things a bit mushy internally
+
 and prohibits the use of queries on template facts. As of release 1.3, <i>all</i>
+
 facts will be backed by a corresponding CLOS instance. A little bit of
+
 performance will be sacrificed for a cleaner implementation and fully functional
+
 queries. Along the way I'm also probably going to simplify the syntax of <i>defimport</i>.
+
 Details in an upcoming update.</p>
+
 <p>
+
 <i>16 April, 2002</i>: Release 1.2 is out, and I've taken a step back to
+
 survey the project. LISA has been in development now for about eighteen
+
 months. In the beginning, I had this (probably unrealistic) notion that
+
 LISA would grow to be some type of Grand Unified Agent Development Platform
+
 for Lisp. Lately however, I've begun to see LISA as something more modest
+
 and practical; a relatively light, clean inference engine for small to
+
 medium scale Lisp applications that would benefit from production rule
+
 technology. The fact that I'm the sole developer probably has something
+
 to do with this philosophical shift (if indeed it is a shift); there's
+
 only so much time to go around. Rather than move on to new feature work
+
 for version 1.3, I've decided to pause development and concentrate on fully
+
 documenting the source code. If someone needs some capability in LISA and
+
 just can't wait I'll consider revising my plans, but for now documentation
+
 and cleanup is my principal immediate goal.</p>
+
 <h3>
+
 Surveys</h3>
+
 If you're using LISA in some capacity, please take the LISA <a href="http://sourceforge.net/survey/survey.php?group_id=12453&survey_id=12988">survey</a>.
+
 Doing so will help me determine the level of effort to invest in the project,
+
 over and above my current commitments. <b>NB: If you follow the survey
+
 link and are asked to log in, go back to this page and click the link again;
+
 there seems to be a Sourceforge problem that causes this behavior.&nbsp;One
+
 shouldn't have to log in to take the survey.</b>
+
 <h3>
+
 Related Links</h3>
+
 This section contains a small collection of topics related to LISA and
+
 her development environment. It will be updated periodically as the need
+
 arises. NB: If your favorite Lisp/Environment/Tool was omitted here it
+
 was done without prejudice; I simply haven't had time to test LISA with
+
 every mainstream Lisp implementation, or investigate every knowledge representation
+
 system, or... you get the idea.
+
 <br>&nbsp;
+
 <br>&nbsp;
+
 <table COLS=2 WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td NOSAVE><b>Free Common Lisp Implementations</b></td>
 
+
+
 <td><b>Commercial Common Lisp Implementations</b></td>
+
 </tr>
 
+
+
 <tr NOSAVE>
+
 <td NOSAVE>
+
 <ul>
+
 <li>
+
 <a href="http://www.cons.org/cmucl">CMU Common Lisp</a> (CMUCL)</li>
 
+
+
 <li>
+
 <a href="http://clisp.cons.org">CLISP</a></li>
+
 </ul>
+
 </td>
 
+
+
 <td NOSAVE>
+
 <ul>
+
 <li>
+
 <a href="http://www.xanalys.com">LispWorks</a>: Xanalys, Inc.</li>
 
+
+
 <li>
+
 <a href="http://www.franz.com">Allegro Common Lisp</a>: Franz, Inc.</li>
+
 </ul>
+
 </td>
+
 </tr>
+
 </table>
 
+
+
 <br>&nbsp;
+
 <table COLS=2 WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td NOSAVE><b>Lisp Development Environments and Libraries</b></td>
 
+
+
 <td></td>
+
 </tr>
 
+
+
 <tr NOSAVE>
+
 <td NOSAVE>
+
 <ul>
+
 <li>
+
 <a href="http://www.gnu.org">Emacs</a>: My environment of choice.</li>
 
+
+
 <li>
+
 <a href="http://ilisp.sourceforge.net">ILisp</a>: A nice, comprehensive
+
 Emacs Lisp package that integrates a number of Lisp implementations.</li>
 
+
+
 <li>
+
 <a href="http://clocc.sourceforge.net">CLOCC</a>: The Common Lisp Open
+
 Code Collection.</li>
+
 </ul>
+
 </td>
+
+
 
 <td NOSAVE></td>
+
 </tr>
+
 </table>
 
+
+
 <br>&nbsp;
+
 <table COLS=2 WIDTH="100%" NOSAVE >
+
 <tr>
+
 <td><b>Commercial and Restricted-Use Knowledge Systems</b></td>
 
+
+
 <td><b>Freely-Available Knowledge Systems</b></td>
+
 </tr>
+
+
 
 <tr VALIGN=BASELINE NOSAVE>
+
 <td NOSAVE>
+
 <ul>
+
 <li>
+
 <a href="http://www.isi.edu/isd/LOOM/LOOM-HOME.html">Loom, PowerLoom</a>:
+
 Semantic networks, ontologies.</li>
 
+
+
 <li>
+
 <a href="http://www.xanalys.com">KnowledgeWorks</a>: Production-rule system
+
 for LispWorks.</li>
 
+
+
 <li>
+
 <a href="http://herzberg.ca.sandia.gov/jess/">JESS</a>: The Java Expert
+
 System Shell.</li>
 
+
+
 <li>
+
 <a href="http://www.ilog.com">JRules</a>: ILog's production-rule system
+
 for Java.</li>
 
+
+
 <li>
+
 <a href="http://www.haley.com">Eclipse, Authorete</a>: The Haley Enterprise's
+
 production rule suite.</li>
+
 </ul>
+
 </td>
+
+
 
 <td>
+
 <ul>
+
 <li>
+
 <a href="http://www.ghgcorp.com/clips/CLIPS.html">CLIPS</a>: A classic
+
 expert system tool.</li>
 
+
+
 <li>
+
 <a href="http://www.cis.upenn.edu/~screamer-tools/home.html">Screamer:</a>
+
 Nondeterministic programming for Lisp.</li>
 
+
+
 <br>&nbsp;</ul>
+
 </td>
+
 </tr>
+
 </table>
+
+
 
 <br>&nbsp;
+
 <table COLS=2 WIDTH="100%" NOSAVE >
+
 <tr>
+
 <td><b>Useful References</b></td>
 
+
+
 <td></td>
+
 </tr>
+
+
 
 <tr NOSAVE>
+
 <td NOSAVE>
+
 <ul>
+
 <li>
+
 <a href="http://www.lisp.org/HyperSpec/FrontMatter/index.html">Common Lisp
+
 HyperSpec</a>: HTML version of the ANSI standard X3.226, 1994.</li>
 
+
+
 <li>
+
 <a href="http://www.alu.org/mop/index.html">The CLOS MOP</a>: HTML version
+
 of the AMOP.</li>
 
+
+
 <li>
+
 <a href="http://www.alu.org">ALU</a>: The
+
 Association of Lisp Users.</li>
 
+
+
 <li>
+
 <i>Steele, Guy L. Jr.</i>: <a href="http://www.amazon.com/exec/obidos/ASIN/1555580416/qid%3D984074327/107-1518177-7350946">Common
+
 Lisp : The Language, Second Edition</a> (CLtL2).</li>
 
+
+
 <li>
+
 <i>Keene, Sonya E.</i>: <a href="http://www.amazon.com/exec/obidos/ASIN/0201175894/">Object
+
 Oriented Programming in Common Lisp - A Programmer's Guide to the Common
+
 Lisp Object System.</a>&nbsp;</li>
 
+
+
 <li>
+
 <i>Kiczales, Gregor et al</i>: <a href="http://www.amazon.com/exec/obidos/ASIN/0262610744/">The
+
 Art of the Metaobject Protocol.</a>&nbsp;</li>
 
+
+
 <li>
+
 <i>Graham, Paul</i>: <a href="http://www.amazon.com/exec/obidos/ASIN/0133708756/ref=sim_books/104-3504753-0375128">ANSI
+
 Common Lisp</a>.&nbsp;</li>
 
+
+
 <li>
+
 <i>Graham, Paul</i>: <a href="http://www.amazon.com/exec/obidos/ASIN/0130305529/">On
+
 Lisp</a>.&nbsp;</li>
 
+
+
 <li>
+
 <i>Curry, Meany, Preece et al:</i> <a href="http://computer.org/intelligent/ex2001/pdf/x1036.pdf">Better
+
 Knowledge Management through Knowledge Engineering</a>. A case study on
+
 the commercial use of Loom.</li>
+
 </ul>
+
 </td>
 
+
+
 <td></td>
+
 </tr>
+
 </table>
 
+
+
 <p><b>Credits</b>
+
 <p>The background image for this web site was lifted, with permission,
+
 from the Loom project home page.
+
 </body>
+
 </html>
+
