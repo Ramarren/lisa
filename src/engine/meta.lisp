@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.28 2001/05/03 19:55:09 youngde Exp $
+;;; $Id: meta.lisp,v 1.29 2001/05/23 21:47:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -142,7 +142,8 @@
      (map-clos-instances #'mark-clos-instance-as-changed self slot-id)
      (values t))))
 
-(defun import-class (symbolic-name class slot-specs)
+(defun import-class (symbolic-name class superclasses slot-specs)
+  (print superclasses)
   (let ((meta (make-meta-shadow-fact
                symbolic-name (class-name class) slot-specs)))
     (register-meta-class symbolic-name meta)
