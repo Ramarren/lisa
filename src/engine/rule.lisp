@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.39 2001/01/29 16:35:23 youngde Exp $
+;;; $Id: rule.lisp,v 1.40 2001/02/01 16:57:07 youngde Exp $
 
 (in-package :lisa)
 
@@ -139,6 +139,8 @@
 
 (defmethod finalize-rule-definition ((self rule) lhs rhs)
   (compile-patterns self lhs)
+  (setf *patterns* (get-patterns self))
+  (break)
   (compile-actions self rhs)
   (values self))
 

@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.14 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: slot.lisp,v 1.15 2001/02/01 16:57:07 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,6 +33,9 @@
    (constraint :initarg :constraint
                :initform nil
                :accessor get-constraint)
+   (negated :initarg :negated
+            :initform nil
+            :reader get-negated)
    (locality :initform t
              :reader get-locality))
   (:documentation
@@ -41,6 +44,10 @@
 (defun is-literal-slotp (self)
   (declare (type slot self))
   (literalp (get-value self)))
+
+(defun is-negatedp (self)
+  (declare (type slot self))
+  (get-negated self))
 
 (defun has-constraintp (slot)
   (declare (type slot slot))
@@ -58,20 +65,64 @@
             (get-name self) (get-value self)
             (get-constraint self))))
 
-(defun make-slot (name value constraint)
-  (make-instance 'slot :name name :value value :constraint constraint))
-
 (defclass optimisable-slot (slot)
   ()
   (:documentation
    "A subclass of SLOT describing a slot instance that's eligible for
    certain optimisations."))
 
-(defclass optimisable-negated-slot (optimisable-slot)
-  ()
-  (:documentation
-   "A subclass of SLOT describing a slot instance that's eligible for
-   certain optimisations, AND is negated."))
+(defmacro negated-constraintp (constraint)
+  `(and (consp ,constraint)
+        (eq (first ,constraint) 'not)
+        (not (consp (second ,constraint)))))
 
-(defmethod get-value ((self optimisable-negated-slot))
-  (second (slot-value self 'value)))
+(defmacro negated-literalp (constraint)
+  `(and (consp ,constraint)
+        (eq (first ,constraint) 'not)
+        (literalp (second ,constraint))))
+
+(defmacro negated-variablep (constraint)
+  `(and (consp ,constraint)
+        (eq (first ,constraint) 'not)
+        (variablep (second ,constraint))))
+
+(defun make-slot (name value constraint global-bindings)
+  "Factory function that constructs instances of various slot types."
+  (macrolet ((generate-test (var value negated)
+               `(if ,negated
+                    `(not (equal ,,var ,,value))
+                  `(equal ,,val ,,value))))
+    (cond ((literalp value)
+           (make-instance 'optimisable-slot :name name :value value))
+          ((negated-literalp value)
+           (make-instance 'optimisable-slot
+             :name name :value (second value) :negated t))
+          ((negated-variablep value)
+           ((make-instance 'optimisable-slot
+              :name name :value (second value) :negated t)))
+          ;; Then the slot value must be a variable...
+          ((null constraint)
+           (if (lookup-binding global-bindings value)
+               (make-instance 'optimisable-slot :name name :value value)
+             (make-instance 'slot :name name :value value)))
+          ;; The value is a variable and there is a constraint...
+          ((literalp constraint)
+           (make-instance 'optimisable-slot :name name :value value
+                          :constraint constraint))
+          ((negated-literalp constraint)
+           (make-instance 'optimisable-slot :name name :value value
+                          :constraint (second constraint) :negated t))
+          ((variablep constraint)
+           (make-instance 'slot :name name :value value
+                          :constraint
+                          (generate-test value constraint nil)))
+          ((negated-variablep constraint)
+           (make-instance 'slot :name name :value value
+                          :constraint 
+                          (generate-test value (second constraint) t)
+                          :negated t))
+          ;; This must be a complex slot with user-written Lisp code as the
+          ;; constraint...
+          (t
+           (make-instance 'slot :name name :value value
+                          :constraint constraint)))))

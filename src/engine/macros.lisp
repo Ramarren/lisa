@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.14 2001/01/28 20:29:32 youngde Exp $
+;;; $Id: macros.lisp,v 1.15 2001/02/01 16:57:07 youngde Exp $
 
 (in-package :lisa)
 
@@ -45,28 +45,10 @@
        (consp ,val)
        (variablep ,val)))
 
-(defmacro negated-rewritable-constraintp (constraint)
-  `(and (consp ,constraint)
-        (eq (first ,constraint) 'not)
-        (not (consp (second ,constraint)))))
-
-(defmacro negated-rewritable-literal-constraintp (constraint)
-  `(and (consp ,constraint)
-        (eq (first ,constraint) 'not)
-        (literalp (second ,constraint))))
-
 (defmacro constraintp (constraint)
   `(or (null ,constraint)
        (literalp ,constraint)
        (consp ,constraint)))
-
-(defmacro oreq (var &rest args)
-  `(or ,@(mapcar #'(lambda (obj)
-                     `(equal ,var ,(if (symbolp obj) `,obj obj)))
-                 args)))
-
-(defmacro neq (obj-1 obj-2)
-  `(not (equal ,obj-1 ,obj-2)))
 
 (defmacro assert-conditions ((&rest forms))
   `(unless (and ,@forms)

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.42 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: pattern.lisp,v 1.43 2001/02/01 16:57:07 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,7 +32,8 @@
 (defclass pattern ()
   ((name :initarg :name
          :reader get-name)
-   (slots :initform nil
+   (slots :initarg :slot-list
+          :initform nil
           :accessor get-slots)
    (bindings :initform nil
              :reader get-bindings)
@@ -41,67 +42,12 @@
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 
-(defmethod add-slot ((self pattern) slot)
-  (with-accessors ((slots get-slots)) self
-    (setf slots
-      (nconc slots `(,slot)))))
-
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
 
 (defmethod print-object ((self pattern) strm)
   (print-unreadable-object (self strm :identity t :type t)
     (format strm "name ~S" (get-name self))))
-
-(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
-  (mapc #'(lambda (desc)
-            (add-slot
-             self (make-slot (first desc) (second desc) (third desc))))
-        slot-list))
-
-(defmacro generate-test (var value negated)
-  `(cond (,negated
-          (if (quotablep ,value)
-              `(not (eq ,,var ',,value))
-            `(not (equal ,,var ,,value))))
-         (t
-          (if (quotablep ,value)
-              `(eq ,,var ',,value)
-            `(equal ,,var ,,value)))))
-       
-(defun canonicalize-slot (slot global-bindings)
-  (labels ((make-slot-variable ()
-             (intern (format nil "?_~A" (symbol-name (gensym)))))
-           (rewrite-slot (var value negated)
-             (setf (get-value slot) var)
-             (setf (get-constraint slot)
-               (generate-test var value negated))))
-    (with-accessors ((slot-value get-value)
-                     (slot-constraint get-constraint)) slot
-      (cond ((literalp slot-value)
-             (change-class slot 'optimisable-slot))
-            ((negated-rewritable-literal-constraintp slot-value)
-             (change-class slot 'optimisable-negated-slot))
-            ((negated-rewritable-constraintp slot-value)
-             (rewrite-slot (make-slot-variable) (second slot-value) t))
-            ;; Then the slot value must be a variable...
-            ((null slot-constraint)
-             (when (lookup-binding global-bindings slot-value)
-               (change-class slot 'optimisable-slot)))
-            ((literalp slot-constraint)
-             (change-class slot 'optimisable-slot))
-            ((negated-rewritable-literal-constraintp slot-constraint)
-             (change-class slot 'optimisable-negated-slot))
-            ((negated-rewritable-constraintp slot-constraint)
-             (rewrite-slot slot-value (second slot-constraint) t))
-            ((variablep slot-constraint)
-             (rewrite-slot slot-value slot-constraint nil))))
-    (values)))
-
-(defun canonicalize-slots (pattern bindings)
-  (mapc #'(lambda (slot)
-            (canonicalize-slot slot bindings))
-        (get-slots pattern)))
 
 (defun setup-pattern-bindings (pattern global-bindings)
   (labels ((add-global-binding (binding)
@@ -129,10 +75,23 @@
                    (collect #'(lambda (obj) (variablep obj))
                             (flatten (get-constraint slot))))))
     (mapc #'(lambda (slot)
-              (unless (typep slot 'optimisable-slot)
-                (add-new-binding (get-value slot) slot)
-                (add-constraint-bindings slot)))
+              (unless (is-literal-slotp slot)
+                (add-new-binding (get-value slot) slot))
+              (add-constraint-bindings slot))
           (get-slots pattern))))
+
+(defun canonicalize-slots (self global-bindings)
+  (declare (type pattern self))
+  (let ((slots nil))
+    (mapc #'(lambda (slot-desc)
+              (push (make-slot (first slot-desc)
+                               (second slot-desc)
+                               (third slot-desc)
+                               global-bindings)
+                    slots))
+          (get-slots self))
+    (format t "~S~%" slots)
+    (setf (get-slots self) (nreverse slots))))
 
 (defmethod finalize-pattern ((self pattern) global-bindings)
   (canonicalize-slots self global-bindings)
