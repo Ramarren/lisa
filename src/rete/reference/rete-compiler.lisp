@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.48 2002/12/07 18:07:02 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.49 2002/12/08 00:25:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -57,25 +57,13 @@
   (push (make-node-pair node parent) *rule-specific-nodes*)
   node)
 
-#+ignore
 (defmethod remove-node-from-parent ((self rete-network) (parent t) child)
   (remhash (node1-test child) (rete-roots self)))
-
-(defmethod remove-node-from-parent ((self rete-network) (parent t) child)
-  (with-accessors ((roots rete-roots)) self
-    (setf roots (delete child roots))))
 
 (defmethod remove-node-from-parent ((self rete-network) 
                                     (parent shared-node) child)
   (remove-successor parent child))
 
-(defun make-root-node (class)
-  (let ((root
-         (make-node1 (make-class-test class))))
-    (push root (gethash class *root-nodes*))
-    (record-node root t)))
-
-#+ignore
 (defun make-root-node (class)
   (let* ((test (make-class-test class))
          (root (gethash test *root-nodes*)))
@@ -102,11 +90,6 @@
                 (make-intra-pattern-test slot)))))
     (make-node1 test)))
 
-(defun distribute-token (rete-network token)
-  (dolist (root-node (rete-roots rete-network))
-    (accept-token root-node token)))
-
-#+ignore
 (defun distribute-token (rete-network token)
   (loop for root-node being the hash-value 
       of (rete-roots rete-network)

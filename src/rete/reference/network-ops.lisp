@@ -20,15 +20,10 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.20 2002/12/07 18:07:02 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.21 2002/12/08 00:25:34 youngde Exp $
 
 (in-package "LISA")
 
-(defun add-token-to-network (rete-network token-ctor)
-  (dolist (root-node (rete-roots rete-network))
-    (accept-token root-node (funcall token-ctor))))
-
-#+ignore
 (defun add-token-to-network (rete-network token-ctor)
   (loop for root-node being the hash-value
       of (rete-roots rete-network)
