@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.13 2002/08/28 19:32:31 youngde Exp $
+;;; $Id: parser.lisp,v 1.14 2002/09/03 01:35:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,7 @@
     (when (null binding)
       (setf binding
         (setf (gethash var *binding-table*)
-          (list var slot-name location))))
+          (make-binding var slot-name location))))
     binding))
 
 (defun find-slot-binding (var &key (errorp t))
@@ -162,11 +162,7 @@
   (let ((head (first pattern)))
     (cl:assert (find-meta-fact head nil) nil
       "This pattern has no meta data: ~S" pattern)
-    (macrolet ((push-slot-binding (field slot-name list)
-                 `(pushnew (find-or-set-slot-binding
-                            ,field ,slot-name location)
-                           ,list :key #'first))
-               (push-constraint-bindings (constraint list)
+    (macrolet ((push-constraint-bindings (constraint list)
                  `(dolist (obj (utils:flatten ,constraint))
                     (when (variablep obj)
                       (pushnew (find-slot-binding obj)
@@ -175,19 +171,24 @@
                  (let ((name (first slot))
                        (field (second slot))
                        (constraint (third slot))
-                       (bindings nil))
+                       (slot-binding nil)
+                       (constraint-bindings (list)))
                    (cl:assert (and (symbolp name)
                                    (slot-valuep field)
                                    (constraintp constraint))
                        nil "This pattern has a malformed slot: ~S" pattern)
                    (when (variablep field)
-                     (push-slot-binding field name bindings))
+                     (setf slot-binding
+                       (find-or-set-slot-binding field name location)))
                    (when (consp constraint)
-                     (push-constraint-bindings constraint bindings))
+                     (push-constraint-bindings constraint 
+                                               constraint-bindings))
                    (make-pattern-slot :name name 
                                       :value field
+                                      :slot-binding slot-binding
                                       :constraint constraint
-                                      :bindings (nreverse bindings))))
+                                      :constraint-bindings
+                                      (nreverse constraint-bindings))))
                (parse-pattern-body (body slots)
                  (let ((slot (first body)))
                    (cl:assert (listp slot) nil

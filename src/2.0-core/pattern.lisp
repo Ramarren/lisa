@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.8 2002/08/30 17:52:08 youngde Exp $
+;;; $Id: pattern.lisp,v 1.9 2002/09/03 01:35:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,8 +40,9 @@
   VARIABLE declaration." 
   (name nil :type symbol)
   (value nil)
+  (slot-binding nil :type list)
   (constraint nil)
-  (bindings nil :type list))
+  (constraint-bindings nil :type list))
 
 (defstruct parsed-pattern
   "Represents the canonical form of a pattern analysed by the language
@@ -56,7 +57,6 @@
   (slots nil :type list)
   (address nil :type integer)
   (pattern-binding nil :type symbol)
-  (bindings nil :type list)
   (type nil :type symbol))
 
 (defstruct rule-actions
