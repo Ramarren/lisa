@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.3 2000/11/15 16:34:34 youngde Exp $
+;;; $Id: rule.lisp,v 1.4 2000/11/15 20:45:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -40,11 +40,17 @@
             :accessor get-actions)
    (nodes :initform nil
           :accessor get-nodes)
+   (engine :initarg :engine
+           :initform nil
+           :reader get-engine)
    (rule-source :initform nil
                 :initarg :rule-source
                 :reader get-rule-source))
   (:documentation
    "This class represents LISA rules."))
+
+(defmethod fire ((self rule) token)
+  (format t "Firing rule ~S~%" (get-name self)))
 
 (defmethod add-node ((self rule) node)
   (with-accessors ((nodes get-nodes)) self
@@ -70,8 +76,8 @@
   (compile-actions self rhs)
   (values rule))
 
-(defun make-rule (name &key (doc-string nil) (salience 0) (source nil))
+(defun make-rule (name engine &key (doc-string nil) (salience 0) (source nil))
   "Constructor for class DEFRULE."
-  (make-instance 'rule :name name :comment doc-string
-                 :salience salience :rule-source source))
+  (make-instance 'rule :name name :engine engine
+                 :comment doc-string :salience salience :rule-source source))
 

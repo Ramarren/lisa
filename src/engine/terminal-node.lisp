@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.3 2000/11/14 19:49:33 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.4 2000/11/15 20:45:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,8 +32,11 @@
    "Represents terminal nodes in the Rete network."))
 
 (defmethod call-node-left ((self terminal-node) (token add-token))
-  (format t "terminal-node: adding rule to activation.")
-  (values t))
+  (with-accessors ((rule get-rule)) self
+    (format t "terminal-node: adding rule ~S to activation.~%"
+            (get-name rule))
+    (create-activation (get-engine rule) rule token)
+    (values t)))
 
 (defmethod print-object ((self terminal-node) strm)
   (print-unreadable-object (self strm :type t :identity t)
