@@ -97,14 +97,14 @@ comes with LISA, write a new one. That sort of thing.</li>
 <br>&nbsp;
 <li>
 <i>No condition hierarchy</i>: Errors are crudely handled in LISA. More
-need to be caught, and a reasonable condition hierarchy needs to be constructed.<br>
-<BR></li>
+need to be caught, and a reasonable condition hierarchy needs to be constructed.</li>
 
+<br>&nbsp;
 <li>
 <i>No multiple inference engines</i>: LISA supports the existence of multiple
 inference engines with the same Lisp world, but there are a couple of places
-where I haven't decided just how to manage this.&nbsp;So for now, just
-one engine per Lisp world please.</li>
+where I haven't decided just how to manage this. So for now, just one engine
+per Lisp world please.</li>
 
 <br>&nbsp;
 <li>
@@ -124,6 +124,10 @@ LISA should be straightforward; load <i>defsys.lisp</i> and evaluate (mk:compile
 :lisa). Note that currently LISA includes a copy of the CLOCC package PORT;
 this will build automatically. If you already have PORT in your Lisp you'll
 have to edit <i>defsys.lisp</i> until I find a better way to manage this.
+One other thing. LISA uses logical pathnames in her defsystem, and translations
+that are suitable for a Linux environment are established there. They might
+work for you; perhaps not. Once again, until I figure out how to correctly
+place default translations you might have to do some hand editing. Sorry.
 <p>To build a knowledge base, write your production rules using the MAB
 source as your guide and load the file into Lisp. You can then change to
 the :lisa package and experiment. You can find the MAB under the <i>misc</i>
@@ -184,5 +188,13 @@ on what you want to monitor.</li>
 <i>unwatch</i>: Undoes the effect of a previous <i>watch</i>.</li>
 </ul>
 There's much more to LISA of course; I'll add documentation as I get time.
+<br>&nbsp;
+<h4>
+V. User feedback.</h4>
+LISA is immature right now and I am <i>very</i> interested in suggestions
+and helpful criticism. In particular, comments related to Lisp constructs
+and idioms ("doing things that way is too slow, this approach is better"),
+and CLOS/MOP techniques are welcome. But, whatever you can think of that
+would make LISA a better system is appropriate.
 </body>
 </html>
