@@ -20,14 +20,14 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.5 2002/11/19 19:53:19 youngde Exp $
+;;; $Id: context.lisp,v 1.6 2002/11/20 15:34:38 youngde Exp $
 
 (in-package "LISA")
 
 (defclass context ()
   ((name :initarg :name
          :reader context-name)
-   (rules :initform (make-hash-table)
+   (rules :initform (make-hash-table :test #'equal)
           :reader context-rules)
    (strategy :initarg :strategy
              :reader context-strategy)))
@@ -38,17 +38,21 @@
         (format strm "~S" "The Initial Context")
       (format strm "~A" (context-name self)))))
 
-(defun find-rule-in-context (context rule-name)
-  (values (gethash rule-name (context-rules context))))
+(defmethod find-rule-in-context ((self context) (rule-name string))
+  (values (gethash rule-name (context-rules self))))
+
+(defmethod find-rule-in-context ((self context) (rule-name symbol))
+  (values (gethash (symbol-name rule-name) (context-rules self))))
 
 (defun add-rule-to-context (context rule)
-  (setf (gethash (rule-name rule) (context-rules context)) rule))
+  (setf (gethash (symbol-name (rule-name rule)) (context-rules context))
+    rule))
 
 (defmethod remove-rule-from-context ((self context) (rule-name symbol))
-  (remhash rule-name (context-rules self)))
+  (remhash (symbol-name rule-name) (context-rules self)))
 
 (defmethod remove-rule-from-context ((self context) (rule t))
-  (remhash (rule-name rule) (context-rules self)))
+  (remove-rule-from-context self (rule-name rule)))
 
 (defun clear-activations (context)
   (remove-activations (context-strategy context)))
@@ -77,6 +81,19 @@
 (defmacro with-context (context &body body)
   `(let ((*active-context* ,context))
      ,@body))
+
+(defmacro with-rule-name ((context name symbolic-name) &body body)
+  (let ((qualifier (gensym))
+        (rule-name (gensym)))
+    `(let* ((,rule-name (symbol-name ,symbolic-name))
+            (,qualifier (position #\. ,rule-name))
+            (,context (if ,qualifier
+                          (subseq ,rule-name 0 ,qualifier)
+                        (symbol-name :initial-context)))
+            (,name (if ,qualifier
+                       (subseq ,rule-name (1+ ,qualifier))
+                     ,rule-name)))
+       ,@body)))
 
 (defun make-context (name &key (strategy nil))
   (make-instance 'context

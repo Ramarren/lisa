@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.39 2002/11/19 20:07:57 youngde Exp $
+;;; $Id: rete.lisp,v 1.40 2002/11/20 15:34:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -71,9 +71,9 @@
 (defun rete-fact-count (rete)
   (hash-table-count (rete-fact-table rete)))
 
-(defun find-rule (rete rule-name)
-  (declare (ignore rete))
-  (find-rule-in-context (active-context) rule-name))
+(defun find-rule (rete qualified-rule-name)
+  (with-rule-name (context-name rule-name qualified-rule-name)
+    (find-rule-in-context (find-context rete context-name) rule-name)))
 
 (defun add-rule-to-network (rete rule patterns)
   (flet ((load-facts (network)
@@ -238,7 +238,9 @@
     (pop (rete-focus-stack rete))))
 
 (defun initial-context (rete)
-  (pop (rete-focus-stack rete)))
+  (if (endp (rete-focus-stack rete))
+      (find-context rete :initial-context)
+    (pop (rete-focus-stack rete))))
 
 (defun push-context (rete context)
   (push *active-context* (rete-focus-stack rete))
@@ -253,8 +255,7 @@
 
 (defmethod add-activation ((self rete) activation)
   (trace-enable-activation activation)
-  (add-activation
-   (context-strategy (rule-context (activation-rule activation))) activation))
+  (add-activation (conflict-set) activation))
 
 (defmethod disable-activation ((self rete) activation)
   (when (eligible-p activation)
@@ -267,7 +268,7 @@
     (do ((count 0))
         ((or (= count step) (rete-halted self)) count)
       (let ((activation 
-             (next-activation (context-strategy (active-context)))))
+             (next-activation (conflict-set))))
         (cond ((null activation)
                (next-context self)
                (when (null (active-context))

@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.11 2002/11/19 19:04:45 youngde Exp $
+;;; $Id: preamble.lisp,v 1.12 2002/11/20 15:34:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,6 +32,9 @@
 (defun active-context ()
   (declare (inline active-context))
   *active-context*)
+
+(defmacro conflict-set ()
+  `(context-strategy *active-context*))
 
 (defun active-tokens ()
   (declare (inline active-tokens))

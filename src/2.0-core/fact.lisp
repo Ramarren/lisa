@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.11 2002/11/15 20:31:36 youngde Exp $
+;;; $Id: fact.lisp,v 1.12 2002/11/20 15:34:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -118,7 +118,7 @@
   `(,(fact-name fact) ,@(get-slot-values fact)))
 
 (defmethod print-object ((self fact) strm)
-  (print-unreadable-object (self strm :type t :identity t)
+  (print-unreadable-object (self strm :type t)
     (let ((slots (get-slot-values self)))
       (format strm "F-~D ; ~S" (fact-id self) (fact-name self))
       (unless (null slots)
