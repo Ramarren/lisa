@@ -24,9 +24,13 @@
 ;;; operator right now. However, all rules are present and the two scenarios on pgs. 555 and
 ;;; 556 are represented (by the functions CULTURE-1 and CULTURE-2).
 
-;;; $Id: mycin.lisp,v 1.3 2004/09/15 20:09:14 youngde Exp $
+;;; $Id: mycin.lisp,v 1.4 2004/09/15 20:38:46 youngde Exp $
 
 (in-package :lisa-user)
+
+(clear)
+
+(setf lisa::*allow-duplicate-facts* nil)
 
 (defclass param-mixin ()
   ((value :initarg :value
@@ -118,7 +122,7 @@
   =>
   (format t "Identity: ~A (~,3F)~%" ?value (lisa:cf ?identity)))
 
-(defun culture-1 ()
+(defun culture-1 (&key (runp t))
   (reset)
   (let ((?organism (make-instance 'organism))
         (?patient (make-instance 'patient
@@ -132,7 +136,8 @@
     (assert (gram (value neg) (entity ?organism)))
     (assert (morphology (value rod) (entity ?organism)))
     (assert (aerobicity (value aerobic) (entity ?organism)))
-    (run)))
+    (when runp
+      (run))))
 
 (defun culture-2 ()
   (reset)
