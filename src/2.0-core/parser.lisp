@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.48 2002/11/01 15:18:43 youngde Exp $
+;;; $Id: parser.lisp,v 1.49 2002/11/01 19:34:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -70,40 +70,41 @@
 
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
-    `(multiple-value-bind (,doc-string ,remains)
-         (extract-rule-headers ,rule-form)
-       (multiple-value-bind (,lhs ,rhs)
-           (let ((*binding-table* (make-hash-table))
-                 (*compound-patterns-p* nil))
-             (parse-rulebody ,remains))
-         ,@body))))
+    `(let ((*binding-table* (make-hash-table))
+           (*compound-patterns-p* nil))
+       (multiple-value-bind (,doc-string ,remains)
+           (extract-rule-headers ,rule-form)
+         (multiple-value-bind (,lhs ,rhs)
+             (parse-rulebody ,remains)
+           ,@body)))))
 
 (defun manage-compound-patterns (patterns)
-  (labels ((build-ruleset (patterns ruleset rulesets)
-             (let ((pattern (first patterns)))
-               (cond ((endp patterns) 
-                      (nreverse rulesets))
-                     ((compound-pattern-p pattern)
-                      (dolist (sub-pattern 
-                                  (parsed-patterns-sub-patterns pattern))
-                        (push (build-ruleset
-                               (rest patterns)
-                               (append ruleset `(,sub-pattern))
-                               rulesets)
-                              rulesets)))
-                     (t 
-                      (build-ruleset
-                       (rest patterns)
-                       (append ruleset `(,pattern))
-                       rulesets))))))
-    (build-ruleset patterns nil nil)))
+  (let ((rulesets (list)))
+    (labels ((build-ruleset (patterns ruleset)
+               (let ((pattern (first patterns)))
+                 (cond ((endp patterns) 
+                        (push ruleset rulesets))
+                       ((compound-pattern-p pattern)
+                        (dolist (sub-pattern 
+                                    (parsed-pattern-sub-patterns pattern))
+                          (build-ruleset
+                           (rest patterns)
+                           (append ruleset `(,sub-pattern))))
+                        ruleset)
+                       (t 
+                        (build-ruleset
+                         (rest patterns)
+                         (append ruleset `(,pattern))))))))
+      (build-ruleset patterns nil)
+      (nreverse rulesets))))
 
 (defun define-rule (name body &optional (salience 0) (module nil))
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
     (when *compound-patterns-p*
-      (manage-compound-patterns lhs))
+      (format t "compound patterns: ~S~%" (manage-compound-patterns lhs))
+      (break))
     (make-rule name (inference-engine) lhs rhs
                :doc-string doc-string
                :salience salience
@@ -193,6 +194,7 @@
                       (parse-pattern (second p)
                                      (set-pattern-binding head location)))
                      ((eq head 'or)
+                      (setf *compound-patterns-p* t)
                       (build-compound-pattern
                        (mapcar #'parse-pattern (rest p))))
                      (t

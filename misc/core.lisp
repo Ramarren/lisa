@@ -25,6 +25,12 @@
   (slot friend)
   (slot age))
 
+(deftemplate hobbit ()
+  (slot name))
+
+(deftemplate pippin ()
+  (slot name))
+
 #+ignore
 (defrule frodo ()
   (frodo (name ?name frodo))
@@ -86,9 +92,12 @@
   (modify ?sam (name samwise)))
 
 (defrule or-rule ()
-  (frodo (name ?name))
   (or (samwise (name sam) (friend ?name))
       (gandalf (name gandalf)))
+  (frodo (name ?name))
+  (or (hobbit)
+      (pippin))
+  (saruman)
   =>
   )
 
