@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.1 2002/08/21 18:42:38 youngde Exp $
+;;; $Id: meta.lisp,v 1.2 2002/10/01 18:09:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,60 +103,46 @@
       "No effective slot for symbol ~S." slot-name)
     effective-slot))
 
-(defparameter *class-map* (make-hash-table)
+(defvar *class-map* (make-hash-table)
   "A hash table mapping a symbolic name to its associated effective class
   name.")
 
-(defmacro with-class-map ((map) &body body)
-  `(let ((,map (meta-class-map (current-engine))))
-     ,@body))
-  
-(defmacro with-meta-map ((map) &body body)
-  `(let ((,map (meta-fact-map (current-engine))))
-     ,@body))
+(defvar *meta-fact-map* (make-hash-table))
 
 (defun register-meta-fact (symbolic-name meta-fact)
   "Binds SYMBOLIC-NAME to a META-FACT instance."
-  (with-meta-map (map)
-    (setf (gethash symbolic-name map) meta-fact)))
+  (setf (gethash symbolic-name *meta-fact-map*) meta-fact))
 
 (defun forget-meta-fact (symbolic-name)
   "Forgets the association between SYMBOLIC-NAME and a META-FACT instance."
-  (with-meta-map (map)
-    (remhash symbolic-name map)))
+  (remhash symbolic-name *meta-fact-map*))
 
 (defun forget-meta-facts ()
   "Forgets all associations in the META-FACT dictionary."
-  (with-meta-map (map)
-    (clrhash map)))
+  (clrhash *meta-fact-map*))
 
 (defun has-meta-factp (symbolic-name)
   "See if SYMBOLIC-NAME has an associated META-FACT instance."
-  (with-meta-map (map)
-    (gethash symbolic-name map)))
+  (gethash symbolic-name *meta-fact-map*))
   
 (defun find-meta-fact (symbolic-name &optional (errorp t))
   "Locates the META-FACT instance associated with SYMBOLIC-NAME. If ERRORP is
   non-nil, signals an error if no binding is found."
-  (with-meta-map (map)
-    (let ((meta-fact (gethash symbolic-name map)))
-      (when errorp
-        (cl:assert (not (null meta-fact)) nil
-          "This fact name does not have a registered meta class: ~S"
-          symbolic-name))
-      meta-fact)))
+  (let ((meta-fact (gethash symbolic-name *meta-fact-map*)))
+    (when errorp
+      (cl:assert (not (null meta-fact)) nil
+        "This fact name does not have a registered meta class: ~S"
+        symbolic-name))
+    meta-fact))
 
 (defun register-external-class (symbolic-name class)
-  (with-class-map (map)
-    (setf (gethash (class-name class) map) symbolic-name)))
+  (setf (gethash (class-name class) *class-map*) symbolic-name))
 
 (defun find-symbolic-name (instance)
-  (with-class-map (map)
-    (let ((name (gethash (class-name (class-of instance)) map)))
-      (when (null name)
-        (environment-error
-         "The class of this instance is not known to LISA: ~S." instance))
-      name)))
+  (let ((name (gethash (class-name (class-of instance)) *class-map*)))
+    (cl:assert (not (null name)) nil
+      "The class of this instance is not known to LISA: ~S." instance)
+    name))
 
 (defmacro import-class (class-name use-inheritance-p)
   "Imports an external class into LISA, making it available for

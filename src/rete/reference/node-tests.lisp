@@ -20,30 +20,39 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.19 2002/09/30 23:25:38 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.20 2002/10/01 18:09:24 youngde Exp $
 
 (in-package "LISA")
 
-(let ((*node-test-table*
-       (make-hash-table :test #'equal)))
+(defvar *node-test-table*
+    (make-hash-table :test #'equal))
 
-  (defun find-test (key constructor)
-    (let ((test (gethash key *node-test-table*)))
-      (when (null test)
-        (setf test
-          (setf (gethash key *node-test-table*)
-            (funcall constructor))))
-      test))
+(defun find-test (key constructor)
+  (let ((test (gethash key *node-test-table*)))
+    (when (null test)
+      (setf test
+        (setf (gethash key *node-test-table*)
+          (funcall constructor))))
+    test))
   
-  (defun clear-node-test-table ()
-    (clrhash *node-test-table*)))
+(defun clear-node-test-table ()
+  (clrhash *node-test-table*))
+
+(defmethod class-matches-p ((instance inference-engine-object) fact class)
+  (eq (fact-name fact) class))
+  
+(defmethod class-matches-p ((instance t) fact class)
+  (or (eq (fact-name fact) class)
+      (has-superclass fact class)))
 
 (defun make-class-test (class)
   (find-test class
              #'(lambda ()
                  (function
                   (lambda (token)
-                    (eq class (fact-name (token-top-fact token))))))))
+                    (let ((fact (token-top-fact token)))
+                      (class-matches-p 
+                       (find-instance-of-fact fact) fact class)))))))
 
 (defun make-simple-slot-test-aux (slot-name value negated-p)
   (find-test 
@@ -163,3 +172,6 @@
 (defun make-behavior (function bindings)
   (make-predicate-test function bindings))
 
+(register-clear-handler
+ "node-tests" #'(lambda ()
+                  (clrhash *node-test-table*)))

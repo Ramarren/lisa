@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.21 2002/09/20 21:28:41 youngde Exp $
+;;; $Id: lisa2.system,v 1.22 2002/10/01 18:09:19 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -137,7 +137,13 @@
                            (:file "network-ops")
                            (:file "network-crawler"))
                           :depends-on
-                          (core20)))
+                          (core20))
+                 (:module "epilogue"
+                          :source-pathname "2.0-core"
+                          :binary-pathname "core20"
+                          :components
+                          ((:file "epilogue"))
+                          :depends-on (core20)))
     :initially-do
     (progn
       (mk:system-source-size :lisa2 :all)

@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.4 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: language.lisp,v 1.5 2002/10/01 18:09:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -73,8 +73,8 @@
 (defun reset (&optional (engine *active-engine*))
   (reset-engine engine))
 
-(defun clear (&optional (engine *active-engine*))
-  (clear-environment engine))
+(defun clear ()
+  (clear-system-environment))
 
 (defun run (&optional (engine *active-engine*))
   (run-engine engine))

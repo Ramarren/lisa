@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.2 2002/09/23 17:28:26 youngde Exp $
+;;; $Id: preamble.lisp,v 1.3 2002/10/01 18:09:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,6 +28,22 @@
 (defvar *active-engine* nil)
 
 (defclass inference-engine-object () ())
+
+(defvar *clear-handlers* (list))
+
+(defmacro register-clear-handler (tag func)
+  `(eval-when (:load-toplevel)
+     (unless (assoc ,tag *clear-handlers* :test #'string=)
+       (push (cons ,tag ,func) *clear-handlers*))))
+
+(defun clear-system-environment ()
+  (mapc #'(lambda (assoc)
+            (funcall (cdr assoc)))
+        *clear-handlers*)
+  t)
+
+(defun clear-environment-handlers ()
+  (setf *clear-handlers* nil))
 
 (defmacro starts-with-? (sym)
   `(eq (aref (symbol-name ,sym) 0) #\?))
@@ -84,7 +100,6 @@
   `(let ((*active-engine* ,engine))
     (progn ,@body)))
 
-(defun clear-environment (engine)
-  "Completely resets the inference engine ENGINE."
-  (clear-engine engine)
-  (values))
+(register-clear-handler
+ "environment" #'(lambda ()
+                   (setf *active-engine* nil)))
