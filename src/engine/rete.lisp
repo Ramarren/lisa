@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.62 2001/08/30 17:37:12 youngde Exp $
+;;; $Id: rete.lisp,v 1.63 2001/10/03 19:24:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -74,6 +74,15 @@
   (declare (type rete self))
   (clrhash (get-rules self)))
 
+(defmethod undefine-rule ((self rete) (rule-instance rule))
+  (remove-rule self rule-instance))
+
+(defmethod undefine-rule ((self rete) (rule-name symbol))
+  (let ((instance (find-rule self rule-name)))
+    (if (not (null instance))
+        (remove-rule self instance)
+      (warn "There's no rule in the network named ~S." rule-name))))
+  
 (defun synchronize-rule (self rule)
   (declare (type rete self))
   (with-dynamic-update (self rule)
