@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.37 2002/11/19 19:04:45 youngde Exp $
+;;; $Id: rete.lisp,v 1.38 2002/11/19 19:41:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,8 +49,9 @@
                  :accessor rete-firing-count)))
 
 (defmethod initialize-instance :after ((self rete) &rest initargs)
-  (push-context 
-   self (register-new-context self (make-context :initial-context))))
+  (register-new-context self (make-context :initial-context))
+  (reset-focus-stack self)
+  self)
 
 ;;; FACT-META-OBJECT represents data about facts. Every LISA fact is backed by
 ;;; a CLOS instance that was either defined by the application or internally
@@ -177,14 +178,14 @@
 (defun clear-focus-stack (rete)
   (setf (rete-focus-stack rete) (list)))
 
-(defun push-context (rete context)
-  (push context (rete-focus-stack rete)))
+(defun reset-focus-stack (rete)
+  (setf (rete-focus-stack rete)
+    (list (find-context rete :initial-context) (rete-focus-stack rete))))
 
 (defun set-initial-state (rete)
   (forget-all-facts rete)
   (clear-contexts rete)
-  (clear-focus-stack rete)
-  (push-context rete (find-context rete :initial-context))
+  (reset-focus-stack rete)
   (setf (rete-next-fact-id rete) -1)
   (setf (rete-firing-count rete) 0)
   t)
@@ -232,6 +233,24 @@
 (defun register-new-context (rete context)
   (setf (gethash (context-name context) (rete-contexts rete)) context))
 
+(defun next-context (rete)
+  (setf *active-context* 
+    (pop (rete-focus-stack rete))))
+
+(defun initial-context (rete)
+  (pop (rete-focus-stack rete)))
+
+(defun push-context (rete context)
+  (push *active-context* (rete-focus-stack rete))
+  (setf *active-context* context))
+
+(defun pop-context (rete)
+  (next-context rete))
+
+(defun retrieve-contexts (rete)
+  (loop for context being the hash-value of (rete-contexts rete)
+      collect context))
+
 (defmethod add-activation ((self rete) activation)
   (trace-enable-activation activation)
   (add-activation
@@ -243,14 +262,16 @@
     (setf (activation-eligible activation) nil)))
 
 (defmethod run-engine ((self rete) &optional (step -1))
-  (let* ((*active-context* (first (rete-focus-stack self)))
-         (strategy (context-strategy (active-context))))
+  (with-context (initial-context self)
     (setf (rete-halted self) nil)
     (do ((count 0))
         ((or (= count step) (rete-halted self)) count)
-      (let ((activation (next-activation strategy)))
+      (let ((activation 
+             (next-activation (context-strategy (active-context)))))
         (cond ((null activation)
-               (halt-engine self))
+               (next-context self)
+               (when (null (active-context))
+                 (halt-engine self)))
               ((eligible-p activation)
                (incf (rete-firing-count self))
                (fire-activation activation)
