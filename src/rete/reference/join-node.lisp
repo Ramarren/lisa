@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.6 2002/09/24 19:27:47 youngde Exp $
+;;; $Id: join-node.lisp,v 1.7 2002/09/24 23:48:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,22 +29,16 @@
               :accessor join-node-successor)
    (tests :initform (list)
           :accessor join-node-tests)
-   (left-memory :initform (make-hash-table)
+   (left-memory :initform (make-hash-table :test #'equal)
                 :reader join-node-left-memory)
-   (right-memory :initform (make-hash-table)
+   (right-memory :initform (make-hash-table :test #'equal)
                  :reader join-node-right-memory)))
 
 (defun remember-token (memory token)
-  (push token (gethash (hash-code token) memory)))
+  (setf (gethash (hash-key token) memory)))
 
 (defun forget-token (memory token)
-  (let* ((bucket (gethash (hash-code token) memory))
-         (new-bucket
-          (delete-if #'(lambda (obj) (equals obj token)) bucket)))
-    (cond ((not (equal bucket new-bucket))
-           (setf (gethash (hash-code token) memory) new-bucket)
-           token)
-          t) nil))
+  (remhash (hash-key token) memory))
 
 (defun add-tokens-to-left-memory (join-node tokens)
   (remember-token (join-node-left-memory join-node) tokens))
@@ -64,8 +58,10 @@
 (defun right-memory-count (join-node)
   (hash-table-count (join-node-right-memory join-node)))
 
-(defmethod pass-tokens-to-successor ((self join-node) left-tokens)
-  (call-successor (join-node-successor self) left-tokens))
+(defmethod pass-tokens-to-successor ((self join-node) left-tokens fact)
+  (call-successor 
+   (join-node-successor self)
+   (token-push-fact (replicate-token left-tokens) fact)))
 
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)

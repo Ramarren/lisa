@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.19 2002/09/24 19:27:45 youngde Exp $
+;;; $Id: token.lisp,v 1.20 2002/09/24 23:48:02 youngde Exp $
 
 (in-package "LISA")
 
@@ -63,14 +63,6 @@
     (unless (zerop (fill-pointer fact-vector))
       (aref fact-vector (decf (fill-pointer fact-vector))))))
 
-(defun token-terminal-contents (token)
-  "Danger! This function should only be called after the token has reached its
-  terminal node."
-  (with-slots ((contents contents)) token
-    (when (null contents)
-      (setf contents (coerce (token-contents token) 'list)))
-    contents))
-
 (defun replicate-token (token &key (token-class nil))
   (let ((new-token 
          (make-instance 
@@ -82,17 +74,11 @@
         (token-push-fact new-token (aref existing-fact-vector i))))
     new-token))
 
-(defmethod hash-code ((self token))
+(defmethod hash-key ((self token))
   (with-slots ((hash-code hash-code)) self
     (when (null hash-code)
-      (setf hash-code
-        (sxhash (coerce (token-contents self) 'list))))
+      (setf hash-code (coerce (token-contents self) 'list)))
     hash-code))
-
-(defmethod equals ((t1 token) (t2 token))
-  (or (eq t1 t2)
-      (equal (coerce (token-contents t1) 'list)
-             (coerce (token-contents t2) 'list))))
 
 (defmethod make-add-token ((fact fact))
   (token-push-fact (make-instance 'add-token) fact))

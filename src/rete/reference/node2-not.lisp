@@ -20,16 +20,11 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.8 2002/09/13 15:37:53 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.9 2002/09/24 23:48:04 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-not (join-node) ())
-
-(defmethod pass-tokens-to-successor ((self node2-not) left-tokens)
-  (call-successor 
-   (join-node-successor self)
-   (token-push-fact left-tokens t)))
 
 (defmethod test-tokens ((self node2-not) left-tokens right-token)
   (let ((tests (join-node-tests self)))
@@ -58,26 +53,27 @@
 
 (defmethod test-against-right-memory ((self node2-not) left-tokens)
   (if (zerop (right-memory-count self))
-      (pass-tokens-to-successor self left-tokens)
+      (pass-tokens-to-successor self left-tokens t)
     (loop for right-token being the hash-value 
         of (join-node-right-memory self)
         do (when (test-tokens self left-tokens right-token)
-             (pass-tokens-to-successor self left-tokens)))))
+             (pass-tokens-to-successor self left-tokens t)))))
 
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (if (test-tokens self left-tokens right-token)
-             (pass-tokens-to-successor self left-tokens)
-           (pass-tokens-to-successor self (make-remove-token left-tokens)))))
+             (pass-tokens-to-successor self left-tokens t)
+           (pass-tokens-to-successor self 
+                                     (make-remove-token left-tokens) t))))
   
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token remove-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
-           (pass-tokens-to-successor self left-tokens))))
+           (pass-tokens-to-successor self left-tokens t))))
   
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
@@ -85,7 +81,7 @@
 
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
-    (pass-tokens-to-successor self left-tokens)))
+    (pass-tokens-to-successor self left-tokens t)))
 
 (defmethod accept-token-from-right ((self node2-not) (right-token add-token))
   (add-token-to-right-memory self right-token)

@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.2 2002/09/19 23:04:35 youngde Exp $
+;;; $Id: strategies.lisp,v 1.3 2002/09/24 23:48:02 youngde Exp $
 
 (in-package "LISA")
 
@@ -86,7 +86,7 @@
 (defun lookup-activation (self rule tokens)
   (declare (type indexed-priority-list self))
   (find-if #'(lambda (act)
-               (and (eql (hash-code act) (hash-code tokens))
+               (and (equal (hash-key act) (hash-key tokens))
                     (eq (activation-rule act) rule)))
            (aref (get-priority-vector self)
                  (+ (rule-salience rule) (get-delta self)))))
