@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.21 2001/02/08 16:11:47 youngde Exp $
+;;; $Id: token.lisp,v 1.22 2001/02/09 01:49:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -130,7 +130,7 @@
       (call-next-method))))
 
 (defmethod print-object ((self token) strm)
-  (with-unreadable-object (self strm :type t :identity t)
+  (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (get-top-fact self))))
 
 (defun make-token (class &key (initial-fact nil) (parent nil) (clone nil))

@@ -22,47 +22,46 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.2 2001/02/08 17:35:08 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.3 2001/02/09 01:49:59 youngde Exp $
 
 (in-package :lisa)
 
-(defmacro symbol-of (instance)
-  `(class-name (class-of ,instance)))
-
-(defmacro instrumentedp (node)
-  `(get (class-name (class-of ,node)) 'instrumented))
+(defun instrumentedp (node)
+  (get-instrumenting node))
 
 (defun maprule (func rule-name)
   (mapc #'(lambda (path)
-            (mapc #'func path))
+            (mapc func path))
         (find-paths-to-rule rule-name)))
 
-(defun instrument-rule (rule-name)
+(defun instrument-rule (rule-name &key (type :minimal))
   "Instruments each node in the network that leads to the rule
   identified by RULE-NAME."
   (maprule #'(lambda (node)
-               (setf (get (symbol-of node) 'instrumented) t))
-           rule-name))
+               (setf (get-instrumenting node) type))
+           rule-name)
+  (values t))
 
 (defun un-instrument-rule (rule-name)
   "Deactivates instrumenting of the rule identified by RULE-NAME."
   (maprule #'(lambda (node)
-               (remprop (symbol-of node) 'instrumented))
-           rule-name))
+               (setf (get-instrumenting node) nil))
+           rule-name)
+  (values t))
 
-(defmethod call-node-right :around ((self node2) (token add-token))
-  (let ((rval (call-next-method self token)))
-    (when (instrumentedp self)
-      (format t "call-node-right for (~S, ~S) returning ~S~%"
-              self token rval))
-    (values rval)))
+(defmethod call-node-right :around ((self node) (token add-token))
+  (let ((instrumented (get-instrumenting self)))
+    (when instrumented
+      (format t "call-node-right (~S)~%" self)
+      (when (eq instrumented :verbose)
+        (format t "  token is ~S~%" token)))
+    (call-next-method self token)))
 
-(defmethod call-node-left :around ((self node2) (token add-token))
-  (let ((rval (call-next-method self token)))
-    (when (instrumentedp self)           
-      (format t "call-node-left for (~S, ~S) returning ~S~%"
-              self token rval))
-    (values rval)))
+(defmethod call-node-left :around ((self node) (token add-token))
+  (let ((instrumented (get-instrumenting self)))
+    (when instrumented
+      (format t "call-node-left (~S)~%" self))
+    (call-next-method self token)))
 
 (defmethod call-node-left :around ((self terminal-node) (token add-token))
   (when (instrumentedp self)
@@ -75,3 +74,18 @@
     (format t "Removing activation for rule ~S, token ~S~%"
             (get-name (get-rule self)) token))
   (call-next-method self token))
+
+(defparameter *node-list* nil)
+(defparameter *token-list* nil)
+
+(defmethod run-tests :around ((self node2) token &optional fact)
+  (let ((rval (call-next-method self token fact))
+        (instrumented (get-instrumenting self)))
+    (when instrumented
+      (format t "run-tests (~S), returning ~S~%" self rval)
+      (when (eq instrumented :test-detail)
+        (format t "  token is ~S~%" token)
+        (format t "  fact is ~S~%" fact)
+        (pushnew self *node-list*)
+        (pushnew token *token-list*)))
+    (values rval)))

@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.12 2001/01/28 20:50:55 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.13 2001/02/09 01:49:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,9 +33,13 @@
   (:documentation
    "Maintains a hashed collection of tokens."))
 
-(defmethod add-token ((self token-tree) (tok token))
-  (setf (gethash (create-hash-code self tok)
-                 (get-table self)) tok))
+(defun add-token (self token)
+  (declare (type token-tree self) (type token token))
+  (let* ((hash (create-hash-code self token))
+         (table (get-table self))
+         (tokens (gethash hash table)))
+    (setf (gethash hash table)
+          (nconc tokens `(,token)))))
 
 (defmethod remove-token ((self token-tree) (tok token))
   (with-accessors ((table get-table)) self

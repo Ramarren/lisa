@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.22 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: mab.lisp,v 1.23 2001/02/09 01:49:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -173,9 +173,7 @@
   (format t "Monkey grabs the ~A.~%" ?name)
   (modify ?thing (location held) (on-top-of held))
   (modify ?monkey (holding ?name))
-  (retract ?goal)
-  (when (= (get-fired-rule-count (current-engine)) 63)
-    (break "Breaking in rule grab-object at count 63.")))
+  (retract ?goal))
 
 
 (defrule drop-object
