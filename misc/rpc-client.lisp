@@ -21,7 +21,7 @@
 ;;; Description: A sample implementation of an RPC client that requests
 ;;; inferencing services from a LISA server.
 
-;;; $Id: lisa-client.lisp,v 1.2 2002/12/11 19:56:11 youngde Exp $
+;;; $Id: rpc-client.lisp,v 1.1 2002/12/12 15:59:19 youngde Exp $
 
 (in-package "RPC")
 
@@ -41,6 +41,9 @@
             (frodo-has-ring self)
             (frodo-companions self))))
 
+(defun class-slots (instance)
+  (clos:class-slots (class-of instance)))
+
 (defun make-client ()
   (make-rpc-client
    'rpc-socket-port
@@ -54,7 +57,7 @@
         (make-client)
       (with-remote-port (port :close t)
         (rcall 'reset)
-        (rcall 'assert-instance frodo)
+        (rcall 'assert-object frodo)
         (rcall 'run)
         (format t "Frodo instance after inferencing: ~S~%" frodo)
         frodo))))

@@ -17,11 +17,11 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: lisa-server.lisp
+;;; File: rpc-server.lisp
 ;;; Description: A sample implementation of an RPC server capable of reasoning
 ;;; over remote objects.
 
-;;; $Id: lisa-server.lisp,v 1.2 2002/12/11 19:56:11 youngde Exp $
+;;; $Id: rpc-server.lisp,v 1.1 2002/12/12 15:59:19 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -38,6 +38,21 @@
 (defvar *server-proc* nil)
 
 (defclass remote-frodo (rpc-remote-ref) ())
+
+(defun assert-object (object)
+  (let ((*package* (find-package "RPC")))
+    (format t "package is ~S~%" *package*)
+    (format t "object is ~S~%" object)
+    (format t "class of object is ~S~%" (class-of object))
+    (format t "class slots: ~S~%" (get-class-slots object))
+    (assert-instance object)
+    object))
+
+(defmethod get-class-slots ((instance rpc-remote-ref))
+  (loop for slot in
+        (clos:class-slots
+         (find-class (intern (make-symbol (rr-type instance)))))
+        collect (clos:slot-definition-name slot)))
 
 (defun initialize-client-environment (port)
   (format t "Initialising client environment~%")
