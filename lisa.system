@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.1 2001/08/22 20:21:30 youngde Exp $
+;;; $Id: lisa.system,v 1.2 2001/08/23 23:53:26 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -182,6 +182,8 @@
                                               :depends-on
                                               (test-pattern generic-pattern
                                                             not-pattern pattern))
+                                       (:file "network-management"
+                                              :depends-on (rete-compiler))
                                        (:file "deffacts")
                                        (:file "parser"
                                               :depends-on (deffacts))

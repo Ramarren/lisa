@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.68 2001/05/31 19:05:41 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.69 2001/08/23 23:53:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,12 +55,6 @@
           :accessor get-roots))
   (:documentation
    "Generates the Rete pattern network."))
-
-#+ignore
-(defmacro simple-slotp (slot)
-  `(or (typep ,slot 'optimisable)
-       (and (typep ,slot 'complex-slot)
-            (localized-slotp ,slot))))
 
 (defmacro simple-slotp (slot)
   `(typep ,slot 'optimisable))
@@ -88,26 +82,6 @@
 (defmethod add-simple-tests ((self test-pattern) rule parent-node)
   (declare (ignore rule))
   (values parent-node))
-
-#+ignore
-(defun create-single-nodes (compiler rule patterns)
-  (declare (optimize (speed 3) (debug 1) (safety 1)))
-  (with-accessors ((terminals get-terminals)
-                   (roots get-roots)) compiler
-    (labels ((first-pass (patterns i)
-               (let ((pattern (first patterns)))
-                 (cond ((null pattern)
-                        (values t))
-                       (t
-                        (let ((last (merge-successor
-                                     (get-root-node compiler)
-                                     (make-node1-tect
-                                      (get-name pattern)) rule)))
-                          (setf (aref roots i) last)
-                          (setf (aref terminals i)
-                            (add-simple-tests pattern rule last))
-                          (first-pass (rest patterns) (1+ i))))))))
-      (first-pass patterns 0))))
 
 (defgeneric generate-single-node (pattern)
   (:method (pattern)
@@ -188,7 +162,7 @@
     (labels ((add-join-node (node2 location)
                (add-successor (aref terminals (1- location)) node2 rule)
                (add-successor (aref terminals location) node2 rule)
-               (add-node rule node2)
+               #+ignore (add-node rule node2)
                (setf (aref terminals (1- location)) node2)
                (setf (aref terminals location) node2)))
       (mapc #'(lambda (pattern)
@@ -196,9 +170,10 @@
                  (generate-join-node pattern rule) (get-location pattern)))
             (rest (get-patterns rule))))))
 
-(defun create-terminal-node (compiler rule)
+(defun create-terminal-node (self rule)
+  (declare (type rete-compiler self))
   (merge-successor
-   (aref (get-terminals compiler) (1- (get-pattern-count rule)))
+   (aref (get-terminals self) (1- (get-pattern-count rule)))
    (make-terminal-node rule) rule))
 
 (defmethod add-rule-to-network ((self rete-compiler) rule)

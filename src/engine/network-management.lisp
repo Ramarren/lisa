@@ -20,12 +20,12 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: network-management.lisp,v 1.1 2001/08/23 20:25:22 youngde Exp $
+;;; $Id: network-management.lisp,v 1.2 2001/08/23 23:53:27 youngde Exp $
 
 (in-package "LISA")
 
 (defun find-paths-to-rule (engine rule-name)
-  (let ((root (get-root-node engine))
+  (let ((root (get-root-node (get-compiler engine)))
         (paths (list)))
     (labels ((trace-graph (nodes path)
                (let ((node (first nodes)))
@@ -33,11 +33,11 @@
                         (values nil))
                        ((and (typep node 'terminal-node)
                              (eq rule-name (get-name (get-rule node))))
-                        (push (nconc path `(,node)) paths)
+                        (push (append path `(,node)) paths)
                         (values t))
                        (t
                         (trace-graph (get-successors node)
-                                     (nconc path `(,node)))
+                                     (append path `(,node)))
                         (trace-graph (rest nodes) path))))))
       (trace-graph (get-successors root) (list root)))
     (values paths)))

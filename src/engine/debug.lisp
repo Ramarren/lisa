@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.17 2001/04/16 18:31:54 youngde Exp $
+;;; $Id: debug.lisp,v 1.18 2001/08/23 23:53:27 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,24 +78,6 @@
 (defun find-node2 (&optional (engine (current-engine)))
   (find-node 'node2 engine))
 
-(defun find-paths-to-rule (rule-name)
-  (let ((root (get-root-node (get-compiler (current-engine))))
-        (paths (list)))
-    (labels ((trace-graph (nodes path)
-               (let ((node (first nodes)))
-                 (cond ((null node)
-                        (values nil))
-                       ((and (typep node 'terminal-node)
-                             (eq rule-name (get-name (get-rule node))))
-                        (push (append path `(,node)) paths)
-                        (values t))
-                       (t
-                        (trace-graph (get-successors node)
-                                     (append path `(,node)))
-                        (trace-graph (rest nodes) path))))))
-      (trace-graph (get-successors root) (list root)))
-    (values paths)))
-
 (defun print-paths-to-rule (rule-name &optional (strm t))
   (labels ((print-path (nodes level)
              (unless (null nodes)
@@ -105,7 +87,7 @@
                  (print-path (rest nodes) (+ level 3))))))
     (mapc #'(lambda (path)
               (print-path path 0))
-          (find-paths-to-rule rule-name)))
+          (find-paths-to-rule (current-engine) rule-name)))
   (values))
 
 (defun find-object (addr)
@@ -114,7 +96,7 @@
   #-Lispworks
   (declare (ignore addr))
   #-Lispworks
-  (error "FIND-OBJECT Not implemented for this platform."))
+  (error "FIND-OBJECT not implemented for this platform."))
 
 (defun show-token (token)
   (do ((tok token (get-parent tok)))
