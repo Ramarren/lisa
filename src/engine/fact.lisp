@@ -17,27 +17,34 @@
 ;;; along with this program; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: node1.lisp
-;;; Description: Single-input node of the Rete pattern network. NODE1
-;;; is intended to be abstract.
+;;; File: fact.lisp
+;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: node1.lisp,v 1.3 2000/11/03 21:36:51 youngde Exp $
+;;; $Id: fact.lisp,v 1.1 2000/11/03 21:36:51 youngde Exp $
 
 (in-package "LISA")
 
-(defclass node1 (node)
-  ()
+(defclass fact ()
+  ((name :initarg name
+         :initform nil
+         :reader get-name)
+   (fact-id :initarg fact-id
+            :initform nil
+            :accessor get-fact-id)
+   (clock :initarg :clock
+          :initform 0
+          :accessor get-clock))
   (:documentation
-   "Single-input node of the Rete pattern network. NODE1 is intended
-   to be abstract."))
+   "Represents facts in the knowledge base."))
 
-(defmethod call-node-right ((self node1) (token clear-token))
-  (pass-along self token)
-  (values t))
+(defmethod get-time ((self fact))
+  (get-clock self))
 
-(defmethod call-node-right ((self node1) (token token))
-  (values nil))
+(defmethod update-time ((self fact) (engine rete))
+  (setf (get-clock self) (get-time engine)))
 
-(defmethod pass-along ((self node1) token)
-  (mapcar #'(lambda (n) (call-node-right n token))
-        (get-successors self)))
+(defmethod equals ((self fact) (obj fact))
+  (equal (get-name self) (get-name obj)))
+
+(defun make-fact (name)
+  (make-instance 'fact :name name))

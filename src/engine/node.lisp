@@ -20,7 +20,7 @@
 ;;; File: node.lisp
 ;;; Description: Parent class of all nodes in the Rete pattern network.
 
-;;; $Id: node.lisp,v 1.3 2000/11/03 19:23:26 youngde Exp $
+;;; $Id: node.lisp,v 1.4 2000/11/03 21:36:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,9 +40,9 @@
   (values))
 
 (defmethod remove-successor ((self node) node)
-  (with-accessors ((succ get-successors)) self
-    (setf succ
-      (remove node succ :test #'equals))))
+  (with-accessors ((successors get-successors)) self
+    (setf successors
+      (remove node successors :test #'equals))))
 
 (defmethod merge-successor ((self node) node rule)
   "Merges a node into the list of successors. Returns either NODE or the
