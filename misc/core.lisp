@@ -25,6 +25,12 @@
   (slot age))
 
 #+ignore
+(defrule simple-rule ()
+  (frodo)
+  =>
+  (format t "simple-rule fired.~%"))
+
+#+ignore
 (defrule special-pattern ()
   ;;;(bilbo (name ?name) (relative ?name))
   (frodo (name ?fname) (has-ring ?ring (eq ?ring ?fname)))
@@ -51,12 +57,11 @@
   =>
   )
 
-#+ignore
 (defrule variable-rule ()
   (frodo (name ?name))
-  (not (gandalf))
   (samwise (friend ?name))
   =>
+  (format t "variable-rule fired.~%")
   )
 
 #+ignore
@@ -67,13 +72,16 @@
   =>
   )
 
+#+ignore
 (defrule negated-variable ()
   (frodo (name ?name))
   (samwise (friend (not ?name)))
   =>
   )
 
+#|
 (defparameter *frodo* (assert (frodo (name frodo))))
 (defparameter *bilbo* (assert (bilbo (name bilbo))))
 (defparameter *samwise* (assert (samwise (friend frodo) (age 100))))
 (defparameter *gandalf* (assert (gandalf (name gandalf) (age 200))))
+|#

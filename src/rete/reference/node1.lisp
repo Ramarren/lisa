@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.10 2002/09/03 15:48:12 youngde Exp $
+;;; $Id: node1.lisp,v 1.11 2002/09/24 00:00:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,6 +46,9 @@
   (if (funcall (node1-test self) token)
       (pass-token-to-successors self token)
     nil))
+
+(defmethod accept-token ((self node1) (token reset-token))
+  (pass-token-to-successors self (token-push-fact token t)))
 
 (defmethod print-object ((self node1) strm)
   (print-unreadable-object (self strm :type t :identity t)

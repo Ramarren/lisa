@@ -20,7 +20,7 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.5 2002/09/23 19:12:41 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.6 2002/09/24 00:00:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,6 +34,3 @@
       do (funcall (successor-connector successor)
                   (successor-node successor)
                   token)))
-
-(defmethod accept-token ((self shared-node) (token reset-token))
-  (pass-token-to-successors self (token-push-fact token t)))

@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.4 2002/09/23 19:12:41 youngde Exp $
+;;; $Id: join-node.lisp,v 1.5 2002/09/24 00:00:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -75,6 +75,9 @@
 (defmethod accept-tokens-from-left ((self join-node) (left-tokens reset-token))
   (clear-memories self)
   (pass-tokens-to-successor self left-tokens))
+
+(defmethod accept-token-from-right ((self join-node) (left-tokens reset-token))
+  nil)
 
 (defmethod print-object ((self join-node) strm)
   (print-unreadable-object (self strm :type t :identity t)
