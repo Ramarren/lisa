@@ -20,7 +20,7 @@
 ;;; File: rpc.lisp
 ;;; Description:
 
-;;; $Id: rpc.lisp,v 1.3 2002/12/09 18:46:53 youngde Exp $
+;;; $Id: rpc.lisp,v 1.4 2002/12/10 16:31:37 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -39,12 +39,27 @@
 (defclass frodo ()
   ((name :initarg :name
          :initform nil
-         :accessor frodo-name)))
+         :accessor frodo-name)
+   (age :initform 0
+        :accessor frodo-age)))
+
+(defclass remote-frodo (rpc-remote-ref) ())
+
+(defmethod frodo-name ((self remote-frodo))
+  (rcall 'frodo-name self))
+
+(defmethod (setf frodo-age) (new-value (self remote-frodo))
+  (rcall '|SETF FRODO-AGE| new-value self))
 
 (defun assert-instance (object)
-  (print object)
+  (format t "Frodo's name: ~S~%" (frodo-name object))
+  (setf (frodo-age object) 100)
+  object)
+
+(defun initialize-client-environment (port)
+  (pprint "initialising client environment")
   (terpri)
-  (print (frodo-name object)))
+  (import-remote-class port 'remote-frodo "frodo"))
 
 (defun make-server ()
   (make-rpc-server
@@ -52,10 +67,10 @@
    :name "RPC Server"
    :local-port *server-port*
    :open :listener
-   :connect-action :process
+   :connect-action :call
    :connect-function
    #'(lambda (port &rest args)
-       (format t "Connection from ~S~%" port)
+       (initialize-client-environment port)
        (values))))
 
 (defun start-server ()
@@ -78,5 +93,4 @@
   (multiple-value-bind (port stuff)
       (make-client)
     (with-remote-port (port :close t)
-      (rcall 'print "Hello from client")
       (rcall 'assert-instance (make-instance 'frodo :name 'frodo)))))
