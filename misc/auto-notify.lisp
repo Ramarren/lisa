@@ -20,24 +20,17 @@
 ;;; File: auto-notify.lisp
 ;;; Description: Small test code for LISA's auto-notify feature.
 
-;;; $Id: auto-notify.lisp,v 1.2 2002/11/25 20:56:47 youngde Exp $
+;;; $Id: auto-notify.lisp,v 1.3 2002/12/03 16:03:46 youngde Exp $
 
 (in-package "LISA-USER")
 
-(defclass frodo (standard-kb-object)
+(defclass frodo ()
   ((name :initarg :name
          :initform 'frodo
          :reader frodo-name)
-   #+Allegro
    (has-ring :initform nil
-             :accessor has-ring)
-   #+Lispworks
-   (has-ring :initform nil
-             :reader has-ring)))
-
-#+Lispworks
-(defsetf has-ring (frodo) (new-value)
-  `(setf (slot-value ,frodo 'has-ring) ,new-value))
+             :accessor has-ring))
+  (:metaclass standard-kb-class))
 
 (defrule frodo ()
   (frodo (has-ring t))
@@ -48,4 +41,4 @@
 
 (reset)
 
-(assert ((identity *frodo*)))
+(assert (#^*frodo*))

@@ -20,46 +20,38 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.10 2002/12/02 20:37:41 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.11 2002/12/03 16:03:47 youngde Exp $
 
 (in-package "CL-USER")
 
-(defclass standard-kb-metaclass (standard-class) ())
+(defclass standard-kb-class (standard-class) ())
 
-(defmethod initialize-instance :after ((self standard-kb-metaclass) &rest initargs)
+(defmethod initialize-instance :after ((self standard-kb-class) &rest initargs)
   (dolist (slot (slot-value self 'clos::direct-slots))
-    (format t "~%looking at writers for slot ~S~%" slot)
     (dolist (writer (clos:slot-definition-writers slot))
       (let* ((gf (ensure-generic-function writer))
              (method-class
               (generic-function-method-class gf)))
-        (describe gf)
-        (describe method-class)
         (multiple-value-bind (body initargs)
             (clos:make-method-lambda
              gf
              (class-prototype method-class)
              '(new-value object)
              nil
-             '(lambda (val obj) (break)))
-          (progn
-            (clos:add-method
-             gf
-             (apply #'make-instance method-class
-                    :function (compile nil body)
-                    :specializers
-                    `(,(find-class t) ,(find-class t)) #|,(find-class (slot-value self 'clos::name)))|#
-                    :qualifiers nil
-                    :lambda-list '(value object)
-                    initargs))))))))
+             `(format t "setting slot ~S to ~S~%" ',(clos:slot-definition-name slot) new-value))
+          (clos:add-method
+           gf
+           (apply #'make-instance method-class
+                  :function (compile nil body)
+                  :specializers
+                  `(,(find-class t) ,self)
+                  :qualifiers '(:after)
+                  :lambda-list '(value object)
+                  initargs)))))))
 
-(defmethod validate-superclass ((class standard-kb-metaclass)
+(defmethod validate-superclass ((class standard-kb-class)
                                 (superclass standard-class))
   t)
-
-(defmethod (setf clos:slot-value-using-class) :after
-           (new-value (class standard-kb-metaclass) instance slot)
-  (format t "setting slot ~S to value ~S~%" slot new-value))
 
 (defclass frodo ()
   ((name :initarg :name
@@ -68,10 +60,6 @@
    (age :initarg :age
         :initform 100
         :accessor frodo-age))
-  (:metaclass standard-kb-metaclass))
-
-#+ignore
-(defmethod (setf frodo-name) (new-value (object frodo))
-  (setf (clos:slot-value-using-class (class-of object) object 'name) new-value))
+  (:metaclass standard-kb-class))
 
 (defparameter *frodo* (make-instance 'frodo :name 'frodo))

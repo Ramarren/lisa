@@ -17,16 +17,27 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File:
-;;; Description:
+;;; File: lispworks-auto-notify.lisp
+;;; Description: Lispworks-specific code for LISA's auto notification
+;;; mechanism, whereby changes to the slot values of CLOS instances, outside
+;;; of LISA's control, are picked up via the MOP protocol and synchronized
+;;; with KB facts.
 
-;;; $Id: lispworks-auto-notify.lisp,v 1.1 2002/12/03 15:26:02 youngde Exp $
+;;; $Id: lispworks-auto-notify.lisp,v 1.2 2002/12/03 16:03:52 youngde Exp $
 
-(in-package "CL-USER")
+(in-package "LISA")
 
 (defclass standard-kb-class (standard-class) ())
 
-(defmethod initialize-instance :after ((self standard-kb-class) &rest initargs)
+(defun lispworks-respond-to-slot-change (instance slot-name)
+  (flet ((ignore-instance (object)
+           (and (boundp '*ignore-this-instance*)
+                (eq object *ignore-this-instance*))))
+    (unless (ignore-instance instance)
+      (mark-instance-as-changed instance :slot-id slot-name))))
+  
+(defmethod initialize-instance :after ((self standard-kb-class)
+                                       &rest initargs) 
   (dolist (slot (slot-value self 'clos::direct-slots))
     (dolist (writer (clos:slot-definition-writers slot))
       (let* ((gf (ensure-generic-function writer))
@@ -38,13 +49,13 @@
              (class-prototype method-class)
              '(new-value object)
              nil
-             `(format t "setting slot ~S to ~S~%" ',(clos:slot-definition-name slot) new-value))
+             `(lispworks-respond-to-slot-change
+               object ',(clos:slot-definition-name slot)))
           (clos:add-method
            gf
            (apply #'make-instance method-class
                   :function (compile nil body)
-                  :specializers
-                  `(,(find-class t) ,self)
+                  :specializers `(,(find-class t) ,self)
                   :qualifiers '(:after)
                   :lambda-list '(value object)
                   initargs)))))))
@@ -53,13 +64,5 @@
                                 (superclass standard-class))
   t)
 
-(defclass frodo ()
-  ((name :initarg :name
-         :initform nil
-         :accessor frodo-name)
-   (age :initarg :age
-        :initform 100
-        :accessor frodo-age))
-  (:metaclass standard-kb-class))
-
-(defparameter *frodo* (make-instance 'frodo :name 'frodo))
+(eval-when (:load-toplevel)
+  (pushnew :lisa-autonotify *features*))

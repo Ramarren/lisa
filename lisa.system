@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.22 2002/12/02 18:21:31 youngde Exp $
+;;; $Id: lisa.system,v 1.23 2002/12/03 16:03:29 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -101,7 +101,10 @@
                           :binary-pathname "implementations"
                           :components
                           ((:file "workarounds")
-                           (:file "auto-notify"))
+                           #+Allegro
+                           (:file "allegro-auto-notify")
+                           #+Lispworks
+                           (:file "lispworks-auto-notify"))
                           :depends-on (preamble))
                  (:module "utils"
                           :source-pathname "utils"
