@@ -18,10 +18,13 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: mycin.lisp
-;;; Description: An implementation of MYCIN as illustrated in PAIP, pg. 553. This example
-;;; is used to exercise Lisa's new support for certainty factors.
+;;; Description: An implementation of MYCIN as illustrated in PAIP, pg. 553. The example
+;;; is used to illustrate (and test) Lisa's new support for certainty factors. I didn't do
+;;; a faithful port of the PAIP version; in particular, there's no interaction with the
+;;; operator right now. However, all rules are present and the two scenarios on pgs. 555 and
+;;; 556 are represented (by the functions CULTURE-1 and CULTURE-2).
 
-;;; $Id: mycin.lisp,v 1.2 2004/09/15 19:23:57 youngde Exp $
+;;; $Id: mycin.lisp,v 1.3 2004/09/15 20:09:14 youngde Exp $
 
 (in-package :lisa-user)
 
@@ -109,6 +112,11 @@
   (growth-conformation (value chains) (entity ?organism))
   =>
   (assert (organism-identity (value streptococcus) (entity ?organism))))
+
+(defrule conclusion (:salience -10)
+  (?identity (organism-identity (value ?value)))
+  =>
+  (format t "Identity: ~A (~,3F)~%" ?value (lisa:cf ?identity)))
 
 (defun culture-1 ()
   (reset)

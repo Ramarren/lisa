@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Test code for Lisa's certainty factor support.
 
-;;; $Id: cf.lisp,v 1.3 2004/09/15 18:22:38 youngde Exp $
+;;; $Id: cf.lisp,v 1.4 2004/09/15 20:09:14 youngde Exp $
 
 (in-package :lisa-user)
 
@@ -37,10 +37,10 @@
   =>
   (assert (has-ring) :cf 0.9))
 
-(defrule bilbo ()
+(defrule bilbo (:cf 0.3)
   (hobbit (name bilbo))
   =>
-  (assert (has-ring) :cf 0.3))
+  (assert (has-ring)))
 
 (defrule combine ()
   (?a (hobbit (name merry)))

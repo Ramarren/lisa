@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.32 2004/09/15 17:57:15 youngde Exp $
+;;; $Id: rule.lisp,v 1.33 2004/09/15 20:09:15 youngde Exp $
 
 (in-package :lisa)
 
@@ -115,10 +115,11 @@
 
 (defmethod print-object ((self rule) strm)
   (print-unreadable-object (self strm :type t)
-    (format strm "~A"
+    (format strm "~A, CF is ~,3F"
             (if (initial-context-p (rule-context self))
                 (rule-short-name self)
-              (rule-name self)))))
+              (rule-name self))
+            (cf self))))
 
 (defun compile-rule (rule patterns actions)
   (compile-rule-behavior rule actions)
