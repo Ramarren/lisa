@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.28 2003/03/27 15:21:52 youngde Exp $
+;;; $Id: lisa.system,v 1.29 2003/03/28 18:55:09 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -74,18 +74,17 @@
 #+LispWorks
 (let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))
 
-  (defun lisa-require (module-name pathname)
-    (let ((lisa-module
-           (find module-name loadable-modules
-                 :test #'string=
-                 :key #'car)))
-      (if (null lisa-module)
-          (call-next-advice module-name pathname)
-        (call-next-advice module-name (cdr lisa-module)))))
-
   (defadvice (require lisa-require :around)
       (module-name &optional pathname)
-    (lisa-require module-name pathname)))
+    (flet ((lisa-requre ()
+             (let ((lisa-module
+                    (find module-name loadable-modules
+                          :test #'string=
+                          :key #'car)))
+               (if (null lisa-module)
+                   (call-next-advice module-name pathname)
+                 (call-next-advice module-name (cdr lisa-module))))))
+      (lisa-require module-name pathname))))
 
 ;;; Make sure the binary directory structure exists...
 
