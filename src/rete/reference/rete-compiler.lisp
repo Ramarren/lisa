@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.33 2002/10/08 17:31:41 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.34 2002/10/09 14:35:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -51,11 +51,7 @@
   node)
 
 (defmethod remove-node-from-parent ((self rete-network) (parent t) child)
-  (let ((root-nodes (rete-roots self)))
-    (maphash #'(lambda (key node)
-                 (when (eq node child)
-                   (remhash key root-nodes)))
-             root-nodes)))
+  (remhash (node1-test child) (rete-roots self)))
 
 (defmethod remove-node-from-parent ((self rete-network) 
                                     (parent shared-node) child)
@@ -67,15 +63,6 @@
     (when (null root)
       (setf root (make-node1 test))
       (setf (gethash test *root-nodes*) root))
-    (record-node root t)))
-
-#+ignore
-(defun make-root-node (class)
-  (let ((root (gethash class *root-nodes*)))
-    (when (null root)
-      (setf root (make-node1
-                  (make-class-test class)))
-      (setf (gethash class *root-nodes*) root))
     (record-node root t)))
 
 (defmethod add-successor ((parent t) new-node connector)
