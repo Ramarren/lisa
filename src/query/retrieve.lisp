@@ -21,18 +21,23 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.14 2002/04/12 20:23:53 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.15 2002/04/13 02:26:32 youngde Exp $
 
 (in-package "LISA")
 
-(defvar *query-result* nil)
+(defvar *query-map*
+    "Serves as the query name cache."
+  (make-hash-table))
+
+(defvar *query-result* 
+    "Holds the results of query firings."
+  '())
 
 (deftemplate query-fact ()
   (slot name))
 
 (defun run-query (query)
-  "Runs a query (RULE instance). Query results are collected in *QUERY-RESULT*
-  as the query rules fire; RUN-QUERY returns both the value of *QUERY-RESULT*
+  "Runs a query (RULE instance), and returns both the value of *QUERY-RESULT*
   and the query name itself."
   (with-inference-engine ((current-engine))
     (let* ((?name (get-name query))
@@ -45,7 +50,7 @@
 (defun define-query (name body)
   "The actual query definition function. Creates a RULE instance identified by
   the symbol NAME, with BODY as its LHS and RHS, and adds the new rule to the
-  rete network."
+  rete network. Returns the new RULE instance."
   (let ((rule (define-rule name body)))
     (add-rule (current-engine) rule)
     (values rule)))
@@ -54,11 +59,27 @@
   "Defines a new query identified by the symbol NAME."
   `(define-query ,name ',body))
 
+;;; Queries fired by RETRIEVE collect their results in the special variable
+;;; *QUERY-RESULT*. As an example, one firing of this query, 
+;;;
+;;;   (retrieve (?x ?y) 
+;;;     (?x (rocky (name ?name)))
+;;;     (?y (hobbit (name ?name))))
+;;;
+;;; will produce a result similar to,
+;;;
+;;; (((?X . #<ROCKY @ #x7147b70a>) (?Y . #<HOBBIT @ #x7147b722>)))
+
 (defmacro retrieve ((&rest varlist) &body body)
   "Issues a query against the knowledge base. First, the query body is
   normalized to produce a hash code. Next, the cache is checked to see if the
   query already exists; if it doesn't, then a new query (rule) is created,
-  cached and added to the rete network. Finally, the query is run."
+  cached and added to the rete network. Finally, the query is run. Query
+  results are collected into the variable *QUERY-RESULT* as the query rules
+  fire. Each individual rule firing produces a list of CONS cells; for each
+  cell, its CAR is a variable as found in VARLIST and its CDR is that
+  variable's pattern binding. RETRIEVE returns two values; the value of
+  *QUERY-RESULT* and the name of the rule implementing the query."
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
     (let ((query-name (gensym))
@@ -77,13 +98,6 @@
                      *query-result*)))
            (remember-query ,hash ,query))
          (run-query ,query)))))
-
-(defvar *query-map*
-    (make-hash-table))
-
-(defun forget-all-queries ()
-  "Discards all queries from both *QUERY-MAP* and the rete network."
-  (clrhash *query-map*))
 
 (defun forget-query (name)
   "Discards a query from the cache by 1) removing it from *QUERY-MAP*; and 2)
@@ -108,7 +122,8 @@
 (defmethod clear-engine :after ((self rete))
   "Removes all queries from *QUERY-MAP* whenever an inference engine is
   CLEARed."
-  (forget-all-queries))
+  (clrhash *query-map*)
+  (values self))
 
 (defun find-query (hash)
   "Looks up a query name in the local query table *QUERY-MAP*, indexed by
