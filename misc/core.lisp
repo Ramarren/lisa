@@ -25,7 +25,7 @@
   (slot age))
 
 (defrule special-pattern ()
-  (bilbo (name ?name) (relative ?name))
+  ;;;(bilbo (name ?name) (relative ?name))
   (frodo (name ?fname) (has-ring ?ring (eq ?ring ?fname)))
   =>
   )

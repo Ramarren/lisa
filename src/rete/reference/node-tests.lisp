@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.10 2002/09/17 17:59:49 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.11 2002/09/17 23:36:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,13 +64,19 @@
    (pattern-slot-value slot)
    (pattern-slot-negated slot)))
 
+(defmacro make-variable-test (slot-name binding)
+  `(function
+    (lambda (tokens)
+      (equal (get-slot-value (token-top-fact tokens) ,slot-name)
+             (get-slot-value 
+              (token-find-fact tokens (binding-address ,binding))
+              (binding-slot-name ,binding))))))
+
 (defun make-inter-pattern-test (slot-name binding)
-  (function
-   (lambda (tokens)
-     (equal (get-slot-value (token-top-fact tokens) slot-name)
-            (get-slot-value 
-             (token-find-fact tokens (binding-address binding))
-             (binding-slot-name binding))))))
+  (make-variable-test slot-name binding))
+
+(defun make-intra-pattern-test (slot-name binding)
+  (make-variable-test slot-name binding))
 
 (defun make-predicate-test (forms bindings)
   (let* ((special-vars

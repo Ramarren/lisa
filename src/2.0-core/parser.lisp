@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.21 2002/09/17 17:59:46 youngde Exp $
+;;; $Id: parser.lisp,v 1.22 2002/09/17 23:36:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -80,7 +80,6 @@
   (with-rule-components ((doc-string lhs rhs) body)
     (format t "LHS: ~S~%" lhs)
     (format t "RHS: ~S~%" rhs)
-    (break)
     (setf *network* (make-test-network lhs))
     *network*))
 
