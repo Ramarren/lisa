@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.22 2001/04/26 17:00:34 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.23 2001/04/26 17:18:56 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -53,9 +53,20 @@
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")
-  (:nicknames "LMP" "THREAD")
-  (:export "MAKE-PROCESS" "MAKE-LOCK" "GET-LOCK" "GIVEUP-LOCK" "WITH-LOCK"
-           "WITHOUT-SCHEDULING"))
+  (:nicknames "LMP")
+  (:import-from "PORT"
+                "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
+                "WITH-TIMEOUT" "PROCESS-YIELD" "KILL-PROCESS"
+                "INTERRUPT-PROCESS" "RESTART-PROCESS" "PROCESSP"
+                "PROCESS-NAME" "PROCESS-ACTIVE-P" "PROCESS-WHOSTATE"
+                "CURRENT-PROCESS" "ALL-PROCESSES" "SHOW-PROCESSES")
+  (:export "MAKE-PROCESS" "PROCESS-WAIT" "PROCESS-WAIT-WITH-TIMEOUT"
+                "WITH-TIMEOUT" "PROCESS-YIELD" "KILL-PROCESS"
+                "INTERRUPT-PROCESS" "RESTART-PROCESS" "PROCESSP"
+                "PROCESS-NAME" "PROCESS-ACTIVE-P" "PROCESS-WHOSTATE"
+                "CURRENT-PROCESS" "ALL-PROCESSES" "SHOW-PROCESSES"
+                "MAKE-LOCK" "GET-LOCK" "GIVEUP-LOCK" "WITH-LOCK"
+                "WITHOUT-SCHEDULING"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
@@ -68,4 +79,5 @@
            "FINALIZE-INHERITANCE"
            "CLASS-FINALIZED-P"))
 
-(pushnew :lisa *features*)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (pushnew :lisa *features*))
