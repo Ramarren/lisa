@@ -20,9 +20,13 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.3 2000/11/16 19:07:45 youngde Exp $
+;;; $Id: environment.lisp,v 1.4 2000/11/16 20:47:13 youngde Exp $
 
 (in-package :lisa)
+
+;;; CLASS-MAP maintains bindings between arbitrary names (symbols) and class
+;;; names. LISA uses this map to locate class objects that represent facts in
+;;; the knowledge base.
 
 (let ((class-map (make-hash-table)))
   (defun import-class (name class)
@@ -34,15 +38,16 @@
           (error "No imported class for symbol ~S." name)
         (find-class val)))))
 
-(let ((engine (make-rete)))
-  (defun current-engine ()
-    (values engine))
-  (defun (setf current-engine) (new-engine)
-    (setf engine new-engine))
-  (defun use-engine (new-engine)
-    (let ((old-engine (current-engine)))
-      (setf (current-engine) new-engine)
-      (values old-engine))))
+(defgeneric current-engine ()
+  (:documentation
+   "Generic function used to locate the 'current' instance of the inference
+   engine, whatever that means. The default implementation returns the
+   singleton RETE; clients that employ more than one RETE instance should
+   override this method."))
+
+(let ((singleton-engine (make-rete)))
+  (defmethod current-engine ()
+    (values singleton-engine)))
 
 (defmacro with-inference-engine ((engine) &body body)
   (let ((old-engine (gensym))
