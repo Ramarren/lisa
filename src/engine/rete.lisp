@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.66 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: rete.lisp,v 1.67 2002/05/31 02:51:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,11 +34,11 @@
              :reader get-compiler)
    (clock :initform 0
           :accessor get-clock)
-   (initial-fact :initform (make-initial-fact)
+   (initial-fact :initform nil
                  :reader get-initial-fact)
-   (clear-fact :initform (make-clear-fact)
+   (clear-fact :initform nil
                :reader get-clear-fact)
-   (null-fact :initform (make-not-or-test-fact)
+   (null-fact :initform nil
               :reader get-null-fact)
    (autofacts :initform '()
               :accessor get-autofacts)
@@ -46,6 +46,8 @@
               :accessor get-facts)
    (instance-table :initform (make-hash-table)
                    :accessor get-instance-table)
+   (meta-data :initform (make-meta-data)
+              :reader get-meta-data)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id)
    (halted-p :initform nil)
@@ -53,6 +55,26 @@
                      :reader get-fired-rule-count))
   (:documentation
    "Represents the inference engine itself."))
+
+(defmethod initialize-instance :after ((self rete) &rest args)
+  (with-inference-engine (self)
+    (deftemplate initial-fact ())
+    (deftemplate clear-fact ())
+    (deftemplate not-or-test-fact ())
+    (deftemplate query-fact () (slot lisa::query-name))
+    (setf (slot-value self 'initial-fact)
+      (make-fact 'initial-fact '()))
+    (setf (slot-value self 'clear-fact)
+      (make-fact 'clear-fact '()))
+    (setf (slot-value self 'null-fact)
+      (make-fact 'not-or-test-fact '()))
+    self))
+
+(defun meta-fact-map (rete)
+  (meta-data-fact-map (get-meta-data rete)))
+
+(defun meta-class-map (rete)
+  (meta-data-class-map (get-meta-data rete)))
 
 (defun fact-count (rete)
   (hash-table-count (get-facts rete)))
@@ -228,7 +250,7 @@
   (insert-token rete (make-clear-token
                       :initial-fact (get-clear-fact rete)))
   (set-initial-state rete)
-  (assert-fact rete (get-initial-fact rete))
+  (assert (initial-fact))
   (assert-autofacts rete)
   t)
 

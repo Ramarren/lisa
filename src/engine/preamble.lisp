@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.10 2002/05/26 16:02:07 youngde Exp $
+;;; $Id: preamble.lisp,v 1.11 2002/05/31 02:51:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,18 +41,6 @@
   "Bind this variable to NIL if you want to inhibit LISA warning messages.")
 
 (defgeneric equals (object-1 object-2))
-
-(defgeneric mark-instance-as-changed (instance &key (engine nil) (slot-id nil))
-  (:method ((instance t) &key engine slot-id)
-           (declare (ignore slot-id) (ignore engine))
-           (error
-            "LISA does not have a MARK-INSTANCE-AS-CHANGED method defined for class ~S."
-            (class-of instance)))
-  (:documentation
-   "This generic function describes the protocol by which LISA can be notified
-   that a CLOS instance has been changed outside of LISA's control. Primary
-   methods on this function are automatically generated as classes are
-   registered with LISA."))
 
 (defgeneric tell-lisa-modified-instance (instance slot)
   (:method ((instance t) slot)

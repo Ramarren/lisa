@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.81 2002/05/26 16:02:07 youngde Exp $
+;;; $Id: parser.lisp,v 1.82 2002/05/31 02:51:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -123,14 +123,16 @@
                (let ((name (first slot))
                      (field (second slot))
                      (constraint (third slot)))
+                 (print name)
+                 (print field)
+                 (print constraint)
                  (cond ((and (symbolp name)
                              (slot-valuep field)
                              (constraintp constraint))
-                        (if (has-meta-slot-p meta name)
-                            `(,name ,field ,constraint)
-                          (pattern-error
-                           pattern
-                           "This slot is not a recognized member: ~S." name)))
+                        (print "more schtum")
+                        (cl:assert (has-meta-slot-p meta name) nil
+                          "This slot has no meta data: ~S." `(,slot))
+                        `(,name ,field ,constraint))
                        (t
                         (pattern-error
                          pattern

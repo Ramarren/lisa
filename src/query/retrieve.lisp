@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.17 2002/05/22 21:03:25 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.18 2002/05/31 02:51:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,16 +33,13 @@
     '()
   "Holds the results of query firings.")
 
-(deftemplate query-fact ()
-  (slot name))
-
 (defun run-query (query)
   "Runs a query (RULE instance), and returns both the value of *QUERY-RESULT*
   and the query name itself."
   (with-inference-engine ((current-engine))
     (let* ((?name (get-name query))
            (*query-result* '())
-           (fact (assert (query-fact (name ?name)))))
+           (fact (assert (query-fact (lisa::query-name ?name)))))
       (run)
       (retract fact)
       (values *query-result* ?name))))
@@ -91,7 +88,7 @@
          (when (null ,query)
            (setf ,query
              (defquery ',query-name
-                 (query-fact (name ,query-name))
+                 (query-fact (lisa::query-name ,query-name))
                ,@body
                =>
                (push (list ,@(mapcar #'make-query-binding varlist))

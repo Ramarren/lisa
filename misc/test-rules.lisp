@@ -11,14 +11,13 @@
   ((name :initarg :name)
    (comrade :initarg :comrade)))
 
-(defimport rocky (lisa-user::rocky)
-  (name buddy))
+(defimport rocky)
 
-(defimport boris (lisa-user::boris)
-  (name comrade))
+(defimport boris)
 
 (defparameter *rocky*
   (make-instance 'rocky :name "rocky" :buddy "bullwinkle"))
+
 (defparameter *boris* nil)
 
 (defrule rocky ()
@@ -39,6 +38,3 @@
   =>
   (format t "natasha fired! Instance is ~S~%" ?obj)
   (format t "engine is ~S~%" (engine)))
-
-(defmethod tell-lisa-modified-instance ((self boris) slot)
-  (format t "LISA modified slot ~S of boris instance ~S~%" slot self))

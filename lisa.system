@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.9 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: lisa.system,v 1.10 2002/05/31 02:51:19 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -136,6 +136,8 @@
                                               :depends-on (fact 
                                                            shadow-fact
                                                            dynamic-update
+                                                           language
+                                                           environment
                                                            rule))
                                        #+ignore
                                        (:file "clos"
