@@ -20,7 +20,7 @@
 ;;; File: test-facts.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: test-facts.lisp,v 1.5 2000/11/10 19:20:08 youngde Exp $
+;;; $Id: test-facts.lisp,v 1.6 2000/11/15 16:34:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,10 +41,18 @@
   (make-instance 'boris :name name))
 
 (defparameter *engine* (make-rete))
+(defparameter *rule* (make-rule 'schtum))
+(defparameter *pattern*
+    (make-generic-pattern 'rocky '((name "rocky"))))
+
+(with-accessors ((patterns get-patterns)) *rule*
+  (setf patterns
+    (append patterns `(,*pattern*))))
+
+#|
 (defparameter *terminals* (make-array 2))
 (defparameter *rule-roots* (make-array 2))
 (defparameter *root* (make-root-node))
-(defparameter *rule* (make-rule 'schtum))
 (defparameter *node-tect* (make-node1-tect (find-class 'rocky)))
 (defparameter *last* (merge-successor *root* *node-tect* *rule*))
 
@@ -55,6 +63,8 @@
                                             (make-node1-rtl) *rule*))
 (setf (aref *terminals* 0) (merge-successor (aref *terminals* 0)
                                             (make-terminal-node *rule*) *rule*))
+|#
+
 (setf *fact* (make-fact (find-class 'rocky)))
 (set-slot-value *fact* 'name "rocky")
 (setf (get-fact-id *fact*) 1)

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.3 2000/11/14 21:29:51 youngde Exp $
+;;; $Id: pattern.lisp,v 1.4 2000/11/15 16:34:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,7 +32,7 @@
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 
-(defmethod add-test ((self pattern) slot-name test)
+(defmethod add-slot ((self pattern) slot-name test)
   (with-accessors ((slots get-slots)) self
     (setf slots
       (nconc slots `(,(make-slot slot-name test))))))

@@ -20,11 +20,9 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.2 2000/11/09 21:22:42 youngde Exp $
+;;; $Id: rule.lisp,v 1.3 2000/11/15 16:34:34 youngde Exp $
 
 (in-package :lisa)
-
-(defvar *rete* (make-hash-table))
 
 (defclass rule ()
   ((name :initarg :name
@@ -70,7 +68,6 @@
 (defmethod finalize-rule-definition ((self rule) lhs rhs)
   (compile-patterns self lhs)
   (compile-actions self rhs)
-  (setf (gethash (get-name self) *rete*) rule)
   (values rule))
 
 (defun make-rule (name &key (doc-string nil) (salience 0) (source nil))

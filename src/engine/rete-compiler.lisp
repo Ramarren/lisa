@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.6 2000/11/14 21:29:51 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.7 2000/11/15 16:34:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -50,54 +50,73 @@
   ((hash-key :initform 101
              :accessor get-hash-key)
    (root-node :initform (make-root-node)
-              :reader get-root-node))
+              :reader get-root-node)
+   (terminals :initform nil
+              :accessor get-terminals)
+   (roots :initform nil
+          :accessor get-roots))
   (:documentation
    "Generates a pattern network."))
 
-(defmethod add-rule ((self rete-compiler) rule)
-  "Adds a rule to the pattern network."
-  (let ((terminals 
-         (make-array (get-pattern-count rule))
-        (rule-roots
-         (make-array (get-pattern-count rule)))))
-    (labels ((add-simple-test (node slot)
-               (merge-successor
-                node (make-node1-teq (get-name slot)
-                                     (get-value (get-test slot)))
-                rule))
-             (add-tests (slots node)
-               (if (null slots)
-                   (values node)
-                 (add-tests (rest slots)
-                            (add-simple-test node (first slots)))))
-             (first-pass (patterns &optional (i 0))
+(defun add-tests (rule slots node)
+  (flet ((add-simple-test (node slot)
+           (merge-successor 
+            node (make-node1-teq (get-name slot)
+                                 (get-value (get-test slot))) rule)))
+    (if (null slots)
+        (values node)
+      (add-tests rule (rest slots)
+                 (add-simple-test node (first slots))))))
+           
+(defun create-single-nodes (rule patterns)
+  (with-accessors ((terminals get-terminals)
+                   (roots get-roots)) rule
+    (labels ((find-multifields ()
+               (values nil))
+             (first-pass (patterns i)
                (let ((pattern (first patterns)))
                  (cond ((null pattern)
                         (values t))
                        (t
                         (let ((last (merge-successor
-                                     (get-root-node self)
+                                     (get-root-node rule)
                                      (make-node1-tect
                                       (get-name pattern)) rule)))
-                          (setf (aref rule-roots i) last)
-                          ;(find-multifields)
+                          (setf (aref roots i) last)
+                          (find-multifields)
                           (setf (aref terminals i)
                             (add-tests (get-slots pattern) last))
-                          (first-pass (rest patterns) (1+ i)))))))
-             (second-pass ()
-               (setf (aref terminals 0)
-                 (merge-successor 
-                  (aref terminals 0) (make-node1-rtl) rule)))
-             (third-pass ()
-               (setf (aref terminals 0)
-                 (merge-successor
-                  (aref terminals 0) (make-terminal-node rule) rule))))
-      (first-pass (get-patterns rule))
-      (second-pass)
-      (third-pass)
-      (values rule))))
+                          (first-pass (rest patterns) (1+ i))))))))
+      (first-pass patterns 0))))
+
+(defun search-for-variables (rule)
+  (with-accessors ((terminals get-terminals)) rule
+    (setf (aref terminals 0)
+      (merge-successor (aref terminals 0)
+                       (make-node1-rtl) rule))))
+
+(defun create-join-nodes (rule)
+  (values nil))
+
+(defun create-terminal-node (rule)
+  (with-accessors ((terminals get-terminals)) rule
+    (setf (aref terminals 0)
+      (merge-successor (aref terminals 0)
+                       (make-terminal-node rule) rule))))
+
+(defmethod add-rule ((self rete-compiler) rule)
+  "Adds a rule to the pattern network."
+  (setf (get-terminals self) (make-array (get-pattern-count rule)))
+  (setf (get-roots self) (make-array (get-pattern-count rule)))
+  (create-single-nodes rule (get-patterns rule))
+  (search-for-variables rule)
+  (create-join-nodes rule)
+  (create-terminal-node rule)
+  (values rule))
                                   
-               
+(defun make-rete-compiler ()
+  (make-instance 'rete-compiler))
+
                
                
              

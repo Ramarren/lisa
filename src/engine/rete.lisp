@@ -20,14 +20,25 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.2 2000/11/09 20:41:47 youngde Exp $
+;;; $Id: rete.lisp,v 1.3 2000/11/15 16:34:34 youngde Exp $
 
 (in-package :lisa)
 
 (defclass rete ()
   ((hash-index :initarg :hash-index
                :initform 0
-               :accessor get-hash-index)))
-   
+               :accessor get-hash-index)
+   (rules :initform (make-hash-table)
+          :accessor get-rules)
+   (compiler :initform (make-rete-compiler)
+             :reader get-compiler))
+  (:documentation
+   "Represents the inference engine itself."))
+
+(defmethod add-rule ((self rete) rule)
+  (with-accessors ((rules get-rules)) self
+    (add-rule (get-compiler self) rule)
+    (setf (gethash (get-name rule) rules) rule)))
+
 (defun make-rete ()
   (make-instance 'rete))
