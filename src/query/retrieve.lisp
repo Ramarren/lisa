@@ -21,11 +21,18 @@
 ;;; Description: Macros and functions implementing LISA's early attempt at a
 ;;; query language.
 
-;;; $Id: retrieve.lisp,v 1.5 2002/01/10 16:36:59 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.6 2002/01/10 16:52:15 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *query-result* nil)
+
+;;; NB: This is an experimental implementation of Queries for LISA. As such,
+;;; it cheats in various ways to limit the impact on other parts of the
+;;; system. For example, this code creates a temporary inference engine each
+;;; time a query is issued, borrowing the FACT table from CURRENT-ENGINE in
+;;; the process. This is not a permanent solution, but it will remain in place
+;;; while I gather feedback on the overall query mechanism.
 
 (defun define-and-run-query (name body)
   (let ((*query-result* '())
@@ -48,5 +55,4 @@
     `(defquery (gensym)
        ,@body
        =>
-       (format t "Firing query~%")
        (push (list ,@(mapcar #'make-query-binding varlist)) *query-result*))))
