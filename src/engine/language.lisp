@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Macros that implement the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.4 2000/10/17 02:08:22 youngde Exp $
+;;; $Id: language.lisp,v 1.5 2000/10/17 15:01:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,7 +34,7 @@
   (actions nil))
 
 (defun make-test-pattern (p)
-  (list p))
+  (list "test" p))
 
 (defun make-negated-pattern (p)
   (list p))
@@ -46,14 +46,14 @@
   (list p))
 
 (defmacro variablep (sym)
-  `(and (symbolp sym)
-    (eq (elt (symbol-name sym) 0) #\?)))
+  `(and (symbolp ,sym)
+    (eq (elt (symbol-name ,sym) 0) #\?)))
 
-(defmacro field-constantp (sym)
+(defmacro identifierp (sym)
   `(or
-    (symbolp sym)
-    (numberp sym)
-    (stringp sym)))
+    (symbolp ,sym)
+    (numberp ,sym)
+    (stringp ,sym)))
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
@@ -64,7 +64,10 @@
 
 (defun redefine-defrule (name body)
   (multiple-value-bind (doc-string decls lhs rhs)
-      (evaluate-defrule body)))
+      (evaluate-defrule body)
+    (format t "name ~S, doc ~S, decls ~S, lhs ~S, rhs ~S~%"
+            name doc-string decls lhs rhs))
+  (values))
       
 (defun evaluate-defrule (body)
   (format t "evaluate-defrule: looking at ~S~%" body)
@@ -73,8 +76,7 @@
     (format t "doc ~S, decls ~S, remains ~S~%" doc-string decls remains)
     (multiple-value-bind (lhs rhs)
         (parse-rulebody remains)
-      (format t "doc ~S, decls ~S, lhs ~S, rhs ~S~%"
-              doc-string decls lhs rhs))))
+      (values doc-string decls lhs rhs))))
 
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers &key (doc nil))
@@ -120,64 +122,32 @@
 (defun make-rule-pattern (template &optional (assign-to nil))
   (labels ((parse-pattern (p)
              (format t "parse-pattern: looking at ~S~%" p)
-             (flet ((identifierp (obj)
-                      (or (symbolp obj)
-                          (stringp obj)
-                          (numberp obj))))
-               (let ((head (first p)))
-                 (if (symbolp head)
-                     (cond ((eq head 'test)
-                            (make-test-pattern (rest p)))
-                           ((eq head 'not)
-                            (make-negated-pattern
-                             (parse-pattern (first (rest p)))))
-                           (t
-                            (let ((fact-body (second p)))
-                              (cond ((consp fact-body)
-                                     (parse-unordered-fact p))
-                                    ((identifierp fact-body)
-                                     (parse-ordered-fact p))
-                                    (t (error "Parse error at ~S~%" fact-body))))))
-                   (error "Parse error at ~S~%" p))))))
+             (let ((head (first p)))
+               (if (symbolp head)
+                   (cond ((eq head 'test)
+                          (make-test-pattern (rest p)))
+                         ((eq head 'not)
+                          (make-negated-pattern
+                           (parse-pattern (first (rest p)))))
+                         (t
+                          (parse-fact p)))
+                 (error "Parse error at ~S~%" p)))))
     (if (null assign-to)
         (make-pattern (parse-pattern template))
       (make-assignment-pattern (parse-pattern template)))))
-
-(defun parse-ordered-fact (fact)
-  (format t "parsed-ordered-fact: looking at ~S~%" fact)
-  (labels ((parse-fields (body &optional facts)
-             (let ((field (first body)))
-               (cond ((null field)
-                      (values facts))
-                     ((field-constantp field)
-                      (parse-fields (rest body)
-                                    (append fields `(,field))))
-                     ((varnamep field)
-                      (if (consp (second body))
-                          (parse-fields
-                           (first (rest body))
-                           (append facts `(,field ,(second body))))
-                        (parse-fields
-                         (rest body)
-                         (append facts `(,field)))))
-                     (t (error "parse-fields: parse error at ~S~%" body))))))
-    (parse-fields fact)))
-
-(defmacro with-fact-components (((name field constraint) fact) &body body)
-  `(destructuring-bind (,name &optional ,field ,constraint) ,fact
-    ,@body))
         
-(defun parse-unordered-fact (fact)
+(defun parse-fact (fact)
   (format t "parsed-unordered-fact: looking at ~S~%" fact)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (list name field constraint)))
            (parse-fact-body (body &optional (slots nil))
-             (format t "parse-unordered-fact-body: looking at ~S~%" body)
+             (format t "parse-fact-body: looking at ~S~%" body)
              (let ((slot (first body)))
                (cond ((consp slot)
                       (parse-fact-body (rest body)
-                                       (append slots (parse-slot slot))))
+                                       (append slots
+                                               `(,(parse-slot slot)))))
                      ((null slot)
                       (values slots))
                      (t
