@@ -8,7 +8,7 @@
 ;;; See <URL:http://www.gnu.org/copyleft/lesser.html>
 ;;; for details and the precise copyright document.
 ;;;
-;;; $Id: net.lisp,v 1.2 2001/03/08 15:43:01 youngde Exp $
+;;; $Id: net.lisp,v 1.3 2001/03/10 20:10:27 youngde Exp $
 ;;; $Source: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/clocc/port/Attic/net.lisp,v $
 
 (eval-when (compile load eval)
@@ -218,8 +218,8 @@ Returns a socket stream or NIL."
                 ;; in ACL6 and later, all sockets are bivalent (both
                 ;; text and binary) and thus there's no need to convert
                 ;; between the element types.
-                #+(and allegro (not (version>= 6)))
-                (socket:set-socket-format sock (if bin :binary :text))
+                ;;#+(and allegro (not (version>= 6)))
+                ;;(socket:set-socket-format sock (if bin :binary :text))
                 sock))
   #+clisp (multiple-value-bind (sec usec) (floor (or wait 0))
             (when (lisp:socket-wait serv (and wait sec) (round usec 1d-6))
