@@ -20,7 +20,7 @@
 ;;; File: node2-exists.lisp
 ;;; Description:
 
-;;; $Id: node2-exists.lisp,v 1.1 2002/11/18 15:59:33 youngde Exp $
+;;; $Id: node2-exists.lisp,v 1.2 2002/11/18 17:55:01 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,8 +30,8 @@
                                       (left-tokens add-token))
   (loop for right-token being the hash-value 
       of (join-node-right-memory self)
-      do (when (and (test-tokens self left-tokens right-token)
-                    (= (token-increment-exists-counter left-tokens) 1))
+      do (when (test-tokens self left-tokens right-token)
+           (token-increment-exists-counter left-tokens)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
 
@@ -39,8 +39,7 @@
                                       (left-tokens remove-token))
   (loop for right-token being the hash-value 
       of (join-node-right-memory self)
-      do (when (and (test-tokens self left-tokens right-token)
-                    (zerop (token-decrement-exists-counter left-tokens)))
+      do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
 
