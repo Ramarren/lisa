@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.12 2002/04/08 02:19:54 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.13 2002/04/08 20:12:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,7 +50,7 @@
 (defmacro retrieve ((&rest varlist) &body body)
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
-    (let ((query-name (gentemp))
+    (let ((query-name (gensym))
           (hash (gensym))
           (query (gensym)))
       `(let* ((,hash (sxhash (normalize-query ',body)))
@@ -79,7 +79,9 @@
     (block found
       (with-hash-table-iterator (next-item *query-map*)
         (multiple-value-bind (foundp key value) (next-item)
-          (when (and foundp (eq value name))
+          (when (and foundp
+                     (string= (symbol-name value)
+                              (symbol-name name)))
             (return-from found
               (remove-query key value))))))))
 
