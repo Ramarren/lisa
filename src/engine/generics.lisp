@@ -20,11 +20,16 @@
 ;;; File: generics.lisp
 ;;; Description: Common generic functions.
 
-;;; $Id: generics.lisp,v 1.5 2001/04/19 14:44:42 youngde Exp $
+;;; $Id: generics.lisp,v 1.6 2001/04/19 17:25:49 youngde Exp $
 
 (in-package "LISA")
 
 (defgeneric equals (object-1 object-2))
 
 (defgeneric tell-lisa-modified-instance (instance slot)
-  (:method (instance slot) t))
+  (:method (instance slot) t)
+  (:documentation
+   "This generic function serves as a notification protocol, whereby LISA
+   informs an application whenever a rule firing modifies an instance
+   slot. Interested code should provide its own specialized method(s)."))
+
