@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.1 2001/03/13 19:59:42 youngde Exp $
+;;; $Id: meta.lisp,v 1.2 2001/03/13 21:00:51 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,10 +33,13 @@
     (setf (gethash name class-map) (class-name class)))
 
   (defun forget-registered-class (name)
-    (rmhash name class-map))
+    (remhash name class-map))
 
   (defun forget-registered-classes ()
     (clrhash class-map))
+
+  (defun registered-classp (name)
+    (gethash name class-map))
   
   (defun find-registered-class (name)
     (let ((real-name (gethash name class-map)))

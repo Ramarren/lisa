@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.36 2001/03/13 19:59:42 youngde Exp $
+;;; $Id: parser.lisp,v 1.37 2001/03/13 21:00:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -101,7 +101,12 @@
     `(,(parse-pattern template nil))))
 
 (defun parse-unordered-pattern (pattern)
-  (labels ((parse-slot (slot)
+  (labels ((parse-pattern-head ()
+             (let ((head (first pattern)))
+               (if (registered-classp head)
+                   (values head)
+                 (error "Pattern has no registered class: ~S" pattern))))
+           (parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (assert-conditions ((symbolp name)
                                    (slot-valuep field)
@@ -111,13 +116,14 @@
              (let ((slot (first body)))
                (cond ((consp slot)
                       (parse-pattern-body (rest body)
-                                          (append slots
+                                          (nconc slots
                                                   `(,(parse-slot slot)))))
                      ((null slot)
                       (values slots))
                      (t
                       (error "parse-unordered-pattern: parse error at ~S~%" body))))))
-    `(,(first pattern) ,(parse-pattern-body (rest pattern) nil))))
+    `(,(parse-pattern-head)
+      ,(parse-pattern-body (rest pattern) nil))))
 
 (defun make-default-pattern (p)
   (parse-unordered-pattern p))
@@ -140,11 +146,9 @@
   (let ((head (first body))
         (slots (rest body)))
     (cond ((symbolp head)
-           (let ((class (find-imported-class head nil)))
-             (if (null class)
-                 (error "No class object found for ~S." head)
-               `(assert-fact (current-engine)
-                             (make-fact ,class (,@(normalize-slots slots)))))))
+           (let ((class (find-registered-class head)))
+             `(assert-fact (current-engine)
+               (make-fact ,class (,@(normalize-slots slots))))))
           (t
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
