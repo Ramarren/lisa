@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.28 2004/03/20 02:19:14 youngde Exp $
+;;; $Id: rule.lisp,v 1.29 2004/06/07 17:43:03 youngde Exp $
 
 (in-package "LISA")
 

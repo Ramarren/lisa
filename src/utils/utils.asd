@@ -22,12 +22,12 @@
 ;;; File: utils.asd
 ;;; Description: System definition file.
 
-;;; $Id: utils.asd,v 1.1 2004/06/07 15:55:39 youngde Exp $
+;;; $Id: utils.asd,v 1.2 2004/06/07 17:43:24 youngde Exp $
 
 (in-package :cl-user)
 
 (asdf:defsystem :lisa.utils
   :components ((:file "compose")
                (:file "utils"))
-  :depends-on ("packages"))
+  :depends-on ("lisa.packages"))
 

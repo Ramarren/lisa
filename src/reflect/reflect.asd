@@ -22,11 +22,11 @@
 ;;; File: reflect.asd
 ;;; Description: System definition file.
 
-;;; $Id: reflect.asd,v 1.1 2004/06/07 15:57:00 youngde Exp $
+;;; $Id: reflect.asd,v 1.2 2004/06/07 17:43:21 youngde Exp $
 
 (in-package :cl-user)
 
 (asdf:defsystem :lisa.reflect
   :components ((:file "reflect"))
-  :depends-on ("utils"))
+  :depends-on ("lisa.utils"))
 

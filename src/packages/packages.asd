@@ -22,9 +22,9 @@
 ;;; File: packages.asd
 ;;; Description: System definition file.
 
-;;; $Id: packages.asd,v 1.1 2004/06/07 15:50:54 youngde Exp $
+;;; $Id: packages.asd,v 1.2 2004/06/07 17:43:08 youngde Exp $
 
 (in-package :cl-user)
 
-(asdf:defsystem :lisa-packages
-  :components (:components ((:file "pkgdecl"))))
+(asdf:defsystem :lisa.packages
+  :components ((:file "pkgdecl")))

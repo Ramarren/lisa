@@ -22,29 +22,37 @@
 ;;; File: core.asd
 ;;; Description: System definition file.
 
-;;; $Id: core.asd,v 1.1 2004/06/07 15:47:47 youngde Exp $
+;;; $Id: core.asd,v 1.2 2004/06/07 17:43:02 youngde Exp $
 
 (in-package :cl-user)
 
-(asdf:defsystem :lisa-core
-  :components (:components ((:file "deffacts")
-                            (:file "fact")
-                            (:file "watches")
-                            (:file "activation")
-                            (:file "strategies")
-                            (:file "context")
-                            (:file "rule")
-                            (:file "pattern")
-                            (:file "parser"
-                             :depends-on ("pattern"))
-                            (:file "language"
-                             :depends-on ("parser"))
-                            (:file "tms-support")
-                            (:file "rete"
-                             :depends-on ("language" "tms-support"))
-                            (:file "meta")
-                            (:file "binding")
-                            (:file "token")
-                            (:file "retrieve"))
-               :depends-on ("packages" "reflect" "utils" "preamble")))
+(asdf:defsystem :lisa.preamble
+  :components ((:file "preamble")
+               (:file "conditions"))
+  :depends-on ("packages"))
 
+(asdf:defsystem :lisa.core
+  :components ((:file "deffacts")
+               (:file "fact")
+               (:file "watches")
+               (:file "activation")
+               (:file "strategies")
+               (:file "context")
+               (:file "rule")
+               (:file "pattern")
+               (:file "parser"
+                :depends-on ("pattern"))
+               (:file "language"
+                :depends-on ("parser"))
+               (:file "tms-support")
+               (:file "rete"
+                :depends-on ("language" "tms-support"))
+               (:file "meta")
+               (:file "binding")
+               (:file "token")
+               (:file "retrieve"))
+  :depends-on ("lisa.packages" "lisa.reflect" "lisa.utils" "lisa.preamble"))
+
+(asdf:defsystem lisa.epilogue
+  :components ((:file "epilogue"))
+  :depends-on ("lisa.config"))
