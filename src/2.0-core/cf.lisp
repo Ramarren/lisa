@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.4 2004/09/15 18:22:41 youngde Exp $
+;;; $Id: cf.lisp,v 1.5 2004/09/15 19:52:32 youngde Exp $
 
 (in-package :lisa.cf)
 
@@ -42,8 +42,11 @@
         (t (/ (+ a b)
               (- 1 (min (abs a) (abs b)))))))
 
-(defmethod cf-p ((cf number))
-  (<= +false+ cf +true+))
+(defgeneric cf-p (cf)
+  (:method ((cf number))
+   (<= +false+ cf +true+))
+  (:method ((cf t))
+   nil))
 
 (defmethod combine ((a number) (b number) &rest args)
   (declare (ignore args))

@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.27 2004/09/14 15:45:54 youngde Exp $
+;;; $Id: language.lisp,v 1.28 2004/09/15 19:52:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -96,23 +96,33 @@
                             `(,value))))))
           body))
 
+(defun determine-cf (sample)
+  (cl:assert (or (null sample) (cf:cf-p sample)) nil
+    "This is not a legal certainty factor: ~S" sample)
+  (cond (sample sample)
+        ((in-rule-firing-p)
+         (cf (active-rule)))
+        nil))
+  
 (defmacro assert ((name &body body) &key (cf nil))
   (let ((fact (gensym))
-        (fact-object (gensym)))
+        (fact-object (gensym))
+        (actual-cf (gensym)))
     `(let ((,fact-object 
             ,@(if (or (consp name)
                       (variablep name))
                   `(,name)
-                `(',name))))
+                `(',name)))
+           (,actual-cf (determine-cf ,cf)))
        (if (typep ,fact-object 'standard-object)
-           (parse-and-insert-instance ,fact-object :cf ,cf)
+           (parse-and-insert-instance ,fact-object :cf ,actual-cf)
          (progn
            (ensure-meta-data-exists ',name)
            (let ((,fact (make-fact ',name ,@(expand-slots body))))
              (when (and (in-rule-firing-p)
                         (logical-rule-p (active-rule)))
                (bind-logical-dependencies ,fact))
-             (assert-fact (inference-engine) ,fact :cf ,cf)))))))
+             (assert-fact (inference-engine) ,fact :cf ,actual-cf)))))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
