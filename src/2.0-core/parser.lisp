@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.72 2002/12/08 01:08:54 youngde Exp $
+;;; $Id: parser.lisp,v 1.73 2002/12/09 15:43:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -152,8 +152,7 @@
                       (first p2))))
                (eq first second))))
       (when (or (null lhs)
-                (find (caar lhs) special-elements)
-                (twins-p (first lhs) (second lhs)))
+                (find (caar lhs) special-elements))
         (push (list 'initial-fact) lhs))
       (if (rule)
           (fixup-runtime-bindings lhs)

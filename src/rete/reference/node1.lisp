@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.14 2002/10/03 18:04:20 youngde Exp $
+;;; $Id: node1.lisp,v 1.15 2002/12/09 15:43:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,6 +37,12 @@
             (make-successor new-node connector))))
       (successor-node successor))))
 
+(defmethod add-successor ((self node1) (new-node t) connector)
+  (setf (gethash `(,new-node ,connector) (shared-node-successors self))
+    (make-successor new-node connector))
+  new-node)
+
+#+ignore
 (defmethod add-successor ((self node1) (new-node t) connector)
   (setf (gethash new-node (shared-node-successors self))
     (make-successor new-node connector))
