@@ -24,13 +24,17 @@
   (slot friend)
   (slot age))
 
-#+ignore
-(defrule simple-rule ()
+(defrule shared-rule-a ()
   (frodo (name frodo))
-  (bilbo (name bilbo))
   (gandalf (name gandalf) (age 100))
   =>
-  (format t "simple-rule fired.~%"))
+  )
+
+(defrule shared-rule-b ()
+  (frodo (name frodo))
+  (gandalf (name gandalf) (age 200))
+  =>
+  )
 
 #+ignore
 (defrule variable-rule ()
@@ -40,6 +44,7 @@
   =>
   )
 
+#+ignore
 (defrule test-rule ()
   (frodo (name ?name))
   (samwise (friend ?name) (age ?age))

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.20 2002/09/14 15:13:23 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.21 2002/09/14 15:55:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -178,7 +178,10 @@
     (add-terminal-node)
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)))
 
+(defvar *test-network* nil)
+
 (defun make-test-network (patterns)
-  (let ((network (make-rete-network)))
-    (compile-rule-into-network network patterns)
-    network))
+  (when (null *test-network*)
+    (setf *test-network* (make-rete-network)))
+  (compile-rule-into-network *test-network* patterns)
+  *test-network*)
