@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.52 2002/09/30 16:37:01 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.53 2002/10/25 14:44:03 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -32,10 +32,6 @@
     (rename-package (find-package 'pcl) 'pcl
                     `(clos ,@(package-nicknames 'pcl)))))
 
-(defpackage "LISA.PRECOMPILER"
-  (:use "COMMON-LISP")
-  (:export "PATTERN" "GENERIC-PATTERN" "TEST-PATTERN" "NOT-PATTERN"))
-
 (defpackage "LISA"
   (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
            "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
@@ -46,7 +42,8 @@
            "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
            "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
            "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
-           "ACTIVATION")
+           "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK" "NEXT"
+           "RESUME" "TOKENS" "BINDINGS")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -63,7 +60,8 @@
                 "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
                 "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
                 "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
-                "ACTIVATION"))
+                "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK" "NEXT"
+                "RESUME" "TOKENS" "BINDINGS"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
