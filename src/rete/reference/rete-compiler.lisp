@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.38 2002/10/10 19:25:22 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.39 2002/10/30 19:02:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -164,6 +164,8 @@
          (make-node2-not))
         ((test-pattern-p pattern)
          (make-node2-test))
+        ((compound-pattern-p pattern)
+         (make-node2-or))
         (t (make-node2))))
 
 (defun make-left-join-connection (join-node node)

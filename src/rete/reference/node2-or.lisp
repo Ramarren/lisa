@@ -20,34 +20,39 @@
 ;;; File: node2-or.lisp
 ;;; Description:
 
-;;; $Id: node2-or.lisp,v 1.1 2002/10/30 15:49:54 youngde Exp $
+;;; $Id: node2-or.lisp,v 1.2 2002/10/30 19:02:57 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-or (join-node) ())
 
 (defmethod test-tokens :around ((self node2-or) left-tokens right-token)
+  (declare (ignorable left-tokens right-token))
   (let ((test-results (call-next-method)))
+    (format t "test-results: ~S~%" test-results)
     (cond (test-results t)
           ((typep (successor-node (join-node-successor self)) 'node2-or)
            t)
           (t nil))))
   
-(defmethod test-against-right-memory ((self node2) left-tokens)
-  (loop for right-token being the hash-value 
-      of (join-node-right-memory self)
-      do (when (test-tokens self left-tokens right-token)
-           (pass-tokens-to-successor 
-            self (combine-tokens left-tokens right-token)))))
+(defmethod test-against-right-memory ((self node2-or) left-tokens)
+  (if (zerop (right-memory-count self))
+      (pass-tokens-to-successor
+       self (combine-tokens left-tokens t))
+    (loop for right-token being the hash-value 
+        of (join-node-right-memory self)
+        do (when (test-tokens self left-tokens right-token)
+             (pass-tokens-to-successor 
+              self (combine-tokens left-tokens right-token))))))
 
-(defmethod test-against-left-memory ((self node2) (right-token add-token))
+(defmethod test-against-left-memory ((self node2-or) (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
   
-(defmethod test-against-left-memory ((self node2) (right-token remove-token))
+(defmethod test-against-left-memory ((self node2-or) (right-token remove-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
@@ -55,19 +60,19 @@
             self (combine-tokens
                   (make-remove-token left-tokens) right-token)))))
   
-(defmethod accept-tokens-from-left ((self node2) (left-tokens add-token))
+(defmethod accept-tokens-from-left ((self node2-or) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
   (test-against-right-memory self left-tokens))
 
-(defmethod accept-token-from-right ((self node2) (right-token add-token))
+(defmethod accept-token-from-right ((self node2-or) (right-token add-token))
   (add-token-to-right-memory self right-token)
   (test-against-left-memory self right-token))
 
-(defmethod accept-tokens-from-left ((self node2) (left-tokens remove-token))
+(defmethod accept-tokens-from-left ((self node2-or) (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
     (test-against-right-memory self left-tokens)))
 
-(defmethod accept-token-from-right ((self node2) (right-token remove-token))
+(defmethod accept-token-from-right ((self node2-or) (right-token remove-token))
   (when (remove-token-from-right-memory self right-token)
     (test-against-left-memory self right-token)))
 
