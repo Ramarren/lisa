@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.13 2000/11/30 15:31:41 youngde Exp $
+;;; $Id: token.lisp,v 1.14 2000/12/11 21:26:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,7 +38,7 @@
    (depth :initform 0
           :reader get-depth)
    (neg-count :initform 0
-              :accessor get-neg-count)
+              :accessor get-negation-count)
    (clock :initform 0
           :accessor get-clock))
   (:documentation
@@ -59,6 +59,15 @@
       (if (null tok)
           (values nil)
         (get-top-fact tok)))))
+
+(defmethod increment-negation-count ((self token))
+  (incf (get-negation-count self)))
+
+(defmethod decrement-negation-count ((self token))
+  (decf (get-negation-count self)))
+
+(defmethod is-negated-p ((self token))
+  (> (get-negation-count self) 0))
 
 (defmethod size ((self token))
   (get-depth self))
@@ -97,7 +106,7 @@
            (setf (slot-value self 'depth) (get-depth token))
            (setf (slot-value self 'sort-code) (get-sort-code token))
            (setf (slot-value self 'clock) (get-clock token))
-           (setf (slot-value self 'neg-count) (get-neg-count token))))
+           (setf (slot-value self 'neg-count) (get-negation-count token))))
     (cond ((and (not (null parent))
                 (not (null initial-fact)))
            (init-derived initial-fact parent))

@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.1 2000/12/11 19:19:18 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.2 2000/12/11 21:22:59 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,4 +29,45 @@
   (:documentation
    "Represents a specialized two-input node for negated patterns."))
 
+(defmethod call-node-left ((self node2-not) (token add-token))
+  (call-next-method self (make-clone-token (class-of token) token)))
 
+(defmethod run-tests-vary-right ((self node2-not) left-token tree)
+  (with-tree-iterator (key right-token tree)
+    (when (or (not (has-tests-p self))
+              (run-tests self left-token (get-top-fact right-token)))
+      (increment-negation-count left-token)))
+  (unless (is-negated-p left-token)
+    (with-accessors ((engine get-engine)) self
+      (let ((token (make-derived-token
+                    (class-of left-token) (get-null-fact engine))))
+        (update-time token engine self)
+        (increment-matches self left-token)
+        (pass-along self token))))
+  (values nil))
+
+(defmethod pass-new-token ((self node2-not) (right-token add-token) left-token)
+  (with-accessors ((engine get-engine)) self
+    (let ((token (make-remove-token :parent left-token
+                                    :initial-fact (get-null-fact engine))))
+      (update-time token self)
+      (pass-along self token)
+      (increment-negation-count token)))
+  (values nil))
+
+(defmethod pass-new-token ((self node2-not) (right-token clear-token) left-token)
+  (when (= (decrement-negation-count left-token) 0)
+    (with-accessors ((engine get-engine)) self
+      (let ((token (make-derived-token (class-of left-token)
+                                       (get-null-fact engine))))
+        (update-time token engine)
+        (pass-along self token))))
+  (cl:assert (>= (get-negation-count left-token) 0))
+  (values))
+
+(defmethod run-tests-vary-left ((self node2-not) right-token tree)
+  (with-tree-iterator (key left-token tree)
+    (when (or (not (has-tests-p self))
+              (run-tests self left-token (get-top-fact right-token)))
+      (pass-new-token self right-token left-token)))
+  (values nil))
