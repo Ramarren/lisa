@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.25 2002/11/04 19:25:48 youngde Exp $
+;;; $Id: rete.lisp,v 1.26 2002/11/07 15:53:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -37,6 +37,10 @@
                  :accessor rete-next-fact-id)
    (autofacts :initform (list)
               :accessor rete-autofacts)
+   (meta-data :initform (make-hash-table)
+              :reader rete-meta-data)
+   (class-table :initform (make-hash-table)
+                :reader rete-class-table)
    (halted :initform nil
            :accessor rete-halted)
    (firing-count :initform 0
@@ -44,6 +48,31 @@
    (strategy :initarg :strategy
              :initform nil
              :reader rete-strategy)))
+
+;;; FACT-META-OBJECT represents data about facts. Every LISA fact is backed by
+;;; a CLOS instance that was either defined by the application or internally
+;;; by LISA (via DEFTEMPLATE). FACT-META-OBJECT performs housekeeping chores;
+;;; mapping symbolic fact names to actual class names, slot names to their
+;;; corresponding effective slot names, etc.
+
+(defstruct fact-meta-object
+  (symbolic-name nil :type symbol)
+  (class-name nil :type symbol)
+  (slot-table (make-hash-table))
+  (slot-list nil :type list)
+  (superclasses nil :type list))
+
+(defun register-meta-object (rete key meta-object)
+  (setf (gethash (rete-meta-data rete) key) meta-object))
+
+(defun register-class (rete class symbolic-name)
+  (setf (gethash (class-name class) (rete-class-table rete)) symbolic-name))
+
+(defun find-meta-object (rete symbolic-name)
+  (gethash symbolic-name (rete-meta-data rete)))
+
+(defun find-symbolic-name (rete instance)
+  (gethash (class-name (class-of instance)) (rete-class-table rete)))
 
 (defun rete-fact-count (rete)
   (hash-table-count (rete-fact-table rete)))
