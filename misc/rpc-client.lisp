@@ -21,7 +21,7 @@
 ;;; Description: A sample implementation of an RPC client that requests
 ;;; inferencing services from a LISA server.
 
-;;; $Id: rpc-client.lisp,v 1.2 2002/12/12 20:10:54 youngde Exp $
+;;; $Id: rpc-client.lisp,v 1.3 2002/12/12 20:59:18 youngde Exp $
 
 (in-package "RPC")
 
@@ -34,17 +34,15 @@
    (companions :initform nil
                :accessor frodo-companions)))
 
+(defun set-slot-value (new-value instance slot-name)
+  (setf (slot-value instance slot-name) new-value))
+
 (defmethod print-object ((self frodo) strm)
   (print-unreadable-object (strm strm :type t :identity t)
     (format strm "~S, ~S, ~S" 
             (frodo-name self)
             (frodo-has-ring self)
             (frodo-companions self))))
-
-(defun class-slots (instance)
-  (values-list
-   (mapcar #'clos:slot-definition-name
-           (clos:class-slots (class-of instance)))))
 
 (defun make-client ()
   (make-rpc-client

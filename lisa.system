@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.25 2002/12/04 15:05:29 youngde Exp $
+;;; $Id: lisa.system,v 1.26 2002/12/12 20:59:10 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -182,7 +182,14 @@
                           :binary-pathname "core20"
                           :components
                           ((:file "epilogue"))
-                          :depends-on (configuration)))
+                          :depends-on (configuration))
+                 #+lisa-rpc
+                 (:module "aclrpc"
+                          :source-pathname "implementations"
+                          :binary-pathname "implementations"
+                          :components
+                          ((:file "aclrpc-support"))
+                          :depends-on (epilogue)))
     :finally-do
     (progn
       (mk:system-source-size :lisa :all)

@@ -21,7 +21,7 @@
 ;;; Description: Experimental support for remote object reasoning, using
 ;;; Allegro's RPC implementation.
 
-;;; $Id: aclrpc-support.lisp,v 1.1 2002/12/11 19:02:18 youngde Exp $
+;;; $Id: aclrpc-support.lisp,v 1.2 2002/12/12 20:59:18 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -29,13 +29,29 @@
   (require 'aclrpc)
   (unless (find-package "LISA.RPC")
     (defpackage "LISA.RPC"
-      (use "LISA-LISP" "NET.RPC"))))
+      (:use "LISA-LISP" "NET.RPC")
+      (:nicknames "RPC"))))
 
 (in-package "LISA.RPC")
 
-(defmethod slot-value-of-instance ((object rpc-remote-ref) slot-name)
+(defclass remote-kb-class (standard-class)
+  ((proxy-class-name :reader proxy-class-name)))
+  
+(defclass remote-instance (rpc-remote-ref)
+  ()
+  (:metaclass remote-kb-class))
+
+(defmethod initialize-instance :after ((self remote-instance) &rest args)
+  (declare (ignore args))
+  (setf (slot-value (class-of self) 'proxy-class-name)
+    (intern (rr-type self) 'rpc)))
+
+(defmethod class-name ((class remote-kb-class))
+  (proxy-class-name class))
+
+(defmethod lisa:slot-value-of-instance ((object remote-instance) slot-name)
   (rcall 'slot-value object slot-name))
 
-(defmethod (setf slot-value-of-instance) 
-    (new-value (object rpc-remote-ref) slot-name)
+(defmethod (setf lisa:slot-value-of-instance) 
+    (new-value (object remote-instance) slot-name)
   (rcall 'set-slot-value new-value object slot-name))
