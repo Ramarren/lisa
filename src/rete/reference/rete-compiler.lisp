@@ -20,15 +20,24 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.11 2002/08/30 17:52:17 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.12 2002/09/03 15:48:13 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *root-nodes* nil)
-(defvar *terminals* nil)
+(defvar *leaf-nodes* nil)
 
-(defmacro add-new-terminal (node)
-  `(vector-push-extend ,node *terminals*))
+(defmacro set-leaf-node (node address)
+  `(setf (aref *leaf-nodes* ,address) ,node))
+
+(defmacro leaf-node ()
+  `(aref *leaf-nodes* (1- (length *leaf-nodes*))))
+
+(defmacro left-input (address)
+  `(aref *leaf-nodes* (1- ,address)))
+
+(defmacro right-input (address)
+  `(aref *leaf-nodes* ,address))
 
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table)
@@ -77,43 +86,50 @@
 (defun add-intra-pattern-nodes (patterns)
   (dolist (pattern patterns)
     (let ((node
-           (add-root-node (parsed-pattern-class pattern))))
+           (add-root-node (parsed-pattern-class pattern)))
+          (address (parsed-pattern-address pattern)))
+      (set-leaf-node node address)
       (dolist (slot (parsed-pattern-slots pattern))
         (when (simple-slot-p slot)
           (setf node
             (add-successor node (make-intra-pattern-node slot)
-                           #'pass-token))))
-      (add-new-terminal node))))
+                           #'pass-token))
+          (set-leaf-node node address))))))
 
 (defun add-join-node-test (join-node pattern slot)
-  (let ((binding (first (pattern-slot-bindings slot)))
-        (address (parsed-pattern-address)))
+  (let ((binding (pattern-slot-slot-binding slot))
+        (address (parsed-pattern-address pattern)))
     (unless (= address (binding-address binding))
       (node2-add-test
+       join-node
        (make-inter-pattern-test (pattern-slot-name slot) binding)))))
-    
+
+(defmethod add-successor :after ((self t) node conn)
+  (format t "add-successor: ~S, ~S, ~S~%" self node conn))
+
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
     (let ((join-node (make-node2))
-          (address (parsed-pattern-address)))
+          (address (parsed-pattern-address pattern)))
       (dolist (slot (parsed-pattern-slots pattern))
         (unless (simple-slot-p slot)
           (add-join-node-test join-node pattern slot)))
       (add-successor
-       (aref *terminals* (1- address) join-node #'pass-tokens-on-left))
+       (left-input address) join-node #'pass-tokens-on-left)
       (add-successor
-       (aref *terminals* address join-node #'pass-token-on-right))
-      (add-new-terminal join-node))))
+       (right-input address) join-node #'pass-token-on-right)
+      (set-leaf-node join-node address))))
+
+(defun add-terminal-node ()
+  (add-successor (leaf-node) (make-terminal-node) #'pass-token))
 
 (defun compile-rule-into-network (rete-network patterns)
   (let ((*root-nodes* (rete-roots rete-network))
-        (*terminals* (make-array 0 :adjustable t :fill-pointer t)))
+        (*leaf-nodes* (make-array (length patterns))))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
-    (setf (slot-value rete-network 'root-nodes) *root-nodes*)
-    (map nil #'(lambda (terminal)
-                 (add-successor terminal (make-terminal-node) #'pass-token))
-         *terminals*)))
+    (add-terminal-node)
+    (setf (slot-value rete-network 'root-nodes) *root-nodes*)))
 
 (defun make-test-network (patterns)
   (let ((network (make-rete-network)))

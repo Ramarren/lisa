@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.15 2002/09/03 01:48:26 youngde Exp $
+;;; $Id: parser.lisp,v 1.16 2002/09/03 15:48:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -122,7 +122,7 @@
   (labels ((build-parsed-pattern (form bindings type 
                                   &optional (binding nil))
              (make-parsed-pattern
-              :bindings bindings
+              :test-bindings bindings
               :class (first form)
               :slots (rest form)
               :type type

@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.9 2002/08/30 16:54:00 youngde Exp $
+;;; $Id: node1.lisp,v 1.10 2002/09/03 15:48:12 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,12 +39,17 @@
 
 (defmethod add-successor ((self node1) (new-node t) connector)
   (setf (gethash new-node (shared-node-successors self))
-    (make-successor new-node connector)))
+    (make-successor new-node connector))
+  new-node)
 
 (defmethod accept-token ((self node1) token)
   (if (funcall (node1-test self) token)
       (pass-token-to-successors self token)
     nil))
+
+(defmethod print-object ((self node1) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "~S" (node1-test self))))
 
 (defun make-node1 (test)
   (make-instance 'node1 :test test))

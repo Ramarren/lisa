@@ -20,7 +20,7 @@
 ;;; File: successor.lisp
 ;;; Description:
 
-;;; $Id: successor.lisp,v 1.1 2002/08/30 01:41:20 youngde Exp $
+;;; $Id: successor.lisp,v 1.2 2002/09/03 15:48:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,3 +32,9 @@
 
 (defun successor-connector (successor)
   (cdr successor))
+
+(defun call-successor (successor &rest args)
+  (apply #'funcall 
+         (successor-connector successor)
+         (successor-node successor)
+         args))

@@ -20,24 +20,31 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.2 2002/08/29 15:29:25 youngde Exp $
+;;; $Id: node2.lisp,v 1.3 2002/09/03 15:48:12 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2 ()
   ((successor :initform nil
               :accessor node2-successor)
-   (tests :initform
-          (make-array nil :adjustable t :fill-pointer t)
+   (tests :initform (list)
           :reader node2-tests)
    (left-memory :initform (make-hash-table)
                 :reader node2-left-memory)
    (right-memory :initform (make-hash-table)
                  :reader node2-right-memory)))
 
-(defmethod accept-tokens-from-left ((self node2) tokens))
+(defmethod accept-tokens-from-left ((self node2) tokens)
+  (call-successor (node2-successor self) tokens))
 
-(defmethod accept-token-from-right ((self node2) token))
+(defmethod accept-token-from-right ((self node2) token)
+  (call-successor (node2-successor self) token))
+
+(defmethod add-successor ((self node2) successor-node connector)
+  (setf (node2-successor self)
+    (make-successor successor-node connector)))
+
+(defun node2-add-test (node2 test))
 
 (defun make-node2 ()
   (make-instance 'node2))

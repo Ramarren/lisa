@@ -20,7 +20,7 @@
 ;;; File: binding.lisp
 ;;; Description:
 
-;;; $Id: binding.lisp,v 1.1 2002/09/03 01:35:13 youngde Exp $
+;;; $Id: binding.lisp,v 1.2 2002/09/03 15:48:05 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,7 +31,7 @@
   (first binding))
 
 (defun binding-slot-name (binding)
-  (second slot-name))
+  (second binding))
 
 (defun binding-address (binding)
   (third binding))
