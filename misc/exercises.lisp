@@ -3,7 +3,7 @@
 ;;; Description: Exercise code to assist in some form of validation
 ;;; for LISA's grammar.
 ;;;
-;;; $Id: exercises.lisp,v 1.2 2000/10/17 02:08:22 youngde Exp $
+;;; $Id: exercises.lisp,v 1.3 2000/10/17 15:01:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -14,25 +14,25 @@
 
 (defrule rule-2
     "Simple rule with no actions."
-  (fact-1 x ?x y ?y z 1)
+  (fact-1 (x ?x) (y ?y) (z 1))
   =>
   (halt))
 
 (defrule rule-3
     "Simple anonymous constraint."
-  (fact severity 0)
+  (fact (severity 0))
   =>
   (halt))
 
 (defrule rule-4
     "Simple 'not' connective constraint"
-  (fact x (not blue)) ; (fact x ~blue)
+  (fact (x (not blue)))
   =>
   (halt))
 
 (defrule rule-5
     "More complex 'not' connective constraint"
-  (fact (value ? (and (not (red green))))) ; (data-B (value ~red&~green))
+  (fact (value (not (or red green))))
   =>
   (halt))
 
@@ -44,7 +44,7 @@
 
 (defrule rule-7
     "Rule with 'test' CE."
-  (fact-1 ?x)
+  (fact-1 (x ?x))
   (fact-2 (key ?k) (value ?val (not 0)))
   (test (not (= ?x ?val)))
   =>
@@ -52,7 +52,7 @@
 
 (defrule rule-8
     "Sample 'or' connective constraint."
-  (fact ?x (or (stringp ?x) (symbolp ?x)))
+  (fact (x ?x (or (stringp ?x) (symbolp ?x))))
   =>
   (halt))
 
@@ -64,7 +64,7 @@
 
 (defrule rule-10
     "Sample 'or' 'and' connective constraint."
-  (fact ?x (or (and (stringp ?x) (string= ?x "foo")) (symbolp ?x)))
+  (fact (x ?x (or (and (stringp ?x) (string= ?x "foo")) (symbolp ?x))))
   =>
   (halt))
   
@@ -77,7 +77,7 @@
   
 (defrule rule-12
     "Predicate constraint"
-  (fact ?x (numberp ?x))
+  (fact (x ?x (numberp ?x)))
   =>
   (halt))
 
@@ -89,7 +89,7 @@
 
 (defrule rule-14
     "More predicate constraints."
-  (fact-1 ?x (and (numberp ?x) (oddp ?x)))
+  (fact-1 (x ?x (and (numberp ?x) (oddp ?x))))
   (fact-2 (slot ?s (stringp ?s)))
   =>
   (halt))
@@ -97,7 +97,7 @@
 (defrule rule-15
     "Predicate constraint with salience."
   (declare (salience 100))
-  (fact-1 ?y)
+  (fact-1 (y ?y))
   (fact-2 (x ?x (> ?x ?y)) (z 10))
   =>
   (terpri)
@@ -111,23 +111,27 @@
 
 (defrule rule-17
     "Assignment pattern."
-  (?fact (fact x 0 y 1))
+  (?fact (fact (x 0) (y 1)))
   =>
   (retract ?fact))
 
 (defrule rule-18
     "Multiple assignment pattern"
-  (?f1 (color (not red)))
-  (?f2 (color (not green)))
+  (?f1 (color ? (not red)))
+  (?f2 (color ? (not green)))
   (test (not (equal ?f1 ?f2)))
   =>
   (halt))
 
 (defrule rule-19
-    "Some 'not' patterns."
+    "Some 'not' patterns, plus a more complicated RHS."
   (not (fact-1))
   (fact-2)
   =>
-  (let ((foo 1))
-    (print foo)))
-
+  (let ((foo (initialize-foo))
+        (schtum (initialize-schtum)))
+    (multiple-value-bind (a b)
+        (find-a-and-b foo schtum)
+      (print a)
+      (print b)
+      (terpri))))
