@@ -20,13 +20,14 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.6 2002/09/03 19:18:57 youngde Exp $
+;;; $Id: token.lisp,v 1.7 2002/09/04 18:27:49 youngde Exp $
 
 (in-package "LISA")
 
 (defclass token ()
   ((facts :initform
-          (make-array 0 :adjustable t :fill-pointer t))))
+          (make-array 0 :adjustable t :fill-pointer t)
+          :reader token-facts)))
 
 (defmethod initialize-instance :after ((self token) &key fact)
   (vector-push-extend fact (slot-value self 'facts))
@@ -50,3 +51,8 @@
 
 (defun token-push-fact (token fact)
   (vector-push-extend fact (slot-value token 'facts)))
+
+(defun token-pop-fact (token)
+  (with-slots ((fact-vector facts)) token
+    (unless (zerop (fill-pointer fact-vector))
+      (decf (fill-pointer fact-vector)))))

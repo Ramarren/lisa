@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.5 2002/09/04 01:04:19 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.6 2002/09/04 18:27:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,10 +55,10 @@
 
 (defun make-inter-pattern-test (slot-name binding)
   (function
-   (lambda (left-tokens right-token)
-     (equal (get-slot-value (token-top-fact right-token) slot-name)
+   (lambda (tokens)
+     (equal (get-slot-value (token-top-fact tokens) slot-name)
             (get-slot-value 
-             (token-find-fact left-tokens (binding-address binding))
+             (token-find-fact tokens (binding-address binding))
              (binding-slot-name binding))))))
 
 (defun make-constraint-test (form bindings)
@@ -69,12 +69,13 @@
                           (declare (special ,@special-vars))
                           ,form))))
     (function
-     (lambda (token)
+     (lambda (tokens)
        (progv
            `(,@special-vars)
            `(,@(mapcar #'(lambda (binding)
                            (get-slot-value
-                            (token-find-fact token (binding-address binding))
+                            (token-find-fact 
+                             tokens (binding-address binding))
                             (binding-slot-name binding)))
                        bindings))
          (funcall predicate))))))

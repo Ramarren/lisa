@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.4 2002/09/03 19:18:58 youngde Exp $
+;;; $Id: node2.lisp,v 1.5 2002/09/04 18:27:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,12 +49,12 @@
   (remember-token (node2-right-memory node2) token))
 
 (defun test-and-pass-tokens (node2 left-tokens right-token)
-  (when (every #'(lambda (test)
-                   (funcall test left-tokens right-token))
-               (node2-tests node2))
-    (call-successor
-     (node2-successor node2) 
-     (combine-tokens left-tokens right-token))))
+  (token-push-fact left-tokens (token-top-fact right-token))
+  (if (every #'(lambda (test)
+                 (funcall test left-tokens))
+             (node2-tests node2))
+      (call-successor (node2-successor node2) left-tokens)
+    (token-pop-fact left-tokens)))
   
 (defmethod accept-tokens-from-left ((self node2) left-tokens)
   (add-tokens-to-left-memory self left-tokens)
