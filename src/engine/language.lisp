@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.48 2001/05/07 17:48:12 youngde Exp $
+;;; $Id: language.lisp,v 1.49 2001/05/17 15:18:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,6 +41,9 @@
 
 (defun assert-instance (instance)
   (parse-and-insert-instance instance))
+
+(defun retract-instance (instance)
+  (parse-and-retract-instance instance))
 
 (defun assert-from-string (str)
   (eval (read-from-string str)))

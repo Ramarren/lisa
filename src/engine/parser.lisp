@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.71 2001/05/08 20:37:45 youngde Exp $
+;;; $Id: parser.lisp,v 1.72 2001/05/17 15:18:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -258,3 +258,7 @@
   (assert-fact
    (current-engine)
    (make-shadow-fact (find-symbolic-name instance) instance)))
+
+(defun parse-and-retract-instance (instance)
+  (let ((engine (current-engine)))
+    (retract-fact engine (find-shadow-fact engine instance))))
