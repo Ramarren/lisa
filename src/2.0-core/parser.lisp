@@ -24,18 +24,28 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.7 2002/08/23 15:47:07 youngde Exp $
+;;; $Id: parser.lisp,v 1.8 2002/08/23 19:08:23 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
+
+(defvar *binding-table* nil)
+
+(defun find-or-set-binding-address (var location)
+  (multiple-value-bind (address present-p)
+      (gethash var *binding-table* location)
+    (unless present-p
+      (setf (gethash var *binding-table*) location))
+    address))
 
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
     `(multiple-value-bind (,doc-string ,remains)
          (extract-rule-headers ,rule-form)
        (multiple-value-bind (,lhs ,rhs)
-           (parse-rulebody ,remains)
+           (let ((*binding-table* (make-hash-table)))
+             (parse-rulebody ,remains))
          ,@body))))
 
 (defun define-rule (name body &optional (salience 0) (module nil))
@@ -93,11 +103,11 @@
                (cond ((eq head 'test)
                       (multiple-value-call
                           #'build-parsed-pattern
-                        (parse-test-pattern p) :test))
+                        (parse-test-pattern p location) :test))
                      ((eq head 'not)
                       (multiple-value-call
                           #'build-parsed-pattern
-                        (parse-default-pattern (second p)) :negated))
+                        (parse-default-pattern (second p) location) :negated))
                      ((variablep head)
                       (cl:assert (null binding) nil
                         "Too many pattern variables: ~S" head)
@@ -105,48 +115,54 @@
                      (t
                       (multiple-value-call
                           #'build-parsed-pattern
-                        (parse-default-pattern p) :generic binding))))))
+                        (parse-default-pattern p location) 
+                        :generic binding))))))
     (parse-pattern template nil)))
 
-(defun parse-test-pattern (pattern)
+(defun parse-test-pattern (pattern location)
   (let ((form (rest pattern)))
     (cl:assert (and (listp form)
                     (= (length form) 1)) nil
       "The body of a TEST CE must be a single Lisp form")
     (values
-     (utils:collect #'(lambda (obj) (variablep obj))
-                    (utils:flatten form))
+     (loop for obj in (utils:flatten form)
+         if (variablep obj)
+            collect (cons obj (find-or-set-binding-address obj location)))
      pattern)))
 
-(defun parse-default-pattern (pattern)
-  (let ((head (first pattern))
-        (variables (list)))
-    (cl:assert (find-meta-fact head nil) nil
-      "This pattern has no meta data: ~S" pattern)
-    (labels ((parse-slot (slot)
-               (let ((name (first slot))
-                     (field (second slot))
-                     (constraint (third slot)))
-                 (cl:assert (and (symbolp name)
-                                 (slot-valuep field)
-                                 (constraintp constraint))
-                     nil "This pattern has a malformed slot: ~S" pattern)
-                 (when (variablep field)
-                   (pushnew field variables))
-                 (make-pattern-slot :name name :value field
-                                    :constraint constraint))) 
-             (parse-pattern-body (body slots)
-               (let ((slot (first body)))
-                 (cl:assert (listp slot) nil
-                   "This pattern has structural problems: ~S" body)
-                 (if (null slot)
-                     (nreverse slots)
-                   (parse-pattern-body
-                    (rest body)
-                    (push (parse-slot slot) slots))))))
-      (let ((cleaned-pattern
-             (parse-pattern-body (rest pattern) nil)))
-        (values (nreverse variables) `(,head ,@cleaned-pattern))))))
+(defun parse-default-pattern (pattern location)
+  (macrolet ((push-binding (var list)
+               `(pushnew (cons ,var (find-or-set-binding-address
+                                     ,var location))
+                         ,list :key #'car)))
+    (let ((head (first pattern))
+          (variables (list)))
+      (cl:assert (find-meta-fact head nil) nil
+        "This pattern has no meta data: ~S" pattern)
+      (labels ((parse-slot (slot)
+                 (let ((name (first slot))
+                       (field (second slot))
+                       (constraint (third slot)))
+                   (cl:assert (and (symbolp name)
+                                   (slot-valuep field)
+                                   (constraintp constraint))
+                       nil "This pattern has a malformed slot: ~S" pattern)
+                   (when (variablep field)
+                     (push-binding field variables))
+                   (make-pattern-slot :name name :value field
+                                      :constraint constraint))) 
+               (parse-pattern-body (body slots)
+                 (let ((slot (first body)))
+                   (cl:assert (listp slot) nil
+                     "This pattern has structural problems: ~S" body)
+                   (if (null slot)
+                       (nreverse slots)
+                     (parse-pattern-body
+                      (rest body)
+                      (push (parse-slot slot) slots))))))
+        (let ((cleaned-pattern
+               (parse-pattern-body (rest pattern) nil)))
+          (values (nreverse variables) `(,head ,@cleaned-pattern)))))))
 
 ;;; End of the rule parsing stuff
 
