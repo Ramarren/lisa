@@ -77,12 +77,20 @@
   =>
   (format t "constraints: ~S ~S~%" ?name ?friend))
 
+#+ignore
 (defrule variable-rule ()
   (frodo (name ?name))
   (?sam (samwise (name ?name) (friend ?name)))
   =>
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
+
+(defrule or-rule ()
+  (frodo (name ?name))
+  (or (samwise (name sam) (friend ?name))
+      (gandalf (name gandalf)))
+  =>
+  )
 
 #+ignore
 (defrule samwise ()

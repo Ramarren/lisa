@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.43 2002/10/24 19:24:56 youngde Exp $
+;;; $Id: parser.lisp,v 1.44 2002/10/29 21:28:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,8 +78,9 @@
 
 (defun define-rule (name body &optional (salience 0) (module nil))
   (with-rule-components ((doc-string lhs rhs) body)
-    #+ignore (format t "LHS: ~S~%" lhs)
+    (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
+    (break)
     (make-rule name (inference-engine) lhs rhs
                :doc-string doc-string
                :salience salience
@@ -148,7 +149,13 @@
               :pattern-binding binding
               :binding-set (make-binding-set)
               :address location))
-           (parse-pattern (p binding)
+           (build-compound-pattern (sub-patterns type)
+             (make-parsed-pattern
+              :type type
+              :address location
+              :binding-set (make-binding-set)
+              :sub-patterns sub-patterns))
+           (parse-pattern (p &optional binding)
              (let ((head (first p)))
                (cl:assert (symbolp head) nil
                  "A symbol doesn't start this pattern: ~S" p)
@@ -163,6 +170,10 @@
                      ((variablep head)
                       (parse-pattern (second p)
                                      (set-pattern-binding head location)))
+                     ((eq head 'or)
+                      (build-compound-pattern
+                       (mapcar #'parse-pattern (rest p))
+                       :or))
                      (t
                       (multiple-value-call
                           #'build-parsed-pattern
