@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.21 2002/11/21 16:33:29 youngde Exp $
+;;; $Id: language.lisp,v 1.22 2002/11/21 20:32:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -146,7 +146,9 @@
 (defun clear ()
   (clear-system-environment))
 
-(defun run ()
+(defun run (&optional (contexts nil))
+  (unless (null contexts)
+    (apply #'focus contexts))
   (run-engine (inference-engine)))
 
 (defun walk (&optional (step 1))
