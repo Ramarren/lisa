@@ -106,11 +106,20 @@
   =>
   )
 
+#+ignore
 (defrule simple ()
   (?f (gandalf (age 100)))
   =>
   (let ((?age 1000))
     (modify ?f (age ?age) (name (intern (make-symbol "gandalf"))))))
+
+(defrule embedded-rule ()
+  (gandalf (name gandalf) (age ?age))
+  =>
+  (defrule new-gandalf ()
+    (gandalf (name new-gandalf) (age ?age))
+    =>
+    (format t "new-gandalf fired.~%")))
 
 #|
 (defparameter *frodo* (assert (frodo (name frodo))))

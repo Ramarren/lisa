@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.41 2002/10/17 18:11:06 youngde Exp $
+;;; $Id: parser.lisp,v 1.42 2002/10/19 18:45:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -89,10 +89,26 @@
       (values (first body) (rest body))
     (values nil body)))
 
+(defun fixup-runtime-bindings (patterns)
+  (labels ((fixup-bindings (part result)
+             (let* ((token (first part))
+                    (new-token token))
+               (cond ((null part)
+                      (return-from fixup-bindings (nreverse result)))
+                     ((and (variablep token)
+                           (boundp token))
+                      (setf new-token (symbol-value token)))
+                     ((consp token)
+                      (setf new-token (fixup-bindings token nil))))
+               (fixup-bindings (rest part) (push new-token result)))))
+    (fixup-bindings patterns nil)))
+
 (defun preprocess-left-side (lhs)
-  (if (null lhs)
-      (push (list 'initial-fact) lhs)
-    lhs))
+  (cond ((null lhs)
+         (push (list 'initial-fact) lhs))
+        ((rule)
+         (fixup-runtime-bindings lhs))
+        (t lhs)))
 
 (defun parse-rulebody (body)
   (let ((location -1))
