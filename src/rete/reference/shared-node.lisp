@@ -20,25 +20,13 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.3 2002/08/30 13:36:48 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.4 2002/08/30 16:54:00 youngde Exp $
 
 (in-package "LISA")
 
 (defclass shared-node ()
   ((successors :initform (make-hash-table :test #'equal)
                :reader shared-node-successors)))
-
-(defmethod add-successor ((self shared-node) key successor-node connector)
-  (setf (gethash key (shared-node-successors self))
-    (make-successor successor-node connector))
-  successor-node)
-
-(defmethod find-successor-node ((self shared-node) key)
-  (let ((successor
-         (gethash key (shared-node-successors self))))
-    (if (null successor)
-        nil
-      (successor-node successor))))
 
 (defmethod pass-token-to-successors ((self shared-node) token)
   (maphash #'(lambda (key successor)

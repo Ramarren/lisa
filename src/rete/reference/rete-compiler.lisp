@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.9 2002/08/30 14:37:41 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.10 2002/08/30 16:54:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,11 +29,6 @@
 
 (defmacro add-new-terminal (node)
   `(vector-push-extend ,node *terminals*))
-
-(defmacro with-shared-node-key ((key slot) &body body)
-  `(let ((,key (list (pattern-slot-name ,slot)
-                     (pattern-slot-value ,slot))))
-     ,@body))
 
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table)
@@ -54,7 +49,8 @@
     (pattern-slot-value slot))))
 
 (defun distribute-token (rete-network token)
-  (maphash #'(lambda (root-node)
+  (maphash #'(lambda (key root-node)
+               (declare (ignore key))
                (accept-token root-node token))
            (rete-roots rete-network)))
 
@@ -79,22 +75,14 @@
 ;;; end connector functions
 
 (defun add-intra-pattern-nodes (patterns)
-  (flet ((add-successor (node slot)
-           (with-shared-node-key (key slot)
-             (let ((successor-node
-                    (find-successor-node node key)))
-               (when (null successor-node)
-                 (setf successor-node
-                   (add-successor 
-                    key (make-intra-pattern-node slot) #'pass-token)))
-               successor-node))))
-    (dolist (pattern patterns)
-      (let ((node
-             (add-root-node (parsed-pattern-class pattern))))
-        (dolist (slot (parsed-pattern-slots pattern))
-          (setf node
-            (add-successor node slot)))
-        (add-new-terminal node)))))
+  (dolist (pattern patterns)
+    (let ((node
+           (add-root-node (parsed-pattern-class pattern))))
+      (dolist (slot (parsed-pattern-slots pattern))
+        (setf node
+          (add-successor node (make-intra-pattern-node slot)
+                         #'pass-token)))
+      (add-new-terminal node))))
 
 (defun add-inter-pattern-nodes (patterns))
     

@@ -20,13 +20,26 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.8 2002/08/30 14:37:41 youngde Exp $
+;;; $Id: node1.lisp,v 1.9 2002/08/30 16:54:00 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node1 (shared-node)
   ((test :initarg :test
          :reader node1-test)))
+
+(defmethod add-successor ((self node1) (new-node node1) connector)
+  (with-slots ((successor-table successors)) self
+    (let ((successor (gethash (node1-test new-node) successor-table)))
+      (when (null successor)
+        (setf successor
+          (setf (gethash (node1-test new-node) successor-table)
+            (make-successor new-node connector))))
+      (successor-node successor))))
+
+(defmethod add-successor ((self node1) (new-node t) connector)
+  (setf (gethash new-node (shared-node-successors self))
+    (make-successor new-node connector)))
 
 (defmethod accept-token ((self node1) token)
   (if (funcall (node1-test self) token)
