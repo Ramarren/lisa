@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.63 2004/09/16 18:50:00 youngde Exp $
+;;; $Id: rete.lisp,v 1.64 2004/09/16 19:43:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -199,34 +199,31 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
-#+ignore
-(defmethod assert-fact-with-cf ((self rete) fact cf)
-  (let ((dup (duplicate-fact-p self fact)))
+(defmethod assert-fact (rete fact (fact-cf number))
+   (cl:assert (not (in-rule-firing-p)) nil
+     "Supplying a CF inside a rule firing does not make sense.")
+   (cl:assert (cf:cf-p fact-cf) nil
+     "This is not a legal certainty factor: ~S" fact-cf)
+   (setf (cf fact) fact-cf)
+   (with-unique-fact (self fact)
+     (assert-fact-aux rete fact)))
+
+(defmethod assert-fact (rete fact (fact-cf t))
+  (cl:assert (null fact-cf) nil
+    "This is not a legal certainty factor: ~S" fact-cf)
+  (let ((conjunct-cf (cf:conjunct-cf (token-facts *active-tokens*)))
+        (rule-cf (cf (active-rule)))
+        (dup (duplicate-fact-p rete fact)))
     (cond (dup
-           (setf (cf dup) (cf:combine cf (cf dup))))
+           (if (plusp rule-cf)
+               (setf (cf dup) (* rule-cf (cf:combine conjunct-cf (cf dup))))
+             (setf (cf dup) (cf:combine conjunct-cf (cf dup)))))
           (t
-           (setf (cf fact) cf)
-           (assert-fact-aux self fact)))
-    fact))
-
-(defmethod assert-fact-with-cf ((self rete) fact cf)
-  (let ((dup (duplicate-fact-p self fact))
-        (rule-cf (if (in-rule-firing-p)
-                     (cf (active-rule))
-                   1.0)))
-    (cond (dup
-           (setf (cf dup) (* (cf:combine cf (cf dup)) rule-cf)))
-          (t
-           (setf (cf fact) (* cf rule-cf))
-           (assert-fact-aux self fact)))
-    fact))
-
-(defmethod assert-fact ((self rete) fact &key cf)
-  (if (null cf)
-      (with-unique-fact (self fact)
-        (assert-fact-aux self fact))
-    (assert-fact-with-cf self fact cf)))
-
+           (if (plusp rule-cf)
+               (setf (cf fact) (* conjunct-cf rule-cf))
+             (setf (cf fact) conjunct-cf))
+           (assert-fact-aux rete fact)))))
+     
 (defmethod retract-fact ((self rete) (fact fact))
   (with-truth-maintenance (self)
     (forget-fact self fact)
