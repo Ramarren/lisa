@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.16 2001/01/07 03:33:22 youngde Exp $
+;;; $Id: pattern.lisp,v 1.17 2001/01/08 16:40:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -57,15 +57,17 @@
     (let ((value (second slot))
           (constraint (third slot)))
       (cond ((literalp value)
-             (values value (rewrite-constraint 
-                            (make-slot-variable) value nil) t))
+             (let ((var (make-slot-variable)))
+               (values var (rewrite-constraint var value nil) t)))
             ((negated-constraintp value)
-             (values value (rewrite-constraint 
-                            (make-slot-variable (second value) t)) t))
-            ((literalp constraint)
+             (let ((var (make-slot-variable)))
+               (values var (rewrite-constraint var (second value) t) t)))
+            ((and (not (null constraint))
+                  (literalp constraint))
              (values value (rewrite-constraint 
                             value constraint nil) t))
-            ((negated-constraintp constraint)
+            ((and (not (null constraint))
+                  (negated-constraintp constraint))
              (values value (rewrite-constraint 
                             value (second constraint) t) t))
             (t
@@ -75,9 +77,9 @@
   (flet ((create-slot-tests (slot)
            (multiple-value-bind (value constraint changed)
                (canonicalize-slot slot)
-             (format t "value ~S ; constraint ~S ; changed ~S~%"
-                     value constraint changed)
-             (let ((tests (list (make-test1 value))))
+             (format t "name ~S value ~S ; constraint ~S ; changed ~S~%"
+                     (first slot) value constraint changed)
+             (let ((tests (list (make-test1-var value))))
                (unless (null constraint)
                  (push (if changed
                            (make-test1-internal-eval constraint)

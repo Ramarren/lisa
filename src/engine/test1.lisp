@@ -22,7 +22,7 @@
 ;;; element. They serve as nothing more than "holders" for tests waiting to be
 ;;; compiled by the Rete compiler.
 
-;;; $Id: test1.lisp,v 1.9 2001/01/07 01:28:29 youngde Exp $
+;;; $Id: test1.lisp,v 1.10 2001/01/08 16:40:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,14 +34,17 @@
    "The standard class for non-functional tests located within conditional
    elements."))
 
-(defmethod value-is-variable-p ((self test1))
-  (variablep (get-value self)))
+(defmethod print-object ((self test1) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "value ~S" (get-value self))))
 
-(defmethod value-is-predicate-p ((self test1))
-  (consp (get-value self)))
+(defclass test1-var (test1)
+  ()
+  (:documentation
+   "Represents a variable test within a conditional element."))
 
-(defun make-test1 (value)
-  (make-instance 'test1 :value value))
+(defun make-test1-var (var)
+  (make-instance 'test1-var :value var))
 
 (defclass test1-eval (test1)
   ()
@@ -52,7 +55,7 @@
 (defun make-test1-eval (value)
   (make-instance 'test1-eval :value value))
 
-(defclass test1-internal-eval (test1)
+(defclass test1-internal-eval (test1-eval)
   ()
   (:documentation
    "Represents a Lisa-defined functional constraint within a conditional

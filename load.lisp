@@ -20,7 +20,7 @@
 ;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.24 2001/01/07 03:33:21 youngde Exp $
+;;; $Id: load.lisp,v 1.25 2001/01/08 16:40:04 youngde Exp $
 
 (in-package :user)
 
@@ -39,14 +39,15 @@
        '(("packages" ("pkgdecl"))
          ("utils" ("utils" "compose"))
          ("engine" ("macros" "utils" "lisa-kb-class" "special-facts"
-                    "strategies" "bindings" "token" "add-token" "fact" "rete"
-                    "rete-compiler" "clear-token" "remove-token" "token-tree"
-                    "node" "node1" "node1-tev1" "node1-tect"
+                    "strategies" "bindings" "token" "add-token" "fact" "test1"
+                    "rete" "rete-compiler" "clear-token" "remove-token"
+                    "token-tree" "node" "node1" "node1-tev1" "node1-tect"
                     "node1-teq" "node1-tfn" "node1-not" "node1-rtl"
-                    "test" "node-test" "test2-simple" "node2" "node2-not"
-                    "terminal-node" "test1" "slot" "pattern" "generic-pattern"
-                    "not-pattern" "factories" "funcall" "rule" "parser"
-                    "language" "activation" "environment" "watch" "debug")))))
+                    "test" "node-test" "test2-simple" "test2-eval" "node2"
+                    "node2-not" "terminal-node" "slot" "pattern"
+                    "generic-pattern" "not-pattern" "factories" "funcall"
+                    "rule" "parser" "language" "activation" "environment"
+                    "watch" "debug")))))
   (labels ((load-files (path files)
              (cond ((null files)
                     (values t))
