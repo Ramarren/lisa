@@ -1,0 +1,77 @@
+;;; This file is part of LISA, the Lisp-based Intelligent Software
+;;; Agents platform.
+
+;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+
+;;; This program is free software; you can redistribute it and/or
+;;; modify it under the terms of the GNU General Public License
+;;; as published by the Free Software Foundation; either version 2
+;;; of the License, or (at your option) any later version.
+
+;;; This program is distributed in the hope that it will be useful,
+;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;; GNU General Public License for more details.
+
+;;; You should have received a copy of the GNU General Public License
+;;; along with this program; if not, write to the Free Software
+;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+;;; File: NOTES
+;;; Description: Ongoing project notes.
+
+;;; $Id: NOTES,v 1.1 2001/03/13 16:11:48 youngde Exp $
+
+This file is an ongoing record of development issues related to the
+LISA project. It was (belatedly) started just after LISA's first alpha
+release on 10 March, 2001; the intention is to record those
+experiences I consider important enough to retain in long-term
+memory. Things like cross-implementation discrepancies, milestones,
+changes in project direction are all suitable candidates.
+
+NB: As of 3.13.2001 LISA runs on four Common Lisp implementations:
+LispWorks 4.1, ACL 5.0/6.0, CMUCL 18c and CLISP. Only the Linux
+versions have been tested.
+
+* 3.9.2001: LISA has her first alpha release. Just prior to this
+  event I was asked to get LISA working on CLISP; doing so exposed
+  some platform discrepancies that I am recording here.
+
+  1. The function CLOS:CLASS-DIRECT-SLOTS is internal in CLISP,
+     external in the others. This is actually looks like a MOP issue.
+
+  2. The method INITIALIZE-INSTANCE: CLISP seems to be much more
+     strict vis-a-vis keyword arguments than the other Lisps. Perhaps
+     CLISP might not be interpreting CLtL2 correctly here, or perhaps
+     the other Lisps are too lax; it isn't completely clear to me from
+     my reading. For example:
+
+     (defclass rocky ()
+       ((name :initarg :name
+              :initform nil
+              :reader get-name)
+        (buddy :initform nil
+              :reader get-buddy)))
+
+     (defmethod initialize-instance :after ((self rocky) &key (buddy nil))
+       (setf (slot-value self 'buddy) buddy))
+
+     (defun make-rocky ()
+       (make-instance 'rocky :name 'rocky))
+
+     Evaluating MAKE-ROCKY in CLISP yields:
+
+     *** - EVAL/APPLY: keyword :NAME is illegal for #<COMPILED-CLOSURE
+           #:COMPILED-FORM-117-1>. The possible keywords are (:BUDDY)
+
+     No complaints from the others.
+
+     Adding &ALLOW-OTHER-KEYS to INITIALIZE-METHOD allows CLISP to run
+     without complaint, but of course disables keyword argument
+     checking.
+
+   3. CLISP's implementation of LOAD doesn't understand logical
+      pathnames. According to CLtL2 it should, but I haven't yet found
+      this stated in the Hyperspec.
+      
+     
