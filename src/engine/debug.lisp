@@ -21,7 +21,9 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.1 2000/11/10 19:20:08 youngde Exp $
+;;; $Id: debug.lisp,v 1.2 2000/11/11 02:34:45 youngde Exp $
 
 (in-package :lisa)
 
+(defun trace-rete (root-node)
+  (format t "root-node: ~S~%" root-node))
