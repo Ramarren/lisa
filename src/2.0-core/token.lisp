@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.27 2002/10/28 20:02:35 youngde Exp $
+;;; $Id: token.lisp,v 1.28 2002/10/29 17:50:55 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,24 +42,12 @@
   (values token (incf (token-not-counter token))))
 
 (defun token-decrement-not-counter (token)
-  (cl:assert (> (token-not-counter token) 0) nil
+  (cl:assert (plusp (token-not-counter token)) nil
     "The negated join node logic is busted.")
   (values token (decf (token-not-counter token))))
 
 (defun token-negated-p (token)
   (plusp (token-not-counter token)))
-
-#+ignore
-(defun token-make-fact-list (token &key (detailp t))
-  (let ((facts (list))
-        (vector (token-facts token)))
-    (dotimes (i (length vector))
-      (let ((fact (aref vector i)))
-        (unless (or (eq fact t)
-                    (minusp (fact-id fact)))
-          (push (if detailp fact (fact-symbolic-id fact)) 
-                facts))))
-    (nreverse facts)))
 
 (defun token-make-fact-list (token &key (detailp t) (debugp nil))
   (let ((facts (list))
@@ -72,6 +60,9 @@
             (push (if detailp fact (fact-symbolic-id fact)) 
                   facts)))))
     (nreverse facts)))
+
+(defun token-fact-count (token)
+  (length (token-facts token)))
 
 (defun token-find-fact (token address)
   (aref (slot-value token 'facts) address))

@@ -20,7 +20,7 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.6 2002/10/28 20:02:46 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.7 2002/10/29 17:51:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,8 +36,7 @@
      "The debugger must be running to use this function."))
 
 (defun leave-debugger ()
-  (setf *stepping* nil)
-  (setf *tokens* nil))
+  (setf *stepping* nil))
 
 (defun has-breakpoint-p (rule)
   (find (rule-name rule) *breakpoints*))
@@ -52,16 +51,15 @@
   (if (find-rule (inference-engine) rule-name)
       (pushnew rule-name *breakpoints*)
     (format t "There's no rule by this name (~A)~%" rule-name))
-  (values))
+  *breakpoints*)
 
 (defun clear-break (rule-name)
   (setf *breakpoints*
     (delete rule-name *breakpoints*))
-  (values))
+  *breakpoints*)
 
 (defun clear-breaks ()
-  (setf *breakpoints* (list))
-  (values))
+  (setf *breakpoints* (list)))
 
 (defun next ()
   (in-debugger-p)
@@ -80,6 +78,9 @@
 
 (defun token (index)
   (in-debugger-p)
+  (cl:assert (and (not (minusp index))
+                  (< index (token-fact-count *tokens*)))
+      nil "The token index isn't valid.")
   (let ((fact (token-find-fact *tokens* index)))
     (cond ((typep fact 'fact)
            fact)

@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.54 2002/10/27 01:03:29 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.55 2002/10/29 17:51:07 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -43,7 +43,7 @@
            "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
            "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
            "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK" "CLEAR-BREAKS"
-           "NEXT" "RESUME" "TOKENS" "BINDINGS")
+           "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE" "BINDINGS")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -61,7 +61,8 @@
                 "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
                 "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
                 "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK"
-                "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "BINDINGS"))
+                "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE"
+                "BINDINGS"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
