@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.19 2002/06/01 01:30:14 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.20 2002/06/04 00:31:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -165,4 +165,14 @@
                   (sort (mapcar #'transform (flatten pattern))
                         #'string<))
               body))))
-             
+
+(defmacro with-simple-query ((var value) query &body body)
+  "For each variable/instance pair in a query result, invoke BODY with VAR
+  bound to the query variable and VALUE bound to the instance."
+  (let ((result (gensym)))
+    `(let ((,result ,query))
+       (dolist (match ,result)
+         (dolist (binding match)
+           (let ((,var (car binding))
+                 (,value (cdr binding)))
+             ,@body))))))

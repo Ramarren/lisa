@@ -20,13 +20,14 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.10 2002/05/31 02:51:19 youngde Exp $
+;;; $Id: lisa.system,v 1.11 2002/06/04 00:31:06 youngde Exp $
 
 (in-package "CL-USER")
 
 (defvar *lisa-root-pathname*
     (make-pathname :directory
                    (pathname-directory *load-truename*)
+                   :host (pathname-host *load-truename*)
                    :device (pathname-device *load-truename*)))
 
 (defun make-lisa-path (relative-path)
@@ -139,9 +140,6 @@
                                                            language
                                                            environment
                                                            rule))
-                                       #+ignore
-                                       (:file "clos"
-                                              :depends-on (rete))
                                        (:file "clear-token"
                                               :depends-on (token))
                                        (:file "remove-token"
@@ -238,9 +236,3 @@
 
 (defun clean-lisa ()
   (mk:clean-system :lisa))
-
-;;; Just until I determine how to properly deal with MP initialization in
-;;; LispWorks...
-
-#+LispWorks
-(mp:initialize-multiprocessing)

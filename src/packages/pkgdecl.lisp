@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.43 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.44 2002/06/04 00:31:07 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -37,11 +37,11 @@
   (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
            "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
            "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
-           "MARK-INSTANCE-AS-CHANGED" "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST"
-           "ENGINE" "USE-ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
-           "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE" "GET-NAME"
-           "RULE" "ASSERT-FROM-STRING" "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*"
-           "UNDEFRULE" "RETRIEVE" "FORGET-QUERY" "DEFAULT")
+           "MARK-INSTANCE-AS-CHANGED" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
+           "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
+           "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING" "=>"
+           "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
+           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -52,11 +52,11 @@
                 "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY"
                 "WATCH" "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
                 "RETRACT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
-                "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE"
-                "USE-ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
-                "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE" "GET-NAME"
-                "RULE" "ASSERT-FROM-STRING" "=>" "DEFFACTS"
-                "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE" "FORGET-QUERY"))
+                "SLOT" "TEST" "ENGINE" "USE-ENGINE" "USE-DEFAULT-ENGINE"
+                "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
+                "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING"
+                "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
+                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY")) 
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")
@@ -95,5 +95,26 @@
            "FIND-DIRECT-SUPERCLASSES"
            "CLASS-ALL-SUPERCLASSES"))
 
+;;; This macro is courtesy of Paul Werkowski. A very nice idea. I modified it
+;;; slightly, replacing the extended LOOP originally used in EXTERNALS-OF with
+;;; what you see here...
+
+(defmacro define-lisa-lisp ()
+  (flet ((externals-of (pkg)
+           (let ((symbols (list)))
+             (do-external-symbols (symbol pkg symbols)
+               (push symbol symbols)))))
+    (let* ((lisa-externs (externals-of "LISA"))
+           (lisa-shadows (intersection (package-shadowing-symbols "LISA")
+                                       lisa-externs))
+           (cl-externs (externals-of "COMMON-LISP")))
+      `(defpackage "LISA-LISP"
+         (:use "COMMON-LISP")
+         (:shadowing-import-from "LISA" ,@lisa-shadows)
+         (:import-from "LISA" ,@(set-difference lisa-externs lisa-shadows))
+         (:export ,@cl-externs)
+         (:export ,@lisa-externs)))))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (define-lisa-lisp)
   (pushnew :lisa *features*))
