@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.13 2002/10/08 18:17:27 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.14 2002/10/08 18:34:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,10 +53,10 @@
                  (remove-nodes (rest nodes))))))
     (remove-nodes (rule-node-list rule))))
 
-(defmethod successor-exists-p ((parent shared-node) (node node1))
+(defmethod find-existing-successor ((parent shared-node) (node node1))
   (gethash (node1-test node) (shared-node-successors parent)))
 
-(defmethod successor-exists-p (parent node)
+(defmethod find-existing-successor (parent node)
   (declare (ignore parent node))
   nil)
 
@@ -79,18 +79,19 @@
            (merge-successors (parent successors)
              (if (endp successors) parent
                (let* ((new-successor (first successors))
-                      (successor-node (successor-node new-successor))
                       (existing-successor 
-                       (successor-exists-p parent successor-node)))
+                       (find-existing-successor 
+                        parent (successor-node new-successor))))
                  (cond ((null existing-successor)
-                        (add-successor parent successor-node
+                        (add-successor parent (successor-node new-successor)
                                        (successor-connector new-successor))
-                        (add-node-set parent successor-node))
+                        (add-node-set parent (successor-node new-successor)))
                        (t
-                        (add-node-set parent successor-node t)
+                        (add-node-set parent (successor-node new-successor) t)
                         (merge-successors 
                          (successor-node existing-successor)
-                         (shared-node-all-successors successor-node))))
+                         (shared-node-all-successors 
+                          (successor-node new-successor)))))
                  (merge-successors parent (rest successors)))))
            (merge-root-node (new-root)
              (let ((existing-root
