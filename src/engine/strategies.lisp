@@ -21,14 +21,12 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.23 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: strategies.lisp,v 1.24 2001/03/28 00:08:50 youngde Exp $
 
 (in-package "LISA")
 
 (defclass strategy ()
-  ((activations :initarg :activations
-                :initform nil
-                :accessor get-activations))
+  ()
   (:documentation
    "Serves as the base class for all classes implementing conflict
    resolution strategies."))
