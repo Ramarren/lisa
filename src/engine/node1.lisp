@@ -21,7 +21,7 @@
 ;;; Description: Single-input node of the Rete pattern network. NODE1
 ;;; is intended to be abstract.
 
-;;; $Id: node1.lisp,v 1.4 2000/11/09 19:26:04 youngde Exp $
+;;; $Id: node1.lisp,v 1.5 2000/12/07 02:28:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,3 +41,6 @@
 (defmethod pass-along ((self node1) token)
   (mapcar #'(lambda (n) (call-node-right n token))
         (get-successors self)))
+
+(defmethod equals ((self node1) obj)
+  (values nil))

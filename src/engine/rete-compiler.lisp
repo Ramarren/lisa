@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.18 2000/12/06 22:52:37 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.19 2000/12/07 02:28:36 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,8 +51,6 @@
              :accessor get-hash-key)
    (root-node :initform (make-root-node)
               :reader get-root-node)
-   (varname-workspace :initform (make-hash-table)
-                      :accessor get-varname-workspace)
    (terminals :initform nil
               :accessor get-terminals)
    (roots :initform nil
@@ -99,7 +97,7 @@
       (first-pass patterns 0))))
 
 (defun find-multiple-references (compiler pattern rule)
-  (with-accessors ((occurrences get-varname-workspace)) compiler
+  (let ((occurrences (make-hash-table)))
     (labels ((first-occurrence (varname)
                (not (gethash varname occurrences)))
              (add-occurrence (varname)
@@ -152,10 +150,8 @@
       (find-multiple-references-aux (get-slots pattern)))))
   
 (defun search-for-multiple-variables (compiler rule)
-  (with-accessors ((terminals get-terminals)
-                   (occurrences get-varname-workspace)) compiler
+  (with-accessors ((terminals get-terminals)) compiler
     (mapc #'(lambda (pattern)
-              (clrhash occurrences)
               (find-multiple-references compiler pattern rule))
           (get-patterns rule))
     (setf (aref terminals 0)
