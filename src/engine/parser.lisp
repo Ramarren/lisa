@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.35 2001/03/13 18:54:58 youngde Exp $
+;;; $Id: parser.lisp,v 1.36 2001/03/13 19:59:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -158,8 +158,4 @@
                       (not (= (length s) 2)))
                   (error "Bad DEFTEMPLATE form for ~S: ~S" name s))
                  (t `(,(second s))))))
-    (let ((template
-           (eval `(defclass ,name (deftemplate)
-                   (,@(mapcar #'extract-slot body))))))
-      (clos:finalize-inheritance template)
-      (values template))))
+    (create-class-template name (mapcar #'extract-slot body))))

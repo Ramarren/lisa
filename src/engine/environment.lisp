@@ -20,33 +20,9 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.10 2001/01/23 21:05:00 youngde Exp $
+;;; $Id: environment.lisp,v 1.11 2001/03/13 19:59:41 youngde Exp $
 
 (in-package :lisa)
-
-;;; CLASS-MAP maintains bindings between arbitrary names (symbols) and class
-;;; names. LISA uses this map to locate class objects that represent facts in
-;;; the knowledge base.
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (let ((class-map (make-hash-table)))
-    (defun import-class (name class)
-      (setf (gethash name class-map) (class-name class)))
-
-    (defun find-imported-class (name &optional (errorp t))
-      (let ((val (gethash name class-map)))
-        (cond ((null val)
-               (if errorp
-                   (error "No imported class for symbol ~S." name)))
-              (t
-               (setf val (find-class val errorp))))
-        (values val)))))
-
-(defun import-and-register-class (name binding)
-  (if (and (symbolp name)
-           (symbolp binding))
-      (import-class name (find-class binding))
-    (error "IMPORT-AND-REGISTER-CLASS: both NAME and BINDING must be symbols.")))
 
 (defgeneric current-engine ()
   (:documentation
