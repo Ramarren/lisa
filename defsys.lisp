@@ -2,7 +2,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.2 2000/10/10 20:42:28 youngde Exp $
+;;; $Id: defsys.lisp,v 1.3 2000/10/12 20:37:12 youngde Exp $
 
 (in-package "USER")
 
@@ -40,8 +40,25 @@
 ;; Make sure the binary directory structure exists, creating it if
 ;; necessary...
 
-(when (not (probe-file *lisa-binary-pathname*))
-  (mkdir *lisa-binary-pathname*))
+(let ((dirlist '("packages" "engine" "utils")))
+  (unless (probe-file *lisa-binary-pathname*)
+    (mkdir *lisa-binary-pathname*))
+  (dolist (dir dirlist)
+    (let ((path (make-pathname
+                 :directory (append (pathname-directory
+                                     *lisa-binary-pathname*)
+                                    `(,dir)))))
+      (unless (probe-file path)
+        (mkdir path)))))
+
+(mk:define-language :zebu
+    :compiler #'(lambda (file &key output-file error-file)
+                  (declare (ignore error-file))
+                  (apply #'zb:zebu-compile-file file `(:output-file ,output-file)))
+    :loader #'(lambda (&rest args)
+                (apply #'zb:zebu-load-file args))
+    :source-extension "zb"
+    :binary-extension "tab")
 
 (mk:defsystem "lisa"
     :source-pathname *lisa-source-pathname*
@@ -51,8 +68,17 @@
                           :source-pathname "packages"
                           :binary-pathname "packages"
                           :components ((:file "pkgdecl")))
+                 (:module "grammar"
+                          :source-pathname "engine"
+                          :binary-pathname "engine"
+                          :language :zebu
+                          :source-extension "zb"
+                          :binary-extension "tab"
+                          :components ((:file "lisa"))
+                          :depends-on (packages))
                  (:module "engine"
                           :source-pathname "engine"
                           :binary-pathname "engine"
                           :components ((:file "language"))
-                          :depends-on (packages))))
+                          :depends-on (packages)))
+    :depends-on (zebu-compiler))
