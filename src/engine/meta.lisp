@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.11 2001/03/30 21:58:52 youngde Exp $
+;;; $Id: meta.lisp,v 1.12 2001/03/31 20:50:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,6 +39,10 @@
       (environment-error "This slot-name has no meta slot: ~S." slot-name))
     (values slot)))
 
+(defun has-meta-slot-p (self slot-name)
+  (declare (type meta-fact self))
+  (find-meta-slot self slot-name nil))
+  
 (defun meta-slot-count (self)
   (declare (type meta-fact self))
   (hash-table-count (get-slots self)))

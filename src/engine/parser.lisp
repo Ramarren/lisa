@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.48 2001/03/30 23:14:40 youngde Exp $
+;;; $Id: parser.lisp,v 1.49 2001/03/31 20:50:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -81,8 +81,7 @@
                      ((null pattern)
                       (values patterns))
                      (t
-                      (parsing-error
-                       "There was trouble while parsing the LHS: ~S" pattern)))))
+                      (pattern-error pattern "Incorrect structure.")))))
            (parse-rhs (actions)
              (values actions)))
     (multiple-value-bind (lhs remains)
@@ -105,46 +104,49 @@
                          ((variablep head)
                           (if (null binding)
                               (parse-pattern (first (rest p)) head)
-                            (parsing-error
-                             "Too many pattern variables: ~S" head)))
+                            (pattern-error
+                             template "Too many pattern variables: ~S" head)))
                          (t
                           (make-parsed-pattern
                            :pattern (make-default-pattern p)
                            :binding binding
                            :type :generic)))
-                 (parsing-error
-                  "Patterns must begin with a symbol: ~S" template)))))
+                 (pattern-error
+                  template "Patterns must begin with a symbol.")))))
     `(,(parse-pattern template nil))))
 
 (defun parse-default-pattern (pattern)
-  (labels ((parse-pattern-head ()
-             (let ((head (first pattern)))
-               (if (has-meta-classp head)
-                   (values head)
-                 (parsing-error "This pattern has no meta class: ~S" pattern))))
-           (parse-slot (slot)
-             (with-slot-components ((name field constraint) slot)
-               (cond ((and (symbolp name)
-                           (slot-valuep field)
-                           (constraintp constraint))
-                      `(,name ,field ,constraint))
-                     (t
-                      (parsing-error
-                       "In pattern ~S there are type problems with this slot: ~S"
-                       pattern slot)))))
-           (parse-pattern-body (body slots)
-             (let ((slot (first body)))
-               (cond ((consp slot)
-                      (parse-pattern-body (rest body)
-                                          (nconc slots
-                                                  `(,(parse-slot slot)))))
-                     ((null slot)
-                      (values slots))
-                     (t
-                      (parsing-error
-                       "This pattern has structural problems: ~S" pattern))))))
-    `(,(parse-pattern-head)
-      ,(parse-pattern-body (rest pattern) nil))))
+  (let* ((head (first pattern))
+         (meta (find-meta-class head nil)))
+    (when (null meta)
+      (pattern-error
+       pattern "This pattern is not supported by any known class."))
+    (labels ((parse-slot (slot)
+               (with-slot-components ((name field constraint) slot)
+                 (cond ((and (symbolp name)
+                             (slot-valuep field)
+                             (constraintp constraint))
+                        (if (has-meta-slot-p meta name)
+                            `(,name ,field ,constraint)
+                          (pattern-error
+                           pattern
+                           "This slot is not a recognized member: ~S." name)))
+                       (t
+                        (pattern-error
+                         pattern
+                         "There are type problems with this slot: ~S" slot)))))
+             (parse-pattern-body (body slots)
+               (let ((slot (first body)))
+                 (cond ((consp slot)
+                        (parse-pattern-body (rest body)
+                                            (nconc slots
+                                                   `(,(parse-slot slot)))))
+                       ((null slot)
+                        (values slots))
+                       (t
+                        (pattern-error
+                         pattern "Found one or more structural problems."))))))
+    `(,head ,(parse-pattern-body (rest pattern) nil)))))
 
 (defun make-default-pattern (p)
   (parse-default-pattern p))
@@ -185,7 +187,7 @@
                      "A fact must begin with a symbol: ~S" head))))))
     (handler-case
         (generate-assert)
-      (lisa-condition (condition)
+      (lisa-error (condition)
         (command-structure-error 'assert-fact condition)))))
 
 (defun parse-and-modify-fact (fact body)
@@ -195,7 +197,7 @@
               (,@(normalize-slots body))))))
     (handler-case
         (generate-modify)
-      (lisa-condition (condition)
+      (lisa-error (condition)
         (command-structure-error 'modify-fact condition)))))
 
 (defun redefine-deftemplate (name body)
@@ -210,5 +212,5 @@
                (create-class-template name (mapcar #'extract-slot body))))
     (handler-case
         (define-template)
-      (lisa-condition (condition)
+      (lisa-error (condition)
         (command-structure-error 'deftemplate condition)))))

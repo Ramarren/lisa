@@ -21,39 +21,44 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.5 2001/03/30 21:58:52 youngde Exp $
+;;; $Id: conditions.lisp,v 1.6 2001/03/31 20:50:53 youngde Exp $
 
 (in-package "LISA")
 
-(define-condition lisa-condition (error)
+(define-condition lisa-error (error)
   ((text :initarg :text
          :initform nil))
   (:documentation
    "The base class of the LISA condition hierarchy."))
 
-(define-condition syntactical-error (lisa-condition)
-  ()
+(define-condition syntactical-error (lisa-error)
+  ((element :initarg :element
+            :initform nil))
   (:documentation
    "This condition represents syntactical errors discovered during the initial
    parsing pass."))
 
-(define-condition environment-error (lisa-condition)
+(define-condition environment-error (lisa-error)
   ()
   (:documentation
    "This condition represents LISA environmental errors."))
 
-(define-condition rule-structure-error (lisa-condition)
-  ((rule-name :initarg :rule-name))
+(define-condition rule-structure-error (lisa-error)
+  ((rule-name :initarg :rule-name)
+   (element :initarg :element
+            :initform nil))
   (:report
    (lambda (condition strm)
-     (with-slots (rule-name text) condition
-       (format strm "While parsing rule ~S:~%" rule-name)
+     (with-slots (rule-name element text) condition
+       (format strm "While compiling rule ~S:~%" rule-name)
+       (unless (null element)
+         (format strm "While parsing element ~S:~%" element))
        (format strm text)))
    :documentation
    "This condition represents structural errors found while parsing DEFRULE
    forms."))
 
-(define-condition command-structure-error (lisa-condition)
+(define-condition command-structure-error (lisa-error)
   ((command-name :initarg :command-name))
   (:report
    (lambda (condition strm)
@@ -64,17 +69,19 @@
    "This condition represents structural errors found while parsing specific
    LISA functions."))
 
-(defmacro make-lisa-condition (cond-name format-string args)
-  `(error ,cond-name
+(defmacro pattern-error (pattern format-string &rest args)
+  `(error 'syntactical-error
+    :element ,pattern
     :text (apply #'format nil ,format-string `(,,@args))))
 
 (defmacro parsing-error (format-string &rest args)
-  `(make-lisa-condition 'syntactical-error ,format-string ,args))
+  `(error 'syntactical-error
+    :text (apply #'format nil ,format-string `(,,@args))))
 
 (defmacro rule-structure-error (rule-name parse-condition)
-  `(with-slots (text) ,parse-condition
+  `(with-slots (text element) ,parse-condition
     (error 'rule-structure-error
-     :rule-name ,rule-name :text text)))
+     :rule-name ,rule-name :element element :text text)))
 
 (defmacro command-structure-error (command-name parse-condition)
   `(with-slots (text) ,parse-condition
@@ -82,4 +89,5 @@
      :command-name ,command-name :text text)))
 
 (defmacro environment-error (format-string &rest args)
-  `(make-lisa-condition 'environment-error ,format-string ,args))
+  `(error 'environment-error
+    :text (apply #'format nil ,format-string `(,,@args))))
