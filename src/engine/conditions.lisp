@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.9 2001/04/02 14:19:19 youngde Exp $
+;;; $Id: conditions.lisp,v 1.10 2001/04/02 16:10:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,7 +44,7 @@
   ()
   (:report
    (lambda (condition strm)
-     (format strm "~S~%" (get-text condition)))
+     (format strm "~A" (get-text condition)))
    :documentation
    "This condition represents LISA environmental errors."))
 
