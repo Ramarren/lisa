@@ -21,11 +21,11 @@
 ;;; Description: This class holds an individual test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-simple.lisp,v 1.4 2000/12/06 16:13:08 youngde Exp $
+;;; $Id: test2-simple.lisp,v 1.5 2001/01/05 21:11:41 youngde Exp $
 
 (in-package :lisa)
 
-(defclass test2-simple ()
+(defclass test2-simple (test)
   ((fact-location :initarg :fact-location
                   :reader get-fact-location)
    (left-slot-name :initarg :left-slot-name

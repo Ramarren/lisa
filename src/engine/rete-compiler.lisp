@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.27 2001/01/05 17:41:42 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.28 2001/01/05 21:11:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -219,6 +219,7 @@
           (get-slots pattern))
     (values node2)))
 
+#+ignore
 (defun create-join-nodes (compiler rule)
   (labels ((add-join-node (node i)
              (with-accessors ((terminals get-terminals)) compiler
@@ -239,6 +240,23 @@
                         (add-join-node node2 i)
                         (third-pass (rest patterns) (1+ i))))))))
     (third-pass (rest (get-patterns rule)) 1)))
+
+;;; the "third pass"...
+
+(defun create-join-nodes (compiler rule)
+  (flet ((add-join-node (node location)
+           (with-accessors ((terminals get-terminals)) compiler
+             (add-successor (aref terminals (1- location)) node rule)
+             (add-successor (aref terminals location) node rule)
+             (add-node rule node)
+             (setf (aref terminals (1- location)) node)
+             (setf (aref terminals location) node)
+             (values node))))
+    (mapc #'(lambda (pattern)
+              (let ((node2 (make-join-node pattern (get-engine rule))))
+                (add-node2-tests rule node2 pattern)
+                (add-join-node node2 (get-location pattern))))
+          (rest (get-patterns rule)))))
 
 (defun create-terminal-node (compiler rule)
   (merge-successor

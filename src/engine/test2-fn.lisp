@@ -21,7 +21,7 @@
 ;;; Description: A two-input node TEST that evaluates a predicate as its
 ;;; result.
 
-;;; $Id: test2-fn.lisp,v 1.1 2001/01/05 21:06:14 youngde Exp $
+;;; $Id: test2-fn.lisp,v 1.2 2001/01/05 21:11:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,3 +33,17 @@
   (:documentation
    "A two-input node TEST that evaluates a predicate as its result."))
 
+(defmethod do-test ((self test2-fn) left-token fact)
+  (declare (ignore fact))
+  (evaluate (get-predicate self) left-token))
+
+(defmethod equals ((self test2-fn) (obj test2-fn))
+  (and (equal (get-slot-name self)
+              (get-slot-name obj))
+       (equals (get-predicate self)
+               (get-predicate obj))))
+
+(defun make-test2-fn (slot-name pred)
+  (make-instance 'test2-fn :slot-name slot-name :predicate pred))
+
+  
