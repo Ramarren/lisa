@@ -20,6 +20,7 @@ algorithm; perhaps at some future date I'll make an attempt.
 Abbreviated Table of Contents</h2></center>
 <a href="#The Programming Language">The Programming Language</a>.
 <br><a href="#The Environment">The Environment</a>.
+<br><a href="#Conflict Resolution">Conflict Resolution</a>.
 <br><a href="#Getting Started">Getting Started</a>.
 <br><a href="#Things Yet to Do">Things Yet to Do</a>.
 <br>&nbsp;
@@ -75,9 +76,9 @@ is the fully-qualified name of the class as it is known to Lisp. If the
 class's ancestry is to be considered during pattern matching, <i>ancestors</i>
 will represent a list containing the <i>symbolic-name</i>s of those classes.
 To limit the slots available for pattern matching, include a list of relevant
-<i>slot-name</i>s. If no slot-names are specified LISA will examine the
-meta class for <i>class-name</i> and make all of the slots in the class
-hierarchy available.</blockquote>
+<i>slot-name</i>s.
+If no slot-names are specified LISA will examine the meta class for <i>class-name</i>
+and make all of the slots in the class hierarchy available.</blockquote>
 
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
@@ -253,7 +254,9 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
-<p><br>When a CLOS instance is asserted into the knowledge-base, LISA creates
+<br>&nbsp;
+<p>&nbsp;
+<p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
 CLOS instance. It is possible to bind this slot to a variable just like
@@ -262,31 +265,33 @@ any other:
 <dd>
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 
-<p><br>Once bound, method and function calls can be made on this object
-from the rule's LHS and RHS.
+<br>&nbsp;
+<p>&nbsp;
+<p>Once bound, method and function calls can be made on this object from
+the rule's LHS and RHS.
 <p>When reasoning over CLOS objects, LISA is capable of considering an
 instance's object hierarchy during pattern matching. In other words, it
 is possible to write rules that apply to many facts that share a common
 ancestry. The following code fragment provides an example:
 <br>&nbsp;
 <dd>
-(defclass fundamental ()&nbsp;())</dd>
+(defclass fundamental () ())</dd>
 
 <dd>
-(defclass rocky (fundamental)&nbsp;())</dd>
+(defclass rocky (fundamental) ())</dd>
 
 <dd>
-(defclass boris (fundamental)&nbsp;())</dd>
+(defclass boris (fundamental) ())</dd>
 
 <br>&nbsp;
 <dd>
-(defimport fundamental (lisa-user::fundamental)&nbsp;())</dd>
+(defimport fundamental (lisa-user::fundamental) ())</dd>
 
 <dd>
-(defimport rocky (lisa-user::rocky (fundamental))&nbsp;())</dd>
+(defimport rocky (lisa-user::rocky (fundamental)) ())</dd>
 
 <dd>
-(defimport boris (lisa-user::boris (fundamental))&nbsp;())</dd>
+(defimport boris (lisa-user::boris (fundamental)) ())</dd>
 
 <br>&nbsp;
 <dd>
@@ -301,7 +306,9 @@ ancestry. The following code fragment provides an example:
 <dd>
 &nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
 
-<p><br>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
+<br>&nbsp;
+<p>&nbsp;
+<p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
 and <i>boris</i> in the knowledge base, retracting each in turn. Note how
 the <i>defimport</i> forms for <i>rocky</i> and <i>boris</i> specify the
 symbolic name of the ancestor class <i>fundamental</i>, rather than the
@@ -480,6 +487,19 @@ environment to safely load a knowledge base into <i>engine</i>.</blockquote>
 <blockquote>Returns the currently-active inference engine. Usually only
 invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(make-inference-engine &amp;key <i>strategy</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Creates an instance of LISA's default inference engine. An
+object representing a type of conflict resolution strategy may be supplied
+using the keyword <i>strategy</i>; by default, a breadth-first algorithm
+is employed. See the section on conflict resolution for details.</blockquote>
+
 <h4>
 <a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
 These operators are typically used interactively to inspect the state of
@@ -574,9 +594,58 @@ II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
 <p><br>For application developers, LISA makes available the LISA-USER package.
 Generally, all user-level work should be done in this package; see the
 various examples provided in "lisa:misc;".
-<br>&nbsp;
 <h3>
-III.&nbsp;<a NAME="Getting Started"></a>Getting Started.</h3>
+III.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
+Conflict Resolution (CR) is the mechanism LISA employs to determine the
+order in which multiple activations will fire. Currently, LISA offers two
+"built-in" strategies; <i>breadth-first</i> and <i>depth-first</i>. It
+is possible to implement new CR algorithms by creating a class derived
+from <i>lisa:strategy</i> and implementing a few generic functions; instances
+of this new strategy can then be given to <i>make-inference-engine</i>.
+<br>&nbsp;
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(add-activation <i>strategy</i> <i>activation</i>)</td>
+
+<td>Generic Function</td>
+</tr>
+</table>
+
+<blockquote>Makes a new <i>activation</i> eligible for firing.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(find-activation <i>strategy</i> <i>rule</i> <i>token</i>)</td>
+
+<td>Generic Function</td>
+</tr>
+</table>
+
+<blockquote>Locates an activation associated with <i>rule</i> and <i>token</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(next-activation <i>strategy</i>)</td>
+
+<td>Generic Function</td>
+</tr>
+</table>
+
+<blockquote>Returns the next eligible activation.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(list-activations <i>strategy</i>)</td>
+
+<td>Generic Function</td>
+</tr>
+</table>
+
+<blockquote>Returns a list of eligible activations.</blockquote>
+Documentation for the CR interface is still fairly light. Look for improvements
+in upcoming releases.
+<h3>
+IV.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 for your convenience, a copy is included in the distribution. Building
 LISA should be straight-forward; load "lisa:defsys.lisp" and evaluate (mk:compile-system
@@ -595,7 +664,7 @@ for the examples in "lisa:misc;".
 support enabled. Also, the baseline version with which LISA has been tested
 is 2.25.1. Earlier releases might work as well, but no guarantees.
 <h3>
-IV.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+V.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 This section is a list (albeit incomplete) of features that would improve
 LISA significantly.
 <ol>
