@@ -13,23 +13,31 @@ xmlns="http://www.w3.org/TR/REC-html40">
  <o:DocumentProperties>
   <o:Author>dyoung</o:Author>
   <o:Template>Normal</o:Template>
-  <o:LastAuthor>David E. Young</o:LastAuthor>
-  <o:Revision>3</o:Revision>
-  <o:TotalTime>4</o:TotalTime>
+  <o:LastAuthor>dyoung</o:LastAuthor>
+  <o:Revision>11</o:Revision>
+  <o:TotalTime>9</o:TotalTime>
   <o:Created>2002-12-09T15:39:00Z</o:Created>
-  <o:LastSaved>2002-12-20T00:11:00Z</o:LastSaved>
+  <o:LastSaved>2003-05-28T15:08:00Z</o:LastSaved>
   <o:Pages>3</o:Pages>
-  <o:Words>1414</o:Words>
-  <o:Characters>8062</o:Characters>
+  <o:Words>1429</o:Words>
+  <o:Characters>8148</o:Characters>
   <o:Company>Bloodhound Software</o:Company>
   <o:Lines>67</o:Lines>
   <o:Paragraphs>16</o:Paragraphs>
-  <o:CharactersWithSpaces>9900</o:CharactersWithSpaces>
+  <o:CharactersWithSpaces>10006</o:CharactersWithSpaces>
   <o:Version>9.2720</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
 <style>
 <!--
+ /* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
  /* Style Definitions */
 p.MsoNormal, li.MsoNormal, div.MsoNormal
 	{mso-style-parent:"";
@@ -62,21 +70,21 @@ div.Section1
 	mso-list-type:hybrid;
 	mso-list-template-ids:-323427016 1054215498 1368262122 819783640 -64555038 1656262036 152204388 -1414908664 -695537064 -1326811476;}
 @list l1
-	{mso-list-id:1564102393;
+	{mso-list-id:1098066236;
 	mso-list-type:hybrid;
-	mso-list-template-ids:-546437862 -147955702 -272235756 -2034235302 -894803028 723663212 1667431092 1964310150 -239309534 1271685704;}
+	mso-list-template-ids:734288032 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
 @list l1:level1
 	{mso-level-number-format:bullet;
 	mso-level-text:\F0B7;
-	mso-level-tab-stop:.5in;
+	mso-level-tab-stop:39.0pt;
 	mso-level-number-position:left;
+	margin-left:39.0pt;
 	text-indent:-.25in;
-	mso-ansi-font-size:10.0pt;
 	font-family:Symbol;}
 @list l2
-	{mso-list-id:1716925823;
+	{mso-list-id:1564102393;
 	mso-list-type:hybrid;
-	mso-list-template-ids:-48354470 -1489309010 -1911512280 -1003878558 2101673534 701285742 -1678868880 637073842 -993629572 -1680183246;}
+	mso-list-template-ids:-546437862 -147955702 -272235756 -2034235302 -894803028 723663212 1667431092 1964310150 -239309534 1271685704;}
 @list l2:level1
 	{mso-level-number-format:bullet;
 	mso-level-text:\F0B7;
@@ -86,10 +94,22 @@ div.Section1
 	mso-ansi-font-size:10.0pt;
 	font-family:Symbol;}
 @list l3
+	{mso-list-id:1716925823;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-48354470 -1489309010 -1911512280 -1003878558 2101673534 701285742 -1678868880 637073842 -993629572 -1680183246;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l4
 	{mso-list-id:1873879823;
 	mso-list-type:hybrid;
 	mso-list-template-ids:1970329758 -1586055644 332586568 875984248 478441260 1296968498 -2061364318 -1850698708 -317555522 166462850;}
-@list l3:level1
+@list l4:level1
 	{mso-level-number-format:bullet;
 	mso-level-text:\F0B7;
 	mso-level-tab-stop:.5in;
@@ -120,12 +140,41 @@ style='tab-interval:.5in'>
 
 <h2>The LISA Project</h2>
 
+<h3>28 May, 2003</h3>
+
+<p>Release 2.0.4, a bug-fix release that mostly addresses some minor
+irritations with the debugger:</p>
+
+<p style='margin-left:39.0pt;text-indent:-.25in;mso-list:l1 level1 lfo13;
+tab-stops:list 39.0pt'><![if !supportLists]><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]>It is no longer necessary to supply a fully qualified
+rule name when manipulating break points; Lisa is now smart enough to figure
+this out.</p>
+
+<p style='margin-left:39.0pt;text-indent:-.25in;mso-list:l1 level1 lfo13;
+tab-stops:list 39.0pt'><![if !supportLists]><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]>Interaction with the debugger when running the LispWorks
+IDE is now sane.</p>
+
+<p style='margin-left:39.0pt;text-indent:-.25in;mso-list:l1 level1 lfo13;
+tab-stops:list 39.0pt'><![if !supportLists]><span style='font-family:Symbol'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><![endif]>Tokens are now displayed correctly.</p>
+
+<p style='margin-left:3.0pt'>Thanks to Yarden Katz for getting me to look at
+these issues.</p>
+
+<p style='margin-left:3.0pt'>The short-hand version of REQUIRE (e.g. (require “lisa-debugger”))
+now works in LispWorks.</p>
+
 <h3>19 December, 2002</h3>
 
 <p>Release 2.0.3, a bug-fix release that corrects a problem with queries.
 Thanks to Push Singh for the report. For Allegro users, there’s also a sample
-RPC applications that illustrates reasoning with remote objects. Look in the “misc”
-folder for details.</p>
+RPC applications that illustrates reasoning with remote objects. Look in the
+“misc” folder for details.</p>
 
 <h3>10 December, 2002</h3>
 
@@ -157,16 +206,16 @@ small enhancements:</p>
 
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l3 level1 lfo3;tab-stops:list .5in'>Auto Notification (AN), a
+     mso-list:l4 level1 lfo3;tab-stops:list .5in'>Auto Notification (AN), a
      mechanism used to monitor changes to CLOS instances in working memory that
      occur outside of LISA (i.e. somewhere else in the application). Normally,
      LISA must be explicitly told about these changes via the function <i>lisa:mark-instance-as-changed</i>;
      when an application alters the contents of an instance’s slots, it must
      inform LISA about the changes so the inference engine can maintain the
-     consistency of working memory. Auto Notification obviates this
-     requirement; LISA hooks into the MOP slot access protocol and notices slot
-     changes without application intervention. This is an experimental feature,
-     and requires a Common Lisp with a robust MOP implementation. As of this
+     consistency of working memory. Auto Notification obviates this requirement;
+     LISA hooks into the MOP slot access protocol and notices slot changes
+     without application intervention. This is an experimental feature, and
+     requires a Common Lisp with a robust MOP implementation. As of this
      writing, only Allegro (6.2) and LispWorks (4.2) are supported [note that
      earlier versions of ACL and LW will probably also work; I just haven't
      tested AN with anything else]. AN for CLISP will <i>not</i> be available
@@ -174,10 +223,10 @@ small enhancements:</p>
      I don't have ready access to a platform that runs CMUCL. There's more on
      Auto Notification in the reference guide.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l3 level1 lfo3;tab-stops:list .5in'>Both <i>assert-instance</i>
+     mso-list:l4 level1 lfo3;tab-stops:list .5in'>Both <i>assert-instance</i>
      and <i>retract-instance</i>, deprecated in 2.0b2, have been
-     &quot;undeprecated&quot;. I've also added the #? dispatch macro character
-     to offer yet another way to add CLOS instances to working memory via <i>assert</i>.
+     &quot;undeprecated&quot;. I've also added the #? dispatch macro character to
+     offer yet another way to add CLOS instances to working memory via <i>assert</i>.
      See the documentation for <i>assert</i> in the reference guide.</li>
 </ul>
 
@@ -188,25 +237,25 @@ this version:</p>
 
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l2 level1 lfo6;tab-stops:list .5in'>Contexts, a mechanism for
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'>Contexts, a mechanism for
      partitioning a knowledge base into distinct collections of related rules,
      each with its own agenda and conflict set. Contexts are similar to Jess
      and CLIPS modules.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l2 level1 lfo6;tab-stops:list .5in'>The EXISTS conditional
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'>The EXISTS conditional
      element.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l2 level1 lfo6;tab-stops:list .5in'>Duplicate fact detection.
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'>Duplicate fact detection.
      LISA now offers the option of performing duplicate detection during fact
      assertion, bringing its behavior more in line with CLIPS and Jess.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l2 level1 lfo6;tab-stops:list .5in'>Some new
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'>Some new
      &quot;introspection&quot; functions in the API.</li>
 </ul>
 
-<p>Unless bugs are reported, 2.0b3 will be released again as the official 2.0
-production version, probably with an additional experimental feature yet to be
-revealed. See the Reference Guide for details on the new features.</p>
+<p>Unless bugs are reported, 2.0b3 will be released again as the official 2.0 production
+version, probably with an additional experimental feature yet to be revealed.
+See the Reference Guide for details on the new features.</p>
 
 <h3>18 November, 2002</h3>
 
@@ -215,7 +264,7 @@ enhancements. Some of these might break existing code:</p>
 
 <ul type=disc>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>Truth maintenance has been
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>Truth maintenance has been
      completed. Negated patterns are now allowed within LOGICAL forms, lifting
      the restriction imposed by the initial TMS implementation. Beware removing
      or redefining rules that have active logical dependencies, however; this
@@ -223,18 +272,18 @@ enhancements. Some of these might break existing code:</p>
      operator may appear within a DEFRULE form. See the Reference Guide for
      details.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>The ASSERT and RETRACT macros
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>The ASSERT and RETRACT macros
      now operate on both template and CLOS instances.&nbsp; ASSERT-INSTANCE and
      RETRACT-INSTANCE have been deprecated.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>The last remaining (known)
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>The last remaining (known)
      concurrency issues have been addressed. As a side effect, LISA delays
      validating asserted facts (i.e. looking for their meta data) until
      assertion time. To assist developers, LISA will signal a continuable error
      if an attempt is made to assert a template fact that was not previously
      defined.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>DEFIMPORT is no longer
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>DEFIMPORT is no longer
      required. And indeed, its semantics have changed. If a class is either
      defined in, or imported into, a package of rules, then LISA will discover
      it automatically upon assertion of the first instance. Note that if a
@@ -242,11 +291,11 @@ enhancements. Some of these might break existing code:</p>
      imported as well. DEFIMPORT is now a convenience macro that may be used to
      handle those details.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;margin-bottom:12.0pt;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>USE-DEFAULT-ENGINE is
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>USE-DEFAULT-ENGINE is
      deprecated. LISA now creates an initial inference engine instance when
      first loaded.</li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l1 level1 lfo9;tab-stops:list .5in'>Inheritance reasoning, or the
+     mso-list:l2 level1 lfo9;tab-stops:list .5in'>Inheritance reasoning, or the
      consideration of an object's taxonomy during pattern matching, is now an
      &quot;all or nothing&quot; deal. In other words, this behavior is either
      enabled or disabled globally rather than on a class-by-class basis. By
@@ -267,17 +316,17 @@ reference guide contains details.</p>
 
 <h3>4 November, 2002</h3>
 
-<p>Alpha release five. This version introduces the OR conditional element, along
-with some improvements to the LISA debugger. The reference guide in the
+<p>Alpha release five. This version introduces the OR conditional element,
+along with some improvements to the LISA debugger. The reference guide in the
 distribution contains details.</p>
 
 <h3>28 October, 2002</h3>
 
-<p>Alpha release four. This version introduces the LISA debugger, a simple
-monitoring and inspection facility for production rules. There is documentation
-for this feature in the 2.0 reference guide. Well, it's actually the 1.x guide
-with debugger documentation grafted in. I haven't yet gone through the document
-and updated it for the rest of 2.0.</p>
+<p>Alpha release four. This version introduces the LISA debugger, a simple monitoring
+and inspection facility for production rules. There is documentation for this
+feature in the 2.0 reference guide. Well, it's actually the 1.x guide with
+debugger documentation grafted in. I haven't yet gone through the document and
+updated it for the rest of 2.0.</p>
 
 <h3>20 October, 2002</h3>
 
