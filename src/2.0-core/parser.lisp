@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.29 2002/09/26 15:44:58 youngde Exp $
+;;; $Id: parser.lisp,v 1.30 2002/09/26 19:13:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,10 +35,10 @@
 (defmacro make-equality-predicate (var atom)
   `(function
     (lambda ()
-      (equal (symbol-value ,var) ,@(if (symbolp atom) `(',atom) `(,atom))))))
+      (equal (symbol-value ,var) ,atom))))
 
-(defmacro make-generic-predicate (&rest body)
-  `(function (lambda () ,@body)))
+(defun make-generic-predicate (forms)
+  (eval `(function (lambda () (progn ,@forms)))))
 
 (defun find-or-set-slot-binding (var slot-name location)
   (multiple-value-bind (binding existsp)
@@ -80,7 +80,6 @@
   (with-rule-components ((doc-string lhs rhs) body)
     (format t "LHS: ~S~%" lhs)
     (format t "RHS: ~S~%" rhs)
-    (break)
     (add-new-rule 
      (inference-engine)
      (make-rule name (inference-engine) lhs rhs
@@ -204,11 +203,12 @@
                  (let ((bindings (list)))
                    (cond ((simple-form-p constraint)
                           (values 
-                           (make-equality-predicate var constraint) nil nil))
+                           (make-equality-predicate var constraint) 
+                           (list (find-slot-binding var)) nil))
                          ((simple-negated-form-p constraint)
                           (values (make-equality-predicate 
                                    var (second constraint))
-                                  nil t))
+                                  (list (find-slot-binding var)) t))
                          (t
                           (values (make-generic-predicate constraint)
                                   (collect-constraint-bindings
@@ -241,8 +241,6 @@
                        (parse-constraint field constraint))
                      (setf existing-bindings
                        (append existing-bindings constraint-bindings)))
-                   (print existing-bindings)
-                   (print constraint-bindings)
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
