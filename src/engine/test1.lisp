@@ -18,9 +18,11 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: test1.lisp
-;;; Description: This class represents a single test in a conditional element.
+;;; Description: The classes here represent single tests in a conditional
+;;; element. They serve as nothing more than "holders" for tests waiting to be
+;;; compiled by the Rete compiler.
 
-;;; $Id: test1.lisp,v 1.6 2000/12/23 02:21:16 youngde Exp $
+;;; $Id: test1.lisp,v 1.7 2001/01/04 17:03:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,17 +31,11 @@
           :initarg :value
           :reader get-value))
   (:documentation
-   "Represents a single test in a conditional element."))
-
-(defmethod do-test ((test test1) token fact)
-  (declare (ignore token fact))
-  (not (null (get-value test))))
+   "The base class for tests located within conditional elements. There's no
+   reason this class should be instantiated directly."))
 
 (defmethod value-is-variable-p ((self test1))
   (variablep (get-value self)))
-
-(defmethod equals ((self test1) (obj test1))
-  (equal (get-value self) (get-value obj)))
 
 (defclass test1-eq (test1)
   ()

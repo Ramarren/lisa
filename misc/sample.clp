@@ -48,6 +48,8 @@
 
 (defrule schtum-simple
   (rocky (name ?name&:(stringp ?name)))
+  (boris (name ?name&:(stringp ?name)))
+  (natasha (name "natasha"))
   =>
   (printout t "schtum-simple!" crlf))
 
@@ -56,11 +58,11 @@
 ;   (printout t "no-patterns!" crlf))
 
 ;(reset)
-(assert (rocky (name "boris")))
+;(assert (rocky (name "boris")))
 ;(assert (boris (name "boris")))
 ;(assert (natasha (name "natasha")))
 
 ;(assert (natasha (name "natasha") (nemesis "rocky")))
 ;(assert (natasha (name "natasha") (nemesis "natasha")))
 
-(run)
+;(run)
