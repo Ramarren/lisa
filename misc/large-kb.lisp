@@ -20,9 +20,9 @@
 ;;; File: large-kb.lisp
 ;;; Description: Makes a "large" knowledge base.
 
-;;; $Id: large-kb.lisp,v 1.1 2002/01/17 02:27:13 youngde Exp $
+;;; $Id: large-kb.lisp,v 1.2 2002/01/17 02:40:20 youngde Exp $
 
-(in-package "LISA")
+(in-package "LISA-USER")
 
 (use-default-engine)
 
@@ -34,7 +34,7 @@
        :initform 0
        :reader id)))
 
-(defimport frodo (lisa::frodo) ())
+(defimport frodo (lisa-user::frodo) ())
 
 (defun large-kb ()
   (dotimes (i 5000)
