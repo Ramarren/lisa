@@ -20,15 +20,13 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.10 2002/12/04 15:05:41 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.11 2002/12/20 00:13:18 youngde Exp $
 
 (in-package "LISA")
 
 (deftemplate initial-fact ())
 
-(deftemplate query-fact ()
-  (slot query-name))
-
+(deftemplate query-fact ())
 
 ;;; This macro is courtesy of Paul Werkowski. A very nice idea.
 

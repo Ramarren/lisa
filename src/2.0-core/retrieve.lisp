@@ -20,7 +20,7 @@
 ;;; File: retrieve.lisp
 ;;; Description:
 
-;;; $Id: retrieve.lisp,v 1.3 2002/12/19 15:09:29 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.4 2002/12/20 00:13:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,9 +31,8 @@
 (defun run-query (query-rule)
   "Runs a query (RULE instance), and returns both the value of *QUERY-RESULT*
   and the query name itself."
-  (let* ((?name (rule-name query-rule))
-         (*query-result* (list)))
-    (assert (query-fact (query-name ?name)))
+  (let ((*query-result* (list)))
+    (assert (query-fact))
     (run)
     *query-result*))
 
@@ -71,7 +70,6 @@
          (let* ((,query-name (gensym))
                 (,query
                  (defquery ',query-name
-;;;                     (query-fact (query-name ,query-name))
                      (query-fact)
                    ,@body
                    =>
