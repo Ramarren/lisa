@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.3 2000/12/06 17:13:06 youngde Exp $
+;;; $Id: bindings.lisp,v 1.4 2001/01/09 01:35:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -63,3 +63,20 @@
 (defun make-slot-binding (binding-name location slot-name)
   (make-instance 'slot-binding :name binding-name
                  :location location :slot-name slot-name))
+
+(defclass binding-table ()
+  ((table :initform (make-hash-table)
+          :reader (get-table)))
+  (:documentation
+   "A small class that maintains a collection of variable bindings."))
+
+(defmethod lookup-binding ((self binding-table) varname)
+  (gethash varname (get-table self)))
+
+(defmethod add-binding ((self binding-table) binding)
+  (with-accessors ((table get-table)) self
+    (unless (gethash (get-name binding) table)
+      (setf (gethash (get-name binding) table) binding))))
+
+(defun make-binding-table ()
+  (make-instance 'binding-table))

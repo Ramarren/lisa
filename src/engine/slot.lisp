@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.5 2000/12/04 20:12:19 youngde Exp $
+;;; $Id: slot.lisp,v 1.6 2001/01/09 01:35:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -28,17 +28,28 @@
   ((name :initarg :name
          :initform nil
          :reader get-name)
+   (value :initarg :value
+          :initform nil
+          :accessor get-value)
+   (constraint :initarg :constraint
+               :initform nil
+               :accessor get-constraint)
    (tests :initarg :tests
           :initform nil
-          :reader get-tests))
+          :accessor get-tests))
   (:documentation
    "Represents a single slot within a pattern."))
 
+(defmethod add-slot-test ((self slot) test)
+  (with-accessors ((tests get-tests)) self
+    (nconc tests `(,test))))
+
 (defmethod print-object ((self slot) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(name = ~S ; tests = ~D)"
-            (get-name self) (length (get-tests self)))))
+    (format strm "(name = ~S ; value = ~S ; constraint = ~S ; tests = ~D)"
+            (get-name self) (get-value)
+            (get-constraint) (length (get-tests self)))))
 
-(defun make-slot (name tests)
-  (make-instance 'slot :name name :tests tests))
+(defun make-slot (name value constraint)
+  (make-instance 'slot :name name :value value :constraint constraint))
 

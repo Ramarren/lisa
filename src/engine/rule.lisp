@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.30 2001/01/08 16:40:05 youngde Exp $
+;;; $Id: rule.lisp,v 1.31 2001/01/09 01:35:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,8 +38,8 @@
              :accessor get-patterns)
    (actions :initform nil
             :accessor get-actions)
-   (bindings :initform (make-hash-table)
-             :accessor get-bindings)
+   (bindings :initform (make-binding-table)
+             :accessor get-binding-table)
    (nodes :initform nil
           :accessor get-nodes)
    (engine :initarg :engine
@@ -68,12 +68,10 @@
     (make-function-call (get-actions self) bindings)))
 
 (defmethod add-binding ((self rule) binding)
-  (with-accessors ((bindings get-bindings)) self
-    (unless (gethash (get-name binding) bindings)
-      (setf (gethash (get-name binding) bindings) binding))))
+  (add-binding (get-binding-table self) binding))
 
 (defmethod find-binding ((self rule) varname)
-  (gethash varname (get-bindings self)))
+  (lookup-binding (get-binding-table self) varname))
 
 (defmethod traverse-bindings ((self rule) token)
   (flet ((show-binding (b)
@@ -112,6 +110,11 @@
                          (add-binding self binding))))
                  (get-tests slot))))
     (mapc #'create-slot-bindings (get-slots pattern))))
+
+(defun canonicalize-pattern (rule pattern)
+  (mapc #'(lambda (slot)
+            (canonicalize-slot rule pattern slot))
+        (get-slots pattern)))
 
 (defun add-new-pattern (rule pattern)
   (with-accessors ((patterns get-patterns)) rule

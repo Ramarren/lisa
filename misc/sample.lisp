@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.41 2001/01/08 16:40:05 youngde Exp $
+;;; $Id: sample.lisp,v 1.42 2001/01/09 01:35:04 youngde Exp $
 
 (in-package :lisa)
 
@@ -42,6 +42,8 @@
             :initform nil
             :reader get-nemesis)))
 
+(defclass fearless-leader () ())
+  
 (defun make-rocky (name)
   (make-instance 'rocky :name name))
 
@@ -54,8 +56,14 @@
 (defimport rocky lisa::rocky)
 (defimport boris lisa::boris)
 (defimport natasha lisa::natasha)
+(defimport fearless-leader lisa::fearless-leader)
 
 (watch :activations)
+
+(defrule fearless-leader
+  (fearless-leader (type fearless))
+  =>
+  (format t "fearless-leader fired.~%"))
 
 #+ignore
 (defrule rocky-1
@@ -69,6 +77,7 @@
   =>
   (format t "rocky-2 fired.~%"))
 
+#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name ?nemesis))

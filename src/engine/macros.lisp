@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.7 2001/01/07 03:33:22 youngde Exp $
+;;; $Id: macros.lisp,v 1.8 2001/01/09 01:35:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,7 +41,7 @@
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)
         (eq (first ,constraint) 'not)
-        (literalp (second ,constraint))))
+        (not (consp (second ,constraint)))))
 
 (defmacro constraintp (constraint)
   `(or (null ,constraint)
