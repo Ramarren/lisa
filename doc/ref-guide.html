@@ -717,11 +717,9 @@ ancestry. The following code fragment provides an example:
 
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
 
-and <i>boris</i> in the knowledge base, retracting each in turn. Note how it was
-
-unnecessary to import class <i>fundamental</i>, as LISA discovers the class
-
-hierarchy for <i>rocky</i> and <i>boris</i> and imports it automatically.</dl>
+and <i>boris</i> in the knowledge base, retracting each in turn. Note that
+taxonomic reasoning is disabled by default. To use the feature, evaluate
+(lisa:consider-taxonomy).</dl>
 
 </blockquote>
 
@@ -751,7 +749,7 @@ by LISA for each firing.</blockquote>
 
 <tr>
 
-<td WIDTH="80%">(undefrule <i>name-or-instance</i> &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%">(undefrule <i>qualified-name</i>)</td>
 
 
 
@@ -763,13 +761,10 @@ by LISA for each firing.</blockquote>
 
 
 
-<blockquote>Undefines, or removes, a rule from the Rete network contained
-
-in <i>engine</i>. <i>Name-or-instance</i> is either a symbol representing
-
-the rule name or the CLOS instance of a rule. By default, operates on the
-
-<i>current-engine</i>.</blockquote>
+<blockquote>Undefines, or removes, a rule from the Rete network. <i>Qualified-name</i>
+  is a symbol representing the fully qualified name of the rule (<i>context.rulename</i>).
+  For example, <i>wizards.frodo</i> evaluates to the rule named <i>frodo</i>
+  found in the <i>wizards</i> context.</blockquote>
 
 
 
@@ -850,7 +845,7 @@ itself.
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(reset &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(reset)</td>
 
 
 
@@ -874,7 +869,7 @@ operates on the <i>current-engine</i>.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(clear &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(clear)</td>
 
 
 
@@ -896,7 +891,7 @@ facts and agenda. By default, operates on the <i>current-engine</i>.</blockquote
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(run &amp;optional <i>engine</i> &amp;key <i>step)</i></td>
+<td WIDTH="80%" NOSAVE>(run &amp;optional <i>focus-list)</i></td>
 
 
 
@@ -944,7 +939,7 @@ by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(halt <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(halt)</td>
 
 
 
@@ -956,7 +951,7 @@ by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 
 
 
-<blockquote>Halts the inference engine <i>engine</i>, even if the agenda
+<blockquote>Halts the inference engine, even if the agenda
 
 still has activations. Typically used only on rule RHSs.</blockquote>
 
