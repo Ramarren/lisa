@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.7 2000/10/20 02:32:43 youngde Exp $
+;;; $Id: language.lisp,v 1.8 2000/10/20 18:07:50 youngde Exp $
 
 (in-package "LISA")
 
@@ -67,7 +67,7 @@
 
 (defun redefine-defrule (name body)
   (with-rule-components ((doc-string decls lhs rhs) body)
-    (let ((rule (make-defrule name :doc-string doc-string)))
+    (let ((rule (make-defrule name :doc-string doc-string :source body)))
       (mapc #'(lambda (p)
                 (add-pattern rule p))
             lhs)
@@ -109,33 +109,12 @@
            (overall-structure-ok (body)
              (< (position 'when body :test #'eq :key #'car)
                 (position 'then body :test #'eq :key #'car))))
-    (if (overall-structure-ok body)
-        (values (parse-lhs (rest (find 'when body :test #'eq :key #'car)))
-                (parse-rhs (rest (find 'then body :test #'eq :key #'car))))
-      (error "Parsing error: overall structure unsound"))))
-  
-#+ignore
-(defun parse-rulebody (body)
-  (labels ((parse-lhs (body &optional (patterns nil) (assign-to nil))
-             (let ((pattern (first body)))
-               (cond ((consp pattern)
-                      (parse-lhs (rest body)
-                                 (append patterns
-                                         (make-rule-pattern pattern
-                                         assign-to))))
-                     ((symbolp pattern)
-                      (cond ((eq pattern '=>)
-                             (values patterns (rest body)))
-                            ((variablep pattern)
-                             (parse-lhs
-                              (rest body) patterns pattern))
-                            (t (error "Parsing error on LHS at ~S~%" body))))
-                     (t (error "Parsing error on LHS at ~S~%" patterns)))))
-           (parse-rhs (actions)
-             (values actions)))
-    (multiple-value-bind (patterns remains)
-        (parse-lhs body)
-      (values patterns (parse-rhs remains)))))
+    (multiple-value-bind (lhs remains)
+        (find-before '=> body :test #'eq)
+      (if (not (null remains))
+          (values (parse-lhs lhs)
+                  (parse-rhs (find-after '=> remains :test #'eq)))
+        (error "parse-rulebody: rule structure unsound.")))))
 
 (defun make-rule-pattern (template &optional (assign-to nil))
   (labels ((parse-pattern (p)
