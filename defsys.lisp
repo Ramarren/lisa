@@ -2,7 +2,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.3 2000/10/12 20:37:12 youngde Exp $
+;;; $Id: defsys.lisp,v 1.4 2000/10/17 02:08:22 youngde Exp $
 
 (in-package "USER")
 
@@ -51,14 +51,10 @@
       (unless (probe-file path)
         (mkdir path)))))
 
-(mk:define-language :zebu
-    :compiler #'(lambda (file &key output-file error-file)
-                  (declare (ignore error-file))
-                  (apply #'zb:zebu-compile-file file `(:output-file ,output-file)))
-    :loader #'(lambda (&rest args)
-                (apply #'zb:zebu-load-file args))
-    :source-extension "zb"
-    :binary-extension "tab")
+(load (make-pathname :directory
+                     (append (pathname-directory *lisa-root-pathname*)
+                             '("contrib" "zebu-3.5.5"))
+                     :name "defsys"))
 
 (mk:defsystem "lisa"
     :source-pathname *lisa-source-pathname*

@@ -3,7 +3,7 @@
 ;;; Description: Exercise code to assist in some form of validation
 ;;; for LISA's grammar.
 ;;;
-;;; $Id: exercises.lisp,v 1.1 2000/10/12 20:23:18 youngde Exp $
+;;; $Id: exercises.lisp,v 1.2 2000/10/17 02:08:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,17 +111,23 @@
 
 (defrule rule-17
     "Assignment pattern."
-  ?fact <- (fact x 0 y 1)
+  (?fact (fact x 0 y 1))
   =>
   (retract ?fact))
 
 (defrule rule-18
     "Multiple assignment pattern"
-  ?f1 <- (color (not red))
-  ?f2 <- (color (not green))
+  (?f1 (color (not red)))
+  (?f2 (color (not green)))
   (test (not (equal ?f1 ?f2)))
   =>
   (halt))
 
-
+(defrule rule-19
+    "Some 'not' patterns."
+  (not (fact-1))
+  (fact-2)
+  =>
+  (let ((foo 1))
+    (print foo)))
 
