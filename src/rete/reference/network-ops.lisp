@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.9 2002/10/03 18:04:20 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.10 2002/10/07 18:55:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,3 +52,32 @@
                    (remove-node-from-parent rete-network parent node))
                  (remove-nodes (rest nodes))))))
     (remove-nodes (rule-node-list rule))))
+
+(defun merge-networks (from-rete to-rete)
+  (labels ((find-root-node (network node)
+             (find node :key #'node1-test
+                   (loop for node being the hash-value
+                       of (rete-roots network)
+                       collect node)))
+           (merge-successors (parent successors)
+             (if (endp successors) parent
+               (let* ((new-successor (first successors))
+                      (existing-successor
+                       (find-successor parent new-successor)))
+                 (if (null existing-successor)
+                     (add-successor parent new-successor)
+                   (merge-successors 
+                    existing-successor 
+                    (shared-node-all-successors 
+                     (successor-node new-successor))))
+                 (merge-successors parent (rest successors)))))
+           (merge-root-node (new-root)
+             (let ((existing-root
+                    (find-root-node to-rete new-root)))
+               (if (null existing-root)
+                   (add-new-root to-rete new-root)
+                 (merge-successors
+                  existing-root (shared-node-all-successors new-root))))))
+    (loop for new-root being the hash-value
+        of (rete-roots from-rete)
+        do (merge-root-node new-root))))
