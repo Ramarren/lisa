@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.3 2000/11/15 16:34:34 youngde Exp $
+;;; $Id: rete.lisp,v 1.4 2000/11/15 19:30:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -30,6 +30,9 @@
                :accessor get-hash-index)
    (rules :initform (make-hash-table)
           :accessor get-rules)
+   (strategy :initarg :strategy
+             :initform nil
+             :reader get-strategy)
    (compiler :initform (make-rete-compiler)
              :reader get-compiler))
   (:documentation
@@ -40,5 +43,5 @@
     (add-rule (get-compiler self) rule)
     (setf (gethash (get-name rule) rules) rule)))
 
-(defun make-rete ()
-  (make-instance 'rete))
+(defun make-rete (&key (strategy (make-depth-first-strategy)))
+  (make-instance 'rete :strategy strategy))
