@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.41 2002/11/05 18:10:40 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.42 2002/11/07 19:16:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,7 +42,9 @@
 
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table)
-               :reader rete-roots)))
+               :reader rete-roots)
+   (node-test-cache :initform (make-hash-table :test #'equal)
+                    :reader node-test-cache)))
 
 (defun record-node (node parent)
   (when (typep parent 'shared-node)
@@ -193,7 +195,8 @@
 (defun compile-rule-into-network (rete-network patterns rule)
   (let ((*root-nodes* (rete-roots rete-network))
         (*rule-specific-nodes* (list))
-        (*leaf-nodes* (make-array (length patterns))))
+        (*leaf-nodes* (make-array (length patterns)))
+        (*node-test-table* (node-test-cache rete-network)))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
     (add-terminal-node rule)

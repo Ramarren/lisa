@@ -20,12 +20,11 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.20 2002/10/01 18:09:24 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.21 2002/11/07 19:16:11 youngde Exp $
 
 (in-package "LISA")
 
-(defvar *node-test-table*
-    (make-hash-table :test #'equal))
+(defvar *node-test-table*)
 
 (defun find-test (key constructor)
   (let ((test (gethash key *node-test-table*)))
