@@ -853,8 +853,10 @@
 
 #-(or (and :CMU (not :new-compiler)) :vms :mcl :lispworks :clisp
       (and allegro-version>= (version>= 4 1)))
-(eval-when #-(or :lucid :cmu17) (:compile-toplevel :load-toplevel :execute)
-	   #+(or :lucid :cmu17) (compile load eval)
+(eval-when #-(or :lucid :cmu17 :cmu18)
+           (:compile-toplevel :load-toplevel :execute)
+	   #+(or :lucid :cmu17 :cmu18)
+           (compile load eval)
   (unless (or (fboundp 'lisp::require) (fboundp 'user::require)
 	      #+(and :excl (and allegro-version>= (version>= 4 0)))
 	      (fboundp 'cltl1::require)
@@ -1676,6 +1678,8 @@ s/^[^M]*IRIX Execution Environment 1, *[a-zA-Z]* *\\([^ ]*\\)/\\1/p\\
 	 (rel-keyword (when (keywordp (car rel-directory))
 			(pop rel-directory)))
 	 (rel-file (file-namestring rel-dir))
+	 #+:MCL (rel-name (pathname-name rel-dir))
+         #+:MCL (rel-type (pathname-type rel-dir))
 	 (directory nil))
     ;; TI Common Lisp pathnames can return garbage for file names because
     ;; of bizarreness in the merging of defaults.  The following code makes
@@ -1683,12 +1687,12 @@ s/^[^M]*IRIX Execution Environment 1, *[a-zA-Z]* *\\([^ ]*\\)/\\1/p\\
     ;; pathname-name.  It also strips TI specific extensions and handles
     ;; the necessary case conversion.  TI maps upper back into lower case
     ;; for unix files!
-    #+TI(if (search (pathname-name abs-dir) abs-name :test #'string-equal)
-	    (setf abs-name (string-right-trim "." (string-upcase abs-name)))
-	    (setf abs-name nil))
-    #+TI(if (search (pathname-name rel-dir) rel-file :test #'string-equal)
-	    (setf rel-file (string-right-trim "." (string-upcase rel-file)))
-	    (setf rel-file nil))
+    #+TI (if (search (pathname-name abs-dir) abs-name :test #'string-equal)
+	     (setf abs-name (string-right-trim "." (string-upcase abs-name)))
+	     (setf abs-name nil))
+    #+TI (if (search (pathname-name rel-dir) rel-file :test #'string-equal)
+	     (setf rel-file (string-right-trim "." (string-upcase rel-file)))
+	     (setf rel-file nil))
     ;; Allegro v4.0/4.1 parses "/foo" into :directory '(:absolute :root)
     ;; and filename "foo". The namestring of a pathname with
     ;; directory '(:absolute :root "foo") ignores everything after the
@@ -1724,10 +1728,14 @@ s/^[^M]*IRIX Execution Environment 1, *[a-zA-Z]* *\\([^ ]*\\)/\\1/p\\
     (namestring
      (make-pathname :host host
 		    :device device
-		    :directory
-		    #-(and :cmu (not :cmu17)) directory
-		    #+(and :cmu (not :cmu17)) (coerce directory 'simple-vector)
-		    :name rel-file))))
+                    :directory
+		    #-(and :cmu (not (or :cmu17 :cmu18)))
+                    directory
+		    #+(and :cmu (not (or :cmu17 :cmu18)))
+                    (coerce directory 'simple-vector)
+		    :name #-:MCL rel-file #+:MCL rel-name
+		    #+:MCL :type #+:MCL rel-type
+		    ))))
 
 (defun directory-to-list (directory)
   ;; The directory should be a list, but nonstandard implementations have
@@ -2024,7 +2032,7 @@ D
 
 (defstruct (component (:include topological-sort-node)
                       (:print-function print-component))
-  (type nil
+  (type :file     ; to pacify the CMUCL compiler (:type is alway supplied)
 	:type (member :defsystem
 		      :system
 		      :subsystem
@@ -2061,8 +2069,8 @@ D
   ;; #'load. Unlike fdmm's SET-LANGUAGE macro, this allows a defsystem to
   ;; mix languages.
   (language nil :type (or null symbol))
-  (compiler nil :type (or null function))
-  (loader   nil :type (or null function))
+  (compiler nil :type (or null symbol function))
+  (loader   nil :type (or null symbol function))
   (compiler-options nil :type list)	; A list of compiler options to
                                         ; use for compiling this
                                         ; component.  These must be
@@ -2133,7 +2141,7 @@ D
 	    (when path
 	      (gethash path *file-load-time-table*)))))))))
 
-#-:CMU17
+#-(or :cmu17 :cmu18)
 (defsetf component-load-time (component) (value)
   `(when ,component
     (etypecase ,component
@@ -2158,7 +2166,7 @@ D
 		    ,value)))))))
     ,value))
 
-#+:CMU17
+#+(or :cmu17 :cmu18)
 (defun (setf component-load-time) (value component)
   (declare
    (type (or null string pathname component) component)
@@ -2458,9 +2466,9 @@ D
 			   :name (pathname-name pathname)
 			   :type (component-extension component type)
 			   :device
-			   #+(and :CMU (not :cmu17))
+			   #+(and :CMU (not (or :cmu17 :cmu18)))
 			   :absolute
-			   #-(and :CMU (not :cmu17))
+			   #-(and :CMU (not (or :cmu17 :cmu18)))
 			   (let ((dev (component-device component)))
 			     (when dev
 			       (pathname-device dev)))
@@ -3519,8 +3527,8 @@ D
 ;;; if anybody does a funcall on #'require.
 
 ;;; Redefine old require to call the new require.
-(eval-when #-(or :lucid :cmu17) (:load-toplevel :execute)
-	   #+(or :lucid :cmu17) (load eval)
+(eval-when #-(or :lucid :cmu17 :cmu18) (:load-toplevel :execute)
+	   #+(or :lucid :cmu17 :cmu18) (load eval)
 (unless *old-require*
   (setf *old-require*
 	(symbol-function
@@ -3663,6 +3671,7 @@ D
 
 (defparameter *c-compiler* "gcc")
 #-(or symbolics (and :lispworks :harlequin-pc-lisp))
+
 (defun run-unix-program (program arguments)
   ;; arguments should be a list of strings, where each element is a
   ;; command-line option to send to the program.
@@ -3692,20 +3701,164 @@ D
 			    output-file)))
 ||#
 
+#||
 (defun c-compile-file (filename &rest args &key output-file error-file)
   ;; gcc -c foo.c -o foo.o
   (declare (ignore args error-file))
   (run-unix-program *c-compiler*
 		    `("-c" ,filename ,@(if output-file `("-o" ,output-file)))))
+||#
 
 
+;;; The following code was inserted to improve C compiler support (at
+;;; least under Linux/GCC).
+;;; Thanks to Espen S Johnsen.
+;;;
+;;; 20001118 Marco Antoniotti.
+
+(defun default-output-pathname (path1 path2 type)
+  (if (eq path1 t)
+      (merge-pathnames
+       (make-pathname :type type)
+       (translate-logical-pathname (pathname path2)))
+      (translate-logical-pathname (pathname path1))))
+	      
+
+(defun run-compiler (program
+		     arguments
+		     output-file
+		     error-file
+		     error-output
+		     verbose)
+  #-cmu (declare (ignore error-file error-output))
+
+  (flet ((make-useable-stream (&rest streams)
+	   (apply #'make-broadcast-stream (delete nil streams)))
+	 )
+    (let ((error-file error-file)
+	  (error-file-stream nil)
+	  (verbose-stream nil)
+	  (old-timestamp (file-write-date output-file))
+	  (fatal-error nil)
+	  (output-file-written nil)
+	  )
+      (unwind-protect
+	   (progn
+	     #+cmu
+	     (setf error-file
+		   (when error-file
+		     (default-output-pathname error-file
+			                      output-file
+                     		              *compile-error-file-type*))
+
+		   error-file-stream
+		   (and error-file
+			(open error-file
+			      :direction :output
+			      :if-exists :supersede)))
+
+	     (setf verbose-stream
+		   (make-useable-stream
+		    #+cmu error-file-stream
+		    (and verbose *standard-input*)))
+    
+	     (format verbose-stream "Running ~A~@[ ~{~A~^ ~}~]~%" program arguments)
+
+	     (setf fatal-error
+		   #-cmu
+		   (and (run-unix-program program arguments) nil) ; Incomplete.
+		   #+cmu
+		   (let* ((error-output
+			   (make-useable-stream error-file-stream
+						(if (eq error-output t)
+						    *error-output*
+						  error-output)))
+			  (process
+			   (ext:run-program program arguments
+					    :error error-output)))
+		     (not (zerop (ext:process-exit-code process)))))
+
+	     (setf output-file-written
+		   (and (probe-file output-file)
+			(not (eql old-timestamp
+				  (file-write-date output-file)))))
+	     
+
+	     (when output-file-written
+	       (format verbose-stream "~A written~%" output-file))
+	     (format verbose-stream "Running of ~A finished~%" program))
+
+	#+cmu
+	(when error-file
+	  (close error-file-stream)
+	  (unless (or fatal-error (not output-file-written))
+	    (delete-file error-file)))
+	
+	(values (and output-file-written output-file)
+		fatal-error
+		fatal-error)))))
+	  
+
+
+(defun c-compile-file (filename &rest args
+				&key
+				(output-file t)
+				(error-file t)
+				(error-output t)
+				(verbose *compile-verbose*)
+				debug
+				link
+				optimize
+				cflags
+				definitions
+				include-paths
+				library-paths
+				libraries
+				(error t))
+  (declare (ignore args))
+
+  (flet ((map-options (flag options &optional (func #'identity))
+	   (mapcar #'(lambda (option)
+		       (format nil "~A~A" flag (funcall func option)))
+		   options))
+	 )
+    (let* ((output-file (default-output-pathname output-file filename "o"))
+	   (arguments
+	    `(,@(when (not link) '("-c"))
+	      ,@(when debug '("-g"))
+	      ,@(when optimize (list (format nil "-O~D" optimize)))
+	      ,@cflags
+	      ,@(map-options
+		 "-D" definitions
+		 #'(lambda (definition)
+		     (if (atom definition)
+			 definition
+		       (apply #'format nil "~A=~A" definition))))
+	      ,@(map-options "-I" include-paths #'truename)
+	      ,(namestring (truename filename))
+	      "-o"
+	      ,(namestring (translate-logical-pathname output-file))
+	      ,@(map-options "-L" library-paths #'truename)
+	      ,@(map-options "-l" libraries))))
+      
+      (multiple-value-bind (output-file warnings fatal-errors)
+	  (run-compiler *c-compiler*
+			arguments
+			output-file
+			error-file
+			error-output
+			verbose)
+	(if (and error (or (not output-file) fatal-errors))
+	    (error "Compilation failed")
+	    (values output-file warnings fatal-errors))))))
 
 
 (define-language :c
   :compiler #'c-compile-file
   :loader #+:lucid #'load-foreign-files
           #+:allegro #'load
-          #-(or :lucid :allegro) #'load
+          #+:cmu #'alien:load-foreign
+          #-(or :lucid :allegro :cmu) #'load
   :source-extension "c"
   :binary-extension "o")
 
