@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.48 2001/05/07 17:48:12 youngde Exp $
+;;; $Id: mab.lisp,v 1.49 2001/07/12 20:41:04 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -361,6 +361,7 @@
 
 ;;; startup rule...
 
+#+ignore
 (defrule startup ()
   =>
   (assert (monkey (location t5-7) (on-top-of green-couch)
@@ -388,6 +389,32 @@
                  (on-top-of floor) (weight light) (location t1-3)))
   (assert (goal-is-to (action eat) (argument-1 bananas) (argument-2 empty))))
 
+(deffacts mab-startup ()
+  (monkey (location t5-7) (on-top-of green-couch)
+          (location green-couch) (holding blank))
+  (thing (name green-couch) (location t5-7) (weight heavy)
+         (on-top-of floor))
+  (thing (name red-couch) (location t2-2) 
+         (on-top-of floor) (weight heavy))
+  (thing (name big-pillow) (location t2-2) 
+         (weight light) (on-top-of red-couch))
+  (thing (name red-chest) (location t2-2) 
+         (weight light) (on-top-of big-pillow))
+  (chest (name red-chest) (contents ladder) (unlocked-by red-key))
+  (thing (name blue-chest) (location t7-7) 
+         (weight light) (on-top-of ceiling))
+  (thing (name grapes) (location t7-8) 
+         (weight light) (on-top-of ceiling))
+  (chest (name blue-chest) (contents bananas) (unlocked-by blue-key))
+  (thing (name blue-couch) (location t8-8) 
+         (on-top-of floor) (weight heavy))
+  (thing (name green-chest) (location t8-8) 
+         (weight light) (on-top-of ceiling))
+  (chest (name green-chest) (contents blue-key) (unlocked-by red-key))
+  (thing (name red-key) 
+         (on-top-of floor) (weight light) (location t1-3))
+  (goal-is-to (action eat) (argument-1 bananas) (argument-2 empty)))
+
 #+ignore
 (defun run-mab (&optional (ntimes 1))
   (let ((start (get-internal-real-time)))
@@ -402,8 +429,8 @@
 (defun run-mab (&optional (ntimes 1))
   (flet ((repeat-mab ()
            (dotimes (i ntimes)
-             (format t "Starting run.~%")
              (reset)
+             (format t "Starting run.~%")
              (run))))
     (time (repeat-mab))))
 
