@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.29 2002/11/08 15:53:49 youngde Exp $
+;;; $Id: rete.lisp,v 1.30 2002/11/13 16:06:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,6 +41,8 @@
               :reader rete-meta-data)
    (class-table :initform (make-hash-table)
                 :reader rete-class-table)
+   (dependency-table :initform (make-hash-table :test #'equal)
+                     :reader rete-dependency-table)
    (halted :initform nil
            :accessor rete-halted)
    (firing-count :initform 0
@@ -156,13 +158,17 @@
   fact)
 
 (defmethod retract-fact ((self rete) (fact fact))
-  (forget-fact self fact)
-  (trace-retract fact)
-  (dolist (dependent-fact (fact-dependencies fact))
-    (retract-fact self dependent-fact))
-  (cleanup-logical-dependencies fact)
-  (remove-fact-from-network (rete-network self) fact)
-  fact)
+  (flet ((retract-scheduled-dependencies ()
+           (dolist (dependency scheduled-dependencies)
+             (dolist (dependent-fact 
+                         (gethash (rete-dependency-table self) dependency))
+               (retract-fact self dependent-fact)))))
+    (with-truth-maintenance
+      (forget-fact self fact)
+      (trace-retract fact)
+      (remove-fact-from-network (rete-network self) fact)
+      (retract-scheduled-dependencies self))
+    fact))
 
 (defmethod retract-fact ((self rete) (fact-id integer))
   (let ((fact (find-fact-by-id self fact-id)))

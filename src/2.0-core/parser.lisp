@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.58 2002/11/12 19:18:37 youngde Exp $
+;;; $Id: parser.lisp,v 1.59 2002/11/13 16:06:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -345,12 +345,10 @@
        ,class)))
 
 (defun bind-logical-dependencies (fact)
-  (let ((marker (rule-logical-marker (active-rule)))
-        (dependencies (list)))
-    (loop for i from 0 to marker
-        do (push (token-find-fact (active-tokens) i) dependencies))
-    (add-logical-dependency (active-rule) dependencies fact)
-    fact))
+  (add-logical-dependency 
+   (inference-engine) fact 
+   (make-dependency-set (active-tokens) (rule-logical-marker (active-rule))))
+  fact)
   
 (defun parse-and-insert-instance (instance)
   (ensure-meta-data-exists

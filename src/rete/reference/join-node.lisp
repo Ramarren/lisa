@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.12 2002/11/12 19:48:03 youngde Exp $
+;;; $Id: join-node.lisp,v 1.13 2002/11/13 16:06:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,11 +36,11 @@
    (right-memory :initform (make-hash-table :test #'equal)
                  :reader join-node-right-memory)))
 
-(defun mark-as-logical-block (join-node)
-  (setf (slot-value join-node 'logical-block) t))
+(defun mark-as-logical-block (join-node marker)
+  (setf (slot-value join-node 'logical-block) marker))
 
 (defun logical-block-p (join-node)
-  (join-node-logical-block join-node))
+  (numberp (join-node-logical-block join-node)))
 
 (defun remember-token (memory token)
   (setf (gethash (hash-key token) memory) token))
@@ -76,6 +76,13 @@
 
 (defmethod pass-tokens-to-successor ((self join-node) left-tokens)
   (call-successor (join-node-successor self) left-tokens))
+
+(defmethod pass-tokens-to-successor :around ((self join-node)
+                                             (left-tokens remove-token))
+  (when (logical-block-p self)
+    (schedule-dependency-removal 
+     (make-dependency-set left-tokens (join-node-logical-block self))))
+  (call-next-method))
 
 (defmethod combine-tokens ((left-tokens add-token) (right-token token))
   (token-push-fact 

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.43 2002/11/12 19:48:03 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.44 2002/11/13 16:06:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -174,7 +174,7 @@
                 (make-node2-test))
                (t (make-node2)))))
     (when (eql (parsed-pattern-address (logical-block-marker)))
-      (mark-as-logical-block join-node))
+      (mark-as-logical-block join-node (logical-block-marker)))
     join-node))
 
 (defun make-left-join-connection (join-node node)
@@ -201,17 +201,11 @@
 (defun add-terminal-node (rule)
   (add-successor (leaf-node) (make-terminal-node rule) #'pass-token))
 
-(defun record-logical-block (patterns)
-  (let ((addresses (list)))
-    (dolist (pattern patterns (first addresses))
-      (when (logical-pattern-p pattern)
-        (push (parsed-pattern-address pattern))))))
-
 (defun compile-rule-into-network (rete-network patterns rule)
   (let ((*root-nodes* (rete-roots rete-network))
         (*rule-specific-nodes* (list))
         (*leaf-nodes* (make-array (length patterns)))
-        (*logical-block-marker* (record-logical-block patterns))
+        (*logical-block-marker* (rule-logical-marker rule))
         (*node-test-table* (node-test-cache rete-network)))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)

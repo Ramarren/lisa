@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.14 2002/11/12 19:18:37 youngde Exp $
+;;; $Id: rule.lisp,v 1.15 2002/11/13 16:06:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,7 +49,8 @@
    (subrules :initform nil
              :accessor rule-subrules)
    (logical-marker :initform nil
-                   :accessor rule-logical-marker)
+                   :initarg :logical-marker
+                   :reader rule-logical-marker)
    (active-dependencies :initform (make-hash-table :test #'equal)
                         :reader rule-active-dependencies)
    (engine :initarg :engine
@@ -105,15 +106,6 @@
 (defun add-logical-dependency (rule dependencies fact)
   (setf (gethash dependencies (rule-active-dependencies rule)) fact))
 
-(defun remember-logical-dependencies (rule patterns)
-  (let ((markers (list)))
-    (dolist (pattern patterns)
-      (when (logical-pattern-p pattern)
-        (push (parsed-pattern-address pattern) markers)))
-    (unless (null markers)
-      (setf (rule-logical-marker rule) (first markers)))
-    rule))
-
 (defun logical-rule-p (rule)
   (numberp (rule-logical-marker rule)))
 
@@ -122,19 +114,22 @@
   (flet ((make-rule-binding-set ()
            (delete-duplicates
             (loop for pattern in patterns
-                append (parsed-pattern-binding-set pattern)))))
-    (let ((rule
-           (compile-rule
-            (make-instance 'rule 
-              :name name 
-              :engine engine
-              :comment doc-string
-              :salience salience
-              :module module
-              :binding-set (make-rule-binding-set))
-            patterns actions)))
-      (remember-logical-dependencies rule patterns)
-      rule)))
+                append (parsed-pattern-binding-set pattern))))
+         (find-logical-marker ()
+           (let ((addresses (list)))
+             (dolist (pattern patterns (first addresses))
+               (when (logical-pattern-p pattern)
+                 (push (parsed-pattern-address pattern) addresses))))))
+    (compile-rule
+     (make-instance 'rule 
+       :name name 
+       :engine engine
+       :comment doc-string
+       :salience salience
+       :module module
+       :logical-marker (find-logical-marker patterns)
+       :binding-set (make-rule-binding-set))
+     patterns actions)))
 
 (defun make-composite-rule (name engine patterns actions
                             &rest args
