@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.65 2001/04/10 20:35:52 youngde Exp $
+;;; $Id: parser.lisp,v 1.66 2001/04/11 15:02:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -262,6 +262,7 @@
       `(import-class ',symbolic-name ,class
         ',(determine-relevant-slots class slot-specs)))))
 
-(defun parse-and-insert-instance (instance))
-  
-                       
+(defun parse-and-insert-instance (instance)
+  (assert-fact
+   (current-engine)
+   (make-shadow-fact (find-symbolic-name instance) instance)))

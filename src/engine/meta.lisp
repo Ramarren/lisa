@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.24 2001/04/11 14:20:59 youngde Exp $
+;;; $Id: meta.lisp,v 1.25 2001/04/11 15:02:11 youngde Exp $
 
 (in-package "LISA")
 
@@ -104,37 +104,37 @@
                   `(,:object))
                  :effective-slots slots))
 
-(let ((meta-map (make-hash-table))
-      (class-map (make-hash-table)))
+(defparameter *meta-map* (make-hash-table))
+(defparameter *class-map* (make-hash-table))
+
+(defun register-meta-class (name meta-object)
+  (setf (gethash name *meta-map*) meta-object))
+
+(defun forget-meta-class (name)
+  (remhash name *meta-map*))
+
+(defun forget-meta-classes ()
+  (clrhash *meta-map*))
+
+(defun has-meta-classp (name)
+  (gethash name *meta-map*))
   
-  (defun register-meta-class (name meta-object)
-    (setf (gethash name meta-map) meta-object))
+(defun find-meta-class (name &optional (errorp t))
+  (let ((meta-object (gethash name *meta-map*)))
+    (when (and (null meta-object) errorp)
+      (environment-error
+       "This fact name does not have a registered meta class: ~S" name))
+    (values meta-object)))
 
-  (defun forget-meta-class (name)
-    (remhash name meta-map))
+(defun register-external-class (symbolic-name class)
+  (setf (gethash (class-name class) *class-map*) symbolic-name))
 
-  (defun forget-meta-classes ()
-    (clrhash meta-map))
-
-  (defun has-meta-classp (name)
-    (gethash name meta-map))
-  
-  (defun find-meta-class (name &optional (errorp t))
-    (let ((meta-object (gethash name meta-map)))
-      (when (and (null meta-object) errorp)
-        (environment-error
-         "This fact name does not have a registered meta class: ~S" name))
-      (values meta-object)))
-
-  (defun register-external-class (symbolic-name class)
-    (setf (gethash (class-name class) class-map) symbolic-name))
-
-  (defun find-symbolic-name (instance)
-    (let ((name (gethash (class-name (class-of instance)))))
-      (when (null name)
-        (environment-error
-         "The class of this instance is not known to LISA: ~S." instance))
-      (values name))))
+(defun find-symbolic-name (instance)
+  (let ((name (gethash (class-name (class-of instance)) *class-map*)))
+    (when (null name)
+      (environment-error
+       "The class of this instance is not known to LISA: ~S." instance))
+    (values name)))
 
 (defun import-class (symbolic-name class slot-specs)
   (let ((meta (make-meta-shadow-fact
