@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.16 2001/04/26 20:17:25 youngde Exp $
+;;; $Id: environment.lisp,v 1.17 2001/04/26 20:19:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -54,8 +54,8 @@
       `(lmp:with-lock (,mutex)
         (let ((,old-engine (use-engine ,engine)))
           (unwind-protect 
-               (progn ,@body))
-          (use-engine ,old-engine))))))
+               (progn ,@body)
+            (use-engine ,old-engine)))))))
 
 (defun clear-environment (engine)
   "Completely resets the inference engine ENGINE."
