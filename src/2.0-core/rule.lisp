@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.27 2004/03/16 22:04:49 youngde Exp $
+;;; $Id: rule.lisp,v 1.28 2004/03/20 02:19:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,6 +41,7 @@
                :initarg :auto-focus
                :reader rule-auto-focus)
    (behavior :initform nil
+             :initarg :behavior
              :accessor rule-behavior)
    (binding-set :initarg :binding-set
                 :initform nil
@@ -100,9 +101,11 @@
   (setf (slot-value rule 'node-list) nodes))
 
 (defun compile-rule-behavior (rule actions)
-  (setf (rule-behavior rule)
-    (make-behavior (rule-actions-actions actions)
-                   (rule-actions-bindings actions))))
+  (with-accessors ((behavior rule-behavior)) rule
+    (unless behavior
+      (setf (rule-behavior rule)
+        (make-behavior (rule-actions-actions actions)
+                       (rule-actions-bindings actions))))))
 
 (defmethod conflict-set ((self rule))
   (conflict-set (rule-context self)))
@@ -167,7 +170,8 @@
                   &key (doc-string nil) 
                        (salience 0) 
                        (context (active-context))
-                       (auto-focus nil))
+                       (auto-focus nil)
+                       (compiled-behavior nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
             (loop for pattern in patterns
@@ -178,6 +182,7 @@
        :engine engine
        :patterns patterns
        :actions actions
+       :behavior compiled-behavior
        :comment doc-string
        :salience salience
        :context (if (null context)
@@ -209,6 +214,7 @@
                     :context ,(if (initial-context-p (rule-context rule))
                                   nil
                                 (context-name (rule-context rule)))
+                    :compiled-behavior ,(rule-behavior rule)
                     :auto-focus ,(rule-auto-focus rule))))
     (with-inference-engine (engine)
       (if (composite-rule-p rule)
