@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.13 2002/07/29 17:41:50 youngde Exp $
+;;; $Id: lisa.system,v 1.14 2002/08/05 17:09:17 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -62,8 +62,10 @@
        '("acl" "lispworks" "cmucl" "clisp")))
   (dolist (lisp lisa-supported-lisps)
     (dolist (dir lisa-binary-directories)
-      (ensure-directories-exist 
-       (concatenate 'string "lisa:lib;" lisp ";" dir ";")))))
+      (let ((pathname
+             (translate-logical-pathname
+              (concatenate 'string "lisa:lib;" lisp ";" dir ";"))))
+        (ensure-directories-exist pathname)))))
 
 (mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
