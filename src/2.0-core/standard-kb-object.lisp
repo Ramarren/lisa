@@ -21,12 +21,12 @@
 ;;; Description: A mixin class used to support reasoning over user-define CLOS
 ;;; objects.
 
-;;; $Id: standard-kb-object.lisp,v 1.2 2002/11/06 20:16:31 youngde Exp $
+;;; $Id: standard-kb-object.lisp,v 1.3 2002/11/07 02:58:41 youngde Exp $
 
 (in-package "LISA")
 
 (defclass standard-kb-object ()
-  ((symbolic-name :reader symbolic-name)
+  ((meta-data :reader meta-data)
    (slot-table :reader slot-table
                :initform (make-hash-table))
    (slot-list :reader slot-list
@@ -37,6 +37,12 @@
                  :reader superclasses))
   (:documentation
    "A mixin class used to support reasoning over user-defined CLOS objects."))
+
+(defstruct meta-fact ()
+  (symbolic-name nil :type symbol)
+  (slot-table (make-hash-table))
+  (slot-list (list))
+  (superclasses nil))
 
 (defmethod initialize-instance :after ((self standard-kb-object))
   (import-class self))
@@ -50,20 +56,13 @@
                            (setf (gethash slot-name table) 
                              effective-slot-name)
                            (push slot-name slot-list))))))
-           (import-one-class (class direct-superclasses)
-             (let* ((class-name (class-name class))
-                    (symbolic-name
-                     (intern (symbol-name class-name))))
-               (setf (slot-value kb-object 'symbolic-name) symbolic-name)
-               (setf (slot-value kb-object 'superclasses) direct-superclasses)
-               (register-slots (reflect:class-slot-list class))
-               (register-external-class symbolic-name class)))
-           (import-classes (class)
-             (let ((superclasses
-                    (if (use-inheritance-p kb-object)
-                        (reflect:find-direct-superclasses class)
-                      (list))))
-               (import-one-class class superclasses)
-               (dolist (super superclasses)
-                 (import-classes super)))))
-    (import-classes (find-class kb-object))))
+           (import-one-class (class)
+             (setf (slot-value kb-object 'meta-data)
+               (make-meta-fact
+                :symbolic-name (intern (symbol-name (class-name class)))
+                :superclasses
+                (if (use-inheritance-p kb-object)
+                    (reflect:find-direct-superclasses class)
+                  (list))))
+             (register-slots (reflect:class-slot-list class))))
+    (import-one-class (find-class kb-object))))
