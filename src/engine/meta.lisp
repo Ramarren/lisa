@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.14 2001/04/06 15:54:17 youngde Exp $
+;;; $Id: meta.lisp,v 1.15 2001/04/06 20:48:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -57,7 +57,7 @@
              (get-slots self))
     (values slots)))
 
-(defmethod initialize-instance :after ((self meta-fact) &key slots #+CLISP &allow-other-keys)
+(defmethod initialize-instance :after ((self meta-fact) &key slots)
   (let ((slot-table (get-slots self))
         (position -1))
     (mapc #'(lambda (slot-name)
