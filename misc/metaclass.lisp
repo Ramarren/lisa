@@ -20,14 +20,38 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.9 2002/11/27 15:47:02 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.10 2002/12/02 20:37:41 youngde Exp $
 
 (in-package "CL-USER")
 
 (defclass standard-kb-metaclass (standard-class) ())
 
 (defmethod initialize-instance :after ((self standard-kb-metaclass) &rest initargs)
-  (describe self))
+  (dolist (slot (slot-value self 'clos::direct-slots))
+    (format t "~%looking at writers for slot ~S~%" slot)
+    (dolist (writer (clos:slot-definition-writers slot))
+      (let* ((gf (ensure-generic-function writer))
+             (method-class
+              (generic-function-method-class gf)))
+        (describe gf)
+        (describe method-class)
+        (multiple-value-bind (body initargs)
+            (clos:make-method-lambda
+             gf
+             (class-prototype method-class)
+             '(new-value object)
+             nil
+             '(lambda (val obj) (break)))
+          (progn
+            (clos:add-method
+             gf
+             (apply #'make-instance method-class
+                    :function (compile nil body)
+                    :specializers
+                    `(,(find-class t) ,(find-class t)) #|,(find-class (slot-value self 'clos::name)))|#
+                    :qualifiers nil
+                    :lambda-list '(value object)
+                    initargs))))))))
 
 (defmethod validate-superclass ((class standard-kb-metaclass)
                                 (superclass standard-class))
@@ -40,9 +64,13 @@
 (defclass frodo ()
   ((name :initarg :name
          :initform nil
-         :accessor frodo-name))
+         :accessor frodo-name)
+   (age :initarg :age
+        :initform 100
+        :accessor frodo-age))
   (:metaclass standard-kb-metaclass))
 
+#+ignore
 (defmethod (setf frodo-name) (new-value (object frodo))
   (setf (clos:slot-value-using-class (class-of object) object 'name) new-value))
 
