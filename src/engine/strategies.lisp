@@ -22,7 +22,7 @@
 ;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
 ;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.11 2000/12/15 21:44:03 youngde Exp $
+;;; $Id: strategies.lisp,v 1.12 2000/12/15 21:53:55 youngde Exp $
 
 (in-package :lisa)
 
@@ -88,12 +88,15 @@
   (with-accessors ((inodes get-inodes)
                    (vector get-priority-vector)
                    (activations get-activations)) plist
-    (let* ((inode (first inodes))
-           (activation (pop (aref vector inode))))
-      (when (null (aref vector inode))
-        (pop inodes)
-        (remhash (hash-code (get-token activation)) activations))
-      (values activation))))
+    (let ((inode (first inodes)))
+      (cond ((null inode)
+             (values nil))
+            (t
+             (let ((activation (pop (aref vector inode))))
+               (when (null (aref vector inode))
+                 (pop inodes)
+                 (remhash (hash-code (get-token activation)) activations))
+               (values activation)))))))
 
 (defun get-all-activations (plist)
   (declare (type indexed-priority-list plist))
