@@ -21,80 +21,72 @@
 ;;; Description: Macros and functions implementing LISA's early attempt at a
 ;;; query language.
 
-;;; $Id: retrieve.lisp,v 1.7 2002/04/03 03:36:00 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.8 2002/04/04 03:39:24 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *query-result* nil)
 
-;;; NB: This is an experimental implementation of Queries for LISA. As such,
-;;; it cheats in various ways to limit the impact on other parts of the
-;;; system. For example, this code creates a temporary inference engine each
-;;; time a query is issued, borrowing the FACT table from CURRENT-ENGINE in
-;;; the process. This is not a permanent solution, but it will remain in place
-;;; while I gather feedback on the overall query mechanism.
+(deftemplate query-fact ()
+  (slot name))
 
 (defun run-query (query)
-  (let ((?name (get-name query)))
-    (assert (query-fact (name ?name)))
-    (run)
-    (values *query-result*)))
-
-(defun define-and-run-query (name body)
-  (let ((*query-result* '())
-        (query-engine (make-inference-engine)))
-    (setf (get-facts query-engine) (get-facts (current-engine)))
-    (with-inference-engine (query-engine)
-      (add-rule query-engine (define-rule name body))
+  (with-inference-engine ((current-engine))
+    (let ((?name (get-name query))
+          (*query-result* '()))
+      (assert (query-fact (name ?name)))
       (run)
       (values *query-result*))))
+
+#+ignore
+(defun run-query (query))
+
+(defun define-query (name body)
+  (format t "name ~S, body ~S~%" name body)
+  (let ((rule (define-rule name body)))
+    (add-rule (current-engine) rule)
+    (values rule)))
 
 (defmacro defquery (name &body body)
   (let ((rule-name (gensym)))
     `(let ((,rule-name
             (if (consp ',name) ,name ',name)))
-       (define-and-run-query ,rule-name ',body))))
-
-#+ignore
-(defun define-and-run-query (name body)
-  (let ((*query-result* '())
-        (query-engine (make-inference-engine)))
-    (setf (get-facts query-engine) (get-facts (current-engine)))
-    (with-inference-engine (query-engine)
-      (add-rule query-engine (define-rule name body))
-      (run)
-      (values *query-result*))))
-
-#+ignore
-(defmacro defquery (name &body body)
-  (let ((rule-name (gensym)))
-    `(let ((,rule-name
-            (if (consp ',name) ,name ',name)))
-       (define-and-run-query ,rule-name ',body))))
-
-#+ignore
-(defmacro retrieve ((&rest varlist) &body body)
-  (flet ((make-query-binding (var)
-           `(cons ',var (instance-of-shadow-fact ,var))))
-    `(defquery (gensym)
-       ,@body
-       =>
-       (push (list ,@(mapcar #'make-query-binding varlist)) *query-result*))))
+       (define-query ',rule-name ',body))))
 
 (defmacro retrieve ((&rest varlist) &body body)
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
     (let ((query (gensym))
-          (query-name (gensym)))
-      `(let ((,query (find-query ',body)))
-         (if (null ,query)
-             (let ((,query-name (gensym)))
-               (defquery ,query-name
-                   (query-fact (name ,query-name))
-                 ,@body
-                 =>
-                 (push (list ,@(mapcar #'make-query-binding varlist)) *query-result*)))
-           (run-query ,query))))))
+          (query-name (gensym))
+          (hash (gensym)))
+      `(let* ((,hash (normalize-query ',body))
+              (,query (find-query ,hash)))
+         (when (null ,query)
+;;;             (let ((,query-name (gensym)))
+           (setf ,query
+             (defquery query-name
+                 (query-fact (name ,query-name))
+               ,@body
+               =>
+               (push (list ,@(mapcar #'make-query-binding varlist))
+                     *query-result*)))
+               (remember-query ,hash ,query))
+         (run-query ,query)))))
+
+(defvar *query-map*
+    (make-hash-table))
+
+(defun forget-all-queries ()
+  (clrhash *query-map*))
+
+(defun remember-query (hash query)
+  (setf (gethash hash *query-map*) (get-name query)))
+
+(defun find-query (hash)
+  (let ((query-name (gethash hash *query-map*)))
+    (if (not (null query-name))
+        (find-rule (current-engine) query-name)
+      (values nil))))
 
 (defun normalize-query (body)
   (let ((varlist '())
