@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.5 2002/10/01 18:09:24 youngde Exp $
+;;; $Id: language.lisp,v 1.6 2002/10/17 01:45:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,8 +85,22 @@
 (defun retract (fact &optional (engine *active-engine*))
   (retract-fact engine fact))
 
+#+ignore
 (defmacro modify (fact &body body)
   (parse-and-modify-fact fact body))
+
+(defmacro modify (fact &body body)
+  `(modify-fact
+    (inference-engine)
+    ,fact 
+    ,@(mapcar #'(lambda (pair)
+                  (destructuring-bind (name value) pair
+                    `(list (identity ',name) 
+                           (identity 
+                            ,@(if (quotablep value)
+                                  `(',value)
+                                `(,value))))))
+              body)))
 
 (defun watch (event)
   (watch-event event))
