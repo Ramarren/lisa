@@ -38,23 +38,23 @@ algorithm; perhaps at some future date I'll make an attempt.
 
 Abbreviated Table of Contents</h2></center>
 
-<a href="#The Programming Language">The Programming Language</a>.
+<a href="#The Programming Language">The Programming Language</a>
 
-<br><a href="#The Environment">The Environment</a>.<br>
-<a href="#Contexts">Contexts</a>.
+<br><a href="#The Environment">The Environment</a><br>
+<a href="#Contexts">Contexts</a>
 
 <br><a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
 
 <br><a href="#Queries">Queries</a>
 
-<br><a href="#Conflict Resolution">Conflict Resolution</a>.<a href="#The LISA Debugger"><br>
-The LISA Debugger</a>.
+<br><a href="#Conflict Resolution">Conflict Resolution</a><a href="#The LISA Debugger"><br>
+The LISA Debugger</a>
 
-<br><a href="#Getting Started">Getting Started</a>.
+<br><a href="#Getting Started">Getting Started</a>
 
-<br><a href="#Things Yet to Do">Things Yet to Do</a>.
+<br><a href="#Things Yet to Do">Things Yet to Do</a>
 
-<br><a href="#Supported Platforms">Supported Platforms</a>.
+<br><a href="#Supported Platforms">Supported Platforms</a>
 
 <br>&nbsp;
 
@@ -124,9 +124,8 @@ are analogous to class slots, but without any of the keyword arguments.
 
 Templates are a convenient way of specifying concepts that don't need the
 
-full support of CLOS. Reasoning over them is slightly more efficient, both
-
-in terms of time and size.</blockquote>
+full support of CLOS, but frankly they're really only in place to ease the
+  transition from CLIPS and Jess.&nbsp;</blockquote>
 
 
 
@@ -864,7 +863,7 @@ facts, clearing all context agendas, and asserting the <i>initial-fact</i>.</blo
 
 
 
-<blockquote>Re-initializes most of the LISA environment, mostly by creating a
+<blockquote>Re-initializes the LISA environment, mostly by creating a
   new instance of the default inference engine.</blockquote>
 
 
@@ -885,7 +884,7 @@ facts, clearing all context agendas, and asserting the <i>initial-fact</i>.</blo
 
 
 
-<blockquote>Runs the inference engine, optionally pushing the contexts on <i>focus-list</i>
+<blockquote>Runs the inference engine, optionally pushing the context names on <i>focus-list</i>
   onto the focus stack before doing so. Execution
 
 will continue until either all agendas are exhausted or a rule calls (halt).</blockquote>
@@ -1383,9 +1382,19 @@ Returns the inference engine's focus stack.</p>
 
 Returns a list of all the inference engine's defined contexts.</p>
 
+</blockquote>
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(with-context (<i>context</i> &amp;body <i>body</i>)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+
 <p>
 
-&nbsp;</p>
+Evaluates the forms contained in <i>body</i> within the context <i>context</i>.</p>
 
 </blockquote>
 
