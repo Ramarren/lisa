@@ -20,14 +20,19 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.2 2002/08/28 18:52:00 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.3 2002/08/28 19:32:36 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete-network ()
-  ((roots :initform
-          (make-array nil :adjustable t :fill-pointer t)
-          :reader rete-roots)))
+  ((root-nodes :initform
+               (make-array 0 :adjustable t :fill-pointer t)
+               :reader rete-roots)))
+
+(defun add-root-node (rete-network class)
+  (let ((node (make-node1 (make-class-test class))))
+    (vector-push-extend node (rete-roots rete-network))
+    node))
 
 (defun make-rete-network ()
   (make-instance 'rete-network))
@@ -41,4 +46,20 @@
 (defun pass-token-on-right (node2 token)
   (accept-token-from-right node2 token))
 
-(defun compile-rule-into-network (patterns))
+(defun compile-rule-into-network (rete-network patterns)
+  (dolist (pattern patterns)
+    (let ((node
+           (add-root-node rete-network (parsed-pattern-class pattern))))
+      (dolist (slot (parsed-pattern-slots pattern))
+        (setf node
+          (add-successor
+           node (make-node1
+                 (make-simple-slot-test
+                  (pattern-slot-name slot)
+                  (pattern-slot-value slot)))
+           #'pass-token))))))
+
+(defun make-test-network (patterns)
+  (let ((network (make-rete-network)))
+    (compile-rule-into-network network patterns)
+    network))

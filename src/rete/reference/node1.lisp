@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.2 2002/08/28 18:52:00 youngde Exp $
+;;; $Id: node1.lisp,v 1.3 2002/08/28 19:32:36 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,8 +31,11 @@
                (make-array 0 :adjustable t :fill-pointer t)
                :reader node1-successors)))
 
-(defun add-successor (node1 successor)
-  (vector-push-extend (node1-successors node1) successor))
+(defun add-successor (node1 successor-node connector)
+  (vector-push-extend
+   (make-successor successor-node connector)
+   (node1-successors node1))
+  successor-node)
 
 (defun successor-node (successor)
   (car successor))
