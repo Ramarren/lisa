@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.63 2001/10/03 19:24:48 youngde Exp $
+;;; $Id: rete.lisp,v 1.64 2002/04/05 02:52:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -278,8 +278,7 @@
                   self (instance-of-shadow-fact fact))))
            (get-facts self)))
   
-(defun clear-engine (self)
-  (declare (type rete self))
+(defmethod clear-engine ((self rete))
   (forget-clos-instances self)
   (set-initial-state self)
   (remove-rules self)

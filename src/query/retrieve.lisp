@@ -18,10 +18,10 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: retrieve.lisp
-;;; Description: Macros and functions implementing LISA's early attempt at a
-;;; query language.
+;;; Description: Macros and functions implementing LISA's initial query
+;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.8 2002/04/04 03:39:24 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.9 2002/04/05 02:52:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,45 +32,39 @@
 
 (defun run-query (query)
   (with-inference-engine ((current-engine))
-    (let ((?name (get-name query))
-          (*query-result* '()))
-      (assert (query-fact (name ?name)))
+    (let* ((?name (get-name query))
+           (*query-result* '())
+           (fact (assert (query-fact (name ?name)))))
       (run)
+      (retract fact)
       (values *query-result*))))
 
-#+ignore
-(defun run-query (query))
-
 (defun define-query (name body)
-  (format t "name ~S, body ~S~%" name body)
   (let ((rule (define-rule name body)))
     (add-rule (current-engine) rule)
     (values rule)))
 
 (defmacro defquery (name &body body)
-  (let ((rule-name (gensym)))
-    `(let ((,rule-name
-            (if (consp ',name) ,name ',name)))
-       (define-query ',rule-name ',body))))
+  `(define-query ,name ',body))
 
 (defmacro retrieve ((&rest varlist) &body body)
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
-    (let ((query (gensym))
-          (query-name (gensym))
-          (hash (gensym)))
-      `(let* ((,hash (normalize-query ',body))
-              (,query (find-query ,hash)))
+    (let ((query-name (gensym))
+          (hash (gensym))
+          (query (gensym)))
+      `(let* ((,hash (sxhash (normalize-query ',body)))
+              (,query (find-query ,hash))
+              (,query-name (gensym)))
          (when (null ,query)
-;;;             (let ((,query-name (gensym)))
            (setf ,query
-             (defquery query-name
+             (defquery ',query-name
                  (query-fact (name ,query-name))
                ,@body
                =>
                (push (list ,@(mapcar #'make-query-binding varlist))
                      *query-result*)))
-               (remember-query ,hash ,query))
+           (remember-query ,hash ,query))
          (run-query ,query)))))
 
 (defvar *query-map*
@@ -81,6 +75,9 @@
 
 (defun remember-query (hash query)
   (setf (gethash hash *query-map*) (get-name query)))
+
+(defmethod clear-engine :after ((self rete))
+  (forget-all-queries))
 
 (defun find-query (hash)
   (let ((query-name (gethash hash *query-map*)))
