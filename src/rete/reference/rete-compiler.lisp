@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.23 2002/09/17 23:36:40 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.24 2002/09/19 19:14:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,9 +64,7 @@
                  (pattern-slot-constraint slot)
                  (pattern-slot-constraint-bindings slot)))
                (t
-                (make-intra-pattern-test
-                 (pattern-slot-name slot)
-                 (pattern-slot-slot-binding slot))))))
+                (make-intra-pattern-test slot)))))
     (make-node1 test)))
 
 (defun distribute-token (rete-network token)
@@ -120,12 +118,10 @@
 
 (defun add-join-node-tests (join-node pattern)
   (labels ((add-simple-join-node-test (slot)
-             (let ((binding (pattern-slot-slot-binding slot))
-                   (address (parsed-pattern-address pattern)))
-               (unless (= address (binding-address binding))
-                 (join-node-add-test join-node
-                                     (make-inter-pattern-test
-                                      (pattern-slot-name slot) binding)))))
+             (unless (= (binding-address (pattern-slot-slot-binding slot))
+                        (parsed-pattern-address pattern))
+               (join-node-add-test join-node
+                                   (make-inter-pattern-test slot))))
            (add-slot-constraint-test (slot)
              (join-node-add-test join-node
                                  (make-predicate-test

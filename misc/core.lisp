@@ -24,6 +24,7 @@
   (slot friend)
   (slot age))
 
+#+ignore
 (defrule special-pattern ()
   ;;;(bilbo (name ?name) (relative ?name))
   (frodo (name ?fname) (has-ring ?ring (eq ?ring ?fname)))
@@ -63,7 +64,12 @@
   (frodo (name ?name))
   (samwise (friend ?name) (age ?age))
   (test (eq ?age 100))
-  (not (gandalf (age ?age)))
+  =>
+  )
+
+(defrule negated-variable ()
+  (frodo (name ?name))
+  (samwise (friend (not ?name)))
   =>
   )
 

@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.11 2002/09/17 23:36:39 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.12 2002/09/19 19:14:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -72,11 +72,17 @@
               (token-find-fact tokens (binding-address ,binding))
               (binding-slot-name ,binding))))))
 
-(defun make-inter-pattern-test (slot-name binding)
-  (make-variable-test slot-name binding))
+(defun make-inter-pattern-test (slot)
+  (let ((predicate
+         (make-variable-test (pattern-slot-name slot)
+                             (pattern-slot-slot-binding slot))))
+    (if (negated-slot-p slot)
+        (complement predicate)
+      predicate)))
 
-(defun make-intra-pattern-test (slot-name binding)
-  (make-variable-test slot-name binding))
+(defun make-intra-pattern-test (slot)
+  (make-variable-test (pattern-slot-name slot)
+                      (pattern-slot-slot-binding slot)))
 
 (defun make-predicate-test (forms bindings)
   (let* ((special-vars
