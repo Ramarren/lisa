@@ -22,7 +22,7 @@
 ;;; resolution strategies for Lisa's RETE implementation. NB: The code here is
 ;;; raw and inefficient; it will change soon.
 
-;;; $Id: strategies.lisp,v 1.7 2000/12/15 16:57:23 youngde Exp $
+;;; $Id: strategies.lisp,v 1.8 2000/12/15 20:38:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,9 +41,9 @@
 (defgeneric remmove-activations (strategy))
 
 (defclass indexed-priority-list ()
-  ((priority-list :reader get-priority-list)
-   (index :initform nil
-          :accessor get-index)
+  ((priority-vector :reader get-priority-vector)
+   (inodes :initform nil
+           :accessor get-inodes)
    (delta :accessor get-delta)
    (insertion-function :initarg :insertion-function
                        :reader get-insertion-function)
@@ -56,21 +56,43 @@
 
 (defmethod initialize-instance :after ((self indexed-priority-list)
                                        &key (priorities 500))
-  (setf (slot-value self 'priority-list)
-    (make-array (1+ priorities) :adjustable t :fill-pointer t))
-  (setf (slot-value self 'delta (/ priorities 2))))
+  (setf (slot-value self 'priority-vector)
+    (make-array (1+ priorities)))
+  (setf (slot-value self 'delta) (/ priorities 2)))
 
 (defun insert-activation (plist activation)
-  (with-accessors ((vector get-priority-list)
-                   (index get-index)
-                   (activations get-activations)) plist
+  (flet ((index-salience (priority)
+           (with-accessors ((inodes get-inodes)) plist
+             (setf inodes
+               (sort (pushnew priority inodes)
+                     #'(lambda (p1 p2)
+                         (> p1 p2)))))))
+    (with-accessors ((vector get-priority-vector)
+                     (activations get-activations)) plist
     (let* ((salience (get-salience (get-rule activation)))
-           (slot (+ salience (get-delta plist)))
-           (queue (aref vector slot)))
-      (setf (aref vector slot)
-        (apply (get-insertion-function plist) activation queue))
-      (index-salience)
-      (setf (gethash (hash-code (get-token activation))) activation))))
+           (inode (+ salience (get-delta plist)))
+           (queue (aref vector inode)))
+      (setf (aref vector inode)
+        (apply (get-insertion-function plist) `(,activation ,queue)))
+      (index-salience inode)
+      (setf (gethash (get-hash-code (get-token activation)) activations) activation)))))
+
+(defun lookup-activation (plist token)
+  (gethash (get-hash-code token) (get-activations plist)))
+
+(defun next-activation (plist)
+  (with-accessors ((inodes get-inodes)
+                   (vector get-priority-vector)
+                   (activations get-activations)) plist
+    (let* ((inode (first inodes))
+           (activation (pop (aref vector inode))))
+      (when (null (aref vector inode))
+        (pop inodes)
+        (remhash (get-hash-code (get-token activation)) activations))
+      (values activation))))
+
+(defun make-indexed-priority-list (func)
+  (make-instance 'indexed-priority-list :insertion-function func))
 
 (defclass depth-first-strategy (strategy)
   ()
