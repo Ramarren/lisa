@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.16 2002/10/08 19:36:18 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.17 2002/10/08 19:54:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -91,7 +91,8 @@
                                        (successor-connector new-successor))
                         (add-node-set parent (successor-node new-successor)))
                        (t
-                        (add-node-set parent (successor-node new-successor) t)
+                        (add-node-set 
+                         parent (successor-node existing-successor) t)
                         (merge-successors 
                          (successor-node existing-successor)
                          (shared-node-all-successors 
