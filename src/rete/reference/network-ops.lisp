@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.14 2002/10/08 18:34:31 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.15 2002/10/08 18:54:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -67,9 +67,13 @@
     (increment-use-count parent))
   (push (make-node-pair node parent) *node-set*))
 
-(defmethod add-node-set (parent node &optional count-p)
-  (declare (ignore parent node count-p))
+(defmethod add-node-set ((parent join-node) node &optional count-p)
+  (declare (ignore node count-p))
   nil)
+
+(defmethod add-node-set (parent node &optional count-p)
+  (declare (ignore count-p))
+  (push (make-node-pair node parent) *node-set*))
 
 (defun merge-networks (from-rete to-rete)
   (labels ((find-root-node (network node)
@@ -96,10 +100,13 @@
            (merge-root-node (new-root)
              (let ((existing-root
                     (find-root-node to-rete new-root)))
-               (if (null existing-root)
-                   (add-new-root to-rete new-root)
-                 (merge-successors
-                  existing-root (shared-node-all-successors new-root))))))
+               (cond ((null existing-root)
+                      (add-new-root to-rete new-root))
+                     (t
+                      (add-node-set t existing-root)
+                      (merge-successors
+                       existing-root 
+                       (shared-node-all-successors new-root)))))))
     (let ((*node-set* (list)))
       (loop for new-root being the hash-value
           of (rete-roots from-rete)
