@@ -21,19 +21,21 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.8 2001/04/01 00:57:24 youngde Exp $
+;;; $Id: conditions.lisp,v 1.9 2001/04/02 14:19:19 youngde Exp $
 
 (in-package "LISA")
 
 (define-condition lisa-error (error)
   ((text :initarg :text
-         :initform nil))
+         :initform nil
+         :reader get-text))
   (:documentation
    "The base class of the LISA condition hierarchy."))
 
 (define-condition syntactical-error (lisa-error)
   ((element :initarg :element
-            :initform nil))
+            :initform nil
+            :reader get-element))
   (:documentation
    "This condition represents syntactical errors discovered during the initial
    parsing pass."))
@@ -42,25 +44,40 @@
   ()
   (:report
    (lambda (condition strm)
-     (with-slots (text) condition
-       (format strm "~S~%" text)))
+     (format strm "~S~%" (get-text condition)))
    :documentation
    "This condition represents LISA environmental errors."))
 
 (define-condition rule-structure-error (lisa-error)
-  ((rule-name :initarg :rule-name)
+  ((rule-name :initarg :rule-name
+              :reader get-rule-name)
    (element :initarg :element
-            :initform nil))
+            :initform nil
+            :reader get-element))
   (:report
    (lambda (condition strm)
-     (with-slots (rule-name element text) condition
-       (format strm "While compiling rule ~S~%" rule-name)
-       (unless (null element)
-         (format strm "While parsing element ~S~%" element))
-       (format strm text)))
+     (format strm "While compiling rule ~S~%" (get-rule-name condition))
+     (unless (null (get-element condition))
+       (format strm "While parsing element ~S~%" (get-element condition)))
+     (format strm (get-text condition)))
    :documentation
    "This condition represents structural errors found while parsing DEFRULE
    forms."))
+
+(define-condition evaluation-error (lisa-error)
+  ((forms :initarg :forms
+          :reader get-forms)
+   (condition :initarg :condition
+              :reader get-condition))
+  (:report
+   (lambda (condition strm)
+     (format strm "While evaluation these forms:~%")
+     (format strm "~S~%" (get-forms condition))
+     (format strm "LISA encountered an error:~%")
+     (princ (get-condition condition) strm))
+   :documentation
+   "This condition represents errors encountered while Lisa is evaluating
+   user-defined Lisp code, such as rule RHSs."))
 
 (define-condition rule-evaluation-error (lisa-error)
   ((rule :initarg :rule)
@@ -70,20 +87,20 @@
      (with-slots (rule condition) condition
        (format strm "While executing rule ~S~%" (get-name rule))
        (format strm "On the RHS the following error occurred:~%")
-       (format strm "~S~%" condition)))
+       (princ (get-condition condition) strm)))
    :documentation
    "This condition represents runtime errors that occur during rule
    execution."))
 
 (define-condition command-structure-error (lisa-error)
   ((form :initarg :form
-         :initform nil))
+         :initform nil
+         :reader get-form))
   (:report
    (lambda (condition strm)
-     (with-slots (form text) condition
-       (format strm "While evaluating the form:")
-       (format strm "~S" form)
-       (format strm text)))
+     (format strm "While evaluating the form:")
+     (format strm "~S" (get-form condition))
+     (format strm (get-text condition)))
    :documentation
    "This condition represents structural errors found while parsing specific
    LISA functions."))
@@ -104,6 +121,9 @@
 
 (defmacro rule-evaluation-error (rule condition)
   `(error 'rule-evaluation-error :rule ,rule :condition ,condition))
+
+(defmacro evaluation-error (condition forms)
+  `(error 'evaluation-error :condition ,condition :forms ,forms))
 
 (defmacro command-structure-error (form parse-condition)
   `(with-slots (text) ,parse-condition
