@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.32 2002/10/03 18:04:21 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.33 2002/10/08 17:31:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -61,6 +61,15 @@
                                     (parent shared-node) child)
   (remove-successor parent child))
 
+(defun make-root-node (class)
+  (let* ((test (make-class-test class))
+         (root (gethash test *root-nodes*)))
+    (when (null root)
+      (setf root (make-node1 test))
+      (setf (gethash test *root-nodes*) root))
+    (record-node root t)))
+
+#+ignore
 (defun make-root-node (class)
   (let ((root (gethash class *root-nodes*)))
     (when (null root)
@@ -203,7 +212,17 @@
     (add-terminal-node rule)
     (unless (null rule)
       (attach-rule-nodes rule (nreverse *rule-specific-nodes*)))
-    (setf (slot-value rete-network 'root-nodes) *root-nodes*)))
+    (setf (slot-value rete-network 'root-nodes) *root-nodes*)
+    rete-network))
+
+(defun merge-rule-into-network (to-network patterns rule)
+  (let ((node-set
+         (merge-networks
+          (compile-rule-into-network (make-rete-network) patterns rule)
+          to-network)))
+    (unless (null node-set)
+      (attach-rule-nodes rule node-set))
+    to-network))
 
 (defvar *test-network* nil)
 

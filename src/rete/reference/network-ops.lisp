@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.11 2002/10/07 19:55:13 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.12 2002/10/08 17:31:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,25 +60,37 @@
   (declare (ignore parent node))
   nil)
 
+(defvar *node-set* nil)
+
+(defmethod add-node-set ((parent shared-node) node &optional (count-p nil))
+  (when count-p
+    (increment-use-count parent))
+  (push (make-node-pair node parent) *node-set*))
+
+(defmethod add-node-set (parent node &optional count-p)
+  (declare (ignore parent node count-p))
+  nil)
+
 (defun merge-networks (from-rete to-rete)
   (labels ((find-root-node (network node)
-             (find node :key #'node1-test
-                   (loop for node being the hash-value
-                       of (rete-roots network)
-                       collect node)))
+             (gethash (node1-test node) (rete-roots network)))
+           (add-new-root (network root)
+             (setf (gethash (node1-test root) (rete-roots network)) root))
            (merge-successors (parent successors)
              (if (endp successors) parent
                (let* ((new-successor (first successors))
                       (existing-successor
-                       (successor-exists-p parent new-successor)))
-                 (if (null existing-successor)
-                     (add-successor 
-                      parent (successor-node new-successor)
-                      (successor-connector new-successor))
-                   (merge-successors 
-                    existing-successor 
-                    (shared-node-all-successors 
-                     (successor-node new-successor))))
+                       (successor-exists-p parent new-successor))
+                      (successor-node (successor-node new-successor)))
+                 (cond ((null existing-successor)
+                        (add-successor parent successor-node
+                                       (successor-connector new-successor))
+                        (add-node-set parent successor-node))
+                       (t
+                        (add-node-set parent successor-node t)
+                        (merge-successors 
+                         existing-successor 
+                         (shared-node-all-successors successor-node))))
                  (merge-successors parent (rest successors)))))
            (merge-root-node (new-root)
              (let ((existing-root
@@ -87,12 +99,8 @@
                    (add-new-root to-rete new-root)
                  (merge-successors
                   existing-root (shared-node-all-successors new-root))))))
-    (loop for new-root being the hash-value
-        of (rete-roots from-rete)
-        do (merge-root-node new-root))))
-
-(defun merge-rule-into-network (to-network patterns rule)
-  (let ((working-network (make-rete-network)))
-    (compile-rule-into-network working-network patterns rule)
-    (merge-networks working-network to-network)
-    rule))
+    (let ((*node-set* (list)))
+      (loop for new-root being the hash-value
+          of (rete-roots from-rete)
+          do (merge-root-node new-root))
+      (nreverse *node-set*))))
