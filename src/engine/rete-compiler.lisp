@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.23 2001/01/04 17:03:11 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.24 2001/01/05 02:25:54 youngde Exp $
 
 (in-package :lisa)
 
@@ -156,6 +156,7 @@
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
 
+#+ignore
 (defun add-node2-tests (rule node2 slots)
   (labels ((add-tests (slot tests)
              (let ((test (first tests)))
@@ -174,6 +175,25 @@
         (add-node2-tests rule node2 (rest slots))))
     (values node2)))
                       
+(defun add-node2-tests (rule node2 pattern)
+  (labels ((add-tests (slot tests)
+             (let ((test (first tests)))
+               (cond ((null test)
+                      (values))
+                     ((value-is-variable-p test)
+                      (let ((binding (find-binding rule (get-value test))))
+                        (cl:assert (typep binding 'slot-binding))
+                        (unless (= (get-location binding)
+                                   (get-location pattern))
+                          (add-binding-test node2 binding (get-name slot)))
+                        (add-tests slot (rest tests))))
+                     (t
+                      (add-tests slot (rest tests)))))))
+    (mapc #'(lambda (slot)
+              (add-tests slot (get-tests slot)))
+          (get-slots pattern))
+    (values node2)))
+                      
 (defun create-join-nodes (compiler rule)
   (labels ((add-join-node (node i)
              (with-accessors ((terminals get-terminals)) compiler
@@ -190,7 +210,8 @@
                      (t
                       (let ((node2
                              (make-join-node pattern (get-engine rule))))
-                        (add-node2-tests rule node2 (get-slots pattern))
+;                        (add-node2-tests rule node2 (get-slots pattern))
+                        (add-node2-tests rule node2 pattern)
                         (add-join-node node2 i)
                         (third-pass (rest patterns) (1+ i))))))))
     (third-pass (rest (get-patterns rule)) 1)))
