@@ -229,15 +229,36 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
-<h4>
-Actions</h4>
+<p><br>When a CLOS instance is asserted into the knowledge-base, LISA creates
+a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
+contains a special slot named <i>:object</i> that is bound to the corresponding
+CLOS instance. It is possible to bind this slot to a variable just like
+any other:
+<br>&nbsp;
+<dd>
+(tank (name ?name)&nbsp;(:object ?tank-object))</dd>
+</blockquote>
+
+<dd>
+Once bound, method and function calls can be made on this object from the
+rule's LHS and RHS.</dd>
+
+<blockquote>
+<h5>
+Actions</h5>
 Following any conditional elements are the rule's actions, if any. Collectively
 known as the Right Hand Side (RHS), actions consist of arbitrary Lisp forms;
 all variables declared on the LHS are available, along with the special
 operator <i>engine</i>, which evaluates to the rule's inference engine
 object. Currently, each rule's RHS is given to the Lisp compiler during
 rule compilation, and executes within a special lexical environment established
-by LISA for each firing.</blockquote>
+by LISA for each firing.
+<br>&nbsp;</blockquote>
 
+<h4>
+CLOS-Related Operators</h4>
+There are a few special operators and functions that LISA provides for
+managing CLOS instances within the knowledge base.
+<br>&nbsp;
 </body>
 </html>
