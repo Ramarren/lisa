@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.2 2001/05/07 15:49:23 youngde Exp $
+;;; $Id: pumps.lisp,v 1.3 2001/05/07 15:53:31 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -102,16 +102,20 @@
 (defimport pump (lisa-user::pump) ())
 (defimport tank (lisa-user::tank) ())
 
+(deftemplate tank-level-warning
+  (slot tank)
+  (slot type))
+
 (defrule warn-if-low ()
   (tank (name ?name) (:object ?tank))
   (test (and (low-p ?tank) (intact-p ?tank)))
-  (not (low-level-warning (tank ?tank)))
+  (not (tank-level-warning (tank ?tank) (type low)))
   =>
-  (assert (low-level-warning (tank ?tank)))
+  (assert (tank-level-warning (tank ?tank) (type low)))
   (format t "Warning: Tank ~S is low!~%" ?name))
 
 (defrule raise-rate-if-low ()
-  (?warning (low-level-warning (tank ?tank)))
+  (?warning (tank-level-warning (tank ?tank)))
   (pump (name ?name) (tank ?tank) (flow-rate ?flow-rate (< ?flow-rate 25))
         (:object ?pump))
   =>
@@ -123,13 +127,13 @@
 (defrule warn-if-high ()
   (tank (name ?name) (:object ?tank))
   (test (and (high-p ?tank) (intact-p ?tank)))
-  (not (high-level-warning (tank ?tank)))
+  (not (tank-level-warning (tank ?tank) (type high)))
   =>
-  (assert (high-level-warning (tank ?tank)))
+  (assert (tank-level-warning (tank ?tank) (type high)))
   (format t "Warning: Tank ~S is high!~%" ?name))
 
 (defrule lower-rate-if-high ()
-  (?warning (high-level-warning (tank ?tank)))
+  (?warning (tank-level-warning (tank ?tank) (type high)))
   (pump (name ?name) (flow-rate ?flow-rate (plusp ?flow-rate))
         (:object ?pump))
   =>
@@ -139,7 +143,7 @@
           ?name (get-flow-rate ?pump)))
 
 (defrule notify-if-ok ()
-  (?warning (level-warning))
+  (?warning (tank-level-warning))
   (tank (name ?name) (:object ?tank))
   (test (and (not (high-p ?tank)) (not (low-p ?tank))))
   =>
