@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.18 2002/11/25 15:33:45 youngde Exp $
+;;; $Id: preamble.lisp,v 1.19 2002/11/25 16:02:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,6 +29,11 @@
 (defvar *active-tokens* nil)
 (defvar *active-context* nil)
 (defvar *ignore-this-instance*)
+
+(defmacro with-auto-notify ((var instance) &body body)
+  `(let* ((,var ,instance)
+          (*ignore-this-instance* ,var))
+     ,@body))
 
 (defun active-context ()
   *active-context*)
