@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.44 2001/04/26 20:43:18 youngde Exp $
+;;; $Id: language.lisp,v 1.45 2001/04/27 15:31:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,8 +78,8 @@
 (defmacro watching ()
   `(format t "Watching: ~S~%" (get-watches)))
 
-(defmacro halt (&optional (engine (current-engine)))
-  `(values))
+(defmacro halt ()
+  `(halt-engine (engine)))
 
 (defun print-activation-list (engine)
   (let ((activations (get-activation-list engine)))

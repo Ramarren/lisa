@@ -30,7 +30,8 @@
   (?boris (boris (name "boris")))
   =>
   (format t "boris fired!~%")
-  (modify ?boris (name "natasha")))
+  (modify ?boris (name "natasha"))
+  (halt))
 
 (defrule natasha ()
   (boris (name "natasha") (:object ?obj))
