@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.35 2001/03/16 21:07:28 youngde Exp $
+;;; $Id: defsys.lisp,v 1.36 2001/03/27 20:57:11 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -172,3 +172,6 @@
 
 (defun clean-lisa ()
   (mk:clean-system :lisa))
+
+(defun optimize-lisa ()
+  (proclaim '(optimize (speed 3) (safety 1) (debug 1))))

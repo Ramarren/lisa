@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.15 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: debug.lisp,v 1.16 2001/03/27 20:57:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -122,11 +122,11 @@
 
 (defun show-node2-memories (node2)
   (format t "Right memory for node ~S~%" node2)
-  (with-tree-iterator (key token (get-right-tree node2))
+  (with-tree-iterator (token (get-right-tree node2))
     (show-token token))
   (terpri)
   (format t "Left memory for node ~S~%" node2)
-  (with-tree-iterator (key token (get-left-tree node2))
+  (with-tree-iterator (token (get-left-tree node2))
     (show-token token))
   (values t))
   
