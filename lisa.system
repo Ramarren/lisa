@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.27 2003/03/26 16:05:43 youngde Exp $
+;;; $Id: lisa.system,v 1.28 2003/03/27 15:21:52 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -75,7 +75,6 @@
 (let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))
 
   (defun lisa-require (module-name pathname)
-    (format t "lisa-require: ~S ~S~%" module-name pathname)
     (let ((lisa-module
            (find module-name loadable-modules
                  :test #'string=
