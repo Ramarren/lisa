@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.48 2001/04/03 19:48:56 youngde Exp $
+;;; $Id: rule.lisp,v 1.49 2001/04/17 17:29:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,6 +34,9 @@
    (salience :initform 0
              :initarg :salience
              :accessor get-salience)
+   (module :initform nil
+           :initarg :module
+           :reader get-module)
    (patterns :initform nil
              :accessor get-patterns)
    (actions :initform nil
@@ -121,11 +124,6 @@
                                       (get-pattern-count self)))))
     (mapc #'compile-pattern plist)))
 
-#+ignore
-(defmethod compile-actions ((self rule) rhs)
-  (setf (get-actions self)
-    (make-function-call rhs (get-bindings self))))
-
 (defmethod compile-actions ((self rule) rhs)
   (let ((global-bindings (get-binding-table self))
         (action-bindings nil))
@@ -149,19 +147,10 @@
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (get-name self))))
 
-(defmethod initialize-instance :after ((self rule) &key (directives nil))
-  (flet ((handle-directives (directive)
-           (typecase directive
-             (salience-directive
-              (setf (slot-value self 'salience)
-                (get-salience directive)))
-             (t nil))))
-    (mapc #'handle-directives directives)))
-
 (defun make-rule (name engine &key (doc-string nil)
-                  (directives nil) (source nil))
-  "Constructor for class DEFRULE."
+                  (salience 0) (module nil) (source nil))
   (make-instance 'rule :name name :engine engine
-                 :comment doc-string :directives directives
+                 :comment doc-string :salience salience
+                 :module module
                  :rule-source source))
 

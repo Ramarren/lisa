@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.41 2001/04/10 20:35:52 youngde Exp $
+;;; $Id: defsys.lisp,v 1.42 2001/04/17 17:29:45 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -146,7 +146,6 @@
                                        (:file "factories")
                                        (:file "funcall")
                                        (:file "rule")
-                                       (:file "directives")
                                        (:file "parser")
                                        (:file "language")
                                        (:file "activation")

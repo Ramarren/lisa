@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.66 2001/04/11 15:02:11 youngde Exp $
+;;; $Id: parser.lisp,v 1.67 2001/04/17 17:29:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,20 +34,21 @@
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
      ,@body))
 
-(defmacro with-rule-components (((doc-string decls lhs rhs) rule-form) &body body)
+(defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
-    `(multiple-value-bind (,doc-string ,decls ,remains)
+    `(multiple-value-bind (,doc-string ,remains)
          (extract-rule-headers ,rule-form)
        (multiple-value-bind (,lhs ,rhs)
            (parse-rulebody ,remains)
          ,@body))))
 
-(defun redefine-defrule (name body)
+(defun redefine-defrule (name body &key (salience 0) (module nil))
   (flet ((redefine-rule ()
-           (with-rule-components ((doc-string decls lhs rhs) body)
+           (with-rule-components ((doc-string lhs rhs) body)
              (let ((rule (make-rule name (current-engine)
-                                    :doc-string doc-string 
-                                    :directives decls
+                                    :doc-string doc-string
+                                    :salience salience
+                                    :module module
                                     :source body)))
                (finalize-rule-definition rule lhs rhs)
                (add-rule (current-engine) rule)))))
@@ -57,40 +58,9 @@
         (rule-structure-error name condition)))))
 
 (defun extract-rule-headers (body)
-  (let ((doc nil)
-        (decls nil)
-        (remains body))
-    (when (stringp (first remains))
-      (setf doc (first remains))
-      (setf remains (rest remains)))
-    (setf decls (first remains))
-    (cond ((and (consp decls)
-                (eq (first decls) 'declare))
-           (setf decls
-             (mapcar #'(lambda (spec)
-                         (make-directive (first spec) (rest spec)))
-                     (rest decls)))
-           (setf remains (rest remains)))
-          (t (setf decls nil)))
-    (values doc decls remains)))
-
-#+ignore
-(defun extract-rule-headers (body)
-  (labels ((extract-headers (headers doc)
-             (let ((obj (first headers)))
-               (cond ((stringp obj)
-                      (if (null doc)
-                          (extract-headers (rest headers) obj)
-                        (parsing-error
-                         "Too many documentation strings: ~S." obj)))
-                     ((consp obj)
-                      (let ((decl (first obj)))
-                        (if (and (symbolp decl)
-                                 (eq decl 'declare))
-                            (values doc obj (rest headers))
-                          (values doc nil headers))))
-                     (t (values doc nil headers))))))
-    (extract-headers body nil)))
+  (if (stringp (first body))
+      (values (first body) (rest body))
+    (values nil body)))
 
 (defun parse-rulebody (body)
   (labels ((parse-lhs (body patterns)
