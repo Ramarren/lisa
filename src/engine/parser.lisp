@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.58 2001/04/06 15:54:17 youngde Exp $
+;;; $Id: parser.lisp,v 1.59 2001/04/06 20:10:14 youngde Exp $
 
 (in-package "LISA")
 
@@ -172,36 +172,31 @@
                 ,(second slot)))
           slots))
 
-(let ((assert-closure
-       (function
-        (lambda (fact-name slots)
-         (let ((class (find-meta-class fact-name)))
-           (assert-fact (current-engine)
-                        (make-fact
-                         fact-name
-                         (canonicalize-slot-names class slots))))))))
-  (defun parse-and-insert-fact (body)
-    (let ((head (first body))
-          (slots (rest body)))
-      (cond ((symbolp head)
-             `(funcall ,assert-closure ',head (,@(normalize-slots slots))))
-            (t
-             (parsing-error
-              "A fact must begin with a symbol: ~S." head))))))
+(defun parse-and-insert-fact (body)
+  (let ((head (first body))
+        (slots (rest body)))
+    (cond ((symbolp head)
+           (let ((meta-class (gensym)))
+             `(let ((,meta-class (find-meta-class ',head)))
+               (assert-fact (current-engine)
+                (make-fact ',head
+                 (canonicalize-slot-names
+                  ,meta-class (,@(normalize-slots slots))))))))
+          (t
+           (parsing-error
+            "A fact must begin with a symbol: ~S." head)))))
 
-(let ((modify-closure
-       (function
-        (lambda (fact slots)
-         (let ((meta-class (find-meta-class (fact-name fact))))
-           (modify-fact (current-engine) fact
-                        (canonicalize-slot-names meta-class slots)))))))
-  (defun parse-and-modify-fact (fact body)
-    (flet ((generate-modify ()
-             `(funcall ,modify-closure ,fact (,@(normalize-slots body)))))
-      (handler-case
-          (generate-modify)
-        (lisa-error (condition)
-          (command-structure-error 'modify-fact condition))))))
+(defun parse-and-modify-fact (fact body)
+  (flet ((generate-modify ()
+           (let ((meta-class (gensym)))
+             `(let ((,meta-class (find-meta-class (fact-name ,fact))))
+               (modify-fact (current-engine) ,fact
+                (canonicalize-slot-names ,meta-class
+                 (,@(normalize-slots body))))))))
+    (handler-case
+        (generate-modify)
+      (lisa-error (condition)
+        (command-structure-error 'modify-fact condition)))))
 
 (defun redefine-deftemplate (name body)
   (labels ((extract-slot (slot)
