@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.8 2002/10/03 14:53:02 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.7 2002/10/03 14:47:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,7 +46,7 @@
              (if (endp nodes) rule
                (let ((node (node-pair-child (first nodes)))
                      (parent (node-pair-parent (first nodes))))
-                 (when (zerop (decrement-use-count node))
+                 (when (= (decrement-use-count node) 0)
                    (remove-node-from-parent rete-network parent node))
                  (remove-nodes (rest nodes))))))
     (remove-nodes (rule-node-list rule))))
