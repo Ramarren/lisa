@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.1 2000/11/15 19:44:46 youngde Exp $
+;;; $Id: activation.lisp,v 1.2 2000/11/19 02:37:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -36,6 +36,14 @@
 
 (defmethod fire-rule ((self activation))
   (fire (get-rule self) (get-token self)))
+
+(defmethod print-object ((self activation) strm)
+  (let ((fact (get-top-fact (get-token self)))
+        (rule (get-rule self)))
+    (print-unreadable-object (self strm :identity t :type t)
+      (format strm "(~S f-~D ; time = ~D ; salience = ~D)"
+              (get-name rule) (get-fact-id fact)
+              (get-time fact) (get-salience rule)))))
 
 (defun make-activation (rule token)
   (make-instance 'activation :rule rule :token token))

@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.3 2000/11/17 21:45:22 youngde Exp $
+;;; $Id: strategies.lisp,v 1.4 2000/11/19 02:37:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,6 +35,7 @@
 
 (defgeneric add-activation (strategy activation))
 (defgeneric find-activation (strategy token rule))
+(defgeneric next-activation (strategy))
 (defgeneric remmove-activations (strategy))
 
 (defclass depth-first-strategy (strategy)
@@ -46,6 +47,9 @@
   (with-accessors ((activations get-activations)) self
     (setf activations
       (nconc activations `(,activation)))))
+
+(defmethod next-activation ((self depth-first-strategy))
+  (pop (get-activations self)))
 
 (defmethod remove-activations ((self depth-first-strategy))
   (setf (get-activations self) nil))

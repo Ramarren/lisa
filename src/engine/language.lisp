@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.19 2000/11/18 22:31:42 youngde Exp $
+;;; $Id: language.lisp,v 1.20 2000/11/19 02:37:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -43,6 +43,9 @@
 (defmacro rules ()
   `(print-rule-list (current-engine)))
 
+(defmacro agenda ()
+  `(print-activation-list (current-engine)))
+
 (defmacro reset ()
   `(reset-engine (current-engine)))
 
@@ -55,12 +58,22 @@
 (defmacro halt ()
   `(values))
 
+(defun print-activation-list (engine)
+  (let ((activations (get-activation-list engine)))
+    (mapc #'(lambda (act)
+              (format t "~S~%" act))
+          activations)
+    (format t "For a total of ~D activation~:P.~%"
+            (length activations))
+    (values)))
+
 (defun print-rule-list (engine)
   (let ((rules (get-rule-list engine)))
     (mapc #'(lambda (rule)
               (format t "~S~%" rule))
           rules)
-    (format t "For a total of ~D rule~:P.~%" (length rules))))
+    (format t "For a total of ~D rule~:P.~%" (length rules))
+    (values)))
 
 (defun print-fact-list (engine)
   (let ((facts (get-fact-list engine)))
