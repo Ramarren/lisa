@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.19 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: funcall.lisp,v 1.20 2001/02/06 21:42:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -93,9 +93,8 @@
   (setf (slot-value self 'function)
     (let ((lambda-list (mapcar #'get-name (get-bindings self))))
       (compile nil `(lambda (,@lambda-list)
-                      (declare (special ,@lambda-list))
                       (progn ,@(get-forms self)))))))
-             
+
 (defun make-function-call (forms bindings)
   (make-instance 'function-call :forms forms :bindings bindings))
 

@@ -20,7 +20,7 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.16 2001/02/04 01:39:02 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.17 2001/02/06 21:42:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -36,6 +36,8 @@
   (with-accessors ((rule get-rule)
                    (activations get-rule-activations)) self
     (let ((activation (make-activation rule token)))
+      #+nil(when (eq (get-name (get-rule self)) 'climb-indirectly)
+        (break "Activating terminal node ~S." self))
       (add-activation (get-engine rule) activation)
       (setf (gethash (hash-code token) activations) activation))
     (values t)))
@@ -47,13 +49,17 @@
   (let* ((activations (get-rule-activations self))
          (index (hash-code token))
          (activation (gethash index activations)))
-    (format t "looking for activation at key ~D~%" index)
-    (when (null activation)
-      (format t "sigh; there isn't one.~%"))
+    #+nil(when (eq (get-name (get-rule self)) 'climb-indirectly)
+      (break "Deactivating terminal node ~S." self))
     (unless (null activation)
       (disable-activation (get-engine (get-rule self)) activation)
       (remhash index activations))
     (values t)))
+
+(defun show-token (token)
+  (do ((tok token (get-parent tok)))
+      ((null tok) t)
+    (describe tok)))
 
 (defmethod print-object ((self terminal-node) strm)
   (print-unreadable-object (self strm :type t :identity t)

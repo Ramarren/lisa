@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.9 2001/02/03 21:55:22 youngde Exp $
+;;; $Id: debug.lisp,v 1.10 2001/02/06 21:42:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,11 +33,26 @@
                         (values nil))
                        (t
                         (let ((obj (format nil "~S" node)))
-                          (format t "~V<~S~>~%"
+                          (format t "~V<~A~>~%"
                                   (+ level (length obj)) obj)
                           (trace-nodes (get-successors node) (+ level 3))
                           (trace-nodes (rest nodes) level)))))))
       (format t "~S~%" root-node)
+      (trace-nodes (get-successors root-node) 3))))
+
+(defun write-rete (strm &optional (engine (current-engine)))
+  (let ((root-node (get-root-node (get-compiler engine))))
+    (labels ((trace-nodes (nodes level)
+               (let ((node (first nodes)))
+                 (cond ((null node)
+                        (values nil))
+                       (t
+                        (let ((obj (format nil "~S" (class-name (class-of node)))))
+                          (format strm "~V<~A~>~%"
+                                  (+ level (length obj)) obj)
+                          (trace-nodes (get-successors node) (+ level 3))
+                          (trace-nodes (rest nodes) level)))))))
+      (format strm "~S~%" (class-name (class-of root-node)))
       (trace-nodes (get-successors root-node) 3))))
 
 (defun find-rule (name &optional (engine (current-engine)))

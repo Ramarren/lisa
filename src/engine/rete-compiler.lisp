@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.49 2001/02/02 19:29:47 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.50 2001/02/06 21:42:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -121,7 +121,8 @@
                       "Missing binding for ~S" ,var)
                     (= (get-location ,pattern) (get-location ,binding))))))
     (flet ((add-constraint-test (slot)
-             (unless (first-variable-occurrence (get-value slot) pattern)
+             (unless (and (first-variable-occurrence (get-value slot) pattern)
+                          (not (has-constraintp slot)))
                (add-test node2 (make-node2-test slot pattern)))))
       (mapc #'(lambda (slot)
                 (unless (simple-slotp slot)
@@ -132,6 +133,7 @@
 ;;; the "third pass"...
 
 (defun create-join-nodes (compiler rule)
+  (setf *current-rule* rule)
   (with-accessors ((terminals get-terminals)) compiler
     (labels ((add-join-node (node2 location)
                (add-successor (aref terminals (1- location)) node2 rule)

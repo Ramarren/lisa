@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.21 2001/02/02 19:29:47 youngde Exp $
+;;; $Id: mab.lisp,v 1.22 2001/02/06 21:42:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,7 +35,9 @@
 (defimport chest lisa::chest)
 (defimport goal-is-to lisa::goal-is-to)
 
-;;;(watch :activations)
+(watch :activations)
+(watch :facts)
+(watch :rules)
 
 ;;; Chest-unlocking rules...
 
@@ -171,7 +173,9 @@
   (format t "Monkey grabs the ~A.~%" ?name)
   (modify ?thing (location held) (on-top-of held))
   (modify ?monkey (holding ?name))
-  (retract ?goal))
+  (retract ?goal)
+  (when (= (get-fired-rule-count (current-engine)) 63)
+    (break "Breaking in rule grab-object at count 63.")))
 
 
 (defrule drop-object
