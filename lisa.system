@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.26 2002/12/12 20:59:10 youngde Exp $
+;;; $Id: lisa.system,v 1.27 2003/03/26 16:05:43 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -46,13 +46,13 @@
 
 (defvar *lisa-binary-pathname*
   #+Allegro
-  (translate-logical-pathname "lisa:lib;lisa;acl;")
+  (translate-logical-pathname "lisa:lib;acl;")
   #+LispWorks
-  (translate-logical-pathname "lisa:lib;lisa;lispworks;")
+  (translate-logical-pathname "lisa:lib;lispworks;")
   #+CMU
-  (translate-logical-pathname "lisa:lib;lisa;cmucl;")
+  (translate-logical-pathname "lisa:lib;cmucl;")
   #+CLISP
-  (translate-logical-pathname "lisa:lib;lisa;clisp;")
+  (translate-logical-pathname "lisa:lib;clisp;")
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
@@ -70,7 +70,24 @@
 #+clisp
 (setf custom:*load-paths*
   (append custom:*load-paths* `(,(lisa-debugger))))
-          
+
+#+LispWorks
+(let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))
+
+  (defun lisa-require (module-name pathname)
+    (format t "lisa-require: ~S ~S~%" module-name pathname)
+    (let ((lisa-module
+           (find module-name loadable-modules
+                 :test #'string=
+                 :key #'car)))
+      (if (null lisa-module)
+          (call-next-advice module-name pathname)
+        (call-next-advice module-name (cdr lisa-module)))))
+
+  (defadvice (require lisa-require :around)
+      (module-name &optional pathname)
+    (lisa-require module-name pathname)))
+
 ;;; Make sure the binary directory structure exists...
 
 (let ((lisa-binary-directories
@@ -82,7 +99,7 @@
     (dolist (dir lisa-binary-directories)
       (let ((pathname
              (translate-logical-pathname
-              (concatenate 'string "lisa:lib;lisa;" lisp ";" dir ";"))))
+              (concatenate 'string "lisa:lib;" lisp ";" dir ";"))))
         (ensure-directories-exist pathname)))))
 
 (mk:defsystem :lisa
