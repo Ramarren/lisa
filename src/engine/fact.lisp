@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.21 2001/03/05 16:35:18 youngde Exp $
+;;; $Id: fact.lisp,v 1.22 2001/03/05 21:59:58 youngde Exp $
 
 (in-package :lisa)
 
@@ -28,16 +28,14 @@
   ((class :initarg :class
          :initform nil
          :reader get-class)
-   (fact-id :initarg :fact-id
-            :initform -1
+   (fact-id :initform -1
             :reader get-fact-id)
    (symbolic-id :reader get-symbolic-id)
    (slot-source :initarg :slot-source
                 :reader get-slot-source)
    (slot-table :initform nil
                :accessor get-slot-table)
-   (clock :initarg :clock
-          :initform 0
+   (clock :initform 0
           :accessor get-clock))
   (:documentation
    "This class represents facts in the knowledge base."))
@@ -93,7 +91,8 @@
             (class-name (get-class self))
             (get-slot-values self))))
 
-(defmethod initialize-instance :after ((self fact) &key &allow-other-keys)
+(defmethod initialize-instance :after ((self fact) &rest args)
+  (declare (ignore args))
   (mapc #'(lambda (pair)
             (set-slot-value self (first pair) (second pair)))
         (get-slot-source self))
