@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.53 2001/04/02 21:25:18 youngde Exp $
+;;; $Id: parser.lisp,v 1.54 2001/04/03 01:03:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -172,8 +172,8 @@
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
              (if (quotablep slot-value)
-                 ``(,,slot-name ,',slot-value)
-               ``(,,slot-name ,,slot-value)))))
+                 ``(,',slot-name ,',slot-value)
+               ``(,',slot-name ,,slot-value)))))
     `(list ,@(mapcar #'normalize slots))))
 
 (defun canonicalize-slot-names (meta-class slots)
@@ -252,6 +252,31 @@
              (cond ((and (symbolp class)
                          (variablep binding)
                          (consp slots))
+                    (let* ((meta (find-meta-class class))
+                           (slot-list (canonicalize-slot-names meta slots))
+                           (func (function
+                                  (lambda (fact slots)
+                                   (if (eq meta (find-meta-class (fact-name fact)))
+                                       (modify-fact (current-engine) fact slots)
+                                     (parsing-error
+                                      "The class of this fact doesn't match its binding: ~S."
+                                      class))))))
+                      `(funcall ,func ,binding (,@(normalize-slots slot-list)))))
+                   (t
+                    (parsing-error
+                     "There's a structural problem with this form: ~S" body))))))
+    (handler-case
+        (generate-modify)
+      (lisa-error (condition)
+        (command-structure-error 'modify-fact condition)))))
+
+#+ignore
+(defun parse-and-modify-fact (body)
+  (flet ((generate-modify ()
+           (with-modify-form ((class binding slots) body)
+             (cond ((and (symbolp class)
+                         (variablep binding)
+                         (consp slots))
                     (let ((slot-list
                            (canonicalize-slot-names
                             (find-meta-class class) slots)))
@@ -259,7 +284,8 @@
                         (,@(normalize-slots slot-list)))))
                    (t
                     (parsing-error
-                     "There's a structural error with this form: ~S" body))))))
+                     "There's a structural problem with this form: ~S"
+                     body))))))
     (handler-case
         (generate-modify)
       (lisa-error (condition)
