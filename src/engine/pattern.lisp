@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.34 2001/01/23 15:26:17 youngde Exp $
+;;; $Id: pattern.lisp,v 1.35 2001/01/23 15:56:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,47 +69,6 @@
               `(eq ,,var ',,value)
             `(equal ,,var ,,value)))))
        
-#+ignore
-(defun canonicalize-slot (pattern slot bindings)
-  (declare (type (pattern pattern) (slot slot)
-                 (binding-table bindings)))
-  (labels ((make-slot-variable ()
-             (make-lisa-defined-slot-variable
-              (intern (make-symbol (format nil "?~A" (gensym))))))
-           (add-local-binding (binding)
-             (push binding (slot-value pattern 'bindings)))
-           (new-slot-binding (var)
-             (let ((binding (lookup-binding bindings var)))
-               (when (null binding)
-                 (setf binding
-                   (make-slot-binding var (get-location pattern)
-                                      (get-name slot)))
-                   (add-binding bindings binding))
-               (add-local-binding binding)))
-           (rewrite-slot (var value negated)
-             (let ((varname (get-variable-name var)))
-               (setf (get-value slot) varname)
-               (setf (get-constraint slot)
-                 (generate-test varname value negated))
-               (new-slot-binding var))))
-    (with-accessors ((slot-value get-value)
-                     (slot-constraint get-constraint)) slot
-      (cond ((literalp slot-value)
-             (rewrite-slot (make-slot-variable) slot-value nil))
-            ((negated-rewritable-constraintp slot-value)
-             (rewrite-slot (make-slot-variable) (second slot-value) t))
-            ((null slot-constraint)
-             (unless (new-slot-binding slot-value)
-               (rewrite-slot (make-slot-variable) slot-value nil)))
-            ((literalp slot-constraint)
-             (rewrite-slot slot-value slot-constraint nil))
-            ((negated-rewritable-constraintp slot-constraint)
-             (rewrite-slot slot-value (second slot-constraint) t))
-            ((variablep slot-value)
-             (new-slot-binding slot-value))
-            (t (error "Funny slot format.")))
-      (values))))
-
 (defun canonicalize-slot (pattern slot bindings)
   (declare (type (pattern pattern) (slot slot)
                  (binding-table bindings)))

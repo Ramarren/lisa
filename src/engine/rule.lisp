@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.35 2001/01/23 15:26:17 youngde Exp $
+;;; $Id: rule.lisp,v 1.36 2001/01/23 15:56:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -88,27 +88,6 @@
                     (format t "~S~%" token)
                     (traverse (get-parent token))))))
     (traverse token)))
-
-(defgeneric create-slot-binding (test pattern slot)
-  (:method ((test test1) pattern slot)
-           (values nil)))
-
-(defmethod create-slot-binding ((test test1-var) pattern slot)
-  (make-slot-binding (get-value test)
-                     (get-location pattern)
-                     (get-name slot)))
-  
-#+ignore
-(defmethod record-slot-bindings ((self rule) pattern)
-  (declare (type pattern pattern))
-  (flet ((create-slot-bindings (slot)
-           (declare (type slot slot))
-           (mapc #'(lambda (test)
-                     (let ((binding (create-slot-binding test pattern slot)))
-                       (unless (null binding)
-                         (add-binding self binding))))
-                 (get-tests slot))))
-    (mapc #'create-slot-bindings (get-slots pattern))))
 
 (defun add-new-pattern (rule pattern)
   (with-accessors ((patterns get-patterns)) rule
