@@ -21,87 +21,78 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.37 2001/03/20 21:31:46 youngde Exp $
+;;; $Id: mab-kw.lisp,v 1.1 2001/03/20 21:31:46 youngde Exp $
 
-(in-package "LISA")
+(require "kw")
 
-(deftemplate monkey
-  (slot location)
-  (slot on-top-of)
-  (slot holding))
+(in-package "KW-USER")
 
-(deftemplate thing
-  (slot name)
-  (slot location)
-  (slot on-top-of)
-  (slot weight))
+(def-kb-struct monkey
+    location on-top-of holding)
 
-(deftemplate chest
-  (slot name)
-  (slot contents)
-  (slot unlocked-by))
+(def-kb-struct thing
+    name location on-top-of weight)
 
-(deftemplate goal-is-to
-  (slot action)
-  (slot argument-1)
-  (slot argument-2))
+(def-kb-struct chest
+    name contents unlocked-by)
 
-;;;(watch :activations)
-;;;(watch :facts)
-;;;(watch :rules)
+(def-kb-struct goal-is-to
+    action argument-1 argument-2)
+
+(defcontext mab :strategy (priority recency order) :auto-return t)
 
 ;;; Chest-unlocking rules...
 
-(defrule hold-chest-to-put-on-floor
-  (goal-is-to (action unlock) (argument-1 ?chest))
-  (thing (name ?chest) (on-top-of (not floor)) (weight light))
-  (monkey (holding (not ?chest)))
-  (not (goal-is-to (action hold) (argument-1 ?chest)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 ?chest)
-                      (argument-2 empty))))
+(defrule hold-chest-to-put-on-floor :forward :context mab
+  (goal-is-to ?goal action unlock argument-1 ?chest)
+  (thing ?thing name ?chest on-top-of ?top weight light)
+  (test (not (eql ?top 'floor)))
+  (not (monkey ?monkey holding ?chest))
+  (not (goal-is-to ? action hold argument-1 ?chest))
+  -->
+  ((format t "hold-chest-to-put-on-floor fired~%"))
+  (assert (goal-is-to ? action hold argument-1 ?chest)))
 
-(defrule put-chest-on-floor
-  (goal-is-to (action unlock) (argument-1 ?chest))
-  (?monkey (monkey (location ?place) (on-top-of ?on) (holding ?chest)))
-  (?thing (thing (name ?chest)))
-  =>
-  (format t "Monkey throws the ~A off the ~A onto the floor.~%" ?chest ?on)
-  (modify ?monkey (holding blank))
-  (modify ?thing (location ?place) (on-top-of floor)))
+(defrule put-chest-on-floor :forward :context mab
+  (goal-is-to ? action unlock argument-1 ?chest)
+  (monkey ?monkey location ?place on-top-of ?on holding ?chest)
+  (thing ?thing name ?chest)
+  -->
+  ((format t "Monkey throws the ~A off the ~A onto the floor.~%" ?chest ?on))
+  (assert ?monkey holding blank)
+  (assert ?thing location ?place on-top-of floor))
 
-(defrule get-key-to-unlock
-  (goal-is-to (action unlock) (argument-1 ?obj))
-  (thing (name ?obj) (on-top-of floor))
-  (chest (name ?obj) (unlocked-by ?key))
-  (monkey (holding (not ?key)))
-  (not (goal-is-to (action hold) (argument-1 ?key)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 ?key)
-                      (argument-2 empty))))
+(defrule get-key-to-unlock :forward :context mab
+  (goal-is-to ? action unlock argument-1 ?obj)
+  (thing ? name ?obj on-top-of floor)
+  (chest ? name ?obj unlocked-by ?key)
+  (not (monkey ? holding ?key))
+  (not (goal-is-to ? action hold argument-1 ?key))
+  -->
+  (assert (goal-is-to ? action hold argument-1 ?key)))
 
-(defrule move-to-chest-with-key
-  (goal-is-to (action unlock) (argument-1 ?chest))
-  (thing (name ?chest) (location ?cplace) (on-top-of floor))
-  (monkey (location (not ?cplace)) (holding ?key))
-  (chest (name ?chest) (unlocked-by ?key))
-  (not (goal-is-to (action walk-to) (argument-1 ?cplace)))
-  =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?cplace)
-                      (argument-2 empty))))
+(defrule move-to-chest-with-key :forward :context mab
+  (goal-is-to ? action unlock argument-1 ?chest)
+  (thing ? name ?chest location ?cplace on-top-of floor)
+  (monkey ?monkey location ?loc holding ?key)
+  (test (not (eql ?loc ?cplace)))
+  (chest ? name ?chest unlocked-by ?key)
+  (not (goal-is-to ? action walk-to argument-1 ?cplace))
+  -->
+  (assert (goal-is-to ? action walk-to argument-1 ?cplace)))
 
-(defrule unlock-chest-with-key
-  (?goal (goal-is-to (action unlock) (argument-1 ?name)))
-  (?chest (chest (name ?name) (contents ?contents) (unlocked-by ?key)))
-  (thing (name ?name) (location ?place) (on-top-of ?on))
-  (monkey (location ?place) (on-top-of ?on) (holding ?key))
-  =>
-  (format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
-          ?name ?key ?contents)
-  (modify ?chest (contents nothing))
-  (assert (thing (name ?contents) (location ?place) 
-                 (weight light) (on-top-of ?name)))
-  (retract ?goal))
+(defrule unlock-chest-with-key :forward :context mab
+  (goal-is-to ?goal action unlock argument-1 ?name)
+  (chest ?chest name ?name contents ?contents unlocked-by ?key)
+  (thing ? name ?name location ?place on-top-of ?on)
+  (monkey ? location ?place on-top-of ?on holding ?key)
+  -->
+  ((format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
+           ?name ?key ?contents))
+  (assert (chest ?chest contents nothing))
+  (assert (thing ? name ?contents location ?place weight light
+                 on-top-of ?name))
+  (erase ?goal))
 
 ;;; Hold-object rules...
 

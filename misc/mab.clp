@@ -14,7 +14,7 @@
 ;;; modified EJFH 4/11/96 for JES Java Expert System
 ;;; produces identical output under CLIPS
 
-(set-node-index-hash 1)
+;;;(set-node-index-hash 1)
 ;;;(set-fact-duplication TRUE)
 ;;;(set-multithreaded-io TRUE)
 
