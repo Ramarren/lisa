@@ -25,11 +25,13 @@
   (slot friend)
   (slot age))
 
+#+ignore
 (defrule frodo ()
   (frodo (name ?name frodo))
   =>
   (format t "frodo fired: ~S~%" ?name))
 
+#+ignore
 (defrule not-frodo ()
   (frodo (name ?name (not frodo)))
   =>
@@ -89,6 +91,7 @@
   =>
   (format t "Rule samwise fired.~%"))
 
+#+ignore
 (defrule test-rule ()
   (frodo (name ?name))
   (samwise (friend ?name) (age ?age))
@@ -102,6 +105,12 @@
   (samwise (friend (not ?name)))
   =>
   )
+
+(defrule negated-patterns ()
+  (frodo (name ?name))
+  (not (samwise (name sam) (friend ?name)))
+  =>
+  (format t "negated-patterns fired.~%"))
 
 #|
 (defparameter *frodo* (assert (frodo (name frodo))))

@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.18 2002/09/30 16:37:01 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.19 2002/09/30 23:25:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,9 +52,6 @@
        (let ((test
               (function
                (lambda (token)
-                 (format t "testing value ~S with slot-name ~S, value ~S~%"
-                         value slot-name (get-slot-value
-                                          (token-top-fact token) slot-name))
                  (equal value
                         (get-slot-value
                          (token-top-fact token)

@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.24 2002/09/30 16:36:58 youngde Exp $
+;;; $Id: token.lisp,v 1.25 2002/09/30 23:25:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,12 +39,12 @@
 (defclass reset-token (token) ())
 
 (defun token-increment-not-counter (token)
-  (incf (token-not-counter token)))
+  (values token (incf (token-not-counter token))))
 
 (defun token-decrement-not-counter (token)
   (cl:assert (> (token-not-counter token) 0) nil
     "The negated join node logic is busted.")
-  (decf (token-not-counter token)))
+  (values token (decf (token-not-counter token))))
 
 (defun token-negated-p (token)
   (plusp (token-not-counter token)))
