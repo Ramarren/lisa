@@ -46,7 +46,8 @@ Abbreviated Table of Contents</h2></center>
 
 <br><a href="#Queries">Queries</a>
 
-<br><a href="#Conflict Resolution">Conflict Resolution</a>.
+<br><a href="#Conflict Resolution">Conflict Resolution</a>.<a href="#The LISA Debugger"><br>
+The LISA Debugger</a>.
 
 <br><a href="#Getting Started">Getting Started</a>.
 
@@ -1676,10 +1677,132 @@ of this new strategy can then be given to <i>make-inference-engine</i>.
 Documentation for the CR interface is still fairly light. Look for improvements
 
 in upcoming releases.
+<h3>VI. <a name="The LISA Debugger">The LISA Debugger</a></h3>
+<p>New as of 2.0 alpha 4, the LISA debugger is a simple monitoring and
+inspection utility that may be used to &quot;debug&quot; production rules.
+Although one cannot step through a rule pattern by pattern, breakpoints may be
+set to trigger just before a rule fires. When a breakpoint is reached, one can
+then interactively examine the token stack, display all pattern bindings and
+their values, single-step into the next activation, etc.</p>
+<p>By default, LISA builds without the debugger loaded to avoid a slight
+performance drag on rule firings. To use the debugger, in the CL-USER package
+evaluate the form (require 'lisa-debugger (lisa-debugger)). If you're running
+Allegro Common Lisp, LISA understands how to hook into the module search list;
+thus you may instead evaluate (require 'lisa-debugger).</p>
+<p>The functionality available via the LISA debugger may increase as user needs
+dictate; here is the command set as of this writing:</p>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(set-break <i>rule-name</i>)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+
+Sets a breakpoint in the rule identified by the symbol <i>rule-name.</i></p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(clear-break <i>rule-name</i>)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Clears the breakpoint previously set on the rule identified by the symbol <i>rule-name</i>.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(clear-breaks)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Removes all breakpoints.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(next)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Fires the currently suspended rule, then single-steps into the next
+  activation, if there is one. If there isn't one, the debugger exits.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(resume)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Resumes normal execution, until the next breakpoint is reached.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(tokens &amp;key (<i>verbose nil</i>))</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>&nbsp;Displays the token stack, which contains the facts that activated
+  this particular rule. If <i>verbose</i> is non-nil, then the fact instances
+  themselves are printed; otherwise, a shorthand notation is used.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(bindings)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Displays the bindings (pattern variables) found on the rule's RHS, along
+  with their values.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(fact <i>fact-id</i>)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Returns the fact instance associated with <i>fact-id</i>, a small integer
+  assigned to each fact by the inference engine.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(breakpoints)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Displays all breakpoints.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(rule)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Returns the rule instance representing the suspended activation.</p>
+
+</blockquote>
 
 <h3>
 
-VI.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
+VII.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
 
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 
@@ -1712,7 +1835,7 @@ is 2.25.1. Earlier releases might work as well, but no guarantees.
 
 <h3>
 
-VII.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+VIII.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 
 This section is a list (albeit incomplete) of features that would improve
 
@@ -1764,7 +1887,7 @@ to CLIPS' LOGICAL construct.</li>
 
 <h3>
 
-<a NAME="Supported Platforms"></a>VIII. Supported Platforms.</h3>
+<a NAME="Supported Platforms"></a>IX. Supported Platforms.</h3>
 
 LISA has been tested, and is known to run, on the following Common Lisp
 
