@@ -21,25 +21,15 @@
 ;;; Description: A sample implementation of an RPC client that requests
 ;;; inferencing services from a LISA server.
 
-;;; $Id: lisa-client.lisp,v 1.1 2002/12/11 19:30:38 youngde Exp $
+;;; $Id: lisa-client.lisp,v 1.2 2002/12/11 19:56:11 youngde Exp $
 
-(in-package "CL-USER")
-
-(eval-when (:load-toplevel :compile-toplevel :execute)
-  (require 'aclrpc)
-  (unless (find-package "LISA.CLIENT")
-    (defpackage "LISA.CLIENT"
-      (:use "LISA-LISP" "NET.RPC")
-      (:import "CL-USER::*LISA-SERVER-HOST*"
-               "CL-USER::*LISA-SERVER-PORT*"))))
-
-(in-package "LISA.CLIENT")
+(in-package "RPC")
 
 (defclass frodo ()
   ((name :initarg :name
          :initform nil
          :accessor frodo-name)
-   (has-ring :initform nil
+   (has-ring :initform :no
              :accessor frodo-has-ring)
    (companions :initform nil
                :accessor frodo-companions)))
@@ -58,7 +48,7 @@
    :remote-port *lisa-server-port*))
    
 (defun run-client ()
-  (let ((frodo (make-instance-frodo :name 'frodo)))
+  (let ((frodo (make-instance 'frodo :name 'frodo)))
     (format t "Frodo instance before inferencing: ~S~%" frodo)
     (multiple-value-bind (port stuff)
         (make-client)

@@ -21,21 +21,20 @@
 ;;; Description: A sample implementation of an RPC server capable of reasoning
 ;;; over remote objects.
 
-;;; $Id: lisa-server.lisp,v 1.1 2002/12/11 19:30:39 youngde Exp $
+;;; $Id: lisa-server.lisp,v 1.2 2002/12/11 19:56:11 youngde Exp $
 
 (in-package "CL-USER")
 
-(defvar *lisa-server-host* "localhost")
-(defvar *lisa-server-port* 10000)
-
 (eval-when (:load-toplevel :compile-toplevel :execute)
   (require 'aclrpc)
-  (unless (find-package "LISA.SERVER")
-    (defpackage "LISA.SERVER"
+  (unless (find-package "RPC")
+    (defpackage "RPC"
       (:use "LISA-LISP" "NET.RPC"))))
 
-(in-package "LISA.SERVER")
+(in-package "RPC")
 
+(defvar *lisa-server-host* "localhost")
+(defvar *lisa-server-port* 10000)
 (defvar *server-proc* nil)
 
 (defclass remote-frodo (rpc-remote-ref) ())
@@ -48,7 +47,7 @@
   (make-rpc-server
    'rpc-socket-server
    :name "LISA RPC Server"
-   :local-port *server-port*
+   :local-port *lisa-server-port*
    :open :listener
    :connect-action :call
    :connect-function
@@ -66,3 +65,7 @@
     (rpc-close :stop :final)
     (setf *server-proc* nil)))
 
+(defrule remote-frodo ()
+  (?frodo (frodo (has-ring :no)))
+  =>
+  (modify ?frodo (has-ring t) (companions '(samwise gandalf))))
