@@ -20,13 +20,15 @@
 ;;; File: pattern.lisp
 ;;; Description: Base class for all types of patterns found on a rule LHS.
 
-;;; $Id: pattern.lisp,v 1.52 2001/04/19 20:24:11 youngde Exp $
+;;; $Id: pattern.lisp,v 1.53 2001/04/20 15:29:42 youngde Exp $
 
 (in-package "LISA")
 
 (defclass pattern ()
   ((name :initarg :name
          :reader get-name)
+   (bindings :initform (list)
+             :reader get-bindings)
    (location :initarg :location
              :reader get-location))
   (:documentation

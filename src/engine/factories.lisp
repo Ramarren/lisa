@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.31 2001/04/19 20:24:11 youngde Exp $
+;;; $Id: factories.lisp,v 1.32 2001/04/20 15:29:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -66,7 +66,10 @@
 (defmethod make-node2-test ((slot slot) pattern)
   (make-test2-eval (make-node-function-call slot pattern)))
 
-(defgeneric make-conditional-element (class location pattern))
+(defgeneric make-conditional-element (class location pattern)
+  (:method (class location pattern)
+           (error "The pattern factory doesn't recognize this pattern class:"
+                  class)))
 
 (defmethod make-conditional-element ((class (eql :test)) location pattern)
   (make-test-pattern (parsed-pattern-pattern pattern) location))

@@ -21,13 +21,13 @@
 ;;; Description: This class represents a special type of generic-pattern that
 ;;; can be bound to a variable.
 
-;;; $Id: bound-pattern.lisp,v 1.1 2001/04/19 19:02:19 youngde Exp $
+;;; $Id: bound-pattern.lisp,v 1.2 2001/04/20 15:29:42 youngde Exp $
 
 (in-package "LISA")
 
 (defclass bound-pattern (generic-pattern)
   ((pattern-binding :initarg :binding
-                    :reader get-bound-name))
+                    :reader get-pattern-binding))
   (:documentation
    "This class represents a special type of generic-pattern that can be bound
    to a variable."))

@@ -20,16 +20,29 @@
 ;;; File: test-pattern.lisp
 ;;; Description: This class represents the TEST conditional element.
 
-;;; $Id: test-pattern.lisp,v 1.1 2001/04/19 19:09:56 youngde Exp $
+;;; $Id: test-pattern.lisp,v 1.2 2001/04/20 15:29:42 youngde Exp $
 
 (in-package "LISA")
 
 (defclass test-pattern (pattern)
-  ((forms :initarg :forms
-          :reader get-forms))
+  ((form :initarg :form
+          :reader get-form))
   (:documentation
    "This class represents the TEST conditional element."))
 
-(defun make-test-pattern (forms location)
+(defmethod finalize-pattern ((self test-pattern) global-bindings)
+  (let ((bindings (list)))
+    (flet ((add-local-binding (var)
+             (let ((binding (lookup-binding global-bindings var)))
+               (cl:assert (not (null binding)) ()
+                 "No global binding for variable ~S." var)
+               (pushnew binding bindings))))
+      (mapc #'add-local-binding
+            (mapcar #'(lambda (obj) (variablep obj))
+                    (flatten (get-form self)))))
+    (setf (slot-value self 'bindings) bindings)
+    (values self)))
+
+(defun make-test-pattern (form location)
   (make-instance 'test-pattern
-                 :name 'test :location location :forms forms))
+                 :name 'test :location location :form form))

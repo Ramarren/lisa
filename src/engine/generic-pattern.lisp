@@ -21,16 +21,14 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.11 2001/04/19 20:24:11 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.12 2001/04/20 15:29:42 youngde Exp $
 
 (in-package "LISA")
 
 (defclass generic-pattern (pattern)
    ((slots :initarg :slot-list
            :initform nil
-           :accessor get-slots)
-    (bindings :initform nil
-              :reader get-bindings))
+           :accessor get-slots))
   (:documentation
    "Represents  the default style of pattern found on rule LHSs, as in
    (fact (slot-0 1) (slot-1 blue))."))
