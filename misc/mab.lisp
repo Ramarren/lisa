@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.6 2001/01/16 19:00:46 youngde Exp $
+;;; $Id: mab.lisp,v 1.7 2001/01/17 01:51:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -45,7 +45,6 @@
   (monkey (holding (not ?chest)))
   (not (goal-is-to (action hold) (argument-1 ?chest)))
   =>
-  (retract ?goal)
   (assert (goal-is-to (action hold) (argument-1 ?chest))))
 
 (defrule put-chest-on-floor

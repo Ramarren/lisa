@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.33 2001/01/13 21:00:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.34 2001/01/17 01:51:35 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,7 +61,6 @@
 
 (defun parse-rulebody (body)
   (labels ((parse-lhs (body patterns)
-             (format t "parse-lhs: looking at ~S~%" body)
              (let ((pattern (first body)))
                (cond ((consp pattern)
                       (parse-lhs (rest body)
