@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.7 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: pattern.lisp,v 1.8 2000/12/04 20:12:19 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,7 +34,7 @@
    (slots :initform nil
           :accessor get-slots)
    (location :initarg :location
-             :reader (get-location)))
+             :reader get-location))
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 

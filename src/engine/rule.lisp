@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.15 2000/12/04 16:44:22 youngde Exp $
+;;; $Id: rule.lisp,v 1.16 2000/12/04 20:12:19 youngde Exp $
 
 (in-package :lisa)
 
@@ -48,7 +48,7 @@
    (rule-source :initform nil
                 :initarg :rule-source
                 :reader get-rule-source)
-   (initial-pattern :initform (make-generic-pattern 'initial-fact nil)
+   (initial-pattern :initform (make-generic-pattern 'initial-fact nil nil)
                     :reader get-initial-pattern
                     :allocation :class))
   (:documentation
@@ -105,26 +105,27 @@
                     (traverse (get-parent token))))))
     (traverse token)))
 
-(defun record-pattern-bindings (pattern)
-  (flet ((record-binding (slot-name test)
-           (declare (type test1 test))
-           (let ((val (get-value test)))
-             (when (variablep val)
-               (add-binding self
-                            (make-slot-binding val (get-location pattern) 
-                                               slot-name)))))
-         (record-slot-bindings (slot)
-           (declare (type slot slot))
-           (mapc #'(lambda (test)
-                     (record-binding (get-name slot) test)))))
-    (mapc #'record-slot-bindings (get-slots slots))))
+(defmethod record-slot-bindings ((self rule) pattern)
+  (declare (type pattern pattern))
+  (labels ((create-binding (slot-name test)
+             (declare (type test1 test))
+             (let ((val (get-value test)))
+               (when (variablep val)
+                 (add-binding self (make-slot-binding
+                                    val (get-location pattern) slot-name)))))
+           (create-slot-bindings (slot)
+             (declare (type slot slot))
+             (mapc #'(lambda (test)
+                       (create-binding (get-name slot) test))
+                   (get-tests slot))))
+    (mapc #'create-slot-bindings (get-slots pattern))))
 
 (defmethod add-pattern ((self rule) pattern)
   (when (has-binding-p pattern)
     (add-binding self (make-pattern-binding
                        (get-pattern-binding pattern)
                        (get-location pattern))))
-  (record-pattern-bindings pattern)
+  (record-slot-bindings self pattern)
   (with-accessors ((patterns get-patterns)) self
     (setf patterns (nconc patterns `(,pattern))))
   (values pattern))
