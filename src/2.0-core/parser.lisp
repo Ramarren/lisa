@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.40 2002/10/17 14:47:38 youngde Exp $
+;;; $Id: parser.lisp,v 1.41 2002/10/17 18:11:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -81,22 +81,8 @@
                :salience salience
                :module module)))
 
-(defvar *network* nil)
-
-#+ignore
-(defun define-rule (name body &optional (salience 0) (module nil))
-  (with-rule-components ((doc-string lhs rhs) body)
-    (format t "LHS: ~S~%" lhs)
-    (format t "RHS: ~S~%" rhs)
-    (setf *network* (make-test-network lhs))
-    *network*))
-
 (defun redefine-defrule (name body &key (salience 0) (module nil))
   (define-rule name body salience module))
-
-#+ignore
-(defun redefine-defrule (name body &key (salience 0) (module nil))
-  (add-rule (current-engine) (define-rule name body salience module)))
 
 (defun extract-rule-headers (body)
   (if (stringp (first body))
@@ -259,12 +245,6 @@
 
 ;;; End of the rule parsing stuff
 
-(defun canonicalize-slot-names (slots)
-  (mapcar #'(lambda (slot)
-              `(,(first slot)
-                ,(second slot)))
-          slots))
-
 (defun create-template-class-slots (class-name slot-list)
   (labels ((determine-default (default-form)
              (cl:assert (and (consp default-form)
@@ -314,8 +294,7 @@
        (dolist (fact ',body)
          (let ((head (first fact)))
            (push 
-            (apply #'make-fact head
-                   (canonicalize-slot-names (rest fact)))
+            (apply #'make-fact head (rest fact))
             ,deffacts)))
        (add-autofact (inference-engine)
                      (make-deffacts ',name (nreverse ,deffacts))))))

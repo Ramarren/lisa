@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.4 2002/10/01 18:17:21 youngde Exp $
+;;; $Id: preamble.lisp,v 1.5 2002/10/17 18:11:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -102,5 +102,6 @@
     (progn ,@body)))
 
 (register-clear-handler
- "environment" #'(lambda ()
-                   (setf *active-engine* nil)))
+ "environment" 
+ #'(lambda ()
+     (setf *active-engine* (make-inference-engine))))

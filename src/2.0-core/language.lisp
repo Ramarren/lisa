@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.7 2002/10/17 14:47:38 youngde Exp $
+;;; $Id: language.lisp,v 1.8 2002/10/17 18:11:06 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,39 +40,19 @@
 (defmacro defimport (class-name &key (use-inheritancep t))
   `(import-class ,class-name ,use-inheritancep))
 
-#+ignore
-(defmacro assert ((&body body))
-  (parse-and-insert-fact body))
-
-#+ignore
-(defmacro assert ((&body body))
-  `(destructuring-bind (name &rest slots) ',body
-     (assert-fact
-      (inference-engine)
-      (make-fact
-       name
-       ,@(mapcar #'(lambda (pair)
-                     (destructuring-bind (name value) pair
-                       `(list (identity ',name) 
-                              (identity 
-                               ,@(if (quotablep value)
-                                     `(',value)
-                                   `(,value))))))
-                 slots)))))
+(defun expand-slots (body)
+  (mapcar #'(lambda (pair)
+              (destructuring-bind (name value) pair
+                `(list (identity ',name) 
+                       (identity 
+                        ,@(if (quotablep value)
+                              `(',value)
+                            `(,value))))))
+          body))
 
 (defmacro assert ((name &body body))
-  `(assert-fact
-    (inference-engine)
-    (make-fact
-     ',name
-     ,@(mapcar #'(lambda (pair)
-                   (destructuring-bind (name value) pair
-                     `(list (identity ',name) 
-                            (identity 
-                             ,@(if (quotablep value)
-                                   `(',value)
-                                 `(,value))))))
-               body))))
+  `(assert-fact (inference-engine)
+                (make-fact ',name ,@(expand-slots body))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
@@ -116,22 +96,8 @@
 (defun retract (fact &optional (engine *active-engine*))
   (retract-fact engine fact))
 
-#+ignore
 (defmacro modify (fact &body body)
-  (parse-and-modify-fact fact body))
-
-(defmacro modify (fact &body body)
-  `(modify-fact
-    (inference-engine)
-    ,fact 
-    ,@(mapcar #'(lambda (pair)
-                  (destructuring-bind (name value) pair
-                    `(list (identity ',name) 
-                           (identity 
-                            ,@(if (quotablep value)
-                                  `(',value)
-                                `(,value))))))
-              body)))
+  `(modify-fact (inference-engine) ,fact ,@(expand-slots body)))
 
 (defun watch (event)
   (watch-event event))

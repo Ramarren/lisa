@@ -1,7 +1,22 @@
 
 <h1>Release Notes for LISA 2.0 (alpha)</h1>
 <h2>The LISA Project</h2>
-<p>1 October, 2002</p>
+<h3>17 October, 2002</h3>
+<p>This is the second alpha release for LISA version 2.0. Rule redefinition and
+queries are now in place, with improved performance and efficiency. In the case
+of rule redefinition, or rule insertion into a &quot;live&quot; engine, LISA now
+builds a &quot;mini Rete network&quot; for the new rule and grafts it into the
+larger network. Also new are rewritten ASSERT and MODIFY macros, allowing code
+similar to the following:</p>
+<blockquote>
+  <dl>
+    <dt>(let ((?age 1000))</dt>
+    <dt>&nbsp; (modify ?fact (age ?age) (name (make-a-name))))</dt>
+  </dl>
+</blockquote>
+<p>In other words, ASSERT and MODIFY should now respond better to their lexical
+environments.</p>
+<h3>1 October, 2002</h3>
 <p>This is the first alpha release for LISA version 2.0, representing a
 significant improvement over the 1.x branch. At the core of 2.0 is a ground-up
 rewrite of LISA's Rete algorithm. While CLOS still forms the basic structure of

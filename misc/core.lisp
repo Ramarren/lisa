@@ -110,7 +110,7 @@
   (?f (gandalf (age 100)))
   =>
   (let ((?age 1000))
-    (modify ?f (age ?age))))
+    (modify ?f (age ?age) (name (intern (make-symbol "gandalf"))))))
 
 #|
 (defparameter *frodo* (assert (frodo (name frodo))))
