@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.39 2001/01/07 01:28:29 youngde Exp $
+;;; $Id: sample.lisp,v 1.40 2001/01/07 03:33:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -57,6 +57,7 @@
 
 (watch :activations)
 
+#+ignore
 (defrule rocky-1
   (rocky (name "rocky"))
   =>
@@ -121,4 +122,17 @@
   (?fact (boris (name ?name (string= ?name "boris"))))
   =>
   (format t "simple-predicate fired: ?name = ~S~%" ?name)
+  (retract ?fact))
+
+#+ignore
+(defrule any-rocky
+  (?fact (rocky (name ?name)))
+  =>
+  (format t "any-rocky fired: ?name = ~S~%" ?name)
+  (retract ?fact))
+
+(defrule any-rocky-but-boris
+  (?fact (rocky (name ?name (not "boris"))))
+  =>
+  (format t "any-rocky-but-boris fired: ?name = ~S~%" ?name)
   (retract ?fact))

@@ -20,7 +20,7 @@
 ;;; File: load
 ;;; Description: Simple-minded loader for use in early development.
 
-;;; $Id: load.lisp,v 1.23 2001/01/05 19:26:50 youngde Exp $
+;;; $Id: load.lisp,v 1.24 2001/01/07 03:33:21 youngde Exp $
 
 (in-package :user)
 
@@ -43,7 +43,7 @@
                     "rete-compiler" "clear-token" "remove-token" "token-tree"
                     "node" "node1" "node1-tev1" "node1-tect"
                     "node1-teq" "node1-tfn" "node1-not" "node1-rtl"
-                    "node-test" "test2-simple" "node2" "node2-not"
+                    "test" "node-test" "test2-simple" "node2" "node2-not"
                     "terminal-node" "test1" "slot" "pattern" "generic-pattern"
                     "not-pattern" "factories" "funcall" "rule" "parser"
                     "language" "activation" "environment" "watch" "debug")))))

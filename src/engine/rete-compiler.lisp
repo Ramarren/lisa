@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.29 2001/01/07 01:28:29 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.30 2001/01/07 03:33:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,55 +55,6 @@
           :accessor get-roots))
   (:documentation
    "Generates the Rete pattern network."))
-
-#+ignore
-(defun add-simple-tests (slots rule node)
-  (labels ((add-test-maybe (node slot-name tests)
-             (let ((test (first tests)))
-               (cond ((null test)
-                      (values node))
-                     (t
-                      (if (value-is-variable-p test)
-                          (add-test-maybe node slot-name (rest tests))
-                        (add-test-maybe (merge-successor
-                                         node (make-node1-teq slot-name
-                                                              (get-value test))
-                                         rule)
-                                        slot-name (rest tests)))))))
-           (add-tests (node slot)
-             (add-test-maybe node (get-name slot) (get-tests slot))))
-    (if (null slots)
-        (values node)
-      (add-simple-tests (rest slots) rule
-                        (add-tests node (first slots))))))
-
-#+ignore
-(defun add-simple-tests (pattern rule parent-node)
-  (labels ((add-test-maybe (node slot-name tests)
-             (let ((test (first tests)))
-               (cond ((null test)
-                      (values node))
-                     ((value-is-variable-p test)
-                      (add-test-maybe node slot-name (rest tests)))
-                     ((and (value-is-predicate-p test)
-                           (> (get-pattern-count rule) 1))
-                      (add-test-maybe node slot-name (rest tests)))
-                     (t
-                      (add-test-maybe
-                       (merge-successor node
-                                        (make-node1-teq slot-name
-                                                        (get-value test))
-                                        rule)
-                       slot-name (rest tests))))))
-           (add-simple-node-tests (slots last-node)
-             (let ((slot (first slots)))
-               (if (null slot)
-                   (values last-node)
-                 (add-simple-node-tests
-                  (rest slots)
-                  (add-test-maybe last-node (get-name slot)
-                                  (get-tests slot)))))))
-    (add-simple-node-tests (get-slots pattern) parent-node)))
 
 (defmethod create-node1-test ((test test1-internal-eval)
                               slot rule pattern)
@@ -223,28 +174,6 @@
                     (get-tests slot)))
           (get-slots pattern))
     (values node2)))
-
-#+ignore
-(defun create-join-nodes (compiler rule)
-  (labels ((add-join-node (node i)
-             (with-accessors ((terminals get-terminals)) compiler
-               (add-successor (aref terminals (1- i)) node rule)
-               (add-successor (aref terminals i) node rule)
-               (add-node rule node)
-               (setf (aref terminals (1- i)) node)
-               (setf (aref terminals i) node)
-               (values node)))
-           (third-pass (patterns i)
-             (let ((pattern (first patterns)))
-               (cond ((null pattern)
-                      (values t))
-                     (t
-                      (let ((node2
-                             (make-join-node pattern (get-engine rule))))
-                        (add-node2-tests rule node2 pattern)
-                        (add-join-node node2 i)
-                        (third-pass (rest patterns) (1+ i))))))))
-    (third-pass (rest (get-patterns rule)) 1)))
 
 ;;; the "third pass"...
 

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.15 2001/01/07 01:28:29 youngde Exp $
+;;; $Id: pattern.lisp,v 1.16 2001/01/07 03:33:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,51 +47,36 @@
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
 
-#+ignore
-(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
-  (labels ((create-constraint-test (constraint)
-             (cond ((literalp constraint)
-                    (make-test1-eq constraint))
-                   ((consp constraint)
-                    (if (eq (first constraint) 'not)
-                        (make-test1-neq `(,(second constraint)))
-                      (make-test1-eq `(,constraint))))
-                   (t
-                    (error "Unrecognizable slot format."))))
-           (create-slot-tests (slot)
-             (let* ((value (first slot))
-                    (constraint (second slot))
-                    (tests `(,(make-test1-eq value))))
-               (unless (null constraint)
-                 (setf tests
-                   (append tests
-                           `(,(create-constraint-test constraint)))))
-               (values tests))))
-    (mapc #'(lambda (slot-desc)
-              (add-slot self (first slot-desc)
-                        (create-slot-tests (rest slot-desc))))
-          slot-list)))
-
 (defun canonicalize-slot (slot)
   (flet ((make-slot-variable ()
-           (intern (make-symbol (format nil "?~A" (gensym))))))
+           (intern (make-symbol (format nil "?~A" (gensym)))))
+         (rewrite-constraint (var value negated)
+           (if negated
+               `(not (equal ,var ,value))
+             `(equal ,var ,value))))
     (let ((value (second slot))
           (constraint (third slot)))
-      (cond ((or (literalp value)
-                 (and (consp value)
-                      (eq (first value) 'not)))
-             (let* ((var (make-slot-variable))
-                    (new-constraint
-                     (if (literalp value) 
-                         `(equal ,var ,value)
-                       `(not (equal ,var ,(second value))))))
-               (values var new-constraint t)))
-            (t (values value constraint nil))))))
+      (cond ((literalp value)
+             (values value (rewrite-constraint 
+                            (make-slot-variable) value nil) t))
+            ((negated-constraintp value)
+             (values value (rewrite-constraint 
+                            (make-slot-variable (second value) t)) t))
+            ((literalp constraint)
+             (values value (rewrite-constraint 
+                            value constraint nil) t))
+            ((negated-constraintp constraint)
+             (values value (rewrite-constraint 
+                            value (second constraint) t) t))
+            (t
+             (values value constraint nil))))))
 
 (defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
   (flet ((create-slot-tests (slot)
            (multiple-value-bind (value constraint changed)
                (canonicalize-slot slot)
+             (format t "value ~S ; constraint ~S ; changed ~S~%"
+                     value constraint changed)
              (let ((tests (list (make-test1 value))))
                (unless (null constraint)
                  (push (if changed
