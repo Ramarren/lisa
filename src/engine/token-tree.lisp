@@ -20,10 +20,81 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.24 2001/03/27 20:57:14 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.25 2001/03/28 19:15:05 youngde Exp $
 
 (in-package "LISA")
 
+(defstruct (token-tree
+            (:constructor create-token-tree))
+  (table (make-hash-table))
+  (sortcodep nil)
+  (index 0)
+  (size 0))
+            
+(defun add-token (self token)
+  (declare (type token-tree self) (type token token))
+  (push token (gethash (create-hash-code self token)
+                       (token-tree-table self)))
+  (incf (token-tree-size self))
+  (values))
+
+(defun remove-token (self token)
+  (declare (type token-tree self) (type token token))
+  (let* ((key (create-hash-code self token))
+         (table (token-tree-table self))
+         (token-list (gethash key table))
+         (foundp nil))
+    (setf token-list
+      (delete-if #'(lambda (obj)
+                     (setf foundp (equals obj token)))
+                 token-list :count 1))
+    (when foundp
+      (if (null token-list)
+          (remhash key table)
+        (setf (gethash key table) token-list))
+      (decf (token-tree-size self)))
+    (values foundp)))
+
+(defun create-hash-code (tree token)
+  (declare (type token-tree tree) (type token token))
+  (abs (if (token-tree-sortcodep tree)
+           (hash-code token)
+         (get-fact-id (find-fact token (token-tree-index tree))))))
+
+(defun clear-tree (self)
+  (declare (type token-tree self))
+  (clrhash (token-tree-table self))
+  (setf (token-tree-size self) 0))
+
+(defun token-tree-count (self)
+  (declare (type token-tree self))
+  (token-tree-size self))
+
+(defmacro with-tree-iterator ((value tree) &body body)
+  "Iterates over each element in TREE (an instance of TOKEN-TREE) and
+  evaluates BODY. RETURN may be used to exit from the iterator with
+  specified results."
+  (let ((generator (gensym))
+        (key (gensym))
+        (foundp (gensym))
+        (token-list (gensym))
+        (rval (gensym)))
+    `(with-hash-table-iterator (,generator (token-tree-table ,tree))
+       (loop
+         (multiple-value-bind (,foundp ,key ,token-list)
+             (,generator)
+           (if ,foundp
+               (let ((,rval
+                      (dolist (,value ,token-list)
+                        ,@body)))
+                 (when ,rval
+                   (return ,rval)))
+             (return nil)))))))
+
+(defun make-token-tree (&key (use-sortcode-p nil))
+  (create-token-tree :sortcodep use-sortcode-p))
+
+#|
 (defclass token-tree ()
   ((table :initform (make-hash-table)
           :accessor get-table)
@@ -102,7 +173,7 @@
 
 (defun make-token-tree (&key (use-sortcode-p nil))
   (make-instance 'token-tree :use-sortcode use-sortcode-p))
-
+|#
 #|
 (defclass token-tree ()
   ((table :initform (make-array 1
