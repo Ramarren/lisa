@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.37 2001/03/30 19:08:10 youngde Exp $
+;;; $Id: defsys.lisp,v 1.38 2001/04/03 17:39:30 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -60,12 +60,6 @@
   (error "Unsupported implementation."))
 
 (load "lisa:clocc;port;port.system")
-
-#+CMU
-(progn
-  (pushnew 'cl:compile pcl::*defgeneric-times*)
-  (pushnew 'cl:compile pcl::*defmethod-times*)
-  (pushnew 'cl:compile pcl::*defclass-times*))
 
 (mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
@@ -144,6 +138,7 @@
                                        (:file "factories")
                                        (:file "funcall")
                                        (:file "rule")
+                                       (:file "directives")
                                        (:file "parser")
                                        (:file "language")
                                        (:file "activation")

@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.55 2001/04/03 15:07:25 youngde Exp $
+;;; $Id: parser.lisp,v 1.56 2001/04/03 17:39:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -46,13 +46,23 @@
   (flet ((redefine-rule ()
            (with-rule-components ((doc-string decls lhs rhs) body)
              (let ((rule (make-rule name (current-engine)
-                                    :doc-string doc-string :source body)))
+                                    :doc-string doc-string
+                                    :directives decls
+                                    :source body)))
                (finalize-rule-definition rule lhs rhs)
                (add-rule (current-engine) rule)))))
     (handler-case
         (redefine-rule)
       (syntactical-error (condition)
         (rule-structure-error name condition)))))
+
+(defun extract-directives (body)
+  (flet ((create-directive (form)
+           (if (consp form)
+               (make-directive (first form) (rest form))
+             (pattern-error
+              body "The form of this declaration is incorrect: ~S" body))))
+    (mapcar #'create-directive body)))
 
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers doc)
@@ -66,7 +76,8 @@
                       (let ((decl (first obj)))
                         (if (and (symbolp decl)
                                  (eq decl 'declare))
-                            (values doc obj (rest headers))
+                            (values doc (extract-directives (rest obj))
+                                    (rest headers))
                           (values doc nil headers))))
                      (t (values doc nil headers))))))
     (extract-headers body nil)))

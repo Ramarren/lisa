@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.45 2001/04/01 00:57:24 youngde Exp $
+;;; $Id: rule.lisp,v 1.46 2001/04/03 17:39:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -149,8 +149,19 @@
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (get-name self))))
 
-(defun make-rule (name engine &key (doc-string nil) (salience 0) (source nil))
+(defmethod initialize-instance :after ((self rule) &key (directives nil))
+  (flet ((handle-directives (directive)
+           (typecase directive
+             (salience-directive
+              (setf (slot-value self 'salience)
+                (get-salience directive)))
+             (t nil))))
+    (mapc #'handle-directives directives)))
+
+(defun make-rule (name engine &key (doc-string nil)
+                  (directives nil) (source nil))
   "Constructor for class DEFRULE."
   (make-instance 'rule :name name :engine engine
-                 :comment doc-string :salience salience :rule-source source))
+                 :comment doc-string :directives directives
+                 :rule-source source))
 

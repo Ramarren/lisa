@@ -21,7 +21,7 @@
 ;;; Description: Classes that represent various directives that appear within
 ;;; a DECLARE form.
 
-;;; $Id: directives.lisp,v 1.1 2001/04/03 16:47:24 youngde Exp $
+;;; $Id: directives.lisp,v 1.2 2001/04/03 17:39:31 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,4 +38,17 @@
 
 (defun make-salience-directive (salience)
   (make-instance 'salience-directive :salience salience))
+
+(defgeneric make-directive (kind body)
+  (:method (kind body)
+           (declare (ignore body))
+           (environment-error
+            "LISA doesn't understand this directive: ~S" kind)))
+
+(defmethod make-directive ((kind (eql 'salience)) (body list))
+  (let ((salience (first body)))
+    (if (typep salience 'integer)
+        (make-salience-directive salience)
+      (parsing-error
+       "A salience value must be of type INTEGER: ~S" salience))))
 
