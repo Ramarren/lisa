@@ -1,3 +1,9 @@
+2001-08-31    <youngde@nc.rr.com>
+
+	LISA's first production release, Version 1.0. Support for rule
+	redefinition regardless of inference engine state; augmented
+	documentation; enhancements to web page.
+
 2001-07-20    <youngde@nc.rr.com>
 
 	Fourth Beta release. Addition of DEFFACTS macro and associated
