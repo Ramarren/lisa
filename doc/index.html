@@ -7,16 +7,16 @@
 	<META NAME="AUTHOR" CONTENT="David Young">
 	<META NAME="CREATED" CONTENT="20001006;11464000">
 	<META NAME="CHANGEDBY" CONTENT="David Young">
-	<META NAME="CHANGED" CONTENT="20001006;21234100">
+	<META NAME="CHANGED" CONTENT="20001202;20301600">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2 ALIGN=CENTER>LISA - Intelligent Software Agents for Common Lisp</H2>
-<P STYLE="margin-bottom: 0in">Welcome to the LISA project, a platform
-for the development of <B>L</B>isp-based <B>I</B>ntelligent <B>S</B>oftware
-<B>A</B>gents. LISA is a production-rule system implemented in the
-Common Lisp Object System (CLOS), and is heavily influenced by the
-Java expert system shell <A HREF="http://herzberg.ca.sandia.gov/jess">Jess</A>.
-At its core is a reasoning engine based on an object-oriented
+<P STYLE="margin-bottom: 0in">Welcome to the <A HREF="http://sourceforge.net/projects/lisa">LISA</A>
+project, a platform for the development of <B>L</B>isp-based
+<B>I</B>ntelligent <B>S</B>oftware <B>A</B>gents. LISA is a
+production-rule system implemented in the Common Lisp Object System
+(CLOS), and is heavily influenced by the Java Expert System Shell
+(JESS). At its core is a reasoning engine based on an object-oriented
 implementation of the Rete algorithm, a very efficient mechanism for
 solving the difficult many-to-many matching problem (&quot;Rete: A
 Fast Algorithm for the Many Pattern/ Many Object Pattern Match
@@ -24,10 +24,9 @@ Problem&quot;, Charles L. Forgy, Artificial Intelligence 19(1982),
 17-37.) Intrinsic to LISA is the ability to reason over CLOS objects
 without imposing special class hierarchy requirements; thus it should
 be possible to easily augment existing CLOS applications with
-reasoning capabilities. While LISA is an extension to Common Lisp,
-the full power of the Lisp environment is always available;
-LISA-enabled applications should run on any ANSI-compliant Common
-Lisp platform.</P>
+reasoning capabilities. As LISA is an extension to Common Lisp, the
+full power of the Lisp environment is always available. LISA-enabled
+applications should run on any ANSI-compliant Common Lisp platform.</P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Times New Roman, serif"><FONT SIZE=4>Project
@@ -48,38 +47,56 @@ of important goals:</P>
 	Vendor neutrality is a significant project goal. As previously
 	mentioned, LISA is implemented in ANSI Common Lisp; currently, all
 	development is being done on CMU Common Lisp (<A HREF="http://www.cons.org/cmucl">CMUCL</A>)
-	and <A HREF="http://www.linux.org/">Linux</A>. Every effort will be
-	made to avoid the use of implementation-specific functionality; in
-	the cases where a non-ANSI feature must be used (e.g.
-	mul</SPAN>tiprocessing support), LISA will attempt to support the
-	major Lisp implementations through conditional evaluation.</P>
+	and <A HREF="http://www.linux.org/">Linux</A>, with periodic testing
+	on Allegro Common Lisp and LispWorks. Every effort will be made to
+	avoid the use of implementation-specific functionality; in the cases
+	where a non-ANSI feature must be used (e.g. mul</SPAN>tiprocessing
+	support), LISA will attempt to support the major Lisp
+	implementations through conditional evaluation.</P>
 	<LI><P STYLE="margin-bottom: 0in"><I>Familiarity</I>: LISA's
-	production-rule system has its roots in CLIPS and Jess, making it
+	production-rule system has its roots in CLIPS and JESS, making it
 	readily familiar to developers who've worked with either of these
-	systems. Indeed, both CLIPS and Jess have <I>their</I><SPAN STYLE="font-style: normal">
+	systems. Indeed, both CLIPS and JESS have <I>their</I><SPAN STYLE="font-style: normal">
 	roots in Lisp.</SPAN></P>
-	<LI><P STYLE="margin-bottom: 0in"><SPAN STYLE="font-style: normal"><I>Adaptability</I>:
+	<LI><P STYLE="margin-bottom: 0in; font-style: normal"><I>Adaptability</I>:
 	LISA is implemented entirely in CLOS; thus, the full power of Lisp's
 	object system is available to developers. Also, as previously
 	mentioned LISA reasons over CLOS objects without imposing
-	requirements on an application's class hierarchy.</SPAN></P>
+	requirements on an application's class hierarchy.</P>
+	<LI><P STYLE="margin-bottom: 0in"><I>Simplicity</I><SPAN STYLE="font-style: normal">:
+	Along with portability, the project is striving for simplicity and
+	elegance at the functional, architecture and source code levels.
+	This doesn't mean LISA should have limited usefulness; rather, it
+	should be possible for new developers to easily understand the code
+	layout and behavior. Unless performance absolutely demands
+	otherwise, clarity of design and implementation will take
+	precedence. </SPAN>
+	</P>
 </UL>
-<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT SIZE=4><FONT FACE="Times New Roman, serif">Project
+<P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Times New Roman, serif"><FONT SIZE=4>Project
 People</FONT></FONT></P>
 <UL>
 	<LI><P STYLE="margin-bottom: 0in"><A HREF="mailto:de.young@computer.org"><I>David
-	E. Young</I></A>, Fujitsu Network Communications</P>
+	E. Young</I></A>, Fujitsu Network Communications.</P>
 </UL>
 <P STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="Times New Roman, serif"><FONT SIZE=4>Project
 Status</FONT></FONT></P>
-<P STYLE="margin-bottom: 0in">LISA is in the very early stages of
-development and is considered &quot;pre-alpha&quot; software. Only a
-small amount of experimental code has been written, but the project
-is &quot;ramping up&quot; quickly. As LISA becomes usable,
-incremental releases will be made available. For more information on
-LISA, including mailing lists and available downloads, go <A HREF="http://sourceforge.net/projects/lisa">here</A>.
-If you prefer, you may contact the project staff directly (see
-<I>Project People</I><SPAN STYLE="font-style: normal">).</SPAN></P>
+<P STYLE="margin-bottom: 0in">LISA is in the early stages of
+development and is considered &quot;pre-alpha&quot; software.
+However, as of 1 December, 2000 LISA has a fair amount of
+functionality available. The fundamental behavior of a Rete network
+is in place; it is possible to build (not very useful) knowledge
+bases consisting of very simple rules (no variables save those for
+fact assignment), assert some basic facts and run the engine. The
+LISA programming language is also beginning to take shape.
+Development continues at a good clip; effort is currently
+concentrated on the addition of full variable support to production
+rules. As LISA becomes usable, incremental releases will be made
+available. For the most current information on the project, including
+mailing lists, latest news and available downloads, see the official
+<A HREF="http://sourceforge.net/projects/lisa">project page</A>. If
+you prefer, you can contact the project staff directly (see <I>Project
+People</I><SPAN STYLE="font-style: normal">).</SPAN></P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><BR>
@@ -91,7 +108,8 @@ If you prefer, you may contact the project staff directly (see
 </P>
 <P STYLE="margin-bottom: 0in"><SPAN ID="Frame1" STYLE="float: left; width: 4.89in; height: 0.69in; border: none; padding: 0in; background: #ffffff">
 	<DL>
-		<DT><B>Free Common Lisp Implementations</B></DT></DL>
+		<DT STYLE="margin-bottom: 0.2in"><B>Free Common Lisp
+		Implementations</B></DT></DL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in">
 		<A HREF="http://www.cons.org/cmucl">CMU Common Lisp</A> (CMUCL)</P>
@@ -100,7 +118,8 @@ If you prefer, you may contact the project staff directly (see
 </SPAN>
 <SPAN ID="Frame2" STYLE="float: right; width: 4.84in; height: 0.68in; border: none; padding: 0in; background: #ffffff">
 	<DL>
-		<DT><B>Commercial Common Lisp Implementations</B></DT></DL>
+		<DT STYLE="margin-bottom: 0.2in"><B>Commercial Common Lisp
+		Implementations</B></DT></DL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in">
 		<A HREF="http://www.franz.com/">Allegro Common Lisp</A> : Franz,
@@ -124,18 +143,21 @@ If you prefer, you may contact the project staff directly (see
 </P>
 <P STYLE="margin-bottom: 0in"><SPAN ID="Frame3" STYLE="float: left; width: 4.86in; height: 1.09in; border: none; padding: 0in; background: #ffffff">
 	<DL>
-		<DT><B>Commercial or Restricted KBS Environments</B></DT></DL>
+		<DT STYLE="margin-bottom: 0.2in"><B>Commercial or Restricted KBS
+		Environments</B></DT></DL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in">
 		<A HREF="http://www.isi.edu/isd/LOOM/LOOM-HOME.html">Loom</A>:
 		Ontologies, declarative modeling.</P>
 		<LI><P STYLE="margin-bottom: 0in"><A HREF="http://www.xanalys.com/">KnowledgeWorks</A>:
 		Production rules for LispWorks.</P>
+		<LI><P STYLE="margin-bottom: 0in"><A HREF="http://herzberg.ca.sandia.gov/jess">JESS</A>:
+		The Java Expert System Shell, and the inspiration for LISA.</P>
 	</UL>
 </SPAN>
 <SPAN ID="Frame4" STYLE="float: right; width: 4.87in; height: 2.24in; border: none; padding: 0in; background: #ffffff">
 	<DL>
-		<DT><B>Useful References</B></DT></DL>
+		<DT STYLE="margin-bottom: 0.2in"><B>Useful References</B></DT></DL>
 	<UL>
 		<LI><P STYLE="margin-bottom: 0in">
 		<A HREF="http://www.lisp.org/HyperSpec/FrontMatter/index.html">Common
@@ -154,6 +176,8 @@ If you prefer, you may contact the project staff directly (see
 		Lisp</A></P>
 	</UL>
 </SPAN><BR>
+</P>
+<P STYLE="margin-bottom: 0in"><BR>
 </P>
 <P STYLE="margin-bottom: 0in"><BR>
 </P>
