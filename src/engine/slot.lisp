@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.26 2001/04/25 15:52:50 youngde Exp $
+;;; $Id: slot.lisp,v 1.25 2001/04/25 15:50:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,7 +111,7 @@
              :name name :value (second value) :negated t))
           ((multifieldp value)
            (make-instance 'literal-slot :name name
-                          :value (eval value)))
+                          :value (mapcar #'identity (eval value))))
           ((negated-variablep value)
            (make-instance 'simple-variable-slot
              :name name :value (second value) :negated t))
