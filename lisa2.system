@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.12 2002/09/03 15:47:59 youngde Exp $
+;;; $Id: lisa2.system,v 1.13 2002/09/03 21:48:36 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -129,7 +129,8 @@
                            (:file "root-node")
                            (:file "terminal-node")
                            (:file "node1")
-                           (:file "node2"))
+                           (:file "node2")
+                           (:file "network-crawler"))
                           :depends-on
                           (core20)))
     :initially-do

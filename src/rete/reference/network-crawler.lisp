@@ -20,11 +20,11 @@
 ;;; File: network-crawler.lisp
 ;;; Description:
 
-;;; $Id: network-crawler.lisp,v 1.1 2002/09/03 19:51:47 youngde Exp $
+;;; $Id: network-crawler.lisp,v 1.2 2002/09/03 21:48:41 youngde Exp $
 
 (in-package "LISA")
 
-(defun crawl-network (rete-network &optional (strm *terminal-io*))
+(defun show-network (rete-network &optional (strm *terminal-io*))
   (labels ((get-roots ()
              (loop for node being the hash-value of (rete-roots rete-network)
                  collect node))
@@ -36,10 +36,15 @@
              (list (successor-node (node2-successor join-node))))
            (trace-nodes (nodes &optional (level 0))
              (unless (null nodes)
-               (let* ((node (first node))
+               (let* ((node (first nodes))
                       (string (format nil "~S" node)))
-                 (format strm "~V<~A>~%" (+ level (length string)) string)
-                 (if (typep node 'shared-node)
-                     (trace-nodes (get-successors node) (+ level 3))
-                   (trace-nodes (get-successor node) (+ level 3)))))))
+                 (format strm "~V<~A~>~%" (+ level (length string)) string)
+                 (typecase node
+                   (shared-node
+                    (trace-nodes (get-successors node) (+ level 3)))
+                   (node2
+                    (trace-nodes (get-successor node) (+ level 3)))
+                   (terminal-node
+                    nil))
+                 (trace-nodes (rest nodes) level)))))
     (trace-nodes (get-roots))))
