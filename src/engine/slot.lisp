@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.8 2001/01/09 20:15:33 youngde Exp $
+;;; $Id: slot.lisp,v 1.9 2001/01/10 20:56:08 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,7 +29,6 @@
          :initform nil
          :reader get-name)
    (value :initarg :value
-          :initform nil
           :accessor get-value)
    (constraint :initarg :constraint
                :initform nil

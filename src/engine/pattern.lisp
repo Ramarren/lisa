@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.22 2001/01/10 20:56:08 youngde Exp $
+;;; $Id: pattern.lisp,v 1.23 2001/01/10 20:56:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -108,7 +108,7 @@
                (= (get-location binding) (get-location pattern))))
            (get-constraint-locality (constraint)
              (let ((obj (first constraint)))
-               (cond ((null obj)
+               (cond ((null constraint)
                       (values t))
                      ((and (variablep obj)
                            (not (is-localp obj)))
