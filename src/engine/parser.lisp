@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.41 2001/03/16 21:07:28 youngde Exp $
+;;; $Id: parser.lisp,v 1.42 2001/03/17 01:03:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -143,7 +143,7 @@
                     (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
     `(list ,@(mapcar #'normalize slots))))
 
-(defun normalize-slots (slots meta-class)
+(defun normalize-slots (slots)
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
@@ -151,13 +151,17 @@
                          (or (literalp slot-value)
                              (variablep slot-value)))
                     (if (quotablep slot-value)
-                        ``(,,(find-meta-slot meta-class slot-name)
-                           ,',slot-value)
-                      ``(,,(find-meta-slot meta-class slot-name)
-                         ,,slot-value)))
+                        ``(,',slot-name ,',slot-value)
+                      ``(,',slot-name ,,slot-value)))
                    (t
                     (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
     `(list ,@(mapcar #'normalize slots))))
+
+(defun canonicalize-slot-names (meta-class slots)
+  (mapcar #'(lambda (slot)
+              `(,(find-meta-slot meta-class (first slot))
+                ,(second slot)))
+          slots))
 
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
@@ -165,13 +169,16 @@
     (cond ((symbolp head)
            (let ((class (find-meta-class head)))
              `(assert-fact (current-engine)
-               (make-fact `,(get-name ,class)
-                (,@(normalize-slots slots class))))))
+               (make-fact ',(get-name class)
+                (canonicalize-slot-names ,class
+                 (,@(normalize-slots slots)))))))
           (t
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
 (defun parse-and-modify-fact (fact body)
-  `(modify-fact (current-engine) ,fact (,@(normalize-slots body))))
+  `(modify-fact (current-engine) ,fact
+    (canonicalize-slot-names (find-meta-class (get-class ,fact))
+     (,@(normalize-slots body)))))
 
 (defun redefine-deftemplate (name body)
   (flet ((extract-slot (s)

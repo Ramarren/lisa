@@ -21,7 +21,7 @@
 ;;; Description: This class holds an individual test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-eq.lisp,v 1.6 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: test2-eq.lisp,v 1.7 2001/03/17 01:03:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,10 +44,10 @@
 (defmethod equals ((self test2-eq) (test test2-eq))
   (and (equal (get-fact-location self)
               (get-fact-location test))
-       (equal (get-left-slot-name self)
-              (get-left-slot-name test))
-       (equal (get-right-slot-name self)
-              (get-right-slot-name test))))
+       (equals (get-left-slot-name self)
+               (get-left-slot-name test))
+       (equals (get-right-slot-name self)
+               (get-right-slot-name test))))
 
 (defun make-test2-eq (fact-location left-slot right-slot)
   (make-instance 'test2-eq :fact-location fact-location
