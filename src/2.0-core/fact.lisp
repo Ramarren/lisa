@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.13 2002/11/21 19:35:44 youngde Exp $
+;;; $Id: fact.lisp,v 1.14 2002/11/22 15:22:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,16 +78,6 @@
   "Returns the value associated with a slot name. FACT is a FACT instance;
   SLOT-NAME is a SLOT-NAME instance."
   (gethash slot-name (fact-slot-table fact)))
-
-(defun effective-slot->slot-name (effective-slot-id)
-  "Retrieves the symbolic name associated with a CLOS instance's
-  slot. FACT is a FACT instance; EFFECTIVE-SLOT-ID is a symbol representing
-  the effective name of a CLOS instance's slot."
-  (let ((symbolic-slot-name
-         (find-symbol (symbol-name effective-slot-id))))
-    (cl:assert (not (null symbolic-slot-name)) nil
-      "Slot name ~S has never been seen!" effective-slot-id)
-    symbolic-slot-name))
 
 (defun find-instance-of-fact (fact)
   "Retrieves the CLOS instance associated with a fact. FACT is a FACT
