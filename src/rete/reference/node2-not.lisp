@@ -20,49 +20,11 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.12 2002/09/30 23:25:38 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.13 2002/09/30 23:48:10 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-not (join-node) ())
-
-#+ignore
-(defmethod test-tokens ((self node2-not) left-tokens right-token)
-  (let ((tests (join-node-tests self)))
-    (setf (token-not-counter left-tokens) 0)
-    (token-push-fact left-tokens (token-top-fact right-token))
-    (when (or (endp tests)
-              (some #'(lambda (test)
-                        (funcall test left-tokens))
-                    tests))
-      (incf (token-not-counter left-tokens)))
-    (token-pop-fact left-tokens)
-    (zerop (token-not-counter left-tokens))))
-
-#+ignore
-(defmethod test-tokens ((self node2-not) left-tokens right-token)
-  (let ((tests (join-node-tests self)))
-    (token-push-fact left-tokens (token-top-fact right-token))
-    (prog1
-        (or (endp tests)
-            (some #'(lambda (test)
-                      (funcall test left-tokens))
-                  tests))
-      (token-pop-fact left-tokens))))
-
-#+ignore
-(defmethod test-tokens ((self node2-not) left-tokens 
-                        (right-token remove-token))
-  (let ((tests (join-node-tests self)))
-    (setf (token-not-counter left-tokens) 0)
-    (token-push-fact left-tokens (token-top-fact right-token))
-    (unless (or (endp tests)
-                (some #'(lambda (test)
-                          (funcall test left-tokens))
-                      tests))
-      (incf (token-not-counter left-tokens)))
-    (token-pop-fact left-tokens)
-    (zerop (token-not-counter left-tokens))))
 
 (defmethod test-against-right-memory ((self node2-not) left-tokens)
   (loop for right-token being the hash-value 
