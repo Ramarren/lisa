@@ -25,13 +25,14 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.17 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: utils.lisp,v 1.18 2001/04/19 14:13:01 youngde Exp $
 
 (in-package "LISA")
 
 (defun find-before (item sequence &key (test #'eql))
   "Returns both that portion of SEQUENCE that occurs before ITEM and
   the rest of SEQUENCE anchored at ITEM, or NIL otherwise."
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (labels ((find-item (obj seq test val)
              (let ((item (first seq)))
                (cond ((null seq)
@@ -45,6 +46,7 @@
 (defun find-after (item sequence &key (test #'eql))
   "Returns that portion of SEQUENCE that occurs after ITEM, or NIL
   otherwise."
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (cond ((null sequence)
          (values nil))
         ((funcall test item (first sequence))
@@ -52,6 +54,7 @@
         (t (find-after item (rest sequence) :test test))))
 
 (defun find-if-after (predicate sequence)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (cond ((null sequence)
          (values nil))
         ((funcall predicate (first sequence))
@@ -78,6 +81,9 @@
       (when (funcall predicate obj)
         (push obj collection)))
     (nreverse collection)))
+
+(defun intern-lisa-symbol (sym)
+  (intern (symbol-name sym)))
 
 ;;; Courtesy of Paul Graham...
 
