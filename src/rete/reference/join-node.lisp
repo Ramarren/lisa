@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.5 2002/09/24 00:00:40 youngde Exp $
+;;; $Id: join-node.lisp,v 1.6 2002/09/24 19:27:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,10 +35,16 @@
                  :reader join-node-right-memory)))
 
 (defun remember-token (memory token)
-  (setf (gethash (token-top-fact token) memory) token))
+  (push token (gethash (hash-code token) memory)))
 
 (defun forget-token (memory token)
-  (remhash (token-top-fact token) memory))
+  (let* ((bucket (gethash (hash-code token) memory))
+         (new-bucket
+          (delete-if #'(lambda (obj) (equals obj token)) bucket)))
+    (cond ((not (equal bucket new-bucket))
+           (setf (gethash (hash-code token) memory) new-bucket)
+           token)
+          t) nil))
 
 (defun add-tokens-to-left-memory (join-node tokens)
   (remember-token (join-node-left-memory join-node) tokens))

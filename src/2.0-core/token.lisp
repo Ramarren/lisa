@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.18 2002/09/23 17:28:26 youngde Exp $
+;;; $Id: token.lisp,v 1.19 2002/09/24 19:27:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,6 +30,7 @@
           :reader token-facts)
    (not-counter :initform 0
                 :accessor token-not-counter)
+   (hash-code :initform nil)
    (contents :initform nil
              :reader token-contents)))
 
@@ -82,7 +83,16 @@
     new-token))
 
 (defmethod hash-code ((self token))
-  self)
+  (with-slots ((hash-code hash-code)) self
+    (when (null hash-code)
+      (setf hash-code
+        (sxhash (coerce (token-contents self) 'list))))
+    hash-code))
+
+(defmethod equals ((t1 token) (t2 token))
+  (or (eq t1 t2)
+      (equal (coerce (token-contents t1) 'list)
+             (coerce (token-contents t2) 'list))))
 
 (defmethod make-add-token ((fact fact))
   (token-push-fact (make-instance 'add-token) fact))
