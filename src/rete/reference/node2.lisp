@@ -17,28 +17,28 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: rete-compiler.lisp
+;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.2 2002/08/28 18:52:00 youngde Exp $
+;;; $Id: node2.lisp,v 1.1 2002/08/28 18:52:00 youngde Exp $
 
 (in-package "LISA")
 
-(defclass rete-network ()
-  ((roots :initform
+(defclass node2 ()
+  ((successor :initform nil
+              :accessor node2-successor)
+   (tests :initform
           (make-array nil :adjustable t :fill-pointer t)
-          :reader rete-roots)))
+          :reader node2-tests)
+   (left-memory :initform (make-hash-table)
+                :reader node2-left-memory)
+   (right-memory :initform (make-hash-table)
+                 :reader node2-right-memory)))
 
-(defun make-rete-network ()
-  (make-instance 'rete-network))
+(defun accept-tokens-from-left (node2 tokens))
 
-(defun pass-token (node1 token)
-  (accept-token node1 token))
+(defun accept-token-from-right (node2 token))
 
-(defun pass-tokens-on-left (node2 tokens)
-  (accept-tokens-from-left node2 tokens))
+(defun make-node2 ()
+  (make-instance 'node2))
 
-(defun pass-token-on-right (node2 token)
-  (accept-token-from-right node2 token))
-
-(defun compile-rule-into-network (patterns))

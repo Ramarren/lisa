@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.6 2002/08/28 00:28:22 youngde Exp $
+;;; $Id: lisa2.system,v 1.7 2002/08/28 18:51:57 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -109,6 +109,8 @@
                                        (:file "rete")
                                        (:file "rule")
                                        (:file "pattern")
+                                       (:file "fact")
+                                       (:file "token")
                                        (:file "parser"
                                               :depends-on (pattern))
                                        (:file "language"
@@ -120,7 +122,9 @@
                           :binary-pathname "rete-compiler"
                           :components
                           ((:file "pattern-compiler")
-                           (:file "rete-compiler"))
+                           (:file "rete-compiler")
+                           (:file "node1")
+                           (:file "node2"))
                           :depends-on
                           (core20)))
     :initially-do

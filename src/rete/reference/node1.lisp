@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.1 2002/08/28 15:54:13 youngde Exp $
+;;; $Id: node1.lisp,v 1.2 2002/08/28 18:52:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,8 +31,29 @@
                (make-array 0 :adjustable t :fill-pointer t)
                :reader node1-successors)))
 
-(defun add-successor (node1 connector)
-  (vector-push-extend (node1-successors node1) connector))
+(defun add-successor (node1 successor)
+  (vector-push-extend (node1-successors node1) successor))
+
+(defun successor-node (successor)
+  (car successor))
+
+(defun successor-connector (successor)
+  (cdr successor))
+
+(defun make-successor (node connector)
+  (cons node connector))
+
+(defun pass-token-to-successors (node1 token)
+  (map nil #'(lambda (successor)
+               (funcall (successor-connector successor)
+                        (successor-node successor)
+                        token))
+       (node1-successors node1)))
+
+(defun accept-token (node1 token)
+  (if (funcall (node1-test node1) token)
+      (pass-token-to-successors node1 token)
+    nil))
 
 (defun make-node1 (test)
   (make-instance 'node1 :test test))
