@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.7 2002/11/20 20:23:31 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.8 2002/11/22 15:58:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,7 +29,27 @@
 (deftemplate query-fact ()
   (slot query-name))
 
+
+;;; This macro is courtesy of Paul Werkowski. A very nice idea.
+
+(defmacro define-lisa-lisp ()
+  (flet ((externals-of (pkg)
+           (loop for s being each external-symbol in pkg collect s)))
+    (let* ((lisa-externs (externals-of "LISA"))
+           (lisa-shadows (intersection (package-shadowing-symbols "LISA")
+                                       lisa-externs))
+           (cl-externs (externals-of "COMMON-LISP")))
+      `(defpackage "LISA-LISP"
+         (:use "COMMON-LISP")
+         (:shadowing-import-from "LISA" ,@lisa-shadows)
+         (:import-from "LISA" ,@(set-difference lisa-externs lisa-shadows))
+         (:export ,@cl-externs)
+         (:export ,@lisa-externs)))))
+
 (eval-when (:load-toplevel :execute)
   (make-default-inference-engine)
-  (setf *active-context* (initial-context (inference-engine))))
+  (setf *active-context* (initial-context (inference-engine)))
+  (define-lisa-lisp)
+  (pushnew :lisa *features*))
+
 

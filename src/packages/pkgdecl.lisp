@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.66 2002/11/22 15:10:43 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.67 2002/11/22 15:58:54 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -36,18 +36,21 @@
   (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
            "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
            "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
-           "MARK-INSTANCE-AS-CHANGED" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
+           "MARK-INSTANCE-AS-CHANGED" "SLOT" "TEST" "ENGINE"
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
-           "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING" "=>"
-           "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-           "FORGET-QUERY" "DEFAULT" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
-           "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
-           "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK" "CLEAR-BREAKS"
-           "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE" "BINDINGS"
-           "*BREAK-ON-SUBRULES*" "LOGICAL" "CONSIDER-TAXONOMY" "EXISTS"
-           "DEFCONTEXT" "FOCUS" "REFOCUS" "FIND-CONTEXT" "CONTEXTS" "CONTEXT"
-           "FIND-RULE" "RULE-NAME" "RULE-SHORT-NAME" "FOCUS-STACK"
-           "UNDEFCONTEXT" "ALLOW-DUPLICATE-FACTS")
+           "MAKE-INFERENCE-ENGINE" "RULE" "=>" "DEFFACTS"
+           "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE" "DEFAULT"
+           "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK" "FACT" "SHOW-NETWORK"
+           "RETE-NETWORK" "INFERENCE-ENGINE" "ACTIVATION" "BREAKPOINTS"
+           "SET-BREAK" "CLEAR-BREAK" "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS"
+           "TOKEN" "INSTANCE" "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
+           "CONSIDER-TAXONOMY" "EXISTS" "DEFCONTEXT" "FOCUS" "REFOCUS"
+           "FIND-CONTEXT" "CONTEXTS" "CONTEXT" "FIND-RULE" "RULE-NAME"
+           "RULE-SHORT-NAME" "FOCUS-STACK" "UNDEFCONTEXT"
+           "ALLOW-DUPLICATE-FACTS" "CONTEXT-NAME" "RULE-SHORT-NAME"
+           "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT" "FACT-NAME" "FACT-ID"
+           "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
+           "MAKE-INFERENCE-ENGINE" "RETE")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -58,19 +61,21 @@
                 "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY"
                 "WATCH" "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
                 "RETRACT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
-                "SLOT" "TEST" "ENGINE" "USE-ENGINE" "USE-DEFAULT-ENGINE"
-                "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
-                "MAKE-INFERENCE-ENGINE" "GET-NAME" "RULE" "ASSERT-FROM-STRING"
-                "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE"
-                "FORGET-QUERY" "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK"
-                "FACT" "SHOW-NETWORK" "RETE-NETWORK" "INFERENCE-ENGINE"
-                "ACTIVATION" "BREAKPOINTS" "SET-BREAK" "CLEAR-BREAK"
-                "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "TOKEN" "INSTANCE"
-                "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
+                "SLOT" "TEST" "ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
+                "WITH-INFERENCE-ENGINE" "INFERENCE-ENGINE"
+                "MAKE-INFERENCE-ENGINE" "RULE" "=>" "DEFFACTS"
+                "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE" "INITIAL-FACT"
+                "WITH-SIMPLE-QUERY" "WALK" "FACT" "SHOW-NETWORK"
+                "RETE-NETWORK" "ACTIVATION" "BREAKPOINTS" "SET-BREAK"
+                "CLEAR-BREAK" "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "TOKEN"
+                "INSTANCE" "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
                 "CONSIDER-TAXONOMY" "EXISTS" "DEFCONTEXT" "FOCUS" "REFOCUS"
                 "FIND-CONTEXT" "CONTEXTS" "CONTEXT" "FIND-RULE" "RULE-NAME"
                 "RULE-SHORT-NAME" "FOCUS-STACK" "UNDEFCONTEXT"
-                "ALLOW-DUPLICATE-FACTS"))
+                "ALLOW-DUPLICATE-FACTS" "CONTEXT-NAME" "RULE-SHORT-NAME"
+                "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT" "FACT-NAME" "FACT-ID"
+                "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
+                "MAKE-INFERENCE-ENGINE" "RETE"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
@@ -106,23 +111,3 @@
            "COMPOSE"
            "COMPOSE-F"
            "COMPOSE-ALL"))
-
-;;; This macro is courtesy of Paul Werkowski. A very nice idea.
-
-(defmacro define-lisa-lisp ()
-  (flet ((externals-of (pkg)
-           (loop for s being each external-symbol in pkg collect s)))
-    (let* ((lisa-externs (externals-of "LISA"))
-           (lisa-shadows (intersection (package-shadowing-symbols "LISA")
-                                       lisa-externs))
-           (cl-externs (externals-of "COMMON-LISP")))
-      `(defpackage "LISA-LISP"
-         (:use "COMMON-LISP")
-         (:shadowing-import-from "LISA" ,@lisa-shadows)
-         (:import-from "LISA" ,@(set-difference lisa-externs lisa-shadows))
-         (:export ,@cl-externs)
-         (:export ,@lisa-externs)))))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (define-lisa-lisp)
-  (pushnew :lisa *features*))

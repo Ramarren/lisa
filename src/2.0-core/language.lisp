@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.23 2002/11/22 15:10:26 youngde Exp $
+;;; $Id: language.lisp,v 1.24 2002/11/22 15:58:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -76,6 +76,13 @@
       (format t "~S~%" context))
     (format t "For a total of ~D context~:P.~%" (length contexts))
     (values)))
+
+(defun dependencies ()
+  (maphash #'(lambda (dependent-fact dependencies)
+               (format *trace-output* "~S:~%" dependent-fact)
+               (format *trace-output* "  ~S~%" dependencies))
+           (rete-dependency-table (inference-engine)))
+  (values))
 
 (defun expand-slots (body)
   (mapcar #'(lambda (pair)
