@@ -20,11 +20,14 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: metaclass.lisp,v 1.8 2002/11/27 15:30:36 youngde Exp $
+;;; $Id: metaclass.lisp,v 1.9 2002/11/27 15:47:02 youngde Exp $
 
 (in-package "CL-USER")
 
 (defclass standard-kb-metaclass (standard-class) ())
+
+(defmethod initialize-instance :after ((self standard-kb-metaclass) &rest initargs)
+  (describe self))
 
 (defmethod validate-superclass ((class standard-kb-metaclass)
                                 (superclass standard-class))
