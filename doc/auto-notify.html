@@ -1,0 +1,139 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 9">
+<meta name=Originator content="Microsoft Word 9">
+<link rel=File-List href="./auto-notify_files/filelist.xml">
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>dyoung</o:Author>
+  <o:LastAuthor>dyoung</o:LastAuthor>
+  <o:Revision>29</o:Revision>
+  <o:TotalTime>38</o:TotalTime>
+  <o:Created>2002-12-03T19:24:00Z</o:Created>
+  <o:LastSaved>2002-12-03T20:02:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Company>Bloodhound Software</o:Company>
+  <o:Lines>1</o:Lines>
+  <o:Paragraphs>1</o:Paragraphs>
+  <o:Version>9.2720</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h3
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:3;
+	font-size:13.0pt;
+	font-family:Arial;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white background="./auto-notify_files/image001.gif" lang=EN-US
+style='tab-interval:.5in'>
+<!--[if gte mso 9]><xml>
+ <v:background id="_x0000_s1025" o:bwmode="white" o:targetscreensize="800,600">
+  <v:fill src="./auto-notify_files/image001.gif" o:title="hierarchy-background"
+   type="frame"/>
+ </v:background></xml><![endif]-->
+
+<div class=Section1>
+
+<h3>Auto Notification</h3>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal>For Common Lisps with complete, or mostly complete, MOP
+implementations, LISA offers an experimental feature called “auto notification”.
+This mechanism may be used to monitor changes to CLOS instances in working
+memory that occur outside of LISA (i.e. somewhere else in the application). Normally,
+LISA must be explicitly told about these changes via the function <i>lisa:mark-instance-as-changed</i>;
+when an application alters the contents of an instance’s slots, it informs LISA
+about the changes so the inference engine can maintain the consistency of
+working memory. Auto Notification obviates this requirement; LISA hooks into
+the MOP slot access protocol and notices slot changes without application intervention.
+Like just about anything worthwhile, however, the benefits of this feature come
+at a small price. Any user-defined class participating in Auto Notification
+must, at a minimum, have as its metaclass <i>lisa:standard-kb-class</i>. For
+example:</p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal style='margin-left:.5in'>(defclass frodo ()</p>
+
+<p class=MsoNormal><span style='mso-tab-count:1'>            </span><span
+style="mso-spacerun: yes">  </span>((name :accessor frodo-name))</p>
+
+<p class=MsoNormal><span style='mso-tab-count:1'>            </span><span
+style="mso-spacerun: yes"> </span><span style="mso-spacerun:
+yes"> </span>(:metaclass lisa:standard-kb-class)) </p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal>There may also be implementation-specific needs that further
+constrain users of Auto Notification. In general, however, the use of the
+aforementioned metaclass is all that’s required.</p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal>As of this writing, Auto Notification has been tested with
+Allegro Common Lisp 6.2 and Lispworks 4.2. CLISP does not have a MOP
+implementation of sufficient depth, and I have not yet attempted a version for CMUCL.
+Regarding the two commercial Common Lisps supported by LISA, their
+implementations of Auto Notification are described below, listing any
+additional requirements beyond the use of <i>lisa:standard-kb-class</i>.</p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<h3>ACL 6.2</h3>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
+<p class=MsoNormal>Are you guys watching me?</p>
+
+</div>
+
+</body>
+
+</html>
