@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.28 2004/09/15 19:52:32 youngde Exp $
+;;; $Id: language.lisp,v 1.29 2004/09/16 15:35:46 youngde Exp $
 
 (in-package :lisa)
 
@@ -96,6 +96,7 @@
                             `(,value))))))
           body))
 
+#+ignore
 (defun determine-cf (sample)
   (cl:assert (or (null sample) (cf:cf-p sample)) nil
     "This is not a legal certainty factor: ~S" sample)
@@ -103,7 +104,34 @@
         ((in-rule-firing-p)
          (cf (active-rule)))
         nil))
-  
+
+(defun determine-cf (a)
+  (cl:assert (or (null a) (cf:cf-p a)) nil
+    "This is not a legal certainty factor: ~S" a)
+  (if a
+      (let ((b (apply #'min (loop for f across (token-facts *active-tokens*)
+                                  if (plusp (cf f))
+                                  collect (cf f)))))
+        (if b
+            (cf:combine a b)
+          a))
+    nil))
+
+(defgeneric calculate-cf (fact-cf)
+  (:method ((fact-cf number))
+   fact-cf)
+  (:method ((fact-cf t))
+   (unless (in-rule-firing-p)
+     (return-from calculate-cf nil))
+   (let ((conjucts (loop for fact across (token-facts *active-tokens*)
+                         if (plusp (cf fact))
+                         collect (cf fact))))
+     (cond (conjuncts
+            (if (= (length conjuncts) 1)
+                (first conjuncts)
+              (apply #'min conjuncts)))
+           (t nil)))))
+         
 (defmacro assert ((name &body body) &key (cf nil))
   (let ((fact (gensym))
         (fact-object (gensym))
@@ -113,7 +141,7 @@
                       (variablep name))
                   `(,name)
                 `(',name)))
-           (,actual-cf (determine-cf ,cf)))
+           (,actual-cf (cf:determine-cf ,cf)))
        (if (typep ,fact-object 'standard-object)
            (parse-and-insert-instance ,fact-object :cf ,actual-cf)
          (progn

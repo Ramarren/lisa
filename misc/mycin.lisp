@@ -24,7 +24,7 @@
 ;;; operator right now. However, all rules are present and the two scenarios on pgs. 555 and
 ;;; 556 are represented (by the functions CULTURE-1 and CULTURE-2).
 
-;;; $Id: mycin.lisp,v 1.5 2004/09/15 20:45:22 youngde Exp $
+;;; $Id: mycin.lisp,v 1.6 2004/09/16 15:35:42 youngde Exp $
 
 (in-package :lisa-user)
 
@@ -139,7 +139,7 @@
     (when runp
       (run))))
 
-(defun culture-2 ()
+(defun culture-2 (&key (runp t))
   (reset)
   (let ((?organism (make-instance 'organism))
         (?patient (make-instance 'patient
@@ -154,4 +154,5 @@
     (assert (gram (value pos) (entity ?organism)) :cf 0.2)
     (assert (morphology (value rod) (entity ?organism)))
     (assert (aerobicity (value anaerobic) (entity ?organism)))
-    (run)))
+    (when runp
+      (run))))
