@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab-kw.lisp,v 1.2 2001/03/23 00:06:05 youngde Exp $
+;;; $Id: mab-kw.lisp,v 1.3 2001/03/23 20:02:32 youngde Exp $
 
 (require "kw")
 
@@ -44,13 +44,12 @@
 ;;; Chest-unlocking rules...
 
 (defrule hold-chest-to-put-on-floor :forward :context mab
-  (goal-is-to ?goal action unlock argument-1 ?chest)
-  (thing ?thing name ?chest on-top-of ?top weight light)
+  (goal-is-to ? action unlock argument-1 ?chest)
+  (thing ? name ?chest on-top-of ?top weight light)
   (test (not (eql ?top 'floor)))
-  (not (monkey ?monkey holding ?chest))
+  (not (monkey ? holding ?chest))
   (not (goal-is-to ? action hold argument-1 ?chest))
   -->
-  ((format t "hold-chest-to-put-on-floor fired~%"))
   (assert (goal-is-to ? action hold argument-1 ?chest)))
 
 (defrule put-chest-on-floor :forward :context mab
@@ -59,14 +58,15 @@
   (thing ?thing name ?chest)
   -->
   ((format t "Monkey throws the ~A off the ~A onto the floor.~%" ?chest ?on))
-  (assert ?monkey holding blank)
-  (assert ?thing location ?place on-top-of floor))
+  (assert (monkey ?monkey holding blank))
+  (assert (thing ?thing location ?place on-top-of floor)))
 
 (defrule get-key-to-unlock :forward :context mab
   (goal-is-to ? action unlock argument-1 ?obj)
   (thing ? name ?obj on-top-of floor)
   (chest ? name ?obj unlocked-by ?key)
-  (not (monkey ? holding ?key))
+  (monkey ? holding ?hold)
+  (test (not (eql ?hold ?key)))
   (not (goal-is-to ? action hold argument-1 ?key))
   -->
   (assert (goal-is-to ? action hold argument-1 ?key)))
@@ -74,7 +74,7 @@
 (defrule move-to-chest-with-key :forward :context mab
   (goal-is-to ? action unlock argument-1 ?chest)
   (thing ? name ?chest location ?cplace on-top-of floor)
-  (monkey ?monkey location ?loc holding ?key)
+  (monkey ? location ?loc holding ?key)
   (test (not (eql ?loc ?cplace)))
   (chest ? name ?chest unlocked-by ?key)
   (not (goal-is-to ? action walk-to argument-1 ?cplace))
@@ -115,7 +115,8 @@
   (goal-is-to ? action hold argument-1 ?obj)
   (thing ? name ?obj location ?place on-top-of ceiling weight light)
   (thing ? name ladder location ?place on-top-of floor)
-  (not (monkey ? on-top-of ladder))
+  (monkey ? on-top-of ?top)
+  (test (not (eql ?top 'ladder)))
   (not (goal-is-to ? action on argument-1 ladder))
   -->
   (assert (goal-is-to ? action on argument-1 ladder)))
@@ -146,7 +147,7 @@
 (defrule walk-to-hold :forward :context mab
   (goal-is-to ? action hold argument-1 ?obj)
   (thing ? name ?obj location ?place on-top-of ?top weight light)
-  (test (not (eql (?top ceiling))))
+  (test (not (eql ?top 'ceiling)))
   (monkey ? location ?loc)
   (test (not (eql ?loc ?place)))
   (not (goal-is-to ? action walk-to argument-1 ?place))
@@ -174,10 +175,10 @@
   (erase ?goal))
 
 (defrule drop-object :forward :context mab
-  (goal ?goal action hold argument-1 blank)
+  (goal-is-to ?goal action hold argument-1 blank)
   (monkey ?monkey location ?place on-top-of ?on
           holding ?name)
-  (test (not (eql ?name blank)))
+  (test (not (eql ?name 'blank)))
   (thing ?thing name ?name)
   -->
   ((format t "Monkey drops the ~A.~%" ?name))
@@ -218,8 +219,8 @@
   (thing ?thing name ?name weight light)
   -->
   ((format t "Monkey drops the ~A.~%" ?name))
-  (assert monkey ?monkey holding blank)
-  (assert (thing ?thing location ?place on-top-of floor)
+  (assert (monkey ?monkey holding blank))
+  (assert (thing ?thing location ?place on-top-of floor))
   (erase ?goal))
 
 (defrule already-moved-object :forward :context mab
@@ -288,7 +289,7 @@
   (goal-is-to ? action on argument-1 ?obj)
   (thing ? name ?obj location ?place)
   (monkey ? location ?place holding ?hold)
-  (test (not (eql ?hold blank)))
+  (test (not (eql ?hold 'blank)))
   (not (goal-is-to ? action hold argument-1 blank))
   -->
   (assert (goal-is-to ? action hold argument-1 blank)))
@@ -331,8 +332,8 @@
 (defrule satisfy-hunger :forward :context mab
   (goal-is-to ?goal action eat argument-1 ?name)
   (monkey ?monkey holding ?name)
-  (think ?thing name ?name)
-  =>
+  (thing ?thing name ?name)
+  -->
   ((format t "Monkey eats the ~A.~%" ?name))
   (assert (monkey ?monkey holding blank))
   (erase ?goal)
@@ -341,55 +342,36 @@
 ;;; startup rule...
 
 (defun startup ()
-  (assert (monkey ? location t5-7 on-top-of green-couch holding blank))
-  (assert (thing ? name green-couch location t5-7 weight heavy
-                 on-top-of floor))
-  (assert (thing ? name red-couch location t2-2 
-                 on-top-of floor weight heavy))
-  (assert (thing ? name big-pillow location t2-2 
-                 weight light on-top-of red-couch))
-  (assert (thing (name red-chest) (location t2-2) 
-                 (weight light) (on-top-of big-pillow)))
-  (assert (chest (name red-chest) (contents ladder) (unlocked-by red-key)))
-  (assert (thing (name blue-chest) (location t7-7) 
-                 (weight light) (on-top-of ceiling)))
-  (assert (thing (name grapes) (location t7-8) 
-                 (weight light) (on-top-of ceiling)))
-  (assert (chest (name blue-chest) (contents bananas) (unlocked-by blue-key)))
-  (assert (thing (name blue-couch) (location t8-8) 
-                 (on-top-of floor) (weight heavy)))
-  (assert (thing (name green-chest) (location t8-8) 
-                 (weight light) (on-top-of ceiling)))
-  (assert (chest (name green-chest) (contents blue-key) (unlocked-by red-key)))
-  (assert (thing (name red-key) 
-                 (on-top-of floor) (weight light) (location t1-3)))
-  (assert (goal-is-to (action eat) (argument-1 bananas) (argument-2 empty))))
-
-#+ignore
-(defun run-mab (&optional (ntimes 1))
-  (let ((start (get-internal-real-time)))
-    (dotimes (i ntimes)
-      (format t "Starting run.~%")
-      (reset)
-      (run))
-    (format t "Elapsed time: ~F~%"
-            (/ (- (get-internal-real-time) start)
-               internal-time-units-per-second))))
+  (make-instance 'monkey :location 't5-7 :on-top-of 'green-couch
+                 :holding 'blank)
+  (make-instance 'thing :name 'green-couch :location 't5-7 :weight 'heavy
+                 :on-top-of 'floor)
+  (make-instance 'thing :name 'red-couch :location 't2-2 
+                 :on-top-of 'floor :weight 'heavy)
+  (make-instance 'thing :name 'big-pillow :location 't2-2 
+                 :weight 'light :on-top-of 'red-couch)
+  (make-instance 'thing :name 'red-chest :location 't2-2 
+                 :weight 'light :on-top-of 'big-pillow)
+  (make-instance 'chest :name 'red-chest :contents 'ladder :unlocked-by 'red-key)
+  (make-instance 'thing :name 'blue-chest :location 't7-7 
+                 :weight 'light :on-top-of 'ceiling)
+  (make-instance 'thing :name 'grapes :location 't7-8 
+                 :weight 'light :on-top-of 'ceiling)
+  (make-instance 'chest :name 'blue-chest :contents 'bananas :unlocked-by 'blue-key)
+  (make-instance 'thing :name 'blue-couch :location 't8-8 
+                 :on-top-of 'floor :weight 'heavy)
+  (make-instance 'thing :name 'green-chest :location 't8-8 
+                 :weight 'light :on-top-of 'ceiling)
+  (make-instance 'chest :name 'green-chest :contents 'blue-key :unlocked-by 'red-key)
+  (make-instance 'thing :name 'red-key 
+                 :on-top-of 'floor :weight 'light :location 't1-3)
+  (make-instance 'goal-is-to :action 'eat :argument-1 'bananas))
 
 (defun run-mab (&optional (ntimes 1))
   (flet ((repeat-mab ()
            (dotimes (i ntimes)
              (format t "Starting run.~%")
              (reset)
-             (run))))
+             (startup)
+             (infer :contexts '(mab)))))
     (time (repeat-mab))))
-
-#+Allegro
-(defun profile-mab (&optional (ntimes 10))
-  (prof:with-profiling (:type :time)
-    (run-mab ntimes)))
-
-#+LispWorks
-(defun profile-mab (&optional (ntimes 10))
-  (hcl:set-up-profiler :packages "LISA")
-  (hcl:profile (run-mab ntimes)))
