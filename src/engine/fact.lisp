@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.33 2001/04/11 14:20:59 youngde Exp $
+;;; $Id: fact.lisp,v 1.34 2001/07/17 20:11:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,6 +111,12 @@
 
 (defun make-fact (name slots)
   (make-instance 'fact :name name :slots slots))
+
+(defun make-fact-from-template (fact)
+  (make-fact (fact-name fact)
+             (mapcar #'(lambda (slot-name)
+                         (list slot-name (get-slot-value fact slot-name)))
+                     (meta-slot-list (get-meta-fact fact)))))
 
 #|
 (defstruct (fact

@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.49 2001/07/12 20:41:04 youngde Exp $
+;;; $Id: mab.lisp,v 1.50 2001/07/17 20:11:52 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -429,8 +429,8 @@
 (defun run-mab (&optional (ntimes 1))
   (flet ((repeat-mab ()
            (dotimes (i ntimes)
-             (reset)
              (format t "Starting run.~%")
+             (reset)
              (run))))
     (time (repeat-mab))))
 

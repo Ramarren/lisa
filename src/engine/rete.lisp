@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.58 2001/07/09 19:05:08 youngde Exp $
+;;; $Id: rete.lisp,v 1.59 2001/07/17 20:11:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -74,6 +74,10 @@
                  autofacts))
     (setf autofacts (nconc autofacts `(,deffact))))
   (values))
+
+(defun remove-autofacts (self)
+  (declare (type rete self))
+  (setf (get-autofacts self) nil))
 
 (defun engine-halted-p (self)
   (declare (type rete self))
@@ -211,7 +215,7 @@
   (declare (type rete self))
   (mapc #'(lambda (deffact)
             (mapc #'(lambda (fact)
-                      (assert-fact self fact))
+                      (assert-fact self (make-fact-from-template fact)))
                   (get-deffacts deffact)))
         (get-autofacts self)))
 
@@ -238,6 +242,7 @@
   (forget-clos-instances self)
   (set-initial-state self)
   (remove-rules self)
+  (remove-autofacts self)
   (setf (slot-value self 'compiler) (make-rete-compiler))
   (values t))
 
