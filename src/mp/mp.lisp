@@ -20,9 +20,17 @@
 ;;; File: mp.lisp
 ;;; Description: Interfaces to the CLOCC multiprocessing library. If the Lisp
 ;;; implementation does not support MP, then the interfaces are either no-ops
-;;; or signal an error.
+;;; or signal an error. The idea here is that core LISA can transparently
+;;; support some "virtual" MP functionality (particularly mutexes) regardless
+;;; of the underlying Lisp platform. For example, LISA can safely invoke
+;;; things like WITH-LOCK without considering whether or not Lisp MP support
+;;; is available. Of course, this does NOT hold for functions like
+;;; MAKE-PROCESS; in cases like this we defer to the underlying behavior of
+;;; CLOCC.
 
-;;; $Id: mp.lisp,v 1.1 2001/04/26 17:00:34 youngde Exp $
+;;; NB: This stuff is NOT intended for consumption outside of core LISA.
+
+;;; $Id: mp.lisp,v 1.2 2001/04/26 17:12:57 youngde Exp $
 
 (in-package "LISA.MULTIPROCESSING")
 
@@ -55,14 +63,15 @@
   `(port:with-lock (,lock) ,args))
 
 #-threads
-(defmacro with-lock ((lock) &rest args)
-  (declare (ignore lock args)))
+(defmacro with-lock ((lock) &body body)
+  (declare (ignore lock))
+  `(progn ,@body))
 
 #+threads
 (defmacro without-scheduling (&rest args)
   `(port:without-scheduling ,args))
 
 #-threads
-(defmacro without-scheduling (&rest args)
-  (declare (ignore args)))
+(defmacro without-scheduling (&body body)
+  `(progn ,@body))
 
