@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.14 2002/09/03 01:35:13 youngde Exp $
+;;; $Id: parser.lisp,v 1.15 2002/09/03 01:48:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -162,7 +162,7 @@
   (let ((head (first pattern)))
     (cl:assert (find-meta-fact head nil) nil
       "This pattern has no meta data: ~S" pattern)
-    (macrolet ((push-constraint-bindings (constraint list)
+    (macrolet ((collect-constraint-bindings (constraint list)
                  `(dolist (obj (utils:flatten ,constraint))
                     (when (variablep obj)
                       (pushnew (find-slot-binding obj)
@@ -181,8 +181,8 @@
                      (setf slot-binding
                        (find-or-set-slot-binding field name location)))
                    (when (consp constraint)
-                     (push-constraint-bindings constraint 
-                                               constraint-bindings))
+                     (collect-constraint-bindings constraint 
+                                                  constraint-bindings))
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding
