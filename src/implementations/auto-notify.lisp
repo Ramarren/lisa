@@ -23,29 +23,47 @@
 ;;; of LISA's control, are picked up via the MOP protocol and synchronized
 ;;; with KB facts.
 
-;;; $Id: auto-notify.lisp,v 1.3 2002/11/25 18:09:14 youngde Exp $
+;;; $Id: auto-notify.lisp,v 1.4 2002/11/25 19:48:27 youngde Exp $
 
 (in-package "LISA")
 
-#+allegro
+#+(or Allegro Lispworks)
 (eval-when (:compile-toplevel :load-toplevel)
   
   (defclass standard-kb-object () ())
 
+  #+Allegro
+  (defmacro -slot-definition-name- (slot)
+    `(clos:slot-definition-name ,slot))
+  
+  #+Lispworks
+  (defmacro -slot-definition-name- (slot)
+    `(identity ,slot))
+
+  (defmacro -slot-value-using-class- (instance slot)
+    `(flet ((ignore-instance (object)
+              (and (boundp '*ignore-this-instance*)
+                   (eq object *ignore-this-instance*))))
+       (unless (ignore-instance ,instance)
+         (mark-instance-as-changed 
+          ,instance :slot-id (-slot-definition-name- ,slot)))))
+    
   (defmethod shared-initialize :around ((self standard-kb-object) 
                                         slot-names &rest initargs)
     (declare (ignore slot-names initargs))
     (let ((*ignore-this-instance* self))
       (call-next-method)))
 
+  #+Allegro
   (defmethod (setf mop:slot-value-using-class) :after
              (new-value class (instance standard-kb-object) slot)
     (declare (ignore new-value class))
-    (flet ((ignore-instance (object)
-             (and (boundp '*ignore-this-instance*)
-                  (eq object *ignore-this-instance*))))
-      (unless (ignore-instance instance)
-        (mark-instance-as-changed 
-         instance :slot-id (clos:slot-definition-name slot)))))
-  
+    (-slot-value-using-class- instance slot))
+
+  #+Lispworks
+  (defmethod (setf clos:slot-value-using-class) :after
+             (new-value class (instance standard-kb-object) slot)
+    (declare (ignore new-value class))
+    (-slot-value-using-class- instance slot))
+
   (pushnew :lisa-autonotify *features*))
