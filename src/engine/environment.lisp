@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.5 2000/11/17 02:52:29 youngde Exp $
+;;; $Id: environment.lisp,v 1.6 2000/11/17 02:57:31 youngde Exp $
 
 (in-package :lisa)
 
@@ -40,6 +40,8 @@
             (t
              (setf val (find-class val errorp))))
       (values val))))
+
+(defun import-and-register-class (name binding))
 
 (defgeneric current-engine ()
   (:documentation
