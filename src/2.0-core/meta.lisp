@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.3 2002/10/15 18:31:52 youngde Exp $
+;;; $Id: meta.lisp,v 1.4 2002/10/16 14:58:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,35 +103,6 @@
       "No effective slot for symbol ~S." slot-name)
     effective-slot))
 
-#+ignore
-(defvar *class-map* (make-hash-table)
-  "A hash table mapping a symbolic name to its associated effective class
-  name.")
-
-#+ignore
-(defvar *meta-fact-map* (make-hash-table))
-
-#+ignore
-(defun register-meta-fact (symbolic-name meta-fact)
-  "Binds SYMBOLIC-NAME to a META-FACT instance."
-  (setf (gethash symbolic-name *meta-fact-map*) meta-fact))
-
-#+ignore
-(defun has-meta-factp (symbolic-name)
-  "See if SYMBOLIC-NAME has an associated META-FACT instance."
-  (gethash symbolic-name *meta-fact-map*))
-  
-#+ignore
-(defun find-meta-fact (symbolic-name &optional (errorp t))
-  "Locates the META-FACT instance associated with SYMBOLIC-NAME. If ERRORP is
-  non-nil, signals an error if no binding is found."
-  (let ((meta-fact (gethash symbolic-name *meta-fact-map*)))
-    (when errorp
-      (cl:assert (not (null meta-fact)) nil
-        "This fact name does not have a registered meta class: ~S"
-        symbolic-name))
-    meta-fact))
-
 (defconstant +lisa-symbolic-name+
     '_lisa-symbolic-name_)
 
@@ -155,17 +126,6 @@
         "This fact name does not have a registered meta class: ~S"
         symbolic-name))
     meta-fact))
-
-#+ignore
-(defun register-external-class (symbolic-name class)
-  (setf (gethash (class-name class) *class-map*) symbolic-name))
-
-#+ignore
-(defun find-symbolic-name (instance)
-  (let ((name (gethash (class-name (class-of instance)) *class-map*)))
-    (cl:assert (not (null name)) nil
-      "The class of this instance is not known to LISA: ~S." instance)
-    name))
 
 (defun register-external-class (symbolic-name class)
   (setf (get (class-name class) +lisa-symbolic-name+) symbolic-name))
