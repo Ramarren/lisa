@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.9 2002/11/08 16:20:09 youngde Exp $
+;;; $Id: meta.lisp,v 1.10 2002/11/08 20:13:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -63,22 +63,22 @@
              (let ((slot-table (fact-meta-object-slot-table meta-object))
                    (symbol-names (list)))
                (dolist (actual-slot slot-list)
-                 (let ((symbolic-slot-name
-                        (intern (symbol-name actual-slot))))
+                 (let ((symbolic-slot-name actual-slot))
                    (setf (gethash symbolic-slot-name slot-table) actual-slot)
                    (push symbolic-slot-name symbol-names)))
                (setf (fact-meta-object-slot-list meta-object) symbol-names)
                meta-object))
            (import-one-class (class direct-superclasses)
-             (let ((meta-data
-                    (make-fact-meta-object
-                     :symbolic-name symbolic-name
-                     :class-name actual-name
-                     :superclasses direct-superclasses)))
+             (let* ((symbolic-class-name (class-name class))
+                    (meta-data
+                     (make-fact-meta-object
+                      :symbolic-name symbolic-class-name
+                      :class-name symbolic-class-name
+                      :superclasses direct-superclasses)))
                (populate-slot-table meta-data
                                     (reflect:class-slot-list class))
                (register-meta-object (inference-engine) 
-                                     symbolic-name meta-data)
+                                     symbolic-class-name meta-data)
                (register-class (inference-engine) class symbolic-name)))
            (import-classes (class-object)
              (let ((superclasses
@@ -89,16 +89,13 @@
                (dolist (super superclasses)
                  (import-classes super)))))
     (import-classes (find-class actual-name))))
-  
-#+ignore
-(defun ensure-meta-data-exists (symbolic-name actual-name)
-  (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
-    (when (null meta-data)
-      (cl:assert (find-class actual-name nil) nil
-        "LISA doesn't know about the fact object ~S" symbolic-name)
-      (setf meta-data
-        (acquire-meta-data symbolic-name actual-name)))
-    meta-data))
+
+(defun import-class-specification (class-name)
+  (let ((class-object (find-class class-name)))
+    (intern (symbol-name class-name))
+    (dolist (slot-name (reflect:class-slot-list class-name))
+      (intern (symbol-name slot-name)))
+    class-object))
 
 (defconstant +no-meta-data-reason+
     "LISA doesn't know about the template named by (~S). Either the name was
@@ -108,7 +105,8 @@
   (flet ((ensure-class-definition ()
            (loop
              (when (find-class actual-name nil)
-               (return (acquire-meta-data symbolic-name actual-name)))
+               (acquire-meta-data symbolic-name actual-name)
+               (return))
              (cerror "Enter a template definition now."
                      +no-meta-data-reason+ actual-name)
              (format t "Enter a DEFTEMPLATE form: ")
@@ -116,5 +114,7 @@
              (fresh-line))))
     (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
       (when (null meta-data)
-        (setf meta-data (ensure-class-definition)))
+        (ensure-class-definition)
+        (setf meta-data 
+          (find-meta-object (inference-engine) symbolic-name)))
       meta-data)))

@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.56 2002/11/07 18:14:01 youngde Exp $
+;;; $Id: parser.lisp,v 1.57 2002/11/08 20:13:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -351,7 +351,7 @@
   
 (defun parse-and-insert-instance (instance)
   (ensure-meta-data-exists
-   (intern (symbol-name (class-name (class-of instance))))
+   (class-name (class-of instance))
    (class-name (class-of instance)))
   (let ((symbolic-name (find-symbolic-name (inference-engine) instance)))
     (let ((fact
@@ -361,9 +361,8 @@
         (bind-logical-dependencies fact))
       (assert-fact (current-engine) fact))))
 
-(defun parse-and-retract-instance (instance)
-  (let ((engine (current-engine)))
-    (retract-fact engine (find-fact-using-instance engine instance))))
+(defun parse-and-retract-instance (instance engine)
+  (retract-fact engine (find-fact-using-instance engine instance)))
 
 (defun show-deffacts (deffact)
   (format t "~S~%" deffact)

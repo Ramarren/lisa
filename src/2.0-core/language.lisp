@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.11 2002/11/07 15:53:47 youngde Exp $
+;;; $Id: language.lisp,v 1.12 2002/11/08 20:13:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,8 @@
   (redefine-deftemplate name body))
 
 (defmacro defimport (class-name &key (use-inheritancep t))
-  `(import-class ,class-name ,use-inheritancep))
+  (declare (ignore use-inheritancep))
+  `(import-class-specification ',class-name))
 
 (defun expand-slots (body)
   (mapcar #'(lambda (pair)
@@ -51,14 +52,22 @@
           body))
 
 (defmacro assert ((name &body body))
-  (let ((fact (gensym)))
-    `(progn
-       (ensure-meta-data-exists ',name ',name)
-       (let ((,fact (make-fact ',name ,@(expand-slots body))))
-         (when (and (in-rule-firing-p)
-                    (logical-rule-p (active-rule)))
-           (bind-logical-dependencies ,fact))
-         (assert-fact (inference-engine) ,fact)))))
+  (let ((fact (gensym))
+        (fact-object (gensym)))
+    `(let ((,fact-object 
+            ,@(if (or (consp name)
+                      (variablep name))
+                  `(,name)
+                `(',name))))
+       (if (typep ,fact-object 'standard-object)
+           (parse-and-insert-instance ,fact-object)
+         (progn
+           (ensure-meta-data-exists ',name ',name)
+           (let ((,fact (make-fact ',name ,@(expand-slots body))))
+             (when (and (in-rule-firing-p)
+                        (logical-rule-p (active-rule)))
+               (bind-logical-dependencies ,fact))
+             (assert-fact (inference-engine) ,fact)))))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
@@ -70,10 +79,12 @@
   (active-rule))
 
 (defun assert-instance (instance)
+  (warn "ASSERT-INSTANCE is deprecated. Use ASSERT instead.")
   (parse-and-insert-instance instance))
 
 (defun retract-instance (instance)
-  (parse-and-retract-instance instance))
+  (warn "RETRACT-INSTANCE is deprecated. Use RETRACT instead.")
+  (parse-and-retract-instance instance (inference-engine)))
 
 (defun assert-from-string (str)
   (eval (read-from-string str)))
@@ -99,8 +110,14 @@
 (defun walk (&optional (engine *active-engine*) (step 1))
   (run-engine engine step))
 
-(defun retract (fact &optional (engine *active-engine*))
-  (retract-fact engine fact))
+(defmethod retract ((fact-object fact) &optional (engine *active-engine*))
+  (retract-fact engine fact-object))
+
+(defmethod retract ((fact-object number) &optional (engine *active-engine*))
+  (retract-fact engine fact-object))
+
+(defmethod retract ((fact-object t) &optional (engine *active-engine*))
+  (parse-and-retract-instance fact-object engine))
 
 (defmacro modify (fact &body body)
   `(modify-fact (inference-engine) ,fact ,@(expand-slots body)))
