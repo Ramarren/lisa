@@ -21,7 +21,7 @@
 ;;; Description: Parent class of all nodes in the Rete pattern network. This
 ;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.26 2001/08/27 20:59:04 youngde Exp $
+;;; $Id: node.lisp,v 1.27 2001/08/28 16:02:30 youngde Exp $
 
 (in-package "LISA")
 
@@ -45,12 +45,6 @@
   (:method (node token)
            (declare (ignore node token))
            (values)))
-
-(defmethod set-dynamic-update ((self node))
-  (setf (get-dynamic-update self) t))
-
-(defmethod clear-dynamic-update ((self node))
-  (setf (get-dynamic-update self) nil))
 
 (defmethod of-dynamic-update ((self node))
   (get-dynamic-update self))
