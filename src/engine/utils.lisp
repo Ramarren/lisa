@@ -20,10 +20,11 @@
 ;;; File: utils.lisp
 ;;; Description: Various utilities useful to the inference engine.
 
-;;; $Id: utils.lisp,v 1.5 2000/11/16 19:07:45 youngde Exp $
+;;; $Id: utils.lisp,v 1.6 2001/03/03 22:32:23 youngde Exp $
 
 (in-package :lisa)
 
+#|
 (defun make-internal-class (name slots)
   (flet ((validate-class (class)
            (when (not (= (length slots)
@@ -44,3 +45,4 @@
 
 (defun is-lisa-class (class)
   (has-superclass class (find-class 'lisa-kb-class)))
+|#
