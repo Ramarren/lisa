@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.13 2001/01/24 18:59:55 youngde Exp $
+;;; $Id: mab.lisp,v 1.14 2001/01/25 22:14:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -83,7 +83,7 @@
   (thing (name ?name) (location ?place) (on-top-of ?on))
   (monkey (location ?place) (on-top-of ?on) (holding ?key))
   =>
-  (format t "Monkey opends the ~A with the ~A revealing the ~A.~%"
+  (format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
           ?name ?key ?contents)
   (modify ?chest (contents nothing))
   (assert (thing (name ?contents) (location ?place) (on-top-of ?name)))
@@ -294,11 +294,10 @@
   =>
   (assert (goal-is-to (action hold) (argument-1 blank))))
 
-#+ignore
 (defrule climb-indirectly
   (goal-is-to (action on) (argument-1 ?obj))
   (thing (name ?obj) (location ?place) (on-top-of ?on))
-  (monkey (location ?place) (on-top-of (not (or* ?on ?obj)))
+  (monkey (location ?place) (on-top-of ?top (not (oreq ?top ?on ?obj)))
           (holding blank))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>

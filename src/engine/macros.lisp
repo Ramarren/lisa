@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.12 2001/01/13 21:00:29 youngde Exp $
+;;; $Id: macros.lisp,v 1.13 2001/01/25 22:14:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,13 +55,13 @@
        (literalp ,constraint)
        (consp ,constraint)))
 
-(defmacro normalize-field (obj)
-  (print obj)
-  `(if (and (not (variablep ,obj))
-            (not (null ,obj))
-            (symbolp ,obj))
-       ',obj
-     ,obj))
+(defmacro oreq (var &rest args)
+  `(or ,@(mapcar #'(lambda (obj)
+                     `(equal ,var ,(if (symbolp obj) `,obj obj)))
+                 args)))
+
+(defmacro neq (obj-1 obj-2)
+  `(not (equal ,obj-1 ,obj-2)))
 
 (defmacro assert-conditions ((&rest forms))
   `(unless (and ,@forms)

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.37 2001/01/23 21:34:29 youngde Exp $
+;;; $Id: pattern.lisp,v 1.38 2001/01/25 22:14:33 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,68 +69,38 @@
               `(eq ,,var ',,value)
             `(equal ,,var ,,value)))))
        
-(defun canonicalize-slot (pattern slot bindings)
+(defun canonicalize-slot (pattern slot global-bindings)
   (labels ((make-slot-variable ()
-             (make-lisa-defined-slot-variable
-              (intern (format nil "?~A" (symbol-name (gensym))))))
-           (new-slot-binding (var)
-             (unless (lookup-binding bindings var)
-               (add-binding bindings
-                            (make-slot-binding var
-                                               (get-location pattern)
-                                               (get-name slot)))))
+             (intern (format nil "?_~A" (symbol-name (gensym)))))
            (rewrite-slot (var value negated)
-             (let ((varname (get-variable-name var)))
-               (setf (get-value slot) varname)
-               (setf (get-constraint slot)
-                 (generate-test varname value negated))
-               (new-slot-binding var))))
+             (setf (get-value slot) var)
+             (setf (get-constraint slot)
+               (generate-test var value negated))))
     (with-accessors ((slot-value get-value)
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
              (rewrite-slot (make-slot-variable) slot-value nil))
             ((negated-rewritable-constraintp slot-value)
              (rewrite-slot (make-slot-variable) (second slot-value) t))
+            ;; Then the slot value must be a variable...
             ((null slot-constraint)
-             (unless (new-slot-binding slot-value)
+             (when (lookup-binding global-bindings slot-value)
                (rewrite-slot (make-slot-variable) slot-value nil)))
             ((literalp slot-constraint)
              (rewrite-slot slot-value slot-constraint nil))
             ((negated-rewritable-constraintp slot-constraint)
              (rewrite-slot slot-value (second slot-constraint) t))
-            ((variablep slot-value)
-             (new-slot-binding slot-value))
-            (t (error "Funny slot format.")))
-      (values))))
+            ((variablep slot-constraint)
+             (rewrite-slot slot-value slot-constraint nil))))
+    (values)))
 
 (defun canonicalize-slots (pattern bindings)
   (mapc #'(lambda (slot)
             (canonicalize-slot pattern slot bindings))
         (get-slots pattern)))
   
-(defun set-slot-localities (pattern bindings)
-  (labels ((is-localp (var)
-             (let ((binding (lookup-binding bindings var)))
-               (cl:assert (not (null binding)) ())
-               (= (get-location binding) (get-location pattern))))
-           (get-constraint-locality (constraint)
-             (let ((obj (first constraint)))
-               (cond ((null constraint)
-                      (values t))
-                     ((consp obj)
-                      (get-constraint-locality obj))
-                     ((and (variablep obj)
-                           (not (is-localp obj)))
-                      (values nil))
-                     (t
-                      (get-constraint-locality (rest constraint))))))
-           (set-slot-locality (slot)
-             (setf (get-locality slot)
-               (and (is-localp (get-value slot))
-                    (get-constraint-locality (get-constraint slot))))))
-    (mapc #'set-slot-locality (get-slots pattern))))
-
-(defun setup-pattern-bindings (pattern bindings)
+#+ignore
+(defun setup-pattern-bindings (pattern global-bindings)
   (labels ((add-local-binding (var)
              (let ((binding (lookup-binding bindings var)))
                (cl:assert (not (null binding)) ())
@@ -144,8 +114,38 @@
               (add-constraint-bindings (get-constraint slot)))
           (get-slots pattern))))
 
-(defmethod finalize-pattern ((self pattern) bindings)
-  (canonicalize-slots self bindings)
-  (set-slot-localities self bindings)
-  (setup-pattern-bindings self bindings)
+(defun setup-pattern-bindings (pattern global-bindings)
+  (labels ((add-global-binding (binding)
+             (add-binding global-bindings
+                          (make-global-slot-binding
+                           (get-name binding)
+                           (get-location binding)
+                           (get-slot-name binding))))
+           (add-new-binding (var slot)
+             (let ((binding (lookup-binding global-bindings var)))
+               (when (null binding)
+                 (setf binding (make-local-slot-binding
+                                var (get-location pattern)
+                                (get-name slot)))
+                 (unless (internal-bindingp binding)
+                   (add-global-binding binding)))
+               (pushnew binding (slot-value pattern 'bindings)
+                        :key #'get-name)
+               (unless (= (get-location binding) (get-location pattern))
+                 (slot-has-global-binding slot))
+               (values binding)))
+           (add-constraint-bindings (slot)
+             (mapc #'(lambda (var)
+                       (add-new-binding var slot))
+                   (collect #'(lambda (obj) (variablep obj))
+                            (flatten (get-constraint slot))))))
+    (mapc #'(lambda (slot)
+              (add-new-binding (get-value slot) slot)
+              (add-constraint-bindings slot))
+          (get-slots pattern))))
+
+(defmethod finalize-pattern ((self pattern) global-bindings)
+  (canonicalize-slots self global-bindings)
+  (setup-pattern-bindings self global-bindings)
+  (format t "pattern bindings for ~S are: ~S~%" (get-name self) (get-bindings self))
   (values self))

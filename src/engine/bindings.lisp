@@ -22,22 +22,9 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.8 2001/01/23 21:34:29 youngde Exp $
+;;; $Id: bindings.lisp,v 1.9 2001/01/25 22:14:33 youngde Exp $
 
 (in-package :lisa)
-
-(defclass lisa-defined-slot-variable ()
-  ((varname :initarg :varname
-            :reader get-varname)))
-
-(defmethod get-variable-name ((self lisa-defined-slot-variable))
-  (get-varname self))
-
-(defmethod get-variable-name ((obj symbol))
-  (values obj))
-
-(defun make-lisa-defined-slot-variable (name)
-  (make-instance 'lisa-defined-slot-variable :varname name))
 
 (defclass binding ()
   ((name :initarg :name
@@ -45,9 +32,19 @@
          :reader get-name)
    (location :initarg :location
              :initform nil
-             :reader get-location))
+             :reader get-location)
+   (internal :initform nil
+             :reader get-internal))
   (:documentation
    "The base class for all types of bindings."))
+
+(defmethod initialize-instance :after ((self binding) &rest args)
+  (declare (ignore args))
+  (setf (slot-value self 'internal)
+    (string= "?_" (subseq (symbol-name (get-name self)) 0 2))))
+
+(defun internal-bindingp (binding)
+  (get-internal binding))
 
 (defmethod print-object ((self binding) strm)
   (print-unreadable-object (self strm :type t :identity t)
@@ -83,22 +80,15 @@
   (make-instance 'local-slot-binding :name name :location location
                  :slot-name slot)) 
 
-(defclass lexical-slot-binding (slot-binding)
+(defclass global-slot-binding (slot-binding)
   ()
   (:documentation
    "This class represents a slot variable whose scope is beyond the pattern
    containing that variable."))
 
-(defun make-lexical-slot-binding (name location slot)
-  (make-instance 'lexical-slot-binding :name name :location location
+(defun make-global-slot-binding (name location slot)
+  (make-instance 'global-slot-binding :name name :location location
                  :slot-name slot)) 
-
-(defmethod make-slot-binding ((variable lisa-defined-slot-variable)
-                              location slot-name)
-  (make-local-slot-binding (get-varname variable) location slot-name))
-
-(defmethod make-slot-binding ((variable symbol) location slot-name)
-  (make-lexical-slot-binding variable location slot-name))
 
 (defclass binding-table ()
   ((table :initform (make-hash-table)
