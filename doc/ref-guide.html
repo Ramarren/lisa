@@ -19,7 +19,8 @@ algorithm; perhaps at some future date I'll make an attempt.
 <h2>
 Abbreviated Table of Contents</h2></center>
 <a href="#The Programming Language">The Programming Language</a>.
-<br><a href="#The Environment">The Environment</a>.
+<br><a href="#The Environment">The Environment</a>.<br>
+<a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
 <br><a href="#Conflict Resolution">Conflict Resolution</a>.
 <br><a href="#Getting Started">Getting Started</a>.
 <br><a href="#Things Yet to Do">Things Yet to Do</a>.
@@ -502,7 +503,7 @@ environment to safely load a knowledge base into <i>engine</i>.</blockquote>
 <blockquote>Returns the currently-active inference engine. Usually only
 invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
-<table WIDTH="100%" NOSAVE >
+<table WIDTH="100%" NOSAVE border="0" >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(make-inference-engine &amp;key <i>strategy</i>)</td>
 
@@ -514,6 +515,30 @@ invoked by code running within the context of <i>with-inference-engine</i>.</blo
 object representing a type of conflict resolution strategy may be supplied
 using the keyword <i>strategy</i>; by default, a breadth-first algorithm
 is employed. See the section on conflict resolution for details.</blockquote>
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(rule)</td>
+    <td>Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+Within the context of an executing rule, returns the CLOS object representing
+that rule.</p>
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(get-name <i>rule</i>)</td>
+    <td>Generic function</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+Returns the symbolic name associated with rule instance <i>rule</i>.</p>
+</blockquote>
 
 <h4>
 <a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
@@ -632,7 +657,7 @@ simple example, consider the following rule:
 BORIS. This new rule is inserted into the inference engine and immediately
 becomes part of the Rete network. Variables bound on the LHS of ROCKY behave as
 expected within the context of BORIS; this means that ?NAME in BORIS is bound to
-the same object as that found in ROCKY.<p>Here's a more complicated example:
+the same object as that found in ROCKY<sup>*</sup>.<p>Here's a more complicated example:
 <blockquote>
   <p>(defrule rocky ()<br>
   &nbsp; (rocky (name ?name))<br>
@@ -650,7 +675,15 @@ the same object as that found in ROCKY.<p>Here's a more complicated example:
   &nbsp;&nbsp;&nbsp; (format t &quot;Rule ROCKY added dynamic rule ~A~%&quot;
   (get-name dynamic-rule))))
 </blockquote>
-<p>&nbsp;
+<p>As before, rule ROCKY creates a dynamic rule when fired. However, this time
+the new rule is given a unique name by evaluating the form (GENSYM); either the
+name or the instance can then be remembered for use later. These two rules also
+introduce functions in the LISA API for retrieving both the currently executing
+rule and its name (RULE and GET-NAME, respectively).<p><sup>*</sup> Actually,
+this isn't precisely true. Whenever LISA encounters a dynamic rule during
+parsing it looks at all the rule's variables and substitutes any bound values.
+Thus, in rule BORIS the variable ?NAME would be replaced by the value of ?NAME
+as bound in rule ROCKY.
 <h3>
 IV.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
 Conflict Resolution (CR) is the mechanism LISA employs to determine the
@@ -731,14 +764,6 @@ LISA significantly.
 "modules" or "packets". It might be nice to be able to group rules into packages
 that could be inserted and removed as necessary. Or, perhaps a mechanism akin to
 the CLIPS module system would be more useful. Or both...<br>
-<br>
-</li>
-
-<li>
-<i>Dynamic rule generation</i>: Destined for Release 1.1, this feature will
-support the creation of new rules from existing rules at runtime. At least one
-individual has suggested that this facility would allow developers to construct
-LISA applications capable of &quot;learning&quot;.<br>
 <br>
 </li>
 
