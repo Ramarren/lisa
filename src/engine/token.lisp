@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.5 2000/11/08 22:17:23 youngde Exp $
+;;; $Id: token.lisp,v 1.6 2000/11/09 02:35:41 youngde Exp $
 
 (in-package :lisa)
 
@@ -71,7 +71,8 @@
 
 (defmethod initialize-instance :after ((self token)
                                        &key (initial-fact nil)
-                                            (new-fact nil) (parent nil) (clone nil))
+                                            (right-token nil) (parent nil)
+                                            (clone nil))
   (flet ((init-derived (self fact parent)
            (setf (slot-value self 'depth) (1+ (get-depth parent)))
            (setf (slot-value self 'sort-code) 
@@ -89,11 +90,18 @@
            (setf (slot-value self 'sort-code) (get-sort-code token))
            (setf (slot-value self 'clock) (get-clock token))
            (setf (slot-value self 'neg-count) (get-neg-count token))))
-    (cond ((not (null clone))
+    (cond ((not (null initial-fact))
+           (init-new self initial-fact))
+          ((and (not (null right-token)
+                     (null parent)))
+           (init-derived self (get-top-fact right-token) parent))
+          ((not (null clone))
            (init-clone self clone))
-          ((not (null parent))
-           (init-derived self parent))
-          (t (init-new self)))
+          ((and (not (null parent))
+                (not (null initial-fact)))
+           (init-derived self initial-fact parent))
+          (t (init-new self))
+          (when (next-method-p)))
     (when (next-method-p)
       (call-next-method))))
 
