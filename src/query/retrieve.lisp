@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.9 2002/04/05 02:52:08 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.10 2002/04/06 03:46:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -82,9 +82,12 @@
 (defun find-query (hash)
   (let ((query-name (gethash hash *query-map*)))
     (if (not (null query-name))
-        (find-rule (current-engine) query-name)
+        (progn
+          (format t "Good. Found query in cache.~%")
+          (find-rule (current-engine) query-name))
       (values nil))))
 
+#+ignore
 (defun normalize-query (body)
   (let ((varlist '())
         (index 0))
@@ -98,4 +101,22 @@
       (mapcar #'(lambda (obj)
                   (if (variablep obj) (map-variable obj) obj))
               (flatten body)))))
+
+(defun normalize-query (body)
+  (let ((varlist '())
+        (index 0))
+    (labels ((map-variable (var)
+               (let ((item (cdr (assoc var varlist))))
+                 (when (null item)
+                   (setf item
+                     (make-symbol (format nil "?_~D" (incf index))))
+                   (setf varlist (acons var item varlist)))
+                 (values item)))
+             (transform (obj)
+               (cond ((variablep obj)
+                      (prin1-to-string (map-variable obj)))
+                     ((stringp obj) obj)
+                     (t (prin1-to-string obj)))))
+      (sort (mapcar #'transform (flatten body))
+            #'string<))))
              
