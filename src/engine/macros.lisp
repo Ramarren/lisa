@@ -20,9 +20,9 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.1 2000/10/25 15:15:19 youngde Exp $
+;;; $Id: macros.lisp,v 1.2 2000/11/16 14:31:55 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defmacro variablep (sym)
   `(and (symbolp ,sym)

@@ -20,9 +20,9 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.4 2000/11/15 16:34:34 youngde Exp $
+;;; $Id: pattern.lisp,v 1.5 2000/11/16 14:31:55 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass pattern ()
   ((name :initarg :name

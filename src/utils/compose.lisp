@@ -20,9 +20,9 @@
 ;;; File: compose.lisp
 ;;; Description: Utilities used to compose anonymous functions.
 ;;;
-;;; $Id: compose.lisp,v 1.1 2000/10/19 19:40:57 youngde Exp $
+;;; $Id: compose.lisp,v 1.2 2000/11/16 14:31:55 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defun build-lambda-expression (forms)
   (labels ((compose-body (forms &optional (body nil))

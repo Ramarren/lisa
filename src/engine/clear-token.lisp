@@ -21,9 +21,9 @@
 ;;; Description: Represents TOKENs used for clear operations on the
 ;;; network.
 
-;;; $Id: clear-token.lisp,v 1.1 2000/11/04 02:52:37 youngde Exp $
+;;; $Id: clear-token.lisp,v 1.2 2000/11/16 14:31:54 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass clear-token (token)
   ()
