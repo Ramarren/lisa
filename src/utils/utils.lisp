@@ -25,7 +25,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.20 2002/07/29 17:24:57 youngde Exp $
+;;; $Id: utils.lisp,v 1.21 2002/11/18 14:55:05 youngde Exp $
 
 (in-package "LISA.UTILS")
 
@@ -221,14 +221,12 @@ so that the bare symbols are read as keywords."
         (read-from-string (concatenate 'string "(" string ")")
                           t nil :start start))))
 
-#+cmu (progn
-        (import 'ext:required-argument :port)
-        (export 'ext:required-argument :port))
-#-cmu (progn
-        (proclaim '(ftype (function () nil) required-argument))
-        (defun required-argument ()
-          "A useful default for required arguments and DEFSTRUCT slots."
-          (error "A required argument was not supplied.")))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (progn
+    (proclaim '(ftype (function () nil) required-argument))
+    (defun required-argument ()
+      "A useful default for required arguments and DEFSTRUCT slots."
+      (error "A required argument was not supplied."))))
 
 ;;;
 ;;; Function Compositions
