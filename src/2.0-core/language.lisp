@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.20 2002/11/21 14:53:22 youngde Exp $
+;;; $Id: language.lisp,v 1.21 2002/11/21 16:33:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,10 +44,10 @@
 (defmacro defimport (class-name)
   `(import-class-specification ',class-name))
 
-(defmacro defcontext (context-name)
+(defmacro defcontext (context-name &optional (strategy nil))
   `(unless (find-context (inference-engine) ,context-name nil)
      (register-new-context (inference-engine) 
-                           (make-context ,context-name))))
+                           (make-context ,context-name :strategy ,strategy))))
 
 (defmacro undefcontext (context-name)
   `(forget-context (inference-engine) ,context-name))
@@ -117,9 +117,6 @@
 (defun retract-instance (instance)
   (warn "RETRACT-INSTANCE is deprecated. Use RETRACT instead.")
   (parse-and-retract-instance instance (inference-engine)))
-
-(defun assert-from-string (str)
-  (eval (read-from-string str)))
 
 (defun facts ()
   (let ((facts (get-fact-list (inference-engine))))
