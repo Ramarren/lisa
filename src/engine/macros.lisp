@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.2 2000/11/16 14:31:55 youngde Exp $
+;;; $Id: macros.lisp,v 1.3 2000/11/16 21:26:17 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,5 +33,5 @@
             (not (variablep ,sym)))
        (numberp ,sym) (stringp ,sym)))
 
-(defmacro unordered-factp (fact)
-  `(consp (second fact)))
+(defmacro unordered-pattern-p (p)
+  `(consp (second ,p)))
