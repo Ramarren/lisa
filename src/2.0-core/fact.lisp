@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.7 2002/11/04 18:55:27 youngde Exp $
+;;; $Id: fact.lisp,v 1.8 2002/11/04 19:25:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,6 +34,8 @@
    (slot-table :reader fact-slot-table
                :initform (make-hash-table))
    (meta-data :reader fact-meta-data)
+   (logicals :initform nil
+             :accessor fact-logicals)
    (dependencies :initform nil
                  :accessor fact-dependencies))
   (:documentation
@@ -42,9 +44,20 @@
 (defun fact-symbolic-id (fact)
   (format nil "F-~D" (fact-id fact)))
 
-(defun add-dependent-fact (fact dependent)
-  (push dependent (fact-dependencies fact))
-  fact)
+(defun remove-dependent-fact (fact dependent)
+  (with-accessors ((dependencies fact-dependencies)) fact
+    (setf dependencies
+      (delete dependent dependencies))
+    fact))
+
+(defun add-dependent-fact (logical-fact dependent)
+  (push dependent (fact-dependencies logical-fact))
+  (push logical-fact (fact-logicals dependent))
+  logical-fact)
+
+(defun cleanup-logical-dependencies (fact)
+  (dolist (logical-fact (fact-logicals fact) fact)
+    (remove-dependent-fact logical-fact fact)))
 
 (defun set-slot-value (fact slot-name value)
   "Assigns a new value to a slot in a fact and its associated CLOS

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.24 2002/11/04 18:55:28 youngde Exp $
+;;; $Id: rete.lisp,v 1.25 2002/11/04 19:25:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -131,6 +131,7 @@
   (trace-retract fact)
   (dolist (dependent-fact (fact-dependencies fact))
     (retract-fact self dependent-fact))
+  (cleanup-logical-dependencies fact)
   (remove-fact-from-network (rete-network self) fact)
   fact)
 
