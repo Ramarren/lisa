@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.52 2002/08/09 21:06:12 youngde Exp $
+;;; $Id: mab.lisp,v 1.53 2002/11/07 20:04:22 youngde Exp $
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (when (not (find-package "LISA-MAB"))
@@ -30,7 +30,7 @@
 
 (in-package "LISA-MAB")
 
-(use-default-engine)
+(make-inference-engine)
 
 (deftemplate monkey ()
   (slot location)

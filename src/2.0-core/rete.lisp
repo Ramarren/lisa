@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.27 2002/11/07 17:46:06 youngde Exp $
+;;; $Id: rete.lisp,v 1.28 2002/11/07 20:03:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -241,11 +241,9 @@
 (defun halt-engine (rete)
   (setf (rete-halted rete) t))
 
-(defun make-rete (strategy)
-  (make-instance 'rete :strategy strategy))
-
-(defun make-inference-engine ()
-  (make-rete (make-breadth-first-strategy)))
+(defun make-rete (&optional (strategy nil))
+  (make-instance 'rete 
+    :strategy (if strategy strategy (make-breadth-first-strategy))))
 
 (defun make-query-engine (source-rete)
   (let* ((query-engine (make-inference-engine)))
