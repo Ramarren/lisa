@@ -21,9 +21,9 @@
 # File: make-release
 # Description: Trivial script to help make LISA releases.
 
-# $Id: make-release,v 1.5 2001/06/28 18:23:41 youngde Exp $
+# $Id: make-release,v 1.6 2002/07/22 23:43:58 youngde Exp $
 
-ROOT=/files/devel/sourceforge/lisa
+ROOT=/d/development/lisa
 FASL_FILES="*.fasl *.ufsl *.x86f *.err *.fas *.lib"
 
 remove_fasl ()
