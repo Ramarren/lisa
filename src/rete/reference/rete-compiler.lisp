@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.46 2002/11/13 21:31:27 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.47 2002/11/18 18:25:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -172,6 +172,8 @@
                 (make-node2-not))
                ((test-pattern-p pattern)
                 (make-node2-test))
+               ((existential-pattern-p pattern)
+                (make-node2-exists))
                (t (make-node2)))))
     (when (eql (parsed-pattern-address pattern) (logical-block-marker))
       (mark-as-logical-block join-node (logical-block-marker)))

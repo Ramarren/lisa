@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.65 2002/11/16 16:42:32 youngde Exp $
+;;; $Id: parser.lisp,v 1.66 2002/11/18 18:23:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -210,6 +210,11 @@
                       (setf *compound-patterns-p* t)
                       (build-compound-pattern
                        (mapcar #'parse-pattern (rest p))))
+                     ((eq head 'exists)
+                      (multiple-value-call
+                          #'build-parsed-pattern
+                        (parse-default-pattern (second p) location) 
+                        :existential))
                      (t
                       (multiple-value-call
                           #'build-parsed-pattern
