@@ -24,15 +24,11 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.80 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: parser.lisp,v 1.81 2002/05/26 16:02:07 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
-
-(defmacro with-slot-components (((name field constraint) slot) &body body)
-  `(destructuring-bind (,name ,field &optional ,constraint) ,slot
-     ,@body))
 
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
@@ -57,22 +53,6 @@
   
 (defun redefine-defrule (name body &key (salience 0) (module nil))
   (add-rule (current-engine) (define-rule name body salience module)))
-
-#+ignore
-(defun redefine-defrule (name body &key (salience 0) (module nil))
-  (flet ((redefine-rule ()
-           (with-rule-components ((doc-string lhs rhs) body)
-             (let ((rule (make-rule name (current-engine)
-                                    :doc-string doc-string
-                                    :salience salience
-                                    :module module
-                                    :source body)))
-               (finalize-rule-definition rule lhs rhs)
-               (add-rule (current-engine) rule)))))
-    (handler-case
-        (redefine-rule)
-      (syntactical-error (condition)
-        (rule-structure-error name condition)))))
 
 (defun extract-rule-headers (body)
   (if (stringp (first body))
@@ -109,7 +89,7 @@
                            :type :test))
                          ((eq head 'not)
                           (make-parsed-pattern
-                           :pattern (parse-default-pattern (second p))
+                           :pattern `(,@(parse-default-pattern (second p)))
                            :type :negated))
                          ((variablep head)
                           (if (null binding)
@@ -118,7 +98,7 @@
                              template "Too many pattern variables: ~S." head)))
                          (t
                           (make-parsed-pattern
-                           :pattern (parse-default-pattern p)
+                           :pattern `(,@(parse-default-pattern p))
                            :binding binding
                            :type (if binding :bound :generic))))
                  (pattern-error
@@ -140,7 +120,9 @@
       (pattern-error
        pattern "This pattern is not supported by any known class."))
     (labels ((parse-slot (slot)
-               (with-slot-components ((name field constraint) slot)
+               (let ((name (first slot))
+                     (field (second slot))
+                     (constraint (third slot)))
                  (cond ((and (symbolp name)
                              (slot-valuep field)
                              (constraintp constraint))
@@ -160,7 +142,7 @@
                                             (nconc slots
                                                    `(,(parse-slot slot)))))
                        ((null slot)
-                        (values slots))
+                        slots)
                        (t
                         (pattern-error
                          pattern "Found one or more structural problems."))))))
@@ -240,34 +222,6 @@
               ,@(list (create-template-class-slots class-name body)))))
        (register-template ',class-name ,class)
        ,class)))
-  
-(defun redefine-defimport (symbolic-name class-name superclasses slot-specs)
-  (labels ((validate-defimport-slots (class slots)
-             (let ((class-slots (find-class-slots class)))
-               (mapc #'(lambda (slot)
-                         (unless (member (symbol-name slot)
-                                         class-slots
-                                         :test #'string=
-                                         :key #'symbol-name)
-                           (syntactical-error
-                            'defimport
-                            "The slot ~S is not known to exist in class ~S."
-                            slot class)))
-                     slots)
-               (values slots)))
-           (determine-relevant-slots (class slots)
-             (if (null slots)
-                 (find-class-slots class)
-               (validate-defimport-slots class slots))))
-    (unless (symbolp symbolic-name)
-      (syntactical-error 
-       'defimport "The symbolic name must be a symbol: ~S." symbolic-name))
-    (unless (listp slot-specs)
-      (syntactical-error
-       'defimport "The slot specification must be a list: ~S." slot-specs))
-    (let ((class (find-class class-name)))
-      `(import-class ',symbolic-name ,class ',superclasses
-                     ',(determine-relevant-slots class slot-specs)))))
 
 (defun parse-and-insert-instance (instance)
   (assert-fact

@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.34 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: meta.lisp,v 1.35 2002/05/26 16:02:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -188,36 +188,29 @@
        "The class of this instance is not known to LISA: ~S." instance))
     (values name)))
 
-(defun generate-internal-methods (class)
-  (eval
-   `(defmethod mark-instance-as-changed ((self ,(class-name class))
-                                         &optional (slot-id nil))
-     (map-clos-instances #'mark-clos-instance-as-changed self slot-id)
-     t)))
+(defmacro import-class (class-name use-inheritancep)
+  `(labels ((import-one-class (class direct-superclasses)
+              (let* ((class-name (class-name class))
+                     (symbolic-name
+                      (intern (symbol-name class-name))))
+                (unless (find-meta-fact symbolic-name nil)
+                  (let ((meta (make-meta-fact
+                               symbolic-name
+                               class-name
+                               direct-superclasses
+                               (reflect:class-slot-list class))))
+                    (register-meta-fact symbolic-name meta)
+                    (register-external-class symbolic-name class)))))
+            (import-classes (class)
+              (let ((superclasses
+                     (if ,use-inheritancep
+                         (reflect:find-direct-superclasses class)
+                       '())))
+                (import-one-class class superclasses)
+                (dolist (super superclasses)
+                  (import-classes super)))))
+     (import-classes (find-class ',class-name))))
 
-(defun import-class (class use-inheritancep)
-  (flet ((import-one-class (class direct-superclasses)
-           (let ((symbolic-name
-                  (intern (symbol-name (class-name class)))))
-             (unless (find-meta-fact symbolic-name nil)
-               (let ((meta (make-meta-fact
-                            symbolic-name
-                            (class-name class)
-                            direct-superclasses
-                            (reflect:class-slot-list class))))
-                 (register-meta-fact symbolic-name meta)
-                 (register-external-class symbolic-name class)
-                 (generate-internal-methods class)))
-             t)))
-    (let ((superclasses
-           (if use-inheritancep
-               (reflect:find-direct-superclasses class)
-             '())))
-      (import-one-class class superclasses)
-      (dolist (super superclasses)
-        (import-class super use-inheritancep))
-      t)))
-             
 (defun register-template (name class)
   "Creates and remembers the meta fact instance associated with a class. NAME
   is the symbolic name of the fact as used in rules; CLASS is the CLOS class

@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.9 2001/09/13 13:54:09 youngde Exp $
+;;; $Id: preamble.lisp,v 1.10 2002/05/26 16:02:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,9 +42,9 @@
 
 (defgeneric equals (object-1 object-2))
 
-(defgeneric mark-instance-as-changed (instance &optional slot-id)
-  (:method ((instance t) &optional slot-id)
-           (declare (ignore slot-id))
+(defgeneric mark-instance-as-changed (instance &key (engine nil) (slot-id nil))
+  (:method ((instance t) &key engine slot-id)
+           (declare (ignore slot-id) (ignore engine))
            (error
             "LISA does not have a MARK-INSTANCE-AS-CHANGED method defined for class ~S."
             (class-of instance)))

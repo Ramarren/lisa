@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.59 2002/05/25 00:57:40 youngde Exp $
+;;; $Id: language.lisp,v 1.60 2002/05/26 16:02:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,14 +39,8 @@
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
 
-(defmacro defimport (class-name &key (use-inheritancep nil))
-  `(import-class (find-class ',class-name) ,use-inheritancep))
-                    
-#+ignore
-(defmacro defimport (symbolic-name (class-name 
-                                    &optional (superclasses nil))
-                     (&body body))
-  (redefine-defimport symbolic-name class-name superclasses body))
+(defmacro defimport (class-name &key (use-inheritancep t))
+  `(import-class ,class-name ,use-inheritancep))
 
 (defmacro engine ()
   `(values ,+lisa-engine-var+))
@@ -104,6 +98,10 @@
 
 (defun halt (engine)
   (halt-engine engine))
+
+(defun mark-instance-as-changed (instance &key (engine nil) (slot-id nil))
+  (mark-clos-instance-as-changed
+   (if (null engine) (current-engine) engine) instance  slot-id))
 
 (defun print-activation-list (engine)
   (let ((activations (get-activation-list engine)))

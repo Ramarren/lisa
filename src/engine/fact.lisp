@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.35 2002/05/22 21:03:24 youngde Exp $
+;;; $Id: fact.lisp,v 1.36 2002/05/26 16:02:07 youngde Exp $
 
 (in-package "LISA")
 
@@ -118,7 +118,7 @@
   (get-slot-value fact (find-meta-slot (get-meta-fact fact) :object)))
 
 (defun has-superclass (fact symbolic-name)
-  (member symbolic-name (get-superclasses (get-meta-fact fact))))
+  (find symbolic-name (get-superclasses (get-meta-fact fact))))
 
 (defun synchronize-with-instance (fact &optional (slot-id nil))
   "Makes a fact's slot values and its CLOS instance's slot values match. If a
