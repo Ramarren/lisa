@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.60 2001/04/19 20:24:11 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.61 2001/04/20 19:37:15 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,6 +77,7 @@
           (get-slots pattern))
     (values last-node)))
 
+#+ignore
 (defun create-single-nodes (compiler rule patterns)
   (declare (optimize (speed 3) (debug 1) (safety 1)))
   (with-accessors ((terminals get-terminals)
@@ -95,6 +96,26 @@
                             (add-simple-tests pattern rule last))
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
+
+(defun create-single-nodes (compiler rule patterns)
+  (declare (optimize (speed 3) (debug 1) (safety 1)))
+  (with-accessors ((terminals get-terminals)
+                   (roots get-roots)) compiler
+    (labels ((first-pass (patterns i)
+               (let ((pattern (first patterns)))
+                 (cond ((null pattern)
+                        (values t))
+                       (t
+                        (let ((last (merge-successor
+                                     (get-root-node compiler)
+                                     (make-node1-tect
+                                      (get-name pattern)) rule)))
+                          (setf (aref roots i) last)
+                          (setf (aref terminals i)
+                            (add-simple-tests pattern rule last))
+                          (first-pass (rest patterns) (1+ i))))))))
+      (first-pass (collect #'(lambda (p) 
+                               (typep p 'generic-pattern)) patterns) 0))))
 
 (defun add-right-to-left-node (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler
@@ -120,6 +141,25 @@
 
 ;;; the "third pass"...
 
+(defgeneric generate-join-node (pattern rule)
+  (:method (pattern rule)
+           (declare (ignore rule))
+           (error "The Rete compiler doesn't understand this pattern type: ~S"
+                  pattern)))
+
+(defmethod generate-join-node ((pattern generic-pattern) rule)
+  (let ((node2 (make-join-node pattern (get-engine rule))))
+    (add-node2-tests node2 pattern)
+    (values node2)))
+
+(defmethod generate-join-node ((pattern test-pattern) rule)
+  (let ((node2 (make-node-test (get-engine rule))))
+    (add-test node2 
+              (make-test2-eval
+               (make-function-call `(,(get-form pattern) )
+                                   (get-bindings pattern))))
+    (values node2)))
+
 (defun create-join-nodes (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler
     (labels ((add-join-node (node2 location)
@@ -129,9 +169,8 @@
                (setf (aref terminals (1- location)) node2)
                (setf (aref terminals location) node2)))
       (mapc #'(lambda (pattern)
-                (let ((node2 (make-join-node pattern (get-engine rule))))
-                  (add-node2-tests node2 pattern)
-                  (add-join-node node2 (get-location pattern))))
+                (add-join-node
+                 (generate-join-node pattern rule) (get-location pattern)))
             (rest (get-patterns rule))))))
 
 (defun create-terminal-node (compiler rule)

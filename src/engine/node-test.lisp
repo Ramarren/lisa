@@ -21,7 +21,7 @@
 ;;; Description: Node containing an arbitrary list of tests. Used for TEST
 ;;; conditional elements and as the base class for JOIN nodes.
 
-;;; $Id: node-test.lisp,v 1.21 2001/04/19 20:24:11 youngde Exp $
+;;; $Id: node-test.lisp,v 1.22 2001/04/20 19:37:15 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,7 +60,7 @@
       (values t))))
 
 (defmethod call-node-left ((self node-test) (token add-token))
-  (if (run-tests self token)
+  (if (run-tests self token (get-top-fact token))
       (pass-the-token self token)
     (values nil)))
 
@@ -82,3 +82,6 @@
 
 (defmethod equals ((self node-test) (obj node-test))
   (eq self obj))
+
+(defun make-node-test (engine)
+  (make-instance 'node-test :engine engine))
