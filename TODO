@@ -20,7 +20,7 @@
 ;;; File: TODO
 ;;; Description: Ongoing list of things that need to be done.
 
-;;; $Id: TODO,v 1.4 2001/05/18 18:36:46 youngde Exp $
+;;; $Id: TODO,v 1.5 2001/05/31 20:20:26 youngde Exp $
 
 ;;; Absolutely necessary...
 
@@ -33,7 +33,7 @@
 * CLOS reasoning support. Expand defimport to allow specification of
   relevant slots? -- DONE
 
-* Documentation, at least a rough reference manual.
+* Documentation, at least a rough reference manual. -- DONE
 
 ;;; Really nice to have...
 

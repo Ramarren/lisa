@@ -1,3 +1,9 @@
+2001-05-31  David E. Young  <youngde@nc.rr.com>
+
+	Second Beta release. Includes a fix to the Rete compiler resulting
+	from a bug reported by Art Nuzzo; object ancestry reasoning;
+	updated Reference Guide.
+
 2001-05-22  David E. Young  <youngde@nc.rr.com>
 
 	First official Beta release. This distribution adds a reasonable
