@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.8 2000/10/20 18:07:50 youngde Exp $
+;;; $Id: language.lisp,v 1.9 2000/10/24 18:58:50 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,11 +47,13 @@
   `(and (symbolp ,sym)
     (eq (elt (symbol-name ,sym) 0) #\?)))
 
-(defmacro identifierp (sym)
-  `(or
-    (symbolp ,sym)
-    (numberp ,sym)
-    (stringp ,sym)))
+(defmacro literalp (sym)
+  `(or (and (symbolp ,sym)
+            (not (variablep ,sym)))
+       (numberp ,sym) (stringp ,sym)))
+
+(defmacro unordered-factp (fact)
+  `(consp (second fact)))
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
@@ -68,10 +70,8 @@
 (defun redefine-defrule (name body)
   (with-rule-components ((doc-string decls lhs rhs) body)
     (let ((rule (make-defrule name :doc-string doc-string :source body)))
-      (mapc #'(lambda (p)
-                (add-pattern rule p))
-            lhs)
-      (set-actions rule (compile-function rhs))
+      (compile-patterns rule lhs)
+      (compiler-actions rule (compile-function rhs))
       (values rule))))
     
 (defun extract-rule-headers (body)
@@ -105,10 +105,7 @@
                       (parse-lhs (rest body) patterns pattern))
                      (t (error "parse-rule-body: parsing error on LHS at ~S~%" patterns)))))
            (parse-rhs (actions)
-             (values actions))
-           (overall-structure-ok (body)
-             (< (position 'when body :test #'eq :key #'car)
-                (position 'then body :test #'eq :key #'car))))
+             (values actions)))
     (multiple-value-bind (lhs remains)
         (find-before '=> body :test #'eq)
       (if (not (null remains))
@@ -131,8 +128,29 @@
     (if (null assign-to)
         (make-pattern (parse-pattern template))
       (make-assignment-pattern (parse-pattern template)))))
-        
-(defun parse-fact (fact)
+
+(defun parse-ordered-fact (fact)
+  (labels ((parse-fields (fields &optional (flist nil))
+             (let ((field (first fields)))
+               (cond ((null field)
+                      (values flist))
+                     ((literalp field)
+                      (parse-fields (rest fields)
+                                    (nconc flist `(,field))))
+                     ((variablep field)
+                      (if (consp (second fields))
+                          (parse-fields (rest (rest fields))
+                                        (nconc flist
+                                               `(,field ,(second fields))))
+                        (parse-fields (rest fields)
+                                      (nconc flist `(,field)))))
+                     (t
+                      (error "parse-ordered-fact: parse error for ~S~%"
+                             fact))))))
+    (list (first fact)
+          (parse-fields (rest fact)))))
+
+(defun parse-unordered-fact (fact)
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (list name field constraint)))
@@ -145,6 +163,11 @@
                      ((null slot)
                       (values slots))
                      (t
-                      (error "parse-fact: parse error at ~S~%" body))))))
+                      (error "parse-unordered-fact: parse error at ~S~%" body))))))
     (list (first fact)
           (parse-fact-body (rest fact)))))
+
+(defun parse-fact (fact)
+  (if (unordered-factp fact)
+      (parse-unordered-fact fact)
+    (parse-ordered-fact fact)))
