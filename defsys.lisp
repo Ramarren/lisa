@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.16 2001/02/09 22:11:30 youngde Exp $
+;;; $Id: defsys.lisp,v 1.17 2001/02/12 19:22:51 youngde Exp $
 
 (in-package :user)
 
@@ -140,7 +140,8 @@
                                        (:file "activation")
                                        (:file "environment")
                                        (:file "watch")
-                                       (:file "debug"))
+                                       (:file "debug")
+                                       (:file "instrumenting"))
                           :depends-on (packages utils lisa-macros))))
 
 (defun compile-lisa ()

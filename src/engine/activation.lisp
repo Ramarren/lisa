@@ -20,7 +20,7 @@
 ;;; File: activation.lisp
 ;;; Description: This class represents an activation of a rule.
 
-;;; $Id: activation.lisp,v 1.6 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: activation.lisp,v 1.7 2001/02/12 19:22:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -37,7 +37,7 @@
    "Represents a rule activation."))
 
 (defmethod fire-rule ((self activation))
-  (setf *current-rule* (get-name (get-rule self)))
+  (watchpoint 'fire self)
   (fire (get-rule self) (get-token self)))
 
 (defun eligible-p (activation)

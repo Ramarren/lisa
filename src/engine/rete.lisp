@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.39 2001/02/09 01:49:59 youngde Exp $
+;;; $Id: rete.lisp,v 1.40 2001/02/12 19:22:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -61,9 +61,11 @@
   (clrhash (get-rules self)))
 
 (defmethod add-activation ((self rete) activation)
+  (watchpoint 'enable-activation activation)
   (add-activation (get-strategy self) activation))
 
 (defmethod disable-activation ((self rete) activation)
+  (watchpoint 'disable-activation activation)
   (setf (get-eligible activation) nil))
 
 (defmethod find-activation ((self rete) rule token)
@@ -103,20 +105,21 @@
       (incf next-fact-id))))
 
 (defmethod insert-token ((self rete) token)
+  (update-time (get-top-fact token) self)
   (call-node-right (get-root-node (get-compiler self)) token))
 
 (defmethod assert-fact ((self rete) fact)
   (set-fact-id fact (next-fact-id self))
   (increment-time self)
-  (update-time fact self)
   (record-fact self fact)
+  (watchpoint 'assert fact)
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
 
 (defmethod retract-fact ((self rete) (fact fact))
   (remove-fact self fact)
   (increment-time self)
-  (update-time fact self)
+  (watchpoint 'retract fact)
   (insert-token self (make-remove-token :initial-fact fact))
   (values fact))
   
@@ -127,11 +130,12 @@
     (values fact)))
 
 (defmethod modify-fact ((self rete) fact slot-changes)
-  (retract-fact self fact)
+  (insert-token self (make-remove-token :initial-fact fact))
   (mapc #'(lambda (slot)
             (set-slot-value fact (first slot) (second slot)))
         slot-changes)
-  (assert-fact self fact))
+  (insert-token self (make-add-token :initial-fact fact))
+  (values fact))
   
 (defmethod set-initial-state ((self rete))
   (remove-facts self)

@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.9 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: watch.lisp,v 1.10 2001/02/12 19:22:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,6 +31,11 @@
 
 (defmacro watching-p (event)
   `(member ,event *watch-list*))
+
+(defgeneric watchpoint (event object)
+  (:method (event object)
+           (declare (ignore event object))
+           (values nil)))
 
 (defun watch-event (event)
   (pushnew event *watch-list*))
@@ -55,33 +60,31 @@
           (get-name (get-rule activation))
           (activation-fact-list activation)))
   
-(defmethod add-activation :before ((s strategy) (act activation))
+(defmethod watchpoint ((action (eql 'enable-activation)) activation)
   (when (watching-p :activations)
-    (show-activation "==>" act))
+    (show-activation "==>" activation))
   (values))
 
-(defun show-activation-maybe (activation)
+(defmethod watchpoint ((action (eql 'disable-activation)) activation)
   (when (watching-p :activations)
     (show-activation "<==" activation))
   (values))
 
-(defmethod disable-activation :before ((engine rete) (act activation))
-  (show-activation-maybe act))
-
-(defmethod fire-rule :before ((act activation))
+(defmethod watchpoint ((action (eql 'fire)) activation)
   (when (watching-p :rules)
     (format t "FIRE ~D: ~S ~S~%"
-            (get-fired-rule-count (get-engine (get-rule act)))
-            (get-name (get-rule act)) (activation-fact-list act))))
+            (get-fired-rule-count (get-engine (get-rule activation)))
+            (get-name (get-rule activation))
+            (activation-fact-list activation))))
 
 (defun show-fact-detail (direction fact)
   (format t "~A f-~D ~S~%" direction (get-fact-id fact)
           (reconstruct-fact fact)))
 
-(defmethod insert-token :before ((engine rete) (token add-token))
+(defmethod watchpoint ((action (eql 'assert)) fact)
   (when (watching-p :facts)
-    (show-fact-detail "==>" (get-top-fact token))))
+    (show-fact-detail " ==>" fact)))
 
-(defmethod insert-token :before ((engine rete) (token remove-token))
+(defmethod watchpoint ((action (eql 'retract)) fact)
   (when (watching-p :facts)
-    (show-fact-detail "<==" (get-top-fact token))))
+    (show-fact-detail " <==" fact)))
