@@ -20,7 +20,7 @@
 ;;; File: NOTES
 ;;; Description: Ongoing project notes.
 
-;;; $Id: NOTES,v 1.5 2001/04/16 18:33:15 youngde Exp $
+;;; $Id: NOTES,v 1.6 2001/04/18 14:57:17 youngde Exp $
 
 This file is an ongoing record of development issues related to the
 LISA project. It was (belatedly) started just after LISA's first alpha
@@ -77,3 +77,12 @@ versions have been tested.
       this stated in the Hyperspec.
 
       ****** FIXED as of CLISP 2.25.1
+
+* 4.18.2001: LISA's final alpha release contains most of the support
+  needed to reason over CLOS objects, plus a slightly-modified DEFRULE
+  syntax. For CLOS reasoning, missing is a protocol for notifying LISA
+  about external changes, and a way to notify outside entities that
+  LISA modified an object. I've solutions for both of these, but
+  they're not in this release. LISA now makes use of PORT, currently
+  for MOP functionality.
+  
