@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.39 2002/10/17 01:45:24 youngde Exp $
+;;; $Id: parser.lisp,v 1.40 2002/10/17 14:47:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -55,9 +55,13 @@
     (make-binding var location :pattern)))
 
 (defun collect-bindings (forms &key (errorp t))
-  (loop for obj in (utils:flatten forms)
-      if (variablep obj)
-      collect (find-slot-binding obj :errorp errorp)))
+  (let ((bindings (list)))
+    (dolist (obj (utils:flatten forms))
+      (when (variablep obj)
+        (let ((binding (find-slot-binding obj :errorp errorp)))
+          (unless (null binding)
+            (push binding bindings)))))
+    (nreverse bindings)))
 
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
@@ -255,67 +259,11 @@
 
 ;;; End of the rule parsing stuff
 
-(defun normalize-slots (slots)
-  (flet ((normalize-slot (slot)
-           (let ((slot-name (first slot))
-                 (slot-value (second slot)))
-             (cl:assert (symbolp slot-name) nil
-               "A slot name must be a symbol: ~S" slot-name)
-             (if (quotablep slot-value)
-                 ``(,',slot-name ,',slot-value)
-               ``(,',slot-name ,,slot-value)))))
-    `(list ,@(mapcar #'normalize-slot slots))))
-
 (defun canonicalize-slot-names (slots)
   (mapcar #'(lambda (slot)
               `(,(first slot)
                 ,(second slot)))
           slots))
-
-(defun parse-and-insert-fact (body)
-  (let ((head (first body))
-        (slots (rest body)))
-    (cl:assert (symbolp head) nil
-      "A symbol must start a fact: ~S" body)
-    `(assert-fact (current-engine)
-                  (make-fact ',head
-                             (canonicalize-slot-names 
-                              (,@(normalize-slots slots)))))))
-
-(defun parse-and-modify-fact (fact body)
-  `(modify-fact (current-engine) ,fact
-                (canonicalize-slot-names 
-                 (,@(normalize-slots body)))))
-
-(defun show-modify (fact &rest slots)
-  (print fact)
-  (print slots)
-  (terpri)
-  (values))
-
-#+ignore
-(defmacro update (fact &body body)
-  (flet ((expand-pair (pair)
-           (let ((slot-name (first pair))
-                 (slot-value (second pair)))
-             `(',slot-name
-               ,@(if (quotablep slot-value) 
-                     (quote slot-value)
-                   slot-value)))))
-    `(show-modify
-      (inference-engine) ,fact
-      (list ,@(mapcar #'expand-pair body)))))
-
-(defmacro update (fact &body body)
-  `(show-modify 
-    ,fact 
-    ,@(mapcar #'(lambda (pair)
-                  (destructuring-bind (name value) pair
-                    `(list (identity ',name) 
-                           (identity 
-                            ,@(if (quotablep value)
-                                  `(',value) `(,value))))))
-              body)))
 
 (defun create-template-class-slots (class-name slot-list)
   (labels ((determine-default (default-form)
@@ -366,8 +314,8 @@
        (dolist (fact ',body)
          (let ((head (first fact)))
            (push 
-            (make-fact head
-                       (canonicalize-slot-names (rest fact)))
+            (apply #'make-fact head
+                   (canonicalize-slot-names (rest fact)))
             ,deffacts)))
        (add-autofact (inference-engine)
                      (make-deffacts ',name (nreverse ,deffacts))))))

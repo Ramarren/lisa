@@ -106,17 +106,11 @@
   =>
   )
 
-(defrule shared-pattern-1 ()
-  (frodo (name ?name))
-  (samwise (name sam) (friend ?name) (age 100))
+(defrule simple ()
+  (?f (gandalf (age 100)))
   =>
-  (format t "shared-pattern-1 fired.~%"))
-
-(defrule shared-pattern-2 ()
-  (gandalf)
-  (samwise (name sam) (age 100))
-  =>
-  (format t "shared-pattern-2 fired.~%"))
+  (let ((?age 1000))
+    (modify ?f (age ?age))))
 
 #|
 (defparameter *frodo* (assert (frodo (name frodo))))

@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.5 2002/09/20 21:28:45 youngde Exp $
+;;; $Id: fact.lisp,v 1.6 2002/10/17 14:47:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -180,7 +180,7 @@
   (initialize-slot-value fact :object instance)
   fact)
 
-(defun make-fact (name slots)
+(defun make-fact (name &rest slots)
   "The default constructor for class FACT. NAME is the symbolic fact name as
   used in rules; SLOTS is a list of symbol/value pairs."
   (make-instance 'fact :name name :slots slots))
@@ -195,7 +195,8 @@
   "Creates a FACT instance using another FACT instance as a
   template. Basically a clone operation useful for such things as asserting
   DEFFACTS."
-  (make-fact (fact-name fact)
-             (mapcar #'(lambda (slot-name)
-                         (list slot-name (get-slot-value fact slot-name)))
-                     (get-slot-list (fact-meta-data fact)))))
+  (apply #'make-fact
+         (fact-name fact)
+         (mapcar #'(lambda (slot-name)
+                     (list slot-name (get-slot-value fact slot-name)))
+                 (get-slot-list (fact-meta-data fact)))))

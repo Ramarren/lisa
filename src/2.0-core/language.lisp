@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.6 2002/10/17 01:45:23 youngde Exp $
+;;; $Id: language.lisp,v 1.7 2002/10/17 14:47:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,8 +40,39 @@
 (defmacro defimport (class-name &key (use-inheritancep t))
   `(import-class ,class-name ,use-inheritancep))
 
+#+ignore
 (defmacro assert ((&body body))
   (parse-and-insert-fact body))
+
+#+ignore
+(defmacro assert ((&body body))
+  `(destructuring-bind (name &rest slots) ',body
+     (assert-fact
+      (inference-engine)
+      (make-fact
+       name
+       ,@(mapcar #'(lambda (pair)
+                     (destructuring-bind (name value) pair
+                       `(list (identity ',name) 
+                              (identity 
+                               ,@(if (quotablep value)
+                                     `(',value)
+                                   `(,value))))))
+                 slots)))))
+
+(defmacro assert ((name &body body))
+  `(assert-fact
+    (inference-engine)
+    (make-fact
+     ',name
+     ,@(mapcar #'(lambda (pair)
+                   (destructuring-bind (name value) pair
+                     `(list (identity ',name) 
+                            (identity 
+                             ,@(if (quotablep value)
+                                   `(',value)
+                                 `(,value))))))
+               body))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
