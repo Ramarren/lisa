@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.53 2004/03/16 19:40:59 youngde Exp $
+;;; $Id: rete.lisp,v 1.54 2004/03/16 22:04:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -361,7 +361,7 @@
     (mapc #'(lambda (rule)
               (unless (subrule-p rule)
                 (copy-rule rule new-engine)))
-          (rete-rules engine))
+          (get-rule-list engine))
     new-engine))
 
 (defun make-query-engine (source-rete)

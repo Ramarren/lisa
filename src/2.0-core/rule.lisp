@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.26 2004/03/16 19:40:59 youngde Exp $
+;;; $Id: rule.lisp,v 1.27 2004/03/16 22:04:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -206,19 +206,22 @@
 (defun copy-rule (rule engine)
   (let ((initargs `(:doc-string ,(rule-comment rule)
                     :salience ,(rule-salience rule)
-                    :context ,(rule-context rule)
+                    :context ,(if (initial-context-p (rule-context rule))
+                                  nil
+                                (context-name (rule-context rule)))
                     :auto-focus ,(rule-auto-focus rule))))
-    (if (composite-rule-p rule)
-        (apply #'make-composite-rule
+    (with-inference-engine (engine)
+      (if (composite-rule-p rule)
+          (apply #'make-composite-rule
+                 (rule-short-name rule)
+                 engine
+                 (append `(,(rule-patterns rule))
+                         `(,@(mapcar #'rule-patterns (rule-subrules rule))))
+                 (rule-actions rule)
+                 initargs)
+        (apply #'make-rule
                (rule-short-name rule)
                engine
-               (append `(,(rule-patterns rule))
-                       `(,@(mapcar #'rule-patterns (rule-subrules rule))))
+               (rule-patterns rule)
                (rule-actions rule)
-               initargs)
-      (apply #'make-rule
-             (rule-short-name rule)
-             engine
-             (rule-patterns rule)
-             (rule-actions rule)
-             initargs))))
+               initargs)))))
