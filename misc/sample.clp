@@ -9,15 +9,16 @@
   (slot nemesis))
 
 (load-package jess.ViewFunctions)
+(set-node-index-hash 1)
 
 (defrule rocky-1
   (rocky (name ?name&:(eq ?name "rocky")))
-  (boris (name ?bname&:(eq ?bname ?name)))
+  (boris (name ?boris&:(eq ?boris ?name)))
   =>
   (format t "rocky-1 fired: ?name = ~S~%" ?name))
 
 (defrule rocky-2
   (rocky (name ?name&:(eq ?name "rocky")))
-  (boris (name ?cname&:(eq ?cname ?name)))
+  (boris (name ?schtum&:(eq ?schtum ?name)))
   =>
   (format t "rocky-2 fired: ?name = ~S~%" ?name))

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.30 2001/01/19 22:15:28 youngde Exp $
+;;; $Id: pattern.lisp,v 1.31 2001/01/22 19:39:43 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,6 +34,8 @@
          :reader get-name)
    (slots :initform nil
           :accessor get-slots)
+   (bindings :initform nil
+             :reader get-bindings)
    (location :initarg :location
              :reader get-location))
   (:documentation
@@ -73,13 +75,21 @@
   (labels ((make-slot-variable ()
              (make-lisa-defined-slot-variable
               (intern (make-symbol (format nil "?~A" (gensym))))))
+           (add-local-binding (binding)
+             (pushnew binding (slot-value pattern 'bindings)
+                      :test-not #'(lambda (b)
+                                    (and (eql (get-location b)
+                                              (get-location binding))
+                                         (eql (get-slot-name b)
+                                              (get-slot-name binding))))))
            (new-slot-binding (var)
-             (unless (lookup-binding bindings var)
-               (add-binding bindings
-                            (make-slot-binding
-                             var
-                             (get-location pattern)
-                             (get-name slot)))))
+             (let ((binding (lookup-binding bindings var)))
+               (when (null binding)
+                 (setf binding
+                   (make-slot-binding var (get-location pattern)
+                                      (get-name slot)))
+                   (add-binding bindings binding))
+               (add-local-binding binding)))
            (rewrite-slot (var value negated)
              (let ((varname (get-variable-name var)))
                (setf (get-value slot) varname)
