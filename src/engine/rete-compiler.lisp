@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.7 2000/11/15 16:34:34 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.8 2000/11/16 02:24:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,19 +58,19 @@
   (:documentation
    "Generates a pattern network."))
 
-(defun add-tests (rule slots node)
+(defun add-tests (slots rule node)
   (flet ((add-simple-test (node slot)
            (merge-successor 
             node (make-node1-teq (get-name slot)
                                  (get-value (get-test slot))) rule)))
     (if (null slots)
         (values node)
-      (add-tests rule (rest slots)
+      (add-tests (rest slots) rule
                  (add-simple-test node (first slots))))))
            
-(defun create-single-nodes (rule patterns)
+(defun create-single-nodes (compiler rule patterns)
   (with-accessors ((terminals get-terminals)
-                   (roots get-roots)) rule
+                   (roots get-roots)) compiler
     (labels ((find-multifields ()
                (values nil))
              (first-pass (patterns i)
@@ -79,39 +79,39 @@
                         (values t))
                        (t
                         (let ((last (merge-successor
-                                     (get-root-node rule)
+                                     (get-root-node compiler)
                                      (make-node1-tect
                                       (get-name pattern)) rule)))
                           (setf (aref roots i) last)
                           (find-multifields)
                           (setf (aref terminals i)
-                            (add-tests (get-slots pattern) last))
+                            (add-tests (get-slots pattern) rule last))
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 
-(defun search-for-variables (rule)
-  (with-accessors ((terminals get-terminals)) rule
+(defun search-for-variables (compiler rule)
+  (with-accessors ((terminals get-terminals)) compiler
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
 
-(defun create-join-nodes (rule)
+(defun create-join-nodes (compiler rule)
   (values nil))
 
-(defun create-terminal-node (rule)
-  (with-accessors ((terminals get-terminals)) rule
+(defun create-terminal-node (compiler rule)
+  (with-accessors ((terminals get-terminals)) compiler
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0)
                        (make-terminal-node rule) rule))))
 
-(defmethod add-rule ((self rete-compiler) rule)
+(defmethod add-rule-to-network ((self rete-compiler) rule)
   "Adds a rule to the pattern network."
   (setf (get-terminals self) (make-array (get-pattern-count rule)))
   (setf (get-roots self) (make-array (get-pattern-count rule)))
-  (create-single-nodes rule (get-patterns rule))
-  (search-for-variables rule)
-  (create-join-nodes rule)
-  (create-terminal-node rule)
+  (create-single-nodes self rule (get-patterns rule))
+  (search-for-variables self rule)
+  (create-join-nodes self rule)
+  (create-terminal-node self rule)
   (values rule))
                                   
 (defun make-rete-compiler ()

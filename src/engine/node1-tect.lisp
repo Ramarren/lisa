@@ -21,7 +21,7 @@
 ;;; Description: A one-input node that tests the fact class type in a pattern
 ;;; network.
 
-;;; $Id: node1-tect.lisp,v 1.4 2000/11/14 19:49:33 youngde Exp $
+;;; $Id: node1-tect.lisp,v 1.5 2000/11/16 02:24:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,4 +51,4 @@
             (class-name (get-class self)))))
 
 (defun make-node1-tect (class)
-  (make-instance 'node1-tect :class class))
+  (make-instance 'node1-tect :class (find-class class)))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.5 2000/11/15 20:45:20 youngde Exp $
+;;; $Id: rete.lisp,v 1.6 2000/11/16 02:24:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -40,12 +40,15 @@
 
 (defmethod add-rule ((self rete) rule)
   (with-accessors ((rules get-rules)) self
-    (add-rule (get-compiler self) rule)
+    (add-rule-to-network (get-compiler self) rule)
     (setf (gethash (get-name rule) rules) rule)))
 
 (defmethod create-activation ((self rete) rule token)
   (add-activation (get-strategy self)
                   (make-activation rule token)))
+
+(defmethod assert-fact ((self rete) token)
+  (call-node-right (get-root-node (get-compiler self)) token))
 
 (defun make-rete (&key (strategy (make-depth-first-strategy)))
   (make-instance 'rete :strategy strategy))
