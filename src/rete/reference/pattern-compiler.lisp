@@ -20,7 +20,7 @@
 ;;; File: pattern-compiler.lisp
 ;;; Description:
 
-;;; $Id: pattern-compiler.lisp,v 1.1 2002/08/27 19:00:18 youngde Exp $
+;;; $Id: pattern-compiler.lisp,v 1.2 2002/08/28 00:28:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,3 +28,19 @@
   (intra-pattern-tests nil :type list)
   (inter-pattern-tests nil :type list))
 
+(defun make-class-test (class-name)
+  (function
+   (lambda (token)
+     (eq class-name
+         (fact-name
+          (get-top-fact-from-token token))))))
+
+(defun make-simple-slot-test (slot-name value)
+  (function
+   (lambda (token)
+     (equal value
+            (get-slot-value
+             (get-top-fact-from-token token)
+             slot-name)))))
+
+(defun compile-pattern (parsed-pattern))
