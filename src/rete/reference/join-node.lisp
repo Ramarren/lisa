@@ -20,19 +20,27 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.11 2002/10/03 14:47:45 youngde Exp $
+;;; $Id: join-node.lisp,v 1.12 2002/11/12 19:48:03 youngde Exp $
 
 (in-package "LISA")
 
 (defclass join-node ()
   ((successor :initform nil
               :accessor join-node-successor)
+   (logical-block :initform nil
+                  :reader join-node-logical-block)
    (tests :initform (list)
           :accessor join-node-tests)
    (left-memory :initform (make-hash-table :test #'equal)
                 :reader join-node-left-memory)
    (right-memory :initform (make-hash-table :test #'equal)
                  :reader join-node-right-memory)))
+
+(defun mark-as-logical-block (join-node)
+  (setf (slot-value join-node 'logical-block) t))
+
+(defun logical-block-p (join-node)
+  (join-node-logical-block join-node))
 
 (defun remember-token (memory token)
   (setf (gethash (hash-key token) memory) token))

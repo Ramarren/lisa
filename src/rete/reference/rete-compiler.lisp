@@ -20,13 +20,14 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.42 2002/11/07 19:16:11 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.43 2002/11/12 19:48:03 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *root-nodes* nil)
 (defvar *rule-specific-nodes* nil)
 (defvar *leaf-nodes* nil)
+(defvar *logical-block-marker*)
 
 (defmacro set-leaf-node (node address)
   `(setf (aref *leaf-nodes* ,address) ,node))
@@ -40,6 +41,10 @@
 (defmacro right-input (address)
   `(aref *leaf-nodes* ,address))
 
+(defun logical-block-marker ()
+  (declare (inline logical-block-marker))
+  *logical-block-marker*)
+  
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table)
                :reader rete-roots)
@@ -162,11 +167,15 @@
     join-node))
 
 (defun make-join-node (pattern)
-  (cond ((negated-pattern-p pattern)
-         (make-node2-not))
-        ((test-pattern-p pattern)
-         (make-node2-test))
-        (t (make-node2))))
+  (let ((join-node
+         (cond ((negated-pattern-p pattern)
+                (make-node2-not))
+               ((test-pattern-p pattern)
+                (make-node2-test))
+               (t (make-node2)))))
+    (when (eql (parsed-pattern-address (logical-block-marker)))
+      (mark-as-logical-block join-node))
+    join-node))
 
 (defun make-left-join-connection (join-node node)
   (if (typep node 'shared-node)
@@ -192,10 +201,17 @@
 (defun add-terminal-node (rule)
   (add-successor (leaf-node) (make-terminal-node rule) #'pass-token))
 
+(defun record-logical-block (patterns)
+  (let ((addresses (list)))
+    (dolist (pattern patterns (first addresses))
+      (when (logical-pattern-p pattern)
+        (push (parsed-pattern-address pattern))))))
+
 (defun compile-rule-into-network (rete-network patterns rule)
   (let ((*root-nodes* (rete-roots rete-network))
         (*rule-specific-nodes* (list))
         (*leaf-nodes* (make-array (length patterns)))
+        (*logical-block-marker* (record-logical-block patterns))
         (*node-test-table* (node-test-cache rete-network)))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
