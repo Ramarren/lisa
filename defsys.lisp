@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.25 2001/03/06 21:24:10 youngde Exp $
+;;; $Id: defsys.lisp,v 1.26 2001/03/09 20:51:15 youngde Exp $
 
 (in-package :user)
 
@@ -30,21 +30,18 @@
                   (merge-pathnames *load-truename*
                                    *default-pathname-defaults*))))
 
-(defun make-lisa-directory (components)
-  (make-pathname
-   :directory
-   (append (pathname-directory *lisa-root-pathname*) components)))
+(defun make-lisa-path (relative-path)
+  (concatenate 'string (directory-namestring *lisa-root-pathname*)
+               relative-path))
 
 (setf (logical-pathname-translations "lisa")
-  `(("src;**;*.*.*" ,(make-lisa-directory '("src" "**")))
-    ("lib;acl;" ,(make-lisa-directory '("lib" "acl")))
-    ("lib;lispworks;" ,(make-lisa-directory '("lib" "lispworks")))
-    ("lib;cmucl;" ,(make-lisa-directory '("lib" "cmucl")))
-    ("lib;clisp;" ,(make-lisa-directory '("lib" "clisp")))
-    ("clocc;port;*.*.*" ,(make-lisa-directory '("contrib" "clocc" "port")))))
+  `(("src;**;" ,(make-lisa-path "src/**/"))
+    ("lib;**;*.*" ,(make-lisa-path "lib/**/"))
+    ("contrib;**;" ,(make-lisa-path "contrib/**/"))
+    ("clocc;port;**;*.*" ,(make-lisa-path "contrib/clocc/port/**/"))))
 
 (setf (logical-pathname-translations "clocc")
-      `(("src;port;*.*.*" ,(translate-logical-pathname "lisa:clocc;port;"))))
+      `(("src;port;**;*.*" ,(translate-logical-pathname "lisa:clocc;port;**;*.*"))))
 
 (defvar *lisa-source-pathname*
   (translate-logical-pathname "lisa:src;"))
