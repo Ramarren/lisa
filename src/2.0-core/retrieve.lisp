@@ -20,7 +20,7 @@
 ;;; File: retrieve.lisp
 ;;; Description:
 
-;;; $Id: retrieve.lisp,v 1.1 2002/10/10 19:25:22 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.2 2002/10/11 15:53:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,14 +31,11 @@
 (defun run-query (query-rule)
   "Runs a query (RULE instance), and returns both the value of *QUERY-RESULT*
   and the query name itself."
-  (with-inference-engine ((inference-engine))
-    (let* ((?name (rule-name query-rule))
-           (*query-result* (list))
-           (fact (assert (query-fact (query-name ?name)))))
-      (run)
-      (retract fact)
-      (forget-rule (inference-engine) query-rule)
-      *query-result*)))
+  (let* ((?name (rule-name query-rule))
+         (*query-result* (list)))
+    (assert (query-fact (query-name ?name)))
+    (run)
+    *query-result*))
 
 #+ignore
 (defun run-query (rule)
@@ -70,15 +67,16 @@
            `(cons ',var (find-instance-of-fact ,var))))
     (let ((query-name (gensym))
           (query (gensym)))
-      `(let* ((,query-name (gensym))
-              (,query
-               (defquery ',query-name
-                   (query-fact (query-name ,query-name))
-                 ,@body
-                 =>
-                 (push (list ,@(mapcar #'make-query-binding varlist))
-                       *query-result*))))
-         (run-query ,query)))))
+      `(with-inference-engine ((make-query-engine (inference-engine)))
+         (let* ((,query-name (gensym))
+                (,query
+                 (defquery ',query-name
+                     (query-fact (query-name ,query-name))
+                   ,@body
+                   =>
+                   (push (list ,@(mapcar #'make-query-binding varlist))
+                         *query-result*))))
+           (run-query ,query))))))
 
 (defmacro with-simple-query ((var value) query &body body)
   "For each variable/instance pair in a query result, invoke BODY with VAR

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.7 2002/10/09 18:24:45 youngde Exp $
+;;; $Id: rule.lisp,v 1.8 2002/10/11 15:53:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -48,30 +48,6 @@
    "Represents production rules after they've been analysed by the language
   parser."))
 
-(defvar *merge* nil)
-
-(defmethod initialize-instance :after ((self rule) &key patterns actions)
-  (add-rule-to-network (rule-engine self) self patterns)
-  (compile-rule-behavior self actions)
-  self)
-
-#+ignore
-(defmethod initialize-instance :after ((self rule) &key patterns actions)
-  (if *merge*
-      (merge-rule-into-network (rete-network (rule-engine self))
-                               patterns self)
-    (compile-rule-into-network 
-     (rete-network (rule-engine self)) patterns self))
-  (compile-rule-behavior self actions)
-  self)
-
-#+ignore
-(defmethod initialize-instance :after ((self rule) &key patterns actions)
-  (compile-rule-into-network 
-   (rete-network (rule-engine self)) patterns self)
-  (compile-rule-behavior self actions)
-  self)
-
 (defmethod fire-rule ((self rule) tokens)
   (let ((*active-rule* self)
         (*active-engine* (rule-engine self)))
@@ -89,14 +65,18 @@
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (rule-name self))))
 
+(defun compile-rule (rule patterns actions)
+  (compile-rule-behavior rule actions)
+  (add-rule-to-network (rule-engine rule) rule patterns)
+  rule)
+
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) (salience 0) (module nil))
-  (make-instance 'rule 
-    :name name 
-    :engine engine
-    :comment doc-string
-    :salience salience
-    :module module
-    :patterns patterns
-    :actions actions))
-
+  (compile-rule
+   (make-instance 'rule 
+     :name name 
+     :engine engine
+     :comment doc-string
+     :salience salience
+     :module module)
+   patterns actions))

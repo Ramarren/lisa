@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.18 2002/10/10 16:28:52 youngde Exp $
+;;; $Id: rete.lisp,v 1.19 2002/10/11 15:53:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,8 +31,8 @@
                :reader rete-fact-table)
    (instance-table :initform (make-hash-table)
                    :reader rete-instance-table)
-   (network :initform (make-rete-network)
-            :reader rete-network)
+   (rete-network :initform (make-rete-network)
+                 :reader rete-network)
    (next-fact-id :initform -1
                  :accessor rete-next-fact-id)
    (autofacts :initform (list)
@@ -207,3 +207,11 @@
 
 (defun make-inference-engine ()
   (make-rete (make-breadth-first-strategy)))
+
+(defun make-query-engine (source-rete)
+  (let* ((query-engine (make-inference-engine))
+         (query-network (rete-network query-engine)))
+    (loop for fact being the hash-value 
+        of (rete-fact-table source-rete)
+        do (remember-fact query-engine fact))
+    query-engine))
