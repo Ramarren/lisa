@@ -1,0 +1,8 @@
+2001-04-25  David E. Young  <youngde@nc.rr.com>
+
+	LISA's last alpha release (0.8.2), and the birth of this
+	ChangeLog. Latest features include full CLOS reasoning support;
+	the TEST conditional element; support for arbitrary list
+	constructs within facts and patterns.
+	
+
