@@ -20,7 +20,7 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.5 2002/10/28 15:59:20 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.6 2002/10/28 20:02:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,7 +36,8 @@
      "The debugger must be running to use this function."))
 
 (defun leave-debugger ()
-  (setf *stepping* nil))
+  (setf *stepping* nil)
+  (setf *tokens* nil))
 
 (defun has-breakpoint-p (rule)
   (find (rule-name rule) *breakpoints*))
@@ -74,19 +75,32 @@
   (setf *stepping* nil)
   (values))
 
+(defun instance (fact)
+  (find-instance-of-fact fact))
+
+(defun token (index)
+  (in-debugger-p)
+  (let ((fact (token-find-fact *tokens* index)))
+    (cond ((typep fact 'fact)
+           fact)
+          (t
+           (format t "The index ~D references a non-fact object." index)
+           nil))))
+
 (defun tokens (&key (verbose nil))
   (in-debugger-p)
   (format t "Token stack for ~A:~%" (rule-name (rule)))
-  (dolist (fact (token-make-fact-list *tokens*))
+  (do* ((facts (token-make-fact-list *tokens* :debugp t) (rest facts))
+        (fact (first facts) (first facts))
+        (index 0 (incf index)))
+      ((endp facts))
     (if verbose
-        (format t "  ~S~%" fact)
-      (format t "  ~A, ~A~%"
+        (format t "  [~D] ~S~%" index fact)
+      (format t "  [~D] ~A, ~A~%"
+              index
               (fact-symbolic-id fact)
               (fact-name fact))))
   (values))
-
-(defun fact (fact-id)
-  (find-fact-by-id (inference-engine) fact-id))
 
 (defun bindings ()
   (in-debugger-p)
@@ -102,22 +116,23 @@
   (values))
 
 (defun debugger-read-eval-print ()
-  (flet ((eval-loop ()
-           (let ((*terminal-io* *terminal-io*)
-                 (*standard-input* *terminal-io*)
-                 (*standard-output* *terminal-io*))
-             (do ((*read-eval-print* t)
-                  (count 0 (incf count)))
-                 ((not *read-eval-print*) count)
-               (format t "LISA-DEBUG[~D]: " count)
-               (force-output)
-               (print (eval (read)))
-               (terpri)))))
-    (handler-case
-        (eval-loop)
-      (error (e)
-        (leave-debugger)
-        (error e)))))
+  (let ((*terminal-io* *terminal-io*)
+        (*standard-input* *terminal-io*)
+        (*standard-output* *terminal-io*))
+    (do ((*read-eval-print* t)
+         (count 0 (incf count)))
+        ((not *read-eval-print*) count)
+      (handler-case
+          (progn
+            (format t "LISA-DEBUG[~D]: " count)
+            (force-output)
+            (print (eval (read)))
+            (terpri))
+        (error (e)
+          (cerror "Remain in the LISA debugger." e)
+          (unless (yes-or-no-p "Remain in the debugger? ")
+            (leave-debugger)
+            (setf *read-eval-print* nil)))))))
 
 (defmethod fire-rule :around ((self rule) tokens)
   (when (or *stepping*

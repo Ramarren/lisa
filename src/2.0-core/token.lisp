@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.26 2002/10/18 16:54:55 youngde Exp $
+;;; $Id: token.lisp,v 1.27 2002/10/28 20:02:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,6 +49,7 @@
 (defun token-negated-p (token)
   (plusp (token-not-counter token)))
 
+#+ignore
 (defun token-make-fact-list (token &key (detailp t))
   (let ((facts (list))
         (vector (token-facts token)))
@@ -58,6 +59,18 @@
                     (minusp (fact-id fact)))
           (push (if detailp fact (fact-symbolic-id fact)) 
                 facts))))
+    (nreverse facts)))
+
+(defun token-make-fact-list (token &key (detailp t) (debugp nil))
+  (let ((facts (list))
+        (vector (token-facts token)))
+    (dotimes (i (length vector))
+      (let ((fact (aref vector i)))
+        (if debugp
+            (push fact facts)
+          (when (typep fact 'fact)
+            (push (if detailp fact (fact-symbolic-id fact)) 
+                  facts)))))
     (nreverse facts)))
 
 (defun token-find-fact (token address)
