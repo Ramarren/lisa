@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.11 2002/08/26 18:27:46 youngde Exp $
+;;; $Id: parser.lisp,v 1.12 2002/08/26 18:39:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -184,7 +184,7 @@
                       (rest body)
                       (push (parse-slot slot) slots))))))
         (values
-         (list head (parse-pattern-body (rest pattern) nil)) nil)))))
+         `(,head ,@(parse-pattern-body (rest pattern) nil)) nil)))))
 
 ;;; End of the rule parsing stuff
 
