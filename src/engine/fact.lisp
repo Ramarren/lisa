@@ -20,23 +20,34 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.2 2000/11/09 18:22:53 youngde Exp $
+;;; $Id: fact.lisp,v 1.3 2000/11/09 19:26:04 youngde Exp $
 
 (in-package :lisa)
 
 (defclass fact ()
-  ((name :initarg :name
+  ((class :initarg :class
          :initform nil
-         :reader get-name)
+         :reader get-class)
    (fact-id :initarg :fact-id
             :initform nil
             :accessor get-fact-id)
+   (slots :initform (make-hash-table)
+          :accessor get-slots)
    (clock :initarg :clock
           :initform 0
           :accessor get-clock))
   (:documentation
    "Represents facts in the knowledge base."))
 
+(defmethod get-name ((self fact))
+  (class-name (get-class self)))
+
+(defmethod set-slot-value ((self fact) slot value)
+  (setf (gethash slot (get-slots self)) value))
+
+(defmethod get-slot-value ((self fact) slot)
+  (gethash slot (get-slots self)))
+  
 (defmethod get-time ((self fact))
   (get-clock self))
 
@@ -44,7 +55,7 @@
   (setf (get-clock self) (get-time engine)))
 
 (defmethod equals ((self fact) (obj fact))
-  (equal (get-name self) (get-name obj)))
+  (equal (get-class self) (get-class obj)))
 
-(defun make-fact (name)
-  (make-instance 'fact :name name))
+(defun make-fact (class)
+  (make-instance 'fact :class class))

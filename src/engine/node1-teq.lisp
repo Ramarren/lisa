@@ -20,9 +20,9 @@
 ;;; File: node1-teq.lisp
 ;;; Description: A one-input node that tests a slot's value.
 
-;;; $Id: node1-teq.lisp,v 1.2 2000/11/03 19:23:26 youngde Exp $
+;;; $Id: node1-teq.lisp,v 1.3 2000/11/09 19:26:04 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass node1-teq (node1)
   ((value :initarg :value
@@ -38,11 +38,12 @@
   (flet ((call-right (self token)
            (with-accessors ((value get-value)
                             (slot get-slot)) self
-             (cond ((equals (get-slot-value (get-top-fact token) slot)
-                            value)
+             (cond ((equal (get-slot-value (get-top-fact token) slot)
+                           value)
                     (pass-along token)
                     (values t))
-                   (t (values nil))))))
+                   (t
+                    (values nil))))))
   (if (call-next-method self token)
       (values nil)
     (call-right self token))))

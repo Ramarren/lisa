@@ -20,9 +20,9 @@
 ;;; File: defrule.lisp
 ;;; Description: The DEFRULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.7 2000/10/25 23:58:53 youngde Exp $
+;;; $Id: defrule.lisp,v 1.8 2000/11/09 19:26:04 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defvar *rete* (make-hash-table))
 
@@ -40,11 +40,17 @@
              :accessor get-patterns)
    (actions :initform nil
             :accessor get-actions)
+   (nodes :initform nil
+          :accessor get-nodes)
    (rule-source :initform nil
                 :initarg :rule-source
                 :reader get-rule-source))
   (:documentation
    "This class represents LISA rules."))
+
+(defmethod add-node ((self defrule) node)
+  (with-accessors ((nodes get-nodes)) self
+    (setf nodes (nconc nodes `(,node)))))
 
 (defmethod get-pattern-count ((self defrule))
   (length (get-patterns self)))
