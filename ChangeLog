@@ -1,9 +1,7 @@
-2002-01-16  David E. Young  <de.young@computer.org>
+2002-04-16  David E. Young  <de.young@computer.org>
 
-	LISA release 1.2. Support for an experimental query language. Not
-	a permanent implementation but rather a feedback-gathering
-	release. There are some glaring inefficiencies that will be
-	addressed when the final product ships.
+	LISA release 1.2. Support for a simple but functional query
+	language; updated included PORT to latest release.
 
 2001-10-03    <de.young@computer.org>
 

@@ -21,17 +21,17 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.15 2002/04/13 02:26:32 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.16 2002/04/17 01:46:44 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *query-map*
-    "Serves as the query name cache."
-  (make-hash-table))
+    (make-hash-table)
+  "Serves as the query name cache.")
 
-(defvar *query-result* 
-    "Holds the results of query firings."
-  '())
+(defvar *query-result*
+    '()
+  "Holds the results of query firings.")
 
 (deftemplate query-fact ()
   (slot name))
