@@ -21,7 +21,7 @@
 ;;; Description: This class holds an individual test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-simple.lisp,v 1.2 2000/12/05 21:37:21 youngde Exp $
+;;; $Id: test2-simple.lisp,v 1.3 2000/12/06 00:36:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,7 +35,22 @@
   (:documentation
    "This class holds an individual test performed by two-input nodes."))
 
-(defmethod do-test ((self test2-simple) token &optional (fact nil)))
+(defmethod do-test ((self test2-simple) left-token right-fact)
+  (let ((left-fact (find-fact token (get-location self))))
+    (cl:assert (not (null left-fact)))
+    (format t "TEST2-SIMPLE.DO-TEST(): left-fact-value = ~S, right-fact-value = ~S~%"
+            (get-slot-value left-fact (get-left-slot-name self))
+            (get-slot-value right-fact (get-right-slot-name self)))
+    (equal (get-slot-value left-fact (get-left-slot-name self))
+           (get-slot-value right-fact (get-right-slot-name self)))))
+
+(defmethod equals ((self test2-simple) (test test2-simple))
+  (and (equal (get-fact-location self)
+              (get-fact-location test))
+       (equal (get-left-slot-name self)
+              (get-left-slot-name test))
+       (equal (get-right-slot-name self)
+              (get-right-slot-name test))))
 
 (defun make-test2-simple (fact-location left-slot right-slot)
   (make-instance 'test2-simple :fact-location fact-location

@@ -20,7 +20,7 @@
 ;;; File: test1.lisp
 ;;; Description: This class represents a single test in a conditional element.
 
-;;; $Id: test1.lisp,v 1.4 2000/12/05 21:37:21 youngde Exp $
+;;; $Id: test1.lisp,v 1.5 2000/12/06 00:36:20 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,7 +31,7 @@
   (:documentation
    "Represents a single test in a conditional element."))
 
-(defmethod do-test ((test test1) token &optional (fact nil))
+(defmethod do-test ((test test1) token fact)
   (declare (ignore token fact))
   (not (null (get-value test))))
 
