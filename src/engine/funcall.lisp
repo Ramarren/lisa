@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.30 2001/04/24 20:37:13 youngde Exp $
+;;; $Id: funcall.lisp,v 1.31 2001/04/26 14:55:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,6 +39,9 @@
           :reader get-forms)
    (bindings :initarg :bindings
              :reader get-bindings)
+   (specials :initarg :specials
+             :reader get-specials
+             :type list)
    (function :reader get-function))
   (:documentation
    "This class manages the mechanics of executing arbitrary Lisp code from
@@ -64,21 +67,22 @@
   (declare (ignore context))
   (get-value binding))
 
-(defun evaluate (func context)
-  (declare (type function-call func)
+(defun evaluate (self context)
+  (declare (type function-call self)
            (type function-call-context context))
   (declare (optimize (speed 3) (debug 1) (safety 1)))
   (flet ((eval-func ()
-           (let ((fcall (get-function func)))
+           (let ((fcall (get-function self)))
              (declare (function fcall))
-             (apply fcall
-                    (mapcar #'(lambda (binding)
-                                (make-lexical-binding binding context))
-                            (get-bindings func))))))
+             (progv `(,@(get-specials self))
+                 `(,@(mapcar #'(lambda (binding)
+                                 (make-lexical-binding binding context))
+                             (get-bindings self)))
+               (funcall fcall)))))
     (handler-case
         (eval-func)
       (error (condition)
-        (evaluation-error condition (get-forms func))))))
+        (evaluation-error condition (get-forms self))))))
 
 (defmethod equals ((self function-call) (obj function-call))
   (eq self obj))
@@ -90,11 +94,12 @@
 (defmethod initialize-instance :after ((self function-call) &rest args)
   (declare (ignore args))
   (setf (slot-value self 'function)
-    (let ((lambda-list (mapcar #'get-name (get-bindings self))))
-      (compile nil `(lambda (,@lambda-list)
-                     (declare (special ,@lambda-list))
-                     (progn ,@(get-forms self)))))))
+      (compile nil `(lambda ()
+                     (declare (special ,@(get-specials self)))
+                     (progn ,@(get-forms self))))))
 
 (defun make-function-call (forms bindings)
-  (make-instance 'function-call :forms forms :bindings bindings))
+  (make-instance 'function-call :forms forms
+                 :specials (mapcar #'get-name bindings)
+                 :bindings bindings))
 
