@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.66 2002/11/18 18:23:38 youngde Exp $
+;;; $Id: parser.lisp,v 1.67 2002/11/18 18:55:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -132,14 +132,15 @@
                (fixup-bindings (rest part) (push new-token result)))))
     (fixup-bindings patterns nil)))
 
-(defun preprocess-left-side (lhs)
-  (when (or (null lhs)
-            (eq (caar lhs) 'not)
-            (eq (caar lhs) 'logical))
-    (push (list 'initial-fact) lhs))
-  (if (rule)
-      (fixup-runtime-bindings lhs)
-    lhs))
+(let ((special-elements '(not exists logical)))
+  
+  (defun preprocess-left-side (lhs)
+    (when (or (null lhs)
+              (find (caar lhs) special-elements))
+      (push (list 'initial-fact) lhs))
+    (if (rule)
+        (fixup-runtime-bindings lhs)
+      lhs)))
 
 (defvar *in-logical-pattern-p* nil)
 
@@ -200,6 +201,8 @@
                           #'build-parsed-pattern
                         (parse-test-pattern p) :test))
                      ((eq head 'not)
+                      (cl:assert (not (eq (first (second p)) 'exists)) nil
+                        "The EXISTS CE may not appear within a NOT CE.")
                       (multiple-value-call
                           #'build-parsed-pattern
                         (parse-default-pattern (second p) location) :negated))
