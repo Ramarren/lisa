@@ -44,7 +44,7 @@
     )
 
 (defrule left-hand-side
-    := conditional-element-list
+    := pattern-list
     )
 
 (defrule right-hand-side
@@ -57,131 +57,81 @@
     )
 
 (defrule action
-    := function-call
+    := sexp
     )
 
-(defrule conditional-element-list
+(defrule pattern-list
     := ()
-
-    := (conditional-element)
-    
-    := (conditional-element conditional-element-list)
+    := (pattern pattern-list)
+    := ("(" variable-name pattern ")" pattern-list)
     )
 
-(defrule conditional-element
-    := pattern-ce
-    := assigned-pattern-ce
-    := not-ce
-    := test-ce
+(defrule pattern
+    := test-pattern
+    := ordered-fact
+    := unordered-fact
+    := (name pattern)
     )
 
-(defrule pattern-ce
-    := ("(" ordered-pattern-ce ")")
-
-    := ("(" unordered-pattern-ce ")")
-    )
-
-(defrule assigned-pattern-ce
-    := (variable-name "<-" pattern-ce)
-    )
-
-(defrule test-ce
-    := ("(test" function-call ")")
-    )
-
-(defrule not-ce
-    := not-form
-
-    )
-
-(defrule ordered-pattern-ce
-    := name
-
-    := (name constraint-list)
-
-    )
-
-(defrule unordered-pattern-ce
-    := name
-    
-    := (name lhs-slot-list)
-
-    )
-
-(defrule lhs-slot-list
-    := single-field-lhs-slot
-    
-    := (single-field-lhs-slot lhs-slot-list)
-
-    )
-
-(defrule single-field-lhs-slot
-    := ("(" slot-name constraint-list ")")
-
+(defrule ordered-fact
+    := ("(" name constraint-list ")")
     )
 
 (defrule constraint-list
-    := constraint
-
+    := ()
     := (constraint constraint-list)
-
     )
 
 (defrule constraint
-    := single-constraint
-    := (single-constraint function-call)
-
-    )
-
-(defrule single-constraint
-    := term
-    := negated-term
-    )
-
-(defrule term
     := constant
-
+    := (constant constraint-condition)
     := single-field-variable
-
+    := (single-field-variable constraint-condition)
     )
 
-(defrule negated-term
-    := not-form
+(defrule constraint-condition
+    := sexp
+    := constant
     )
 
-(defrule not-form
-    := ("(" "not" term ")")
-    := ("(" "not" conditional-element ")")
-    := ("(" "not" function-call ")")
+(defrule unordered-fact
+    := ("(" name slot-list ")")
     )
 
-(defrule function-call
-    := ("(" function-name ")")
-    
-    := ("(" function-name function-argument-list ")")
-
+(defrule slot-list
+    := ()
+    := (slot slot-list)
     )
 
-(defrule function-argument-list
-    := function-argument
-    
-    := (function-argument function-argument-list)
-
+(defrule slot
+    := ("(" name ")")
+    := ("(" name constraint ")")
     )
 
-(defrule function-argument
-    := varname-or-value
-    := function-call
+(defrule test-pattern
+    := ("(" "test" sexp ")")
+    )
+
+(defrule sexp
+    := ("(" name lambda-list ")")
+    := ("(" sexp ")")
+    )
+
+(defrule lambda-list
+    := ()
+    := param
+    := (param lambda-list)
+    )
+
+(defrule param
+    := constant
+    := variable-name
+    := sexp
     )
 
 (defrule single-field-variable
     := variable-name
     := anonymous-variable-name
-    )
-
-(defrule varname-or-value
-    := variable-name
-    := constant
     )
 
 (defrule variable-name
@@ -191,15 +141,6 @@
 
 (defrule anonymous-variable-name
     := anonymous-varname
-
-    )
-
-(defrule slot-name
-    := name
-    )
-
-(defrule function-name
-    := name
     )
 
 (defrule name
