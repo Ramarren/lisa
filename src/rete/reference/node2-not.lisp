@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.7 2002/09/13 15:12:34 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.8 2002/09/13 15:37:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,7 +85,7 @@
 
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
-    (test-against-right-memory self left-tokens)))
+    (pass-tokens-to-successor self left-tokens)))
 
 (defmethod accept-token-from-right ((self node2-not) (right-token add-token))
   (add-token-to-right-memory self right-token)
