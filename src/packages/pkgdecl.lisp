@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.17 2001/04/18 20:50:55 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.18 2001/04/19 14:44:42 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -38,7 +38,8 @@
   (:export "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS" "RULES"
            "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH" "UNWATCH"
            "WATCHING" "HALT" "ASSERT-INSTANCE" "CURRENT-ENGINE" 
-           "TELL-EXTERNALLY-MODIFIED" "SLOT" "=>"))
+           "TELL-EXTERNALLY-MODIFIED" "TELL-LISA-MODIFIED-INSTANCE"
+           "SLOT" "=>"))
 
 (defpackage "LISA-USER"
   (:use "COMMON-LISP")
@@ -48,7 +49,8 @@
                 "DEFRULE" "DEFTEMPLATE" "DEFIMPORT" "FACTS" "RULES"
                 "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
                 "UNWATCH" "WATCHING" "HALT" "CURRENT-ENGINE" "ASSERT-INSTANCE"
-                "TELL-EXTERNALLY-MODIFIED" "SLOT" "=>"))
+                "TELL-EXTERNALLY-MODIFIED" "TELL-LISA-MODIFIED-INSTANCE"
+                "SLOT" "=>"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")

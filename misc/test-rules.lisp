@@ -37,3 +37,5 @@
   =>
   (format t "natasha fired! Instance is ~S~%" ?obj))
 
+(defmethod tell-lisa-modified-instance (instance slot)
+  (format t "LISA modified slot ~S of instance ~S~%" slot instance))
