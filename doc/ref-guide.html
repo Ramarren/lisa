@@ -363,13 +363,19 @@ By default, all rules have salience 0.</blockquote>
 
 
 
-<pre>:module <i>name</i></pre>
+<pre>:context <i>name</i></pre>
 
 
 
-<blockquote>Binds the rule to a module identified by the symbol <i>name</i>.
+<blockquote>Binds the rule to a context identified by the symbol <i>name</i>.
+  The context must have been previously defined, or LISA will signal an error.</blockquote>
 
-Currently unimplemented.</blockquote>
+  <pre>:auto-focus <i>t</i></pre>
+  <blockquote>
+    <p>Identifies the rule as requiring &quot;auto focus&quot; behavior. This
+    means that whenever the rule is activated, its context will be made the
+    active context after the rule firing completes.</p>
+  </blockquote>
 
 If the rule identified by <i>name</i> already exists in the Rete network
 
@@ -541,10 +547,10 @@ HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
     single sub-rule:</p>
     <blockquote>
       <pre>frodo: (frodo), (bilbo), (samwise)</pre>
-      <pre>frodo..1: (frodo), (gandalf), (samwise)</pre>
+      <pre>frodo~1: (frodo), (gandalf), (samwise)</pre>
     </blockquote>
     <p>Notice that LISA separates the example DEFRULE into the primary rule <i>frodo</i>,
-    and a single sub-rule, <i>frodo..1</i>. LISA maintains the relationship
+    and a single sub-rule, <i>frodo~1</i>. LISA maintains the relationship
     between a primary rule and its sub-rules; if a primary rule is removed,
     every related sub-rule is also eliminated.</p>
   </blockquote>
@@ -577,14 +583,24 @@ HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
     implicitly matches the INITIAL-FACT; thus, in order for rules employing
     truth maintenance to function correctly, a RESET must be always be performed
     prior to any operation affecting working memory. LISA's behavior is
-    undefined otherwise.&nbsp;</p>
+    undefined otherwise.</p>
   </blockquote>
 
-</blockquote>
-
-
-
-<blockquote>
+    <pre>exists pattern</pre>
+  <blockquote>
+    <p>The EXISTS conditional element performs an existential test on a pattern.
+    The pattern will match exactly once, even if there are many facts that might
+    satisfy it. For example, this rule:</p>
+    <dl>
+      <dd>
+    <p>(defrule frodo ()<br>
+    &nbsp;&nbsp;&nbsp; (exists (frodo (has-ring t)))<br>
+    &nbsp;&nbsp;&nbsp; =&gt;)</p>
+      </dd>
+    </dl>
+    <p>will activate just once if there is at least one FRODO fact whose
+    HAS-RING slot has the value T.</p>
+  </blockquote>
   <pre>The initial fact</pre>
   <p>If a rule provides no conditional elements, then it is said to match the
 
@@ -1036,7 +1052,7 @@ invoked by code running within the context of <i>with-inference-engine</i>.</blo
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(make-inference-engine &amp;key <i>strategy</i>)</td>
+<td WIDTH="80%" NOSAVE>(make-inference-engine)</td>
 
 
 
@@ -1048,13 +1064,7 @@ invoked by code running within the context of <i>with-inference-engine</i>.</blo
 
 
 
-<blockquote>Creates an instance of LISA's default inference engine. An
-
-object representing a type of conflict resolution strategy may be supplied
-
-using the keyword <i>strategy</i>; by default, a breadth-first algorithm
-
-is employed. See the section on conflict resolution for details.</blockquote>
+<blockquote>Creates an instance of LISA's default inference engine.</blockquote>
 
 
 
@@ -1084,7 +1094,7 @@ representing that rule.</blockquote>
 
 <tr>
 
-<td WIDTH="80%">(get-name <i>rule</i>)</td>
+<td WIDTH="80%">(rule-name <i>rule</i>)</td>
 
 
 
@@ -1096,7 +1106,7 @@ representing that rule.</blockquote>
 
 
 
-<blockquote>Returns the symbolic name associated with rule instance <i>rule</i>.</blockquote>
+<blockquote>Returns the fully qualified symbolic name associated with rule instance <i>rule</i>.</blockquote>
 
 
 
@@ -1135,7 +1145,7 @@ need further work.
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(facts &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(facts)</td>
 
 
 
@@ -1147,9 +1157,8 @@ need further work.
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the fact base
-
-belonging to <i>engine</i>.</blockquote>
+<blockquote>Prints on <i>standard output</i> the contents of the active
+  inference engine's fact base.</blockquote>
 
 
 
@@ -1157,7 +1166,7 @@ belonging to <i>engine</i>.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(rules &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(rules &amp;optional <i>context-name</i>)</td>
 
 
 
@@ -1169,9 +1178,10 @@ belonging to <i>engine</i>.</blockquote>
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the rule base
-
-belonging to <i>engine</i>.</blockquote>
+<blockquote>Prints on <i>standard output</i> the contents of the active
+  inference engine's rule base. By default, all rules and all contexts will be
+  printed. If <i>context-name</i> is provided, then only those rules in that
+  context are printed.</blockquote>
 
 
 
@@ -1179,7 +1189,7 @@ belonging to <i>engine</i>.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(agenda &amp;optional <i>engine</i>)</td>
+<td WIDTH="80%" NOSAVE>(agenda &amp;optional <i>context-name</i>)</td>
 
 
 
@@ -1191,9 +1201,9 @@ belonging to <i>engine</i>.</blockquote>
 
 
 
-<blockquote>Prints on <i>standard output</i> the contents of the agenda
-
-belonging to <i>engine</i>.</blockquote>
+<blockquote>Prints on <i>standard output</i> the contents of the active
+  inference engine's agenda. By default, the agendas for all contexts will be
+  printed, unless <i>context-name</i> is supplied.</blockquote>
 
 
 
@@ -1213,15 +1223,7 @@ belonging to <i>engine</i>.</blockquote>
 
 
 
-<blockquote>Asks LISA to report the occurrence of <i>event</i> to <i>standard
-
-output</i>. The entire watch facility needs work, especially to accommodate
-
-a multi-inference-engine environment. Also, it would be nice to generalize
-
-the facility such that it behaves more like a "publish/subscribe" mechanism
-
-with "real" events.
+<blockquote>Asks LISA to report the occurrence of <i>event</i> to <i>trace output</i>.
 
 <p>Currently, LISA allows monitoring of these events:
 
@@ -1248,6 +1250,11 @@ the agenda.</blockquote>
 
 
 <blockquote>Triggers an event each time a rule is fired.</blockquote>
+
+  <pre>:all</pre>
+  <blockquote>
+    <p>Watch all allowable events.</p>
+  </blockquote>
 
 </blockquote>
 
@@ -1329,8 +1336,8 @@ III. <a name="Contexts">Contexts</a></h3>
 
 <p>
 
-LISA Contexts are a way of partitioning a knowledge base into distinct groups of
-rules. The mechanism is similar to Modules in CLIPS and recent versions of Jess,
+LISA contexts are a way of partitioning a knowledge base into distinct groups of
+rules. The mechanism is similar to modules in CLIPS and recent versions of Jess,
 in that individual rule groups can be invoked &quot;procedurally&quot; without
 resorting to the use of control facts to manipulate firing order. Contexts can
 also serve as an organizational construct when working with larger knowledge
@@ -1354,7 +1361,8 @@ Activations in the Initial Context are always available for firing. Otherwise,
 activations in other contexts will only fire if those contexts are explicitly
 given control, via the FOCUS operator. Each inference engine maintains its own
 focus stack; before a new context is given control, the active context is pushed
-onto the focus stack. The REFOCUS operator may be used on a rule's RHS to leave
+onto the focus stack. The REFOCUS operator may be used on a rule's RHS (or,
+perhaps, interactively) to leave
 the active context and return control to the previous context on the stack.
 Control automatically returns to the previous context if the active context runs
 out of activations. When all contexts have exhausted their activations, the
@@ -1366,6 +1374,11 @@ A rule can be tagged with the <i>auto-focus</i> attribute by supplying the
 AUTO-FOCUS keyword to DEFRULE. If an auto-focus rule activates, that rule's
 context is automatically pushed onto the focus stack and given control when the
 rule completes its firing.</p>
+
+<p>Note carefully that while the <i>rules</i> in a knowledge base may be
+partitioned, there remains a <i>single working memory</i> per inference engine.
+At any given time, all facts in a knowledge base are visible to all rules in
+that knowledge base, regardless of context.</p>
 
 <table border="0" width="100%">
   <tr>
@@ -1402,7 +1415,8 @@ rule completes its firing.</p>
 <p>
 
 If <i>context-names</i> is non-NIL, it should be a collection of context names
-that will be added to the focus stack. If no names are specified, then FOCUS
+that will be added to the focus stack. Contexts are pushed onto the focus stack
+in right-to-left order. If no names are specified, then FOCUS
 returns the active context object.</p>
 
 </blockquote>
