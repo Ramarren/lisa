@@ -1,0 +1,64 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         ex2.zb
+; Description:  
+; Author:       Joachim H. Laubsch
+; Created:      27-Mar-92
+; Modified:     Thu Oct  2 12:52:05 1997 (Joachim H. Laubsch)
+; Language:     ZEBU
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/win/test/Attic/ex2.zb,v 1.1 2000/10/17 18:03:33 youngde Exp $
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: ex2.zb,v $
+; RCS Revision 1.1  2000/10/17 18:03:33  youngde
+; RCS Returned Windows-specific stuff to Zebu
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "ex2" :package "CL-USER" :grammar "null-grammar"
+ :domain-file "ex2-dom")
+
+(defrule EE 
+	:= (TT E-PRIME)
+	:build (:form (append TT E-PRIME)) )
+
+(defrule E-PRIME 
+	:= ("+" TT E-PRIME)
+	:build (:form (cons "+" (append TT E-PRIME)))
+
+	:= ())
+
+(defrule TT 
+	:= (FF T-PRIME)
+	:build (:form (cons FF T-PRIME)) )
+
+(defrule T-PRIME 
+	:= ("*" FF T-PRIME) 
+	:build (:form (list* "*" FF T-PRIME))
+
+	:= ())
+
+(defrule FF
+	:= ( "(" EE ")")
+	:build (:form EE)
+	:= IDENTIFIER 
+	:= NUMBER
+	)
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(compile-slr-grammar "ex2.zb")
+(zb:zebu-load-file "ex2.tab")
+(zebu::print-actions "ex2")
+(equal (zb:read-parser "x * y" :grammar (find-grammar "ex2"))
+       '(X "*" Y))
+(equal (zb:read-parser "(x * y) + (x * y)" :grammar (find-grammar "ex2"))
+       '((X "*" Y) "+" (X "*" Y)))
+||#
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of ex2.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

@@ -1,0 +1,159 @@
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         zebu-mg.zb
+; Description:  Metagrammar for Zebu
+; Author:       Joachim H. Laubsch
+; Created:      13-Apr-92
+; Modified:     Thu Dec 21 16:26:28 1995 (Joachim H. Laubsch)
+; Language:     Lisp
+; Package:      ZEBU
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/win/Attic/mg.zb,v 1.1 2000/10/17 18:03:33 youngde Exp $
+;
+; (c) Copyright 1992, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: mg.zb,v $
+; RCS Revision 1.1  2000/10/17 18:03:33  youngde
+; RCS Returned Windows-specific stuff to Zebu
+; RCS
+; 10-Mar-93 (Joachim H. Laubsch)
+;  add domain definition
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name        "zebu-mg"
+ :domain-file "zmg-dom"
+ :package     "ZEBU"
+ :grammar     "null-grammar"
+ :identifier-start-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars
+ "$-_.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ )
+
+(defrule Meta-Grammar
+  := Def-Type
+  := zb-rule)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                              Domain Definition
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule Def-Type
+  :=     ( Identifier ":=" Typed-Conj Print-function ";" )
+  :build (cons-domain-type Identifier Typed-Conj Print-function)
+
+  :=     ( Identifier ":=" Conj Print-function ";")
+  :build (cons-domain-type Identifier Conj Print-function)
+  )
+
+(defrule Print-function
+  :=     ()
+
+  :=     ("<<" "print-function:" Identifier ">>")
+  :build (:form Identifier))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                 AVM grammar
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule Typed-Conj
+  :=     ( Identifier ":" Conj )
+  :build (:type Feat-Term
+	  :map  ((Conj       . :-slots)
+		 (Identifier . :-type))))
+
+(defrule Conj
+  :=     ( "[" Label-value-pairs "]" )
+  :build (:form Label-value-pairs))
+
+(defrule Feat-Term
+  :=     Identifier
+  :=     Number
+  :=     String
+
+  :=     (Identifier "*")
+  :build (intern (concatenate 'string (string Identifier) "*"))
+
+  :=     (Identifier "+")
+  :build (intern (concatenate 'string (string Identifier) "+"))
+
+  :=     Typed-Conj
+
+  :=     Conj
+  :build (:type Feat-Term
+	  :map  ((Conj       . :-slots)))
+  )
+
+(defrule Label-value-pair
+  :=     ( "(" Identifier Feat-Term ")" )
+  :build (:type Label-value-pair
+          :map ((Identifier       . :-label)
+		(Feat-Term        . :-value)))
+
+  :=     ( "(" Identifier ")" )
+  :build (:type Label-value-pair
+          :map ((Identifier       . :-label)))
+  )
+
+(defrule Label-value-pairs
+  :=      ()
+  
+  :=      ( Label-value-pair Label-value-pairs )
+  :build  cons
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                Grammar Rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrule zb-rule
+  := ( Non-terminal "-->" Rhs ";")
+  :build (:type zb-rule
+	  :map ((Non-terminal . :-name)
+		(Rhs          . :-productions))))
+
+(defrule Non-terminal := Identifier)
+
+(defrule Rhs
+  := ()
+
+  := ( Rhs1 More-Rhs )
+  :build cons
+  )
+
+(defrule Rhs1
+  := ( Constituent-list )
+  :build (:type Production-Rhs
+	  :map  ((Constituent-list . :-syntax)))
+
+  := ( Constituent-list "{" Feat-Term "}" )
+  :build (:type Production-Rhs
+	  :map  ((Constituent-list . :-syntax)
+		 (Feat-Term        . :-semantics)))
+  )
+
+(defrule Constituent-list
+  := ( Constituent Constituent-list )
+  :build cons
+
+  := () )
+
+(defrule Constituent
+  := Identifier
+  := (Identifier "*" String)
+  :build (:type Kleene* :map ((Identifier . :-constituent)
+			      (String     . :-separator)))
+  := (Identifier "+" String)
+  :build (:type Kleene+ :map ((Identifier . :-constituent)
+			      (String     . :-separator)))
+  := String )
+
+(defrule More-Rhs
+  := ()
+  := ( "|" Rhs1 More-Rhs )
+  :build (:form (cons Rhs1 More-Rhs)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of zebu-mg.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

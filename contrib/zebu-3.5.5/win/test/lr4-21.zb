@@ -1,0 +1,49 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         lr4-21.zb
+; Description:  grammar (4.21) on page 231 of Dragon
+; Author:       Joachim H. Laubsch
+; Created:      20-Mar-91
+; Modified:     Thu Oct  2 12:57:09 1997 (Joachim H. Laubsch)
+; Language:     CL
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/win/test/Attic/lr4-21.zb,v 1.1 2000/10/17 18:03:34 youngde Exp $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: lr4-21.zb,v $
+; RCS Revision 1.1  2000/10/17 18:03:34  youngde
+; RCS Returned Windows-specific stuff to Zebu
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "lr4-21"
+ :domain-file "lr4-dom"
+ :package "CL-USER"
+ :grammar "null-grammar"
+ :identifier-start-chars "$-?abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars "$-_?.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+(defrule S 
+    := (L "=" R) 
+    :build (list 'S L "=" R)
+
+    := R
+    :build (list 'S R))
+
+(defrule L
+    := ("*" R)
+    :build (list 'L "*" R)
+
+    := IDENTIFIER)
+
+(defrule R
+    := NUMBER
+    :build (list 'R NUMBER)
+
+    := L
+    :build (list 'R L))
+
+
+
+

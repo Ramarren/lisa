@@ -1,0 +1,16 @@
+(:name "bug-exp3"
+ :package "CL-USER"
+ :grammar "zebu-mg"
+ :identifier-start-chars
+ "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars
+ "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :intern-identifier nil
+ )
+
+Underlying_type -->  String_type      |
+		     Identifier ;
+
+String_type  --> "STRING" "(" NUMBER ")" ;
+
+

@@ -1,0 +1,17 @@
+(:name "bug-exp2"
+ :package "CL-USER"
+ :grammar "zebu-mg"
+ :identifier-start-chars
+ "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars
+ "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :intern-identifier t
+ :lex-cats ((SIMPLEID "[a-zA-Z][_a-zA-Z0-9]*"))
+ )
+
+Underlying_type -->  String_type      |
+                     SIMPLEID ;
+
+String_type  --> "STRING" "(" NUMBER ")" ;
+
+

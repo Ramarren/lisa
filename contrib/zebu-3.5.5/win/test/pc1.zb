@@ -1,0 +1,107 @@
+; -*- mode:     Lisp -*- --------------------------------------------------- ;
+; File:         pc1.zb
+; Description:  propositional calculus
+; Author:       Joachim H. Laubsch
+; Created:      15-Aug-91
+; Modified:     Thu Oct  2 12:57:17 1997 (Joachim H. Laubsch)
+; Language:     Lisp
+; Package:      CL-USER
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/win/test/Attic/pc1.zb,v 1.1 2000/10/17 18:03:34 youngde Exp $
+;
+; (c) Copyright 1991, Hewlett-Packard Company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Revisions:
+; RCS $Log: pc1.zb,v $
+; RCS Revision 1.1  2000/10/17 18:03:34  youngde
+; RCS Returned Windows-specific stuff to Zebu
+; RCS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "pc1"
+ :domain-file "pc1-dom" 
+ :grammar "null-grammar"
+ :package "CL-USER"
+ :identifier-continue-chars
+ "$-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :domain 
+ (kb-domain
+  :subtype (Formula
+	    :subtype (Propositional-variable 
+		      :slots (-name))
+	    :subtype (P-Formula :slots   (-content))
+	    :subtype (Boolean-Expr
+		      :slots ((-rand1    Formula)
+			      (-rand2    Formula))
+		      :subtype Boolean-Or
+		      :subtype Boolean-And)
+	    :subtype (Atomic-Wff :slots 
+				 (-predicate
+				  (-Role-Argument-Pairs KB-sequence))))
+  :subtype (Role-Argument-Pair :slots (-Role -Argument)))
+ )
+
+;; productions
+
+(defrule formula
+  := Propositional-variable
+
+  := Boolean-Expr
+
+  := ( "(" Formula ")" )
+  :build (:form (progn Formula))
+
+  := Atomic-Wff
+  )
+
+(defrule Propositional-Variable
+  := Identifier
+  :build (:type Propositional-variable
+          :map ((Identifier . :-name)))
+  )
+
+(defrule Boolean-Expr
+  :=     (Formula.1 "and" Formula.2)
+  :build (:type Boolean-And
+	  :map ((Formula.1 . :-rand1)
+		(Formula.2 . :-rand2)))
+
+  :=     (Formula.1 "or" Formula.2)
+  :build (:type Boolean-Or
+	  :map ((Formula.1 . :-rand1)
+		(Formula.2 . :-rand2)))
+  )
+
+(defrule Atomic-Wff
+  :=     (Identifier "(" Role-Argument-Pairs ")")
+  :build (:type Atomic-Wff
+	  :map ((Identifier          . :-predicate)
+		(Role-Argument-Pairs . :-Role-Argument-Pairs))
+	  ))
+
+(defrule Role-Argument-Pairs
+  := ()
+    
+  := (Role-Argument-Pair Role-Argument-Pairs)
+  :build (:type KB-Sequence
+	  :map  ((Role-Argument-Pair  . :first)
+		 (Role-Argument-Pairs . :rest)))
+  )
+
+(defrule Role-Argument-Pair
+  := (Identifier ":" Term)
+  :build (:type Role-Argument-Pair
+	  :map ((Identifier . :-Role)
+		(Term       . :-Argument)))
+  )
+
+(defrule Term
+  := Identifier
+  := Number)
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(zebu-compile-file "pc1.zb" :output-file "binary/pc1.tab")
+(zebu-load-file "binary/pc1.tab")
+
+||#
+

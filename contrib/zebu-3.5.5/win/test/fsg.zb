@@ -1,0 +1,224 @@
+;;; -*- Mode: Fundamental; Syntax: ZEBU; Package: NLL -*-
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;        file: fsg.zb
+;;;      module: TFS-2  
+;;;     version: 2.0, Zebu 3.2.8. with Meta Grammar
+;;;  written by: Karsten Konrad (konrad@dfki.uni-sb.de)
+;;; last update: 7-Sep-1994
+;;;  updated by: KaKo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; author            | date        | modification
+;;; ------------------|-------------|------------------------------------------
+;;;                   |             |
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Grammar for Typed Feature Structures (TFS) using MetaGrammar of Zebu.
+;;; 
+;;; The grammar's syntax is according to UDiNe (Backofen).
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(:name "tfs-g2"
+ :grammar "zebu-mg"
+ :identifier-continue-chars
+ ":$+-_*.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :identifier-start-chars
+ "$+-_*.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :domain-file "tfs-d2" 
+ )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Domain Definition
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+fs-object := kb-domain:[(-extras)];
+
+feat-term := fs-object:[];
+
+;; type expressions for typed terms
+
+fs-type-expr := fs-object:[];
+
+fs-type := fs-type-expr:[(-type)(-sort-p)];
+fs-atomar := fs-type-expr:[(-value)];
+fs-type-conj := fs-type-expr:[(-types)];
+fs-type-disj := fs-type-expr:[(-types)];
+fs-type-neg  := fs-type-expr:[(-type)];
+
+;; other objects
+
+label-value-pair := fs-object:[(-label)(-value)]
+        << print-function: print-label-value-pair >>;
+
+neg-var := fs-object:[(-number)];
+neg-vars := fs-object:[(-members)];
+
+fs-var := feat-term:[(-number)(-var-bound)(-neg-vars)];
+
+tagged-term := feat-term:[(-tag)(-term)];
+
+typed-fs-term := feat-term:[(-type)(-conj)];
+
+fs-atom := feat-term:[(-value)]
+        << print-function: print-fs-atom >>;
+
+negative-atoms := feat-term:[(-atoms)];
+
+fs-conj-term := feat-term:[(-lvps)]
+        << print-function: print-fs-conj-term >>;
+
+fs-disj-term := feat-term:[(-members)]
+        << print-function: print-fs-disj-term >>;
+
+fs-list := feat-term:[(-first)(-rest)];
+
+empty-fs-list := feat-term:[];
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Syntax Rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Feature-Term -->
+        Untagged-Term |
+        Tagged-Term |
+        FS-Var;
+
+Tagged-Term -->
+        FS-Var "=" Untagged-Term
+        {Tagged-Term:[(-tag FS-VAR)(-term Untagged-Term)]};
+
+Untagged-Term -->
+        Pos-Untagged-Term |
+        Negative-Atoms;
+
+Negative-Atoms -->
+        "-(" FS-Atom + " " ")"
+        {Negative-Atoms:[(-atoms FS-Atom+)]};
+ 
+Pos-Untagged-Term -->
+        Typed-Fs-Term |
+        FS-Conj-Term |
+        FS-Disj-Term |
+        FS-List |
+        FS-Atom;
+
+Typed-Fs-Term -->
+        Type-Expr Fs-Conj-Term
+        {Typed-Fs-Term:[(-type Type-Expr)
+                        (-conj Fs-Conj-Term)]};
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Lists
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+FS-List -->
+        "nil"
+        {empty-fs-list:[]} |
+        "<" ">"
+        {empty-FS-List:[]} |
+        "<" Feature-Term ">"
+        {FS-List:[(-first Feature-Term)
+                  (-rest empty-FS-List)]} |
+        "<" Feature-Term FS-List-Rest ">"
+        {FS-List:[(-first Feature-Term)
+                  (-rest FS-List-Rest)]};
+
+FS-List-Rest -->
+        Feature-Term.1 "." Feature-Term.2
+        {FS-List:[(-first Feature-Term.1)
+                  (-rest  Feature-Term.2)]} |
+        Feature-Term FS-List-Rest
+        {FS-List:[(-first Feature-Term)
+                  (-rest FS-List-Rest)]} |
+        Feature-Term
+        {FS-List:[(-first Feature-Term)
+                  (-rest Empty-FS-List)]};
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Conj Terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+FS-Conj-Term -->
+        "[" Label-Value-Pair * " " "]"
+        {FS-Conj-Term:[(-lvps Label-Value-Pair*)]};
+
+FS-Disj-Term -->
+        "{" Feature-Term + "," "}"
+        {FS-Disj-Term:[(-members Feature-Term+)]};
+
+
+FS-Atom -->
+        IDENTIFIER
+        {FS-Atom:[(-value IDENTIFIER)]} | 
+        NUMBER
+        {FS-Atom:[(-value NUMBER)]} | 
+        STRING
+        {FS-Atom:[(-value STRING)]};
+
+
+Label-Value-Pair -->
+        "(" IDENTIFIER Feature-Term ")"
+        {Label-Value-Pair:[(-label IDENTIFIER)
+                           (-value Feature-Term)]};
+
+FS-Var -->
+        "%" Number 
+        {Fs-Var:[(-number Number)]} |
+        "%" Number Neg-Vars
+        {Fs-Var:[(-number Number)
+                 (-neg-vars Neg-Vars)]};
+
+Neg-Vars -->
+        "(" Neg-Var + " " ")"
+        {Neg-Vars:[(-members Neg-Var+)]};
+
+Neg-Var -->
+        "-" "%" Number
+        {Neg-Var:[(-number Number)]}; 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; TDL Types
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Atomar -->
+        "(" ":atom" Identifier ")"
+        {FS-Atomar:[(-value Identifier)]} |
+         "(" ":atom" Number ")"
+        {FS-Atomar:[(-value Number)]} |
+         "(" ":atom" String ")"
+        {FS-Atomar:[(-value String)]};
+
+Conjunction -->
+        "(" ":and" TYPE + " " ")"
+        {FS-Type-Conj:[(-types TYPE+)]};
+
+Disjunction -->
+        "(" ":or" TYPE + " " ")"
+        {FS-Type-Disj:[(-types TYPE+)]};
+
+Negation -->
+        "(" ":not" TYPE ")"
+        {FS-Type-Neg:[(-type TYPE)]};
+
+;; Type can be printed with (:type <type>) or <type>
+;; ugly syntax convention, but no problem on this side.
+;; (replaced by syntax transformation)
+
+Type-Expr -->
+        "(" ":type" Type ")"
+        {FS-Type:[(-type Type)]} |
+        "(" ":type" Type ":sort-p" Identifier ")"
+        {FS-Type:[(-type Type)(-sort-p Identifier)]} |
+        Type;
+
+Type -->
+        Identifier |
+        Conjunction |
+        Disjunction |
+        Negation |
+        Atomar;
+
+
+

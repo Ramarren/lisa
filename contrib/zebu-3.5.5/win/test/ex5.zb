@@ -1,0 +1,28 @@
+(:grammar "zebu-mg")
+
+;; Domain definition
+
+Program     := [(-stmts kb-sequence)];
+Combination := [(-function) (-args kb-sequence)];
+Tuple       := [(-members kb-sequence)];
+
+;; Rules
+
+Program --> "begin" Stmt+ "." "end"
+             { Program: [(-stmts Stmt+)] } ;
+
+Stmt    --> Identifier | Appl | Program ;
+
+Appl    --> Identifier "(" Arg* "," ")"
+             {Combination: [(-function Identifier) (-args Arg*)]};
+
+Arg     --> Identifier | Number | Appl | Tuple ;
+
+Tuple   --> "<" Arg+ " " ">" 
+            { Tuple: [(-members Arg+)] };
+
+#||
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                             End of ex5.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+

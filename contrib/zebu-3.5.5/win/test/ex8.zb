@@ -1,0 +1,6 @@
+(:name "ex8" :package "USER" :grammar "zebu-mg")
+
+_root := [(ids kb-sequence)];
+
+starttoken --> IDENTIFIER+ " " {_root:[(ids IDENTIFIER+)]};
+

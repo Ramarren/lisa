@@ -1,0 +1,16 @@
+(:name "bug-exp"
+ :package "CL-USER"
+ :grammar "zebu-mg"
+ :identifier-start-chars
+ "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ :identifier-continue-chars
+ "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+ :lex-cats ((SIMPLEID "[a-zA-Z][_a-zA-Z0-9]*"))
+ )
+
+Underlying_type -->  String_type      |
+                     "any junk" ;
+
+String_type  --> "STRING" "(" NUMBER ")" ;
+
+

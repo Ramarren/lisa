@@ -1,0 +1,34 @@
+; -*- mode:     CL -*- ----------------------------------------------------- ;
+; File:         g0.zb
+; Description:  Zebu Grammar: Simple Expressions
+; Author:       Joachim H. Laubsch
+; Language:     CL
+; Status:       Experimental (Do Not Distribute) 
+; RCS $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/contrib/zebu-3.5.5/win/test/Attic/g0.zb,v 1.1 2000/10/17 18:03:33 youngde Exp $
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:name "G0")
+
+(defrule Program := ( "begin" Stmts "end" ) )
+
+(defrule Stmts   := ( SimpleStmt ";" Stmts) 
+	         := ( "begin" Stmts "end" ";" Stmts )
+		 := () )
+(defrule SimpleStmt := Identifier)
+
+#||
+(set-working-directory *ZEBU-test-directory*)
+(let ((*load-verbose* t))
+  (compile-slr-grammar "g0.zb"))
+(setq zebu:*current-grammar*
+      (zebu-load-file "g0.tab"))
+(progn (format t "symbols: ") (terpri) (zebu::cruise-symbols-2))
+(zebu::print-collection t)
+(zb::cruise-first-sets)
+(zb::cruise-follow-sets)
+(zb::read-parser "begin A; B; end")
+
+||#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                                End of g0.zb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
