@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.18 2002/09/16 15:34:28 youngde Exp $
+;;; $Id: parser.lisp,v 1.19 2002/09/16 17:35:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -95,10 +95,19 @@
       (values (first body) (rest body))
     (values nil body)))
 
-(defun finalize-parsed-patterns (patterns)
-  (if (null patterns)
-      (push (make-parsed-pattern :name 'initial-fact) patterns)
-    patterns))
+(defun preprocess-left-side (lhs)
+  (flet ((check-intra-pattern-bindings ()
+           (let ((bindings
+                  (loop for obj in (utils:flatten (first lhs))
+                      if (variablep obj)
+                      collect obj)))
+             (if (equal bindings (remove-duplicates bindings))
+                 lhs
+               (push lhs (list :unconditional))))))
+    (cond ((null lhs)
+           (push (list 'initial-fact) lhs))
+          (t
+           (check-intra-pattern-bindings)))))
 
 (defun parse-rulebody (body)
   (let ((location -1))
@@ -111,7 +120,7 @@
                       (rest body)
                       (push
                        (make-rule-pattern pattern (incf location)) patterns))
-                   (finalize-parsed-patterns (nreverse patterns)))))
+                   (nreverse patterns))))
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
@@ -119,7 +128,7 @@
       (multiple-value-bind (lhs remains)
           (utils:find-before *rule-separator* body :test #'eq)
         (cl:assert (not (null remains)) nil "Missing rule separator")
-        (values (parse-lhs lhs nil)
+        (values (parse-lhs (preprocess-left-side lhs) nil)
                 (parse-rhs (utils:find-after *rule-separator*
                                              remains :test #'eq)))))))
 
@@ -199,9 +208,7 @@
                                       :slot-binding slot-binding
                                       :negated negated
                                       :constraint constraint
-                                      :constraint-bindings constraint-bindings
-                                      :all-bindings
-                                      (append slot-binding constraint-bindings))))
+                                      :constraint-bindings constraint-bindings)))
                (parse-pattern-body (body slots)
                  (let ((slot (first body)))
                    (cl:assert (listp slot) nil
