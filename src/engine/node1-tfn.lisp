@@ -21,7 +21,7 @@
 ;;; Description: This class represents a single-input Rete node that evaluates
 ;;; a function to test a slot's value.
 
-;;; $Id: node1-tfn.lisp,v 1.5 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: node1-tfn.lisp,v 1.6 2001/03/17 01:03:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,7 +44,7 @@
         (t (values nil))))
 
 (defmethod equals ((self node1-tfn) (obj node1-tfn))
-  (and (equal (get-slot-name self) (get-slot-name obj))
+  (and (equals (get-slot-name self) (get-slot-name obj))
        (equals (get-predicate self) (get-predicate obj))))
 
 (defmethod print-object ((self node1-tfn) strm)
