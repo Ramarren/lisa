@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.64 2002/11/15 20:31:36 youngde Exp $
+;;; $Id: parser.lisp,v 1.65 2002/11/16 16:42:32 youngde Exp $
 
 (in-package "LISA")
 
@@ -134,6 +134,7 @@
 
 (defun preprocess-left-side (lhs)
   (when (or (null lhs)
+            (eq (caar lhs) 'not)
             (eq (caar lhs) 'logical))
     (push (list 'initial-fact) lhs))
   (if (rule)

@@ -31,6 +31,7 @@
 (deftemplate pippin ()
   (slot name))
 
+#+ignore
 (defrule frodo ()
   (frodo (name ?name frodo))
   =>
@@ -90,17 +91,15 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
-#+ignore
 (defrule logical-1 ()
   (logical
-   (not (gandalf)))
+   (frodo))
   =>
   (assert (bilbo)))
 
-#+ignore
 (defrule logical-2 ()
   (logical
-   (not (frodo)))
+   (bilbo))
   =>
   (assert (samwise)))
 
