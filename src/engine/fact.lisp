@@ -18,9 +18,9 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: fact.lisp
-;;; Description: Represents facts in the knowledge base.
+;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.8 2000/11/30 16:10:02 youngde Exp $
+;;; $Id: fact.lisp,v 1.9 2000/12/08 02:04:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -37,7 +37,7 @@
           :initform 0
           :accessor get-clock))
   (:documentation
-   "Represents facts in the knowledge base."))
+   "This class represents facts in the knowledge base."))
 
 (defmethod get-name ((self fact))
   (class-name (get-class self)))

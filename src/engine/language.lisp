@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.21 2000/11/28 14:37:30 youngde Exp $
+;;; $Id: language.lisp,v 1.22 2000/12/08 02:04:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -57,6 +57,17 @@
 
 (defmacro retract (fact-id)
   `(retract-fact (current-engine) ,fact-id))
+
+(defmacro modify (fact &body body))
+
+(defmacro show-bindings ()
+  `(print-bindings (current-engine)))
+
+(defun print-bindings (engine)
+  (format t "Dumping local lexical environment...~%")
+  (maphash #'(lambda (key val)
+               (format t "varname ~S, binding ~S~%" key val))
+           (get-lexical-environment engine)))
 
 (defmacro halt ()
   `(values))

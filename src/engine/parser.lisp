@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.14 2000/11/30 21:42:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.15 2000/12/08 02:04:18 youngde Exp $
 
 (in-package :lisa)
 
@@ -195,10 +195,17 @@
            (cond ((consp slot)
                   (let ((name (first slot))
                         (value (second slot)))
-                    (if (and (symbolp name)
-                             (literalp value))
-                        (values slot)
-                      (error "PARSE-FACT-BODY: malformed slot ~S." slot))))
+                    (cond ((and (symbolp name)
+                                (literalp value))
+                           (values slot))
+                          ((and (symbolp name)
+                                (variablep value))
+                           (setf value (get-lexical-binding
+                                        (current-engine) value))
+                           (cl:assert (not (null value)))
+                           `(,name ,value))
+                          (t
+                           (error "PARSE-FACT-BODY: malformed slot ~S." slot)))))
                  (t
                   (error "PARSE-FACT-BODY: parse error at ~S." slot)))))
     (if (consp (first body))
