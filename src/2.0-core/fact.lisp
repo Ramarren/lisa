@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.3 2002/08/29 15:29:25 youngde Exp $
+;;; $Id: fact.lisp,v 1.4 2002/09/06 01:41:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -173,7 +173,7 @@
   INSTANCE is the CLOS instance associated with this fact."
   (mapc #'(lambda (slot-name)
             (set-slot-from-instance fact meta-data instance slot-name))
-        (get-slot-list meta))
+        (get-slot-list meta-data))
   (initialize-slot-value fact :object instance)
   fact)
 

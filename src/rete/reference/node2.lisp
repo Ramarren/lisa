@@ -20,7 +20,7 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.6 2002/09/05 17:25:09 youngde Exp $
+;;; $Id: node2.lisp,v 1.7 2002/09/06 01:41:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,11 +33,6 @@
                 :reader node2-left-memory)
    (right-memory :initform (make-hash-table)
                  :reader node2-right-memory)))
-
-(defmacro combine-tokens (left-tokens right-token)
-  `(progn
-     (token-push-fact ,left-tokens (token-top-fact ,right-token))
-     ,left-tokens))
 
 (defun remember-token (memory token)
   (setf (gethash (token-top-fact token) memory) token))
@@ -57,18 +52,15 @@
     (token-pop-fact left-tokens)))
   
 (defmethod accept-tokens-from-left ((self node2) left-tokens)
+  (print "accept-tokens-from-left")
   (add-tokens-to-left-memory self left-tokens)
-  (maphash #'(lambda (key right-token)
-               (declare (ignore key))
-               (test-and-pass-tokens self left-tokens right-token))
-           (node2-right-memory self)))
+  (loop for right-token being the hash-value of (node2-right-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
 
 (defmethod accept-token-from-right ((self node2) right-token)
   (add-token-to-right-memory self right-token)
-  (maphash #'(lambda (key left-tokens)
-               (declare (ignore key))
-               (test-and-pass-tokens self left-tokens right-token))
-           (node2-left-memory self)))
+  (loop for left-tokens being the hash-value of (node2-left-memory self)
+      do (test-and-pass-tokens self left-tokens right-token)))
 
 (defmethod add-successor ((self node2) successor-node connector)
   (setf (node2-successor self)

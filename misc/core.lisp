@@ -30,8 +30,8 @@
 
 (defrule variable-rule ()
   (frodo (name ?name))
-;;;  (bilbo (name ?name))
-  (bilbo (name ?bname (eq ?name ?bname)))
+  (bilbo (name ?name))
+;;;  (bilbo (name ?bname (eq ?name ?bname)))
   =>
   )
 
