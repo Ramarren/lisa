@@ -91,11 +91,17 @@
   (format t "variable-rule fired: ~S~%" ?sam)
   (modify ?sam (name samwise)))
 
-(defrule logical-rule ()
+(defrule logical-1 ()
   (logical
-   (gandalf))
+   (not (gandalf)))
   =>
   (assert (bilbo)))
+
+(defrule logical-2 ()
+  (logical
+   (not (frodo)))
+  =>
+  (assert (samwise)))
 
 #+ignore
 (defrule respond-to-logical-rule ()
@@ -167,6 +173,3 @@
 |#
 
 (reset)
-(assert (gandalf))
-(run)
-(facts)

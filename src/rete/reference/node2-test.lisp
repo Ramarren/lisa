@@ -20,7 +20,7 @@
 ;;; File: node2-test.lisp
 ;;; Description:
 
-;;; $Id: node2-test.lisp,v 1.4 2002/09/25 14:43:20 youngde Exp $
+;;; $Id: node2-test.lisp,v 1.5 2002/11/14 14:45:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,12 +31,12 @@
   (when (every #'(lambda (test)
                    (funcall test left-tokens))
                (join-node-tests self))
-    (pass-tokens-to-successor self (combine-tokens left-tokens t))))
+    (pass-tokens-to-successor self (combine-tokens left-tokens self))))
 
 (defmethod accept-tokens-from-left ((self node2-test) 
                                     (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
-    (pass-tokens-to-successor self (combine-tokens left-tokens t))))
+    (pass-tokens-to-successor self (combine-tokens left-tokens self))))
 
 (defun make-node2-test ()
   (make-instance 'node2-test))

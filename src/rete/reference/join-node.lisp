@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.13 2002/11/13 16:06:48 youngde Exp $
+;;; $Id: join-node.lisp,v 1.14 2002/11/14 14:45:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,25 +77,18 @@
 (defmethod pass-tokens-to-successor ((self join-node) left-tokens)
   (call-successor (join-node-successor self) left-tokens))
 
-(defmethod pass-tokens-to-successor :around ((self join-node)
-                                             (left-tokens remove-token))
-  (when (logical-block-p self)
-    (schedule-dependency-removal 
-     (make-dependency-set left-tokens (join-node-logical-block self))))
-  (call-next-method))
-
 (defmethod combine-tokens ((left-tokens add-token) (right-token token))
   (token-push-fact 
    (replicate-token left-tokens) (token-top-fact right-token)))
 
 (defmethod combine-tokens ((left-tokens add-token) (right-token t))
-  (token-push-fact (replicate-token left-tokens) t))
+  (token-push-fact (replicate-token left-tokens) right-token))
 
 (defmethod combine-tokens ((left-tokens token) (right-token token))
   (token-push-fact left-tokens (token-top-fact right-token)))
 
 (defmethod combine-tokens ((left-tokens token) (right-token t))
-  (token-push-fact left-tokens t))
+  (token-push-fact left-tokens right-token))
 
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)

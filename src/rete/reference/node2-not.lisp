@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.13 2002/09/30 23:48:10 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.14 2002/11/14 14:45:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,7 @@
            (token-increment-not-counter left-tokens)))
   (unless (token-negated-p left-tokens)
     (pass-tokens-to-successor 
-     self (combine-tokens left-tokens t))))
+     self (combine-tokens left-tokens self))))
 
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token add-token))
@@ -42,7 +42,7 @@
       do (when (test-tokens self left-tokens right-token)
            (token-increment-not-counter left-tokens)
            (pass-tokens-to-successor 
-            self (combine-tokens (make-remove-token left-tokens) t)))))
+            self (combine-tokens (make-remove-token left-tokens) self)))))
   
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token remove-token))
@@ -51,7 +51,8 @@
       do (when (and (test-tokens self left-tokens right-token)
                     (not (token-negated-p
                           (token-decrement-not-counter left-tokens))))
-           (pass-tokens-to-successor self (combine-tokens left-tokens t)))))
+           (pass-tokens-to-successor 
+            self (combine-tokens left-tokens self)))))
   
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
@@ -59,7 +60,7 @@
 
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
-    (pass-tokens-to-successor self (combine-tokens left-tokens t))))
+    (pass-tokens-to-successor self (combine-tokens left-tokens self))))
 
 (defmethod accept-token-from-right ((self node2-not) (right-token add-token))
   (add-token-to-right-memory self right-token)
