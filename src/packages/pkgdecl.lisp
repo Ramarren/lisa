@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.48 2002/08/20 19:13:53 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.49 2002/08/20 19:36:09 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -34,12 +34,10 @@
 
 (defpackage "LISA.RETE"
   (:use "COMMON-LISP")
-  (:export "RETE-NETWORK" "TOKEN" "FACT" "SLOT" "GENERIC-PATTERN"
-           "NOT-PATTERN" "TEST-PATTERN" "PATTERN" "ADD-TOKEN" "REMOVE-TOKEN"
-           "CLEAR-TOKEN"))
+  (:export "RETE-NETWORK" "FACT"))
 
 (defpackage "LISA.RETE.RI"
-  (:use "COMMON-LISP"))
+  (:use "COMMON-LISP" "LISA.RETE"))
 
 (defpackage "LISA.PRECOMPILER"
   (:use "COMMON-LISP")
