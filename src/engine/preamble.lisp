@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.3 2001/05/03 19:55:09 youngde Exp $
+;;; $Id: preamble.lisp,v 1.4 2001/05/11 14:41:50 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,7 +30,7 @@
 
 (defgeneric equals (object-1 object-2))
 
-(defgeneric mark-instance-as-changed (instance &optional (slot-id nil))
+(defgeneric mark-instance-as-changed (instance &optional slot-id)
   (:method ((instance t) &optional slot-id)
            (declare (ignore slot-id))
            (error
