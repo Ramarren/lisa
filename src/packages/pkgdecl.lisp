@@ -20,9 +20,17 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.14 2001/04/17 19:10:19 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.15 2001/04/17 20:27:47 youngde Exp $
 
 (in-package "CL-USER")
+
+;;; accommodate implementations whose CLOS is really PCL, like CMUCL...
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (when (and (not (find-package 'clos))
+             (find-package 'pcl))
+    (rename-package (find-package 'pcl) 'pcl
+                    `(clos ,@(package-nicknames 'pcl)))))
 
 (defpackage "LISA"
   (:use "COMMON-LISP")
@@ -43,7 +51,7 @@
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
-  #+(or Allegro CMUCL)
+  #+(or Allegro CMU)
   (:import-from "CLOS"
                 "CLASS-SLOTS"
                 "SLOT-DEFINITION-NAME"
@@ -61,16 +69,9 @@
   (:import-from "CLOS"
                 clos::class-slots
                 clos::slot-definition-name)
-  #-(or Allegro CMUCL Lispworks CLISP)
+  #-(or Allegro CMU Lispworks CLISP)
   (error "Unsupported implementation.")
   (:export "CLASS-SLOTS"
            "SLOT-DEFINITION-NAME"
            "FINALIZE-INHERITANCE"
            "CLASS-FINALIZED-P"))
-
-;;; accommodate implementations whose CLOS is really PCL, like CMUCL...
-
-(when (and (not (find-package 'clos))
-           (find-package 'pcl))
-  (rename-package (find-package 'pcl) 'pcl
-                  `(clos ,@(package-nicknames 'pcl))))
