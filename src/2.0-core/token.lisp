@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.3 2002/08/29 15:29:25 youngde Exp $
+;;; $Id: token.lisp,v 1.4 2002/08/29 19:21:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,12 +41,12 @@
 (defun make-remove-token (fact)
   (make-instance 'remove-token :fact fact))
 
-(defun find-fact-in-token (token address)
+(defun token-find-fact (token address)
   (aref (slot-value token 'facts) address))
 
-(defun peek-fact-in-token (token)
+(defun token-peek-fact (token)
   (with-slots ((fact-vector facts)) token
     (aref fact-vector (1- (length fact-vector)))))
 
-(defun push-fact-on-token (token fact)
+(defun token-push-fact (token fact)
   (vector-push-extend (slot-value token 'facts) fact))
