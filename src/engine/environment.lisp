@@ -20,7 +20,7 @@
 ;;; File: environment.lisp
 ;;; Description: Defines the standard LISA environment.
 
-;;; $Id: environment.lisp,v 1.15 2001/04/26 19:43:05 youngde Exp $
+;;; $Id: environment.lisp,v 1.16 2001/04/26 20:17:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,8 +52,8 @@
     macro is MP-safe."
     (let ((old-engine (gensym)))
       `(lmp:with-lock (,mutex)
-        (unwind-protect 
-             (let ((,old-engine (use-engine ,engine)))
+        (let ((,old-engine (use-engine ,engine)))
+          (unwind-protect 
                (progn ,@body))
           (use-engine ,old-engine))))))
 

@@ -30,7 +30,7 @@
 
 ;;; NB: This stuff is NOT intended for consumption outside of core LISA.
 
-;;; $Id: mp.lisp,v 1.3 2001/04/26 17:49:52 youngde Exp $
+;;; $Id: mp.lisp,v 1.4 2001/04/26 20:17:25 youngde Exp $
 
 (in-package "LISA.MULTIPROCESSING")
 
@@ -59,8 +59,8 @@
   (declare (ignore lock)))
 
 #+threads
-(defmacro with-lock ((lock) &rest args)
-  `(port:with-lock (,lock) ,args))
+(defmacro with-lock ((lock) &body body)
+  `(port:with-lock (,lock) ,@body))
 
 #-threads
 (defmacro with-lock ((lock) &body body)
