@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.57 2001/05/09 20:12:56 youngde Exp $
+;;; $Id: rete.lisp,v 1.58 2001/07/09 19:05:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,6 +40,8 @@
                :reader get-clear-fact)
    (null-fact :initform (make-not-or-test-fact)
               :reader get-null-fact)
+   (autofacts :initform '()
+              :accessor get-autofacts)
    (fact-list :initform (make-hash-table)
               :accessor get-facts)
    (next-fact-id :initform 0
@@ -59,6 +61,19 @@
 (defun remove-rules (self)
   (declare (type rete self))
   (clrhash (get-rules self)))
+
+;;; This function is a bit brutal in terms of efficiency, but I don't expect a
+;;; large number of DEFFACTs per inference engine...
+
+(defun add-autofact (self deffact)
+  (declare (type rete self))
+  (with-accessors ((autofacts get-autofacts)) self
+    (setf autofacts
+      (delete-if #'(lambda (fact)
+                     (eql (get-name fact) (get-name deffact)))
+                 autofacts))
+    (setf autofacts (nconc autofacts `(,deffact))))
+  (values))
 
 (defun engine-halted-p (self)
   (declare (type rete self))
@@ -192,12 +207,21 @@
   (setf (slot-value self 'fired-rule-count) 0)
   (values t))
 
+(defun assert-autofacts (self)
+  (declare (type rete self))
+  (mapc #'(lambda (deffact)
+            (mapc #'(lambda (fact)
+                      (assert-fact self fact))
+                  (get-deffacts deffact)))
+        (get-autofacts self)))
+
 (defun reset-engine (self)
   (declare (type rete self))
   (insert-token self (make-clear-token
                       :initial-fact (get-clear-fact self)))
   (set-initial-state self)
   (assert-fact self (get-initial-fact self))
+  (assert-autofacts self)
   (values t))
 
 (defun forget-clos-instances (self)
