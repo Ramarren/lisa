@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.18 2002/12/11 19:02:18 youngde Exp $
+;;; $Id: fact.lisp,v 1.19 2003/06/02 15:02:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,6 +32,8 @@
    (slot-table :reader fact-slot-table
                :initform (make-hash-table :test #'equal))
    (clos-instance :reader fact-clos-instance)
+   (shadows :initform nil
+            :reader fact-shadowsp)
    (meta-data :reader fact-meta-data))
   (:documentation
    "This class represents all facts in the knowledge base."))
@@ -166,6 +168,7 @@
             (set-slot-from-instance fact instance slot-name))
         (get-slot-list meta-data))
   (setf (slot-value fact 'clos-instance) instance)
+  (setf (slot-value fact 'shadows) t)
   fact)
 
 (defun make-fact (name &rest slots)

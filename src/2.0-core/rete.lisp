@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.48 2002/11/25 18:09:14 youngde Exp $
+;;; $Id: rete.lisp,v 1.49 2003/06/02 15:02:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -170,6 +170,8 @@
     (remember-fact self fact)
     (trace-assert fact)
     (add-fact-to-network (rete-network self) fact)
+    (when (fact-shadowsp fact)
+      (register-clos-instance self (find-instance-of-fact fact) fact))
     fact))
 
 (defmethod retract-fact ((self rete) (fact fact))
@@ -177,7 +179,15 @@
     (forget-fact self fact)
     (trace-retract fact)
     (remove-fact-from-network (rete-network self) fact)
+    (when (fact-shadowsp fact)
+      (forget-clos-instance self (find-instance-of-fact fact)))
     fact))
+
+(defmethod retract-fact ((self rete) (instance standard-object))
+  (let ((fact (find-fact-using-instance self instance)))
+    (cl:assert (not (null fact)) nil
+      "This CLOS instance is unknown to LISA: ~S" instance)
+    (retract-fact self fact)))
 
 (defmethod retract-fact ((self rete) (fact-id integer))
   (let ((fact (find-fact-by-id self fact-id)))
@@ -238,6 +248,9 @@
 
 (defun register-clos-instance (rete instance fact)
   (setf (gethash instance (rete-instance-table rete)) fact))
+
+(defun forget-clos-instance (rete instance)
+  (remhash instance (rete-instance-table rete)))
 
 (defun forget-clos-instances (rete)
   (clrhash (rete-instance-table rete)))

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.74 2002/12/09 16:05:41 youngde Exp $
+;;; $Id: parser.lisp,v 1.75 2003/06/02 15:02:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -367,11 +367,11 @@
     (when (and (in-rule-firing-p)
                (logical-rule-p (active-rule)))
       (bind-logical-dependencies fact))
-    (register-clos-instance (inference-engine) instance fact)
+;;;    (register-clos-instance (inference-engine) instance fact)
     (assert-fact (inference-engine) fact)))
 
 (defun parse-and-retract-instance (instance engine)
-  (retract-fact engine (find-fact-using-instance engine instance)))
+  (retract-fact engine instance))
 
 (defun show-deffacts (deffact)
   (format t "~S~%" deffact)
