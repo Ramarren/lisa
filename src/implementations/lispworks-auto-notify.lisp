@@ -23,7 +23,7 @@
 ;;; of LISA's control, are picked up via the MOP protocol and synchronized
 ;;; with KB facts.
 
-;;; $Id: lispworks-auto-notify.lisp,v 1.2 2002/12/03 16:03:52 youngde Exp $
+;;; $Id: lispworks-auto-notify.lisp,v 1.3 2002/12/03 17:39:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -38,7 +38,7 @@
   
 (defmethod initialize-instance :after ((self standard-kb-class)
                                        &rest initargs) 
-  (dolist (slot (slot-value self 'clos::direct-slots))
+  (dolist (slot (class-direct-slots self))
     (dolist (writer (clos:slot-definition-writers slot))
       (let* ((gf (ensure-generic-function writer))
              (method-class
