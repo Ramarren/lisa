@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.63 2001/04/10 13:53:22 youngde Exp $
+;;; $Id: parser.lisp,v 1.64 2001/04/10 20:21:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -235,25 +235,33 @@
         (command-structure-error 'deftemplate condition)))))
 
 (defun redefine-defimport (symbolic-name class-name slot-specs)
-  (flet ((check-slot-spec (slot)
-           (unless (and (consp slot)
-                        (= (length slot) 2)
-                        (symbolp (first slot))
-                        (symbolp (second slot)))
-             (syntactical-error
-              'defimport
-              "The format of this slot specification is wrong: ~S." slot))))
+  (labels ((validate-defimport-slots (class slots)
+             (let ((class-slots (find-class-slots class)))
+               (mapc #'(lambda (slot)
+                         (unless (member (symbol-name slot)
+                                         class-slots
+                                         :test #'string=
+                                         :key #'symbol-name)
+                           (syntactical-error
+                            'defimport
+                            "The slot ~S is not known to exist in class ~S."
+                            slot class)))
+                     slots)
+               (values slots)))
+           (determine-relevant-slots (class)
+             (if (null slot-specs)
+                 (find-class-slots class)
+               (validate-defimport-slots class))))
     (unless (symbolp symbolic-name)
       (syntactical-error 
        'defimport "The symbolic name must be a symbol: ~S." symbolic-name))
-    (unless (find-class class-name nil)
+    (unless (listp slot-specs)
       (syntactical-error
-       'defimport "The symbol ~S does not identify a class." class-name))
-    (if (consp slot-specs)
-        (mapc #'check-slot-spec slot-specs)
-      (syntactical-error
-       'defimport "The slot specification must be a list: ~S."
-       slot-specs))
-    `(import-class ',symbolic-name ',class-name ',slot-specs)))
-             
+       'defimport "The slot specification must be a list: ~S." slot-specs))
+    (let ((class (find-class class-name)))
+      `(import-class ',symbolic-name ,class
+        ',(determine-relevant-slots slot-specs)))))
+
+(defun parse-and-insert-instance (instance))
+  
                        

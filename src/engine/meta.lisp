@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.19 2001/04/10 13:53:22 youngde Exp $
+;;; $Id: meta.lisp,v 1.20 2001/04/10 20:21:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -104,7 +104,9 @@
                    :slots slots
                    :methods methods)))
 
-(let ((meta-map (make-hash-table)))
+(let ((meta-map (make-hash-table))
+      (class-map (make-hash-table)))
+  
   (defun register-meta-class (name meta-object)
     (setf (gethash name meta-map) meta-object))
 
@@ -122,12 +124,31 @@
       (when (and (null meta-object) errorp)
         (environment-error
          "This fact name does not have a registered meta class: ~S" name))
-      (values meta-object))))
+      (values meta-object)))
 
-(defun import-class (symbolic-name class-name slot-specs)
+  (defun register-external-class (symbolic-name class)
+    (setf (gethash (class-name class) class-map) symbolic-name))
+
+  (defun find-symbolic-name (instance)
+    (let ((name (gethash (class-name (class-of instance)))))
+      (when (null name)
+        (environment-error
+         "The class of this instance is not known to LISA: ~S." instance))
+      (values name))))
+
+(defun import-class (symbolic-name class slot-specs)
+  (print symbolic-name)
+  (print class)
+  (print slot-specs)
+  (terpri)
+  (values))
+
+#+ignore
+(defun import-class (symbolic-name class slot-specs)
   (let ((meta (make-meta-shadow-fact
-               symbolic-name class-name slot-specs)))
+               symbolic-name (class-name class) slot-specs)))
     (register-meta-class symbolic-name meta)
+    (register-external-class symbolic-name class)
     (values meta)))
 
 (defun create-class-template (name slots)
@@ -158,3 +179,6 @@
     (when (null not-or-test-fact)
       (setf not-or-test-fact (make-special-fact 'not-or-test-fact)))
     (values not-or-test-fact)))
+
+(defun find-class-slots (class)
+  (mapcar #'slot-definition-name (reflect:class-slots class)))

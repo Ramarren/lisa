@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.31 2001/04/09 18:37:10 youngde Exp $
+;;; $Id: fact.lisp,v 1.32 2001/04/10 20:21:56 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,6 +32,7 @@
             :reader get-fact-id)
    (symbolic-id :initform nil)
    (slot-table :reader get-slot-table)
+   (meta-fact :reader get-meta-fact)
    (clock :initform 0
           :accessor get-clock))
   (:documentation
@@ -56,12 +57,12 @@
 
 (defun get-slot-values (self)
   (declare (type fact self))
-  (let ((meta (find-meta-class (fact-name self)))
-        (table (get-slot-table self)))
+  (let ((table (get-slot-table self)))
     (mapcar #'(lambda (meta-slot)
-                `(,(get-name meta-slot)
-                  ,(aref table (get-position meta-slot))))
-            (meta-slot-list meta))))
+                (declare (type slot-name meta-slot))
+                `(,(slot-name-name meta-slot)
+                  ,(aref table (slot-name-position meta-slot))))
+            (meta-slot-list (get-meta-fact self)))))
 
 (defun get-slot-value (self slot-name)
   (declare (type fact self) (type slot-name slot-name))
@@ -101,7 +102,8 @@
                   :initial-element nil))
     (mapc #'(lambda (pair)
               (set-slot-value self (first pair) (second pair)))
-          slots)))
+          slots)
+    (setf (slot-value self 'meta-fact) meta)))
 
 (defun make-fact (name slots)
   (make-instance 'fact :name name :slots slots))

@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.8 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.9 2001/04/10 20:21:57 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -30,6 +30,32 @@
   (:export "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS" "RULES"
            "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH" "UNWATCH"
            "WATCHING" "HALT"))
+
+(defpackage "LISA.REFLECT"
+  (:use "COMMON-LISP")
+  (:nicknames "REFLECT")
+  #+(or Allegro CMUCL)
+  (:import-from "MOP"
+                mop:class-slots
+                mop:slot-definition-name
+                mop:finalize-inheritance
+                mop:class-finalized-p)
+  #+Lispworks
+  (:import-from "CLOS"
+                clos:class-slots
+                clos:slot-definition-name
+                clos:finalize-inheritance
+                clos:class-finalized-p)
+  #+CLISP
+  (:import-from "CLOS"
+                clos::class-slots
+                clos::slot-definition-name)
+  #-(or Allegro CMUCL Lispworks CLISP)
+  (error "Unsupported implementation.")
+  (:export slot-definition-name
+           class-slots
+           finalize-inheritance
+           class-finalized-p))
 
 ;;; accommodate implementations whose CLOS is really PCL, like CMUCL...
 
