@@ -25,11 +25,11 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.18 2001/04/19 14:13:01 youngde Exp $
+;;; $Id: utils.lisp,v 1.19 2001/06/29 00:52:53 youngde Exp $
 
 (in-package "LISA")
 
-(defun find-before (item sequence &key (test #'eql))
+(defun _find-before (item sequence &key (test #'eql))
   "Returns both that portion of SEQUENCE that occurs before ITEM and
   the rest of SEQUENCE anchored at ITEM, or NIL otherwise."
   (declare (optimize (speed 3) (safety 1) (debug 1)))
@@ -42,6 +42,28 @@
                      (t
                       (find-item obj (rest seq) test (nconc val `(,item))))))))
     (find-item item sequence test nil)))
+
+;;; This version of FIND-BEFORE courtesy of Bob Bane, Global Science and
+;;; Technology...
+
+(defun find-before (item sequence &key (test #'eql))
+  "Returns both that portion of SEQUENCE that occurs before ITEM and
+  the rest of SEQUENCE anchored at ITEM, or NIL otherwise."
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (labels ((find-item (obj seq test val valend)
+	     (let ((item (first seq)))
+               (cond ((null seq)
+                      (values nil nil))
+                     ((funcall test obj item)
+                      (values val seq))
+                     (t
+                      (let ((newend `(,item)))
+                        (nconc valend newend)
+                        (find-item obj (rest seq) test val newend)))))))
+    (if (funcall test item (car sequence))
+        (values nil sequence)
+      (let ((head (list (car sequence))))
+        (find-item item (cdr sequence) test head head)))))
 
 (defun find-after (item sequence &key (test #'eql))
   "Returns that portion of SEQUENCE that occurs after ITEM, or NIL
