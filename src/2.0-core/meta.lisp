@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.10 2002/11/08 20:13:52 youngde Exp $
+;;; $Id: meta.lisp,v 1.11 2002/11/15 16:36:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,15 +39,6 @@
 (defun get-superclasses (meta-object)
   (fact-meta-object-superclasses meta-object))
 
-(defun find-effective-slot (meta-object slot-name)
-  "Finds the actual CLOS slot name as identified by the symbolic name
-  SLOT-NAME."
-  (let ((effective-slot 
-         (gethash slot-name (fact-meta-object-slot-table meta-object))))
-    (cl:assert (not (null effective-slot)) ()
-      "No effective slot for symbol ~S." slot-name)
-    effective-slot))
-
 (defun find-meta-fact (symbolic-name &optional (errorp t))
   "Locates the META-FACT instance associated with SYMBOLIC-NAME. If ERRORP is
   non-nil, signals an error if no binding is found."
@@ -58,63 +49,54 @@
         symbolic-name))
     meta-fact))
 
-(defun acquire-meta-data (symbolic-name actual-name)
-  (labels ((populate-slot-table (meta-object slot-list)
-             (let ((slot-table (fact-meta-object-slot-table meta-object))
-                   (symbol-names (list)))
-               (dolist (actual-slot slot-list)
-                 (let ((symbolic-slot-name actual-slot))
-                   (setf (gethash symbolic-slot-name slot-table) actual-slot)
-                   (push symbolic-slot-name symbol-names)))
-               (setf (fact-meta-object-slot-list meta-object) symbol-names)
-               meta-object))
-           (import-one-class (class direct-superclasses)
-             (let* ((symbolic-class-name (class-name class))
+(defun acquire-meta-data (actual-name)
+  (labels ((build-meta-object (class direct-superclasses)
+             (let* ((class-name (class-name class))
                     (meta-data
                      (make-fact-meta-object
-                      :symbolic-name symbolic-class-name
-                      :class-name symbolic-class-name
+                      :class-name class-name
+                      :slot-list (reflect:class-slot-list class)
                       :superclasses direct-superclasses)))
-               (populate-slot-table meta-data
-                                    (reflect:class-slot-list class))
-               (register-meta-object (inference-engine) 
-                                     symbolic-class-name meta-data)
-               (register-class (inference-engine) class symbolic-name)))
-           (import-classes (class-object)
+               (register-meta-object (inference-engine) class-name meta-data)
+               meta-data))
+           (examine-class (class-object)
              (let ((superclasses
                     (if *consider-taxonomy-when-reasoning*
                         (reflect:find-direct-superclasses class-object)
                       nil)))
-               (import-one-class class-object superclasses)
+               (build-meta-object class-object superclasses)
                (dolist (super superclasses)
-                 (import-classes super)))))
-    (import-classes (find-class actual-name))))
+                 (examine-class super)))))
+    (examine-class (find-class actual-name))))
 
 (defun import-class-specification (class-name)
   (let ((class-object (find-class class-name)))
     (intern (symbol-name class-name))
     (dolist (slot-name (reflect:class-slot-list class-name))
       (intern (symbol-name slot-name)))
+    (when *consider-taxonomy-when-reasoning*
+      (dolist (ancestor (reflect:find-direct-superclasses class-object))
+        (import-class-specification ancestor)))
     class-object))
 
 (defconstant +no-meta-data-reason+
     "LISA doesn't know about the template named by (~S). Either the name was
     mistyped or you forgot to write a DEFTEMPLATE specification for it.")
 
-(defun ensure-meta-data-exists (symbolic-name actual-name)
+(defun ensure-meta-data-exists (class-name)
   (flet ((ensure-class-definition ()
            (loop
-             (when (find-class actual-name nil)
-               (acquire-meta-data symbolic-name actual-name)
+             (when (find-class class-name nil)
+               (acquire-meta-data class-name)
                (return))
              (cerror "Enter a template definition now."
-                     +no-meta-data-reason+ actual-name)
+                     +no-meta-data-reason+ class-name)
              (format t "Enter a DEFTEMPLATE form: ")
              (eval (read))
              (fresh-line))))
-    (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
+    (let ((meta-data (find-meta-object (inference-engine) class-name)))
       (when (null meta-data)
         (ensure-class-definition)
         (setf meta-data 
-          (find-meta-object (inference-engine) symbolic-name)))
+          (find-meta-object (inference-engine) class-name)))
       meta-data)))

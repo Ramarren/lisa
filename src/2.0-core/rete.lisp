@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.34 2002/11/14 14:45:38 youngde Exp $
+;;; $Id: rete.lisp,v 1.35 2002/11/15 16:36:05 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,8 +39,6 @@
               :accessor rete-autofacts)
    (meta-data :initform (make-hash-table)
               :reader rete-meta-data)
-   (class-table :initform (make-hash-table)
-                :reader rete-class-table)
    (dependency-table :initform (make-hash-table :test #'equal)
                      :accessor rete-dependency-table)
    (halted :initform nil
@@ -57,24 +55,23 @@
 ;;; mapping symbolic fact names to actual class names, slot names to their
 ;;; corresponding effective slot names, etc.
 
+#+ignore
 (defstruct fact-meta-object
   (symbolic-name nil :type symbol)
   (class-name nil :type symbol)
   (slot-table (make-hash-table))
+  (superclasses nil :type list))
+
+(defstruct fact-meta-object
+  (class-name nil :type symbol)
   (slot-list nil :type list)
   (superclasses nil :type list))
 
 (defun register-meta-object (rete key meta-object)
   (setf (gethash key (rete-meta-data rete)) meta-object))
 
-(defun register-class (rete class symbolic-name)
-  (setf (gethash (class-name class) (rete-class-table rete)) symbolic-name))
-
 (defun find-meta-object (rete symbolic-name)
   (gethash symbolic-name (rete-meta-data rete)))
-
-(defun find-symbolic-name (rete instance)
-  (gethash (class-name (class-of instance)) (rete-class-table rete)))
 
 (defun rete-fact-count (rete)
   (hash-table-count (rete-fact-table rete)))

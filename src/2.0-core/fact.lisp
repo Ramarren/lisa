@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.9 2002/11/12 19:18:37 youngde Exp $
+;;; $Id: fact.lisp,v 1.10 2002/11/15 16:36:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,11 +44,8 @@
   "Assigns a new value to a slot in a fact and its associated CLOS
   instance. SLOT-NAME is a symbol; VALUE is the new value for the
   slot."
-  (let* ((meta (fact-meta-data fact))
-         (instance (find-instance-of-fact fact))
-         (effective-slot (find-effective-slot meta slot-name)))
-    (setf (slot-value instance effective-slot) value)
-    (initialize-slot-value fact slot-name value)))
+  (setf (slot-value (find-instance-of-fact fact) slot-name) value)
+  (initialize-slot-value fact slot-name value))
 
 (defun initialize-slot-value (fact slot-name value)
   "Sets the value of a slot in a fact's slot table. FACT is a FACT instance;
@@ -63,7 +60,7 @@
   affected slot."
   (initialize-slot-value
    fact slot-name
-   (slot-value instance (find-effective-slot meta-fact slot-name))))
+   (slot-value instance slot-name)))
 
 (defun get-slot-values (fact)
   "Returns a list of slot name / value pairs for every slot in a fact. FACT is
@@ -112,8 +109,7 @@
                         fact meta instance slot-name))
                    (get-slot-list meta)))
            (synchronize-this-slot ()
-             (set-slot-from-instance
-              fact meta instance (effective-slot->slot-name effective-slot))))
+             (set-slot-from-instance fact meta instance effective-slot)))
       (if (null effective-slot)
           (synchronize-all-slots)
         (synchronize-this-slot)))

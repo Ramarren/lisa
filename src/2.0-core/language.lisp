@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.12 2002/11/08 20:13:51 youngde Exp $
+;;; $Id: language.lisp,v 1.13 2002/11/15 16:36:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -62,7 +62,7 @@
        (if (typep ,fact-object 'standard-object)
            (parse-and-insert-instance ,fact-object)
          (progn
-           (ensure-meta-data-exists ',name ',name)
+           (ensure-meta-data-exists ',name)
            (let ((,fact (make-fact ',name ,@(expand-slots body))))
              (when (and (in-rule-firing-p)
                         (logical-rule-p (active-rule)))
