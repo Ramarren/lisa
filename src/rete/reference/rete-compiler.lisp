@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.14 2002/09/04 01:04:19 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.15 2002/09/05 01:58:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,42 +85,52 @@
 
 (defun add-intra-pattern-nodes (patterns)
   (dolist (pattern patterns)
-    (let ((node
-           (add-root-node (parsed-pattern-class pattern)))
-          (address (parsed-pattern-address pattern)))
-      (set-leaf-node node address)
-      (dolist (slot (parsed-pattern-slots pattern))
-        (when (simple-slot-p slot)
-          (setf node
-            (add-successor node (make-intra-pattern-node slot)
-                           #'pass-token))
-          (set-leaf-node node address))))))
+    (unless (test-pattern-p pattern)
+      (let ((node
+             (add-root-node (parsed-pattern-class pattern)))
+            (address (parsed-pattern-address pattern)))
+        (set-leaf-node node address)
+        (dolist (slot (parsed-pattern-slots pattern))
+          (when (simple-slot-p slot)
+            (setf node
+              (add-successor node (make-intra-pattern-node slot)
+                             #'pass-token))
+            (set-leaf-node node address)))))))
 
-(defun add-join-node-tests (join-node pattern slot)
-  (flet ((add-simple-join-node-test ()
-           (let ((binding (pattern-slot-slot-binding slot))
-                 (address (parsed-pattern-address pattern)))
-             (unless (= address (binding-address binding))
-               (node2-add-test join-node
-                               (make-inter-pattern-test
-                                (pattern-slot-name slot) binding)))))
-         (add-slot-constraint-test ()
-           (node2-add-test join-node
-                           (make-constraint-test
-                            (pattern-slot-constraint slot)
-                            (pattern-slot-constraint-bindings slot)))))
-    (cond ((simple-bound-slot-p slot)
-           (add-simple-join-node-test))
-          ((constrained-slot-p slot)
-           (add-slot-constraint-test)))
+(defun add-join-node-tests (join-node pattern)
+  (labels ((add-simple-join-node-test (slot)
+             (let ((binding (pattern-slot-slot-binding slot))
+                   (address (parsed-pattern-address pattern)))
+               (unless (= address (binding-address binding))
+                 (node2-add-test join-node
+                                 (make-inter-pattern-test
+                                  (pattern-slot-name slot) binding)))))
+           (add-slot-constraint-test (slot)
+             (node2-add-test join-node
+                             (make-predicate-test
+                              (pattern-slot-constraint slot)
+                              (pattern-slot-constraint-bindings slot))))
+           (add-test-pattern-predicate ()
+             (node2-add-test join-node
+                             (make-predicate-test
+                              (parsed-pattern-test-forms pattern)
+                              (parsed-pattern-test-bindings pattern))))
+           (add-generic-pattern-tests ()
+             (dolist (slot (parsed-pattern-slots pattern))
+               (cond ((simple-bound-slot-p slot)
+                      (add-simple-join-node-test slot))
+                     ((constrained-slot-p slot)
+                      (add-slot-constraint-test slot))))))
+    (if (test-pattern-p pattern)
+        (add-test-pattern-predicate)
+      (add-generic-pattern-tests))
     join-node))
     
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
     (let ((join-node (make-node2))
           (address (parsed-pattern-address pattern)))
-      (dolist (slot (parsed-pattern-slots pattern))
-        (add-join-node-tests join-node pattern slot))
+      (add-join-node-tests join-node pattern)
       (add-successor
        (left-input address) join-node #'pass-tokens-on-left)
       (add-successor
