@@ -44,51 +44,145 @@ how this works in the MAB example.</li>
 <li>
 <i>Rule salience</i>: All rules operate at the same salience, or priority.
 LISA's conflict resolution strategy is ready for this feature; I just need
-to tweak the rule parser a bit.<br>
-<BR></li>
+to tweak the rule parser a bit.</li>
 
+<br>&nbsp;
 <li>
-<i>No TEST conditional element</i>.<br>
-<BR></li>
+<i>No TEST conditional element</i>.</li>
 
+<br>&nbsp;
 <li>
 <i>No rule redefinition</i>: LISA doesn't yet support dynamic redefinition
 of rules. Before reloading an existing knowledge base one must first CLEAR
-the inference engine.&nbsp;Failing to do this will hose the Rete network
-pretty good.<br>
-<BR></li>
+the inference engine. Failing to do this will hose the Rete network pretty
+good.</li>
 
+<br>&nbsp;
 <li>
 <i>No multiprocessing support</i>: LISA will eventually support this feature
-but the implementation requires some thought.<br>
-<BR></li>
+but the implementation requires some thought.</li>
 
+<br>&nbsp;
 <li>
 <i>Limited fact slot values</i>: Right now LISA limits the values fact
 slots can possess to '(string, number, symbol). In particular, lists are
-not yet supported.<br>
-<BR></li>
+not yet supported.</li>
 
+<br>&nbsp;
 <li>
 <i>Patterns like this</i>: LISA currently doesn't support patterns like
 (<b>pattern-1 (slot-1 ?var) (slot-2 ?var))</b>, where <b>?var</b> first
-occurs in <b>pattern-1</b> and multiple times within its slots.&nbsp;Is
-this clear enough?<br>
-<BR></li>
+occurs in <b>pattern-1</b> and multiple times within its slots. I hope
+that's not too vague.</li>
 
+<br>&nbsp;
 <li>
 <i>No ruleset partitioning</i>: LISA doesn't yet support the notion of
-rule "modules" or "packets".<br>
-<BR></li>
+rule "modules" or "packets".</li>
 
+<br>&nbsp;
 <li>
 <i>No backward chaining</i>: LISA employs a forward-chaining inference
-engine. I might support backward-chaining in the future.<br>
+engine. I might support backward-chaining in the future.</li>
+
+<br>&nbsp;
+<li>
+<i>Mushy language/engine interface</i>: This is a sore point that I intend
+to address soon. I really want LISA to have clean separation between the
+rule language implementation and the inference engine. In other words,
+I'd like to have a "generic" Rete implementation upon which one can attach
+different rule programming languages. If you don't like the language that
+comes with LISA, write a new one. That sort of thing.</li>
+
+<br>&nbsp;
+<li>
+<i>No condition hierarchy</i>: Errors are crudely handled in LISA. More
+need to be caught, and a reasonable condition hierarchy needs to be constructed.<br>
 <BR></li>
 
 <li>
-</li>
+<i>No multiple inference engines</i>: LISA supports the existence of multiple
+inference engines with the same Lisp world, but there are a couple of places
+where I haven't decided just how to manage this.&nbsp;So for now, just
+one engine per Lisp world please.</li>
+
+<br>&nbsp;
+<li>
+<i>Sub-optimal performance</i>: No doubt about it; LISA doesn't yet run
+as quickly as she eventually will. I've done a small amount of profiling
+to identify some bottlenecks; in particular, slot lookup during pattern
+matching is slow, but I've designed a scheme that should allow constant-time
+access. This work is actually at the top of my list, just to get it out
+of the way.</li>
 </ol>
 
+<h4>
+III. Getting started.</h4>
+LISA <i>requires </i>the Portable Defsystem as maintained by the <a href="http://clocc.sourceforge.net">CLOCC</a>
+project; for convenience, a copy is included in the distribution. Building
+LISA should be straightforward; load <i>defsys.lisp</i> and evaluate (mk:compile-system
+:lisa). Note that currently LISA includes a copy of the CLOCC package PORT;
+this will build automatically. If you already have PORT in your Lisp you'll
+have to edit <i>defsys.lisp</i> until I find a better way to manage this.
+<p>To build a knowledge base, write your production rules using the MAB
+source as your guide and load the file into Lisp. You can then change to
+the :lisa package and experiment. You can find the MAB under the <i>misc</i>
+directory in <i>mab.lisp</i>. I realize this is pretty thin; if you have
+trouble just <a href="mailto:de.young@computer.org">drop me a line</a>.
+I promise the documentation will improve dramatically.
+<br>&nbsp;
+<h4>
+IV. The LISA programming language.</h4>
+This section contains brief documentation on LISA's language as it exists
+today. Most commands are pretty obvious; none are sufficiently documented.
+<ul>
+<li>
+<i>defrule</i>: Defines a production rule. If you're familiar with CLIPS
+or JESS you're in great shape; LISA has her roots in those two systems.
+If not you'll have to muddle throught the MAB example for now.</li>
+
+<li>
+<i>assert</i>: Asserts a fact into the knowledge base.</li>
+
+<li>
+<i>retract</i>: Removes a fact from the knowledge base. You can give <i>retract</i>
+either the fact identifier (an integer) or a fact object.</li>
+
+<li>
+<i>modify</i>: Modifies a fact. In essence, this function causes a <i>retract</i>
+followed by an <i>assert</i>.</li>
+
+<li>
+<i>facts</i>: Prints a list of facts.</li>
+
+<li>
+<i>agenda</i>: Prints the current rule activations.</li>
+
+<li>
+<i>reset</i>: Clears all facts from the knowledge base, resets the inference
+engine and asserts the <i>initial fact</i>.</li>
+
+<li>
+<i>clear</i>: Re-initializes the inference engine and destroys any existing
+Rete network.</li>
+
+<li>
+<i>run</i>: Runs the engine until there are no more activations. Optionally
+takes as an argument an integer indicating the number of rules to fire
+before halting.</li>
+
+<li>
+<i>halt</i>. Not yet implemented.</li>
+
+<li>
+<i>watch</i>: Asks the engine to indicate the occurrence of certain events.
+Currently, one can monitor assertions, retractions, activations and firings;
+give <i>watch</i> one of the keywords '(:facts :activations :rules) depending
+on what you want to monitor.</li>
+
+<li>
+<i>unwatch</i>: Undoes the effect of a previous <i>watch</i>.</li>
+</ul>
+There's much more to LISA of course; I'll add documentation as I get time.
 </body>
 </html>
