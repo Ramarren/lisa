@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.3 2000/11/13 19:27:05 youngde Exp $
+;;; $Id: debug.lisp,v 1.4 2000/11/13 20:12:11 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,6 +34,6 @@
                       (format t "~,,V<~S~>~%" level node)
                       (trace-nodes (get-successors node) (+ level 3))
                       (trace-nodes (rest nodes) level))))))
-    (format t "root-node: ~S~%" root-node)
+    (format t "~S~%" root-node)
     (trace-nodes (get-successors root-node) 3)))
 
