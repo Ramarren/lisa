@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.73 2002/12/09 15:43:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.74 2002/12/09 16:05:41 youngde Exp $
 
 (in-package "LISA")
 
@@ -141,22 +141,12 @@
 (let ((special-elements '(not exists logical)))
   
   (defun preprocess-left-side (lhs)
-    (flet ((twins-p (p1 p2)
-             (let ((first
-                    (if (variablep (first p1))
-                        (first (second p1))
-                      (first p1)))
-                   (second
-                    (if (variablep (first p2))
-                        (first (second p2))
-                      (first p2))))
-               (eq first second))))
-      (when (or (null lhs)
-                (find (caar lhs) special-elements))
-        (push (list 'initial-fact) lhs))
-      (if (rule)
-          (fixup-runtime-bindings lhs)
-        lhs))))
+    (when (or (null lhs)
+              (find (caar lhs) special-elements))
+      (push (list 'initial-fact) lhs))
+    (if (rule)
+        (fixup-runtime-bindings lhs)
+      lhs)))
 
 (defvar *in-logical-pattern-p* nil)
 
