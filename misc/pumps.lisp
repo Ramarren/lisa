@@ -22,9 +22,11 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.9 2001/05/10 13:32:25 youngde Exp $
+;;; $Id: pumps.lisp,v 1.10 2001/05/10 17:08:54 youngde Exp $
 
 (in-package "LISA-USER")
+
+(defparameter *verbose-output* nil)
 
 (use-default-engine)
 
@@ -48,17 +50,28 @@
          :reader get-name)))
 
 (defmacro with-new-process ((name) &body body)
-  `(port:make-process
-    ,name #'(lambda ()
-              (let ((*package* (find-package "LISA-USER")))
-                (progn ,@body)))))
+  `(let ((verbose *verbose-output*))
+     (port:make-process
+      ,name #'(lambda ()
+                (let ((*package* (find-package "LISA-USER"))
+                      (*verbose-output* verbose))
+                  (progn ,@body))))))
 
+(let ((msg-lock (port:make-lock)))
+  (defun message (strm format-string &rest args)
+    (port:with-lock (msg-lock)
+      (apply #'format strm format-string args)))
+  
+  (defun debug-message (strm format-string &rest args)
+    (when *verbose-output*
+      (apply #'message strm format-string args))))
+  
 (defun set-flow-rate (self new-rate)
   (declare (type pump self))
   (with-accessors ((rate get-flow-rate)) self
     (when (and (not (minusp new-rate)) (not (eql rate new-rate)))
-      (format t "Setting new flow rate for pump ~S to ~D.~%"
-              (get-name self) new-rate)
+      (debug-message t "Setting new flow rate for pump ~S to ~D.~%"
+                     (get-name self) new-rate)
       (setf rate new-rate)
       (mark-instance-as-changed self 'flow-rate))))
 
@@ -100,9 +113,9 @@
 (defun add-water (self amount)
   (declare (type tank self) (type integer amount))
   (unless (zerop amount)
-    (format t "Increasing level in tank ~S by ~D units.~%"
-            (get-name self) amount)
     (incf (get-level self) amount)
+    (debug-message t "Increased level in tank ~S by ~D units: new level is ~D.~%"
+                   (get-name self) amount (get-level self))
     (mark-instance-as-changed self 'level)))
 
 (defun run-tank (self)
@@ -113,9 +126,9 @@
              (add-water self (- (random 25)))
              (sleep 0.250))
            (cond ((>= (get-level self) 1000)
-                  (format t "Tank ~S exploded!~%" (get-name self)))
+                  (message t "Tank ~S exploded!~%" (get-name self)))
                  ((<= (get-level self) 0)
-                  (format t "Tank ~S ran dry and caught fire!~%"
+                  (message t "Tank ~S ran dry and caught fire!~%"
                           (get-name self))))))
     (with-new-process ((concatenate 'string "Tank:" (get-name self)))
       (adjust-tank-level))))
@@ -153,30 +166,30 @@
   (slot count))
 
 (defrule warn-if-low ()
-  (tank (name ?name) (:object ?tank))
+  (tank (name ?name) (level ?level) (:object ?tank))
   (test (and (low-p ?tank) (intact-p ?tank)))
   (not (tank-level-warning (tank ?tank) (type low)))
   =>
   (assert (tank-level-warning (tank ?tank) (type low)))
-  (format t "Warning: Tank ~S is low!~%" ?name))
+  (message t "Warning: Tank ~S is low (~D)!~%" ?name ?level))
 
 (defrule raise-rate-if-low ()
-  (?warning (tank-level-warning (tank ?tank)))
+  (?warning (tank-level-warning (tank ?tank) (type low)))
   (pump (name ?name) (tank ?tank) (flow-rate ?flow-rate (< ?flow-rate 25))
         (:object ?pump))
   =>
   (retract ?warning)
   (set-flow-rate ?pump (1+ ?flow-rate))
-  (format t "Raised pumping rate of pump ~S to ~D~%" 
-          ?name (get-flow-rate ?pump)))
+  (message t "Raised pumping rate of pump ~S to ~D~%" 
+           ?name (get-flow-rate ?pump)))
 
 (defrule warn-if-high ()
-  (tank (name ?name) (:object ?tank))
+  (tank (name ?name) (level ?level) (:object ?tank))
   (test (and (high-p ?tank) (intact-p ?tank)))
   (not (tank-level-warning (tank ?tank) (type high)))
   =>
   (assert (tank-level-warning (tank ?tank) (type high)))
-  (format t "Warning: Tank ~S is high!~%" ?name))
+  (message t "Warning: Tank ~S is high (~D)!~%" ?name ?level))
 
 (defrule lower-rate-if-high ()
   (?warning (tank-level-warning (tank ?tank) (type high)))
@@ -184,9 +197,10 @@
         (:object ?pump))
   =>
   (retract ?warning)
-  (set-flow-rate ?pump (1- ?flow-rate))
-  (format t "Lowered pumping rate of pump ~S to ~D~%"
-          ?name (get-flow-rate ?pump)))
+  (let ((new-rate (1- ?flow-rate)))
+    (set-flow-rate ?pump new-rate)
+    (message t "Lowered pumping rate of pump ~S to ~D~%"
+             ?name new-rate)))
 
 (defrule notify-if-ok ()
   (?warning (tank-level-warning))
@@ -194,7 +208,7 @@
   (test (and (not (high-p ?tank)) (not (low-p ?tank))))
   =>
   (retract ?warning)
-  (format t "Tank ~S is now OK.~%" ?name))
+  (message t "Tank ~S is now OK.~%" ?name))
 
 (defrule sleep-if-bored (:salience -100)
   (?idle (idle (count ?count)))
@@ -204,23 +218,21 @@
   (assert (idle (count (1+ ?count)))))
 
 (defrule report-fire ()
-  (?fact (tank (name ?name) (:object ?tank)))
+  (tank (name ?name) (:object ?tank))
   (test (and (low-p ?tank) (not (intact-p ?tank))))
   =>
-  (format t "*********************************************~%")
-  (format t "* Tank ~S has run dry and caught fire.~%" ?name)
-  (format t "*********************************************~%")
-  (retract ?fact)
+  (message t "*********************************************~%")
+  (message t "* Tank ~S has run dry and caught fire.~%" ?name)
+  (message t "*********************************************~%")
   (halt (engine)))
 
 (defrule report-explosion ()
-  (?fact (tank (name ?name) (:object ?tank)))
+  (tank (name ?name) (:object ?tank))
   (test (and (high-p ?tank) (not (intact-p ?tank))))
   =>
-  (format t "*********************************************~%")
-  (format t "* Tank ~S has overfilled and exploded.~%" ?name)
-  (format t "*********************************************~%")
-  (retract ?fact)
+  (message t "*********************************************~%")
+  (message t "* Tank ~S has overfilled and exploded.~%" ?name)
+  (message t "*********************************************~%")
   (halt (engine)))
 
 (defrule startup ()
