@@ -20,7 +20,7 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.10 2002/10/03 18:04:21 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.11 2002/10/07 19:55:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,3 +53,8 @@
   (loop for successor being the hash-value
       of (shared-node-successors shared-node)
       collect (successor-node successor)))
+
+(defun shared-node-all-successors (shared-node)
+  (loop for successor being the hash-value
+      of (shared-node-successors shared-node)
+      collect successor))

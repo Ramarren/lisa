@@ -20,7 +20,7 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.10 2002/10/07 18:55:30 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.11 2002/10/07 19:55:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,6 +53,13 @@
                  (remove-nodes (rest nodes))))))
     (remove-nodes (rule-node-list rule))))
 
+(defmethod successor-exists-p ((parent shared-node) (node node1))
+  (gethash (node1-test node) (shared-node-successors parent)))
+
+(defmethod successor-exists-p (parent node)
+  (declare (ignore parent node))
+  nil)
+
 (defun merge-networks (from-rete to-rete)
   (labels ((find-root-node (network node)
              (find node :key #'node1-test
@@ -63,9 +70,11 @@
              (if (endp successors) parent
                (let* ((new-successor (first successors))
                       (existing-successor
-                       (find-successor parent new-successor)))
+                       (successor-exists-p parent new-successor)))
                  (if (null existing-successor)
-                     (add-successor parent new-successor)
+                     (add-successor 
+                      parent (successor-node new-successor)
+                      (successor-connector new-successor))
                    (merge-successors 
                     existing-successor 
                     (shared-node-all-successors 
@@ -81,3 +90,9 @@
     (loop for new-root being the hash-value
         of (rete-roots from-rete)
         do (merge-root-node new-root))))
+
+(defun merge-rule-into-network (to-network patterns rule)
+  (let ((working-network (make-rete-network)))
+    (compile-rule-into-network working-network patterns rule)
+    (merge-networks working-network to-network)
+    rule))

@@ -20,17 +20,9 @@
 ;;; File: successor.lisp
 ;;; Description:
 
-;;; $Id: successor.lisp,v 1.3 2002/10/07 18:55:30 youngde Exp $
+;;; $Id: successor.lisp,v 1.4 2002/10/07 19:55:13 youngde Exp $
 
 (in-package "LISA")
-
-(defun successor-p (obj)
-  (and (consp obj)
-       (atom (car obj))
-       (atom (cdr obj))))
-
-(deftype successor ()
-  `(and cons (satisfies successor-p)))
 
 (defun make-successor (node connector)
   (cons node connector))
