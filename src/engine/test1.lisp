@@ -20,7 +20,7 @@
 ;;; File: test1.lisp
 ;;; Description: This class represents a single test in a conditional element.
 
-;;; $Id: test1.lisp,v 1.2 2000/11/07 01:57:50 youngde Exp $
+;;; $Id: test1.lisp,v 1.3 2000/12/05 15:18:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,6 +33,9 @@
 
 (defmethod do-test ((test test1))
   (not (null (get-value test))))
+
+(defmethod value-is-variable-p ((self test1))
+  (variablep (get-value self)))
 
 (defmethod equals ((self test1) (obj test1))
   (equal (get-value self) (get-value obj)))

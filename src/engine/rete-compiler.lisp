@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.13 2000/12/05 01:03:17 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.14 2000/12/05 15:18:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -95,6 +95,23 @@
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
 
+(defun add-node2-tests (rule node2 slots)
+  (labels ((add-tests (tests)
+             (let ((test (first tests)))
+               (cond ((null test)
+                      (values))
+                     ((value-is-variable-p test)
+                      (let ((binding (get-binding rule (get-value test))))
+                        (assert (typep binding 'slot-binding))
+                        (add-test node2 binding)
+                        (add-tests (rest tests))))
+                     (t
+                      (add-tests (rest tests)))))))
+    (unless (null slots)
+      (add-tests (get-tests (first slots)))
+      (add-node2-tests node2 (rest slots)))
+    (values node2)))
+                      
 (defun create-join-nodes (compiler rule)
   (labels ((add-join-node (node i)
              (with-accessors ((terminals get-terminals)) compiler
@@ -108,8 +125,10 @@
              (cond ((null patterns)
                     (values t))
                    (t
-                    (add-join-node (make-node2 (get-engine rule)) i)
-                    (third-pass (rest patterns) (1+ i))))))
+                    (let ((node2 (make-node2 (get-engine rule))))
+                      (add-node2-tests rule node2 (get-slots (first pattern)))
+                      (add-join-node node2 i)
+                      (third-pass (rest patterns) (1+ i)))))))
     (third-pass (rest (get-patterns rule)) 1)))
 
 (defun create-terminal-node (compiler rule)
