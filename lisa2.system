@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.18 2002/09/17 14:42:38 youngde Exp $
+;;; $Id: lisa2.system,v 1.19 2002/09/17 18:09:21 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -108,7 +108,7 @@
                           :components ((:file "environment")
                                        (:file "meta")
                                        (:file "rete"
-                                              :depends-on (environment))
+                                              :depends-on (environment language))
                                        (:file "rule")
                                        (:file "binding")
                                        (:file "pattern")
