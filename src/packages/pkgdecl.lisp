@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.47 2002/08/20 18:21:55 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.48 2002/08/20 19:13:53 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -38,8 +38,15 @@
            "NOT-PATTERN" "TEST-PATTERN" "PATTERN" "ADD-TOKEN" "REMOVE-TOKEN"
            "CLEAR-TOKEN"))
 
+(defpackage "LISA.RETE.RI"
+  (:use "COMMON-LISP"))
+
+(defpackage "LISA.PRECOMPILER"
+  (:use "COMMON-LISP")
+  (:export "PATTERN" "GENERIC-PATTERN" "TEST-PATTERN" "NOT-PATTERN"))
+
 (defpackage "LISA"
-  (:use "LISA.RETE")
+  (:use "LISA.RETE" "LISA.PRECOMPILER")
   (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
            "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
            "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
