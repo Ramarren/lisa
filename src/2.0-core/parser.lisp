@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.45 2002/10/30 19:02:55 youngde Exp $
+;;; $Id: parser.lisp,v 1.46 2002/10/30 20:34:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -107,29 +107,12 @@
                (fixup-bindings (rest part) (push new-token result)))))
     (fixup-bindings patterns nil)))
 
-(defun expand-any-compound-patterns (lhs)
-  (let ((elements (list)))
-    (labels ((expand-patterns (patterns tag)
-               (let ((pattern (first patterns)))
-                 (cond ((endp patterns) elements)
-                       (t
-                        (cl:assert (consp pattern) nil
-                          "This rule body is malformed: ~S" lhs)
-                        (if (eq (first pattern) 'or)
-                            (expand-patterns (rest pattern) :or)
-                          (if (null tag)
-                              (push pattern elements)
-                            (push (list :or pattern) elements)))
-                        (expand-patterns (rest patterns) tag))))))
-      (nreverse (expand-patterns lhs nil)))))
-
 (defun preprocess-left-side (lhs)
-  (let ((elements (expand-any-compound-patterns lhs)))
-    (cond ((null elements)
-           (push (list 'initial-fact) elements))
-          ((rule)
-           (fixup-runtime-bindings elements))
-          (t elements))))
+  (cond ((null lhs)
+         (push (list 'initial-fact) lhs))
+        ((rule)
+         (fixup-runtime-bindings lhs))
+        (t lhs)))
 
 (defun parse-rulebody (body)
   (let ((location -1))
@@ -154,8 +137,6 @@
                 (parse-rhs (utils:find-after *rule-separator*
                                              remains :test #'eq)))))))
 
-(defvar *compound-pattern-p*)
-
 (defun make-rule-pattern (template location)
   (labels ((build-parsed-pattern (form bindings type 
                                   &optional (binding nil))
@@ -166,7 +147,11 @@
               :type type
               :pattern-binding binding
               :binding-set (make-binding-set)
-              :compound-pattern-p (boundp '*compound-pattern-p*)
+              :address location))
+           (build-compound-pattern (sub-patterns)
+             (make-parsed-pattern
+              :type :or
+              :sub-patterns sub-patterns
               :address location))
            (parse-pattern (p &optional binding)
              (let ((head (first p)))
@@ -183,9 +168,9 @@
                      ((variablep head)
                       (parse-pattern (second p)
                                      (set-pattern-binding head location)))
-                     ((eq head :or)
-                      (let ((*compound-pattern-p* t))
-                        (parse-pattern (second p))))
+                     ((eq head 'or)
+                      (build-compound-pattern
+                       (mapcar #'parse-pattern (rest p))))
                      (t
                       (multiple-value-call
                           #'build-parsed-pattern
