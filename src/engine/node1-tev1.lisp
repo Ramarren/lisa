@@ -21,7 +21,7 @@
 ;;; Description: This class represents network nodes that test whether
 ;;; two slots in the same fact have the same type and value.
 
-;;; $Id: node1-tev1.lisp,v 1.2 2000/12/06 22:52:37 youngde Exp $
+;;; $Id: node1-tev1.lisp,v 1.3 2000/12/07 02:20:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -41,7 +41,7 @@
          (let ((fact (get-top-fact token)))
            (cond ((equal (get-slot-value fact (get-initial-slot self))
                          (get-slot-value fact (get-reference-slot self)))
-                  (pass-along token)
+                  (pass-along self token)
                   (values t))
                  (t (values nil)))))))
 
