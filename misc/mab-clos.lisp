@@ -22,13 +22,15 @@
 ;;; implementation, a common AI planning problem. The monkey's objective is to
 ;;; find and eat some bananas.
 
-;;; $Id: mab-clos.lisp,v 1.6 2001/05/24 19:55:45 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.7 2001/05/31 19:13:56 youngde Exp $
 
 (in-package "LISA-USER")
 
 (use-default-engine)
 
-(defclass monkey ()
+(defclass mab-fundamental () ())
+
+(defclass monkey (mab-fundamental)
   ((location :initarg :location
              :initform 'green-couch)
    (on-top-of :initarg :on-top-of
@@ -38,7 +40,7 @@
    (holding :initarg :holding
             :initform 'nothing)))
 
-(defclass thing ()
+(defclass thing (mab-fundamental)
   ((name :initarg :name)
    (location :initarg :location)
    (on-top-of :initarg :on-top-of
@@ -46,12 +48,12 @@
    (weight :initarg :weight
            :initform 'light)))
 
-(defclass chest ()
+(defclass chest (mab-fundamental)
   ((name :initarg :name)
    (contents :initarg :contents)
    (unlocked-by :initarg :unlocked-by)))
 
-(defclass goal-is-to ()
+(defclass goal-is-to (mab-fundamental)
   ((action :initarg :action)
    (argument-1 :initarg :argument-1)
    (argument-2 :initarg :argument-2
@@ -62,13 +64,15 @@
 ;;; introspection. The last form illustrates how one might limit the slots of
 ;;; interest by specifying them explicitly...
 
-(defimport monkey (lisa-user::monkey) ())
+(defimport mab-fundamental (lisa-user::mab-fundamental) ())
 
-(defimport thing (lisa-user::thing) ())
+(defimport monkey (lisa-user::monkey (mab-fundamental)) ())
 
-(defimport chest (lisa-user::chest) ())
+(defimport thing (lisa-user::thing (mab-fundamental)) ())
 
-(defimport goal-is-to (lisa-user::goal-is-to)
+(defimport chest (lisa-user::chest (mab-fundamental)) ())
+
+(defimport goal-is-to (lisa-user::goal-is-to (mab-fundamental))
   (action argument-1 argument-2))
 
 ;;;(watch :activations)
@@ -393,6 +397,11 @@
   (monkey (satisfied t) (:object ?monkey))
   =>
   (format t "Monkey is satisfied: ~S~%" ?monkey))
+
+(defrule cleanup (:salience -100)
+  (?fact (mab-fundamental))
+  =>
+  (retract ?fact))
 
 ;;; startup rule...
 
