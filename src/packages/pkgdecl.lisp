@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.25 2001/04/26 20:43:18 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.26 2001/04/27 18:58:28 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -40,7 +40,7 @@
            "WATCHING" "HALT" "ASSERT-INSTANCE" "TELL-EXTERNALLY-MODIFIED"
            "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
-           "=>"))
+           "ASSERT-FROM-STRING" "=>"))
 
 (defpackage "LISA-USER"
   (:use "COMMON-LISP")
@@ -52,7 +52,8 @@
                 "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
                 "TELL-EXTERNALLY-MODIFIED" "TELL-LISA-MODIFIED-INSTANCE"
                 "SLOT" "TEST" "ENGINE" "USE-ENGINE" "WITH-INFERENCE-ENGINE"
-                "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "=>"))
+                "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "ASSERT-FROM-STRING"
+                "=>"))
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")
