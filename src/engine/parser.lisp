@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.17 2000/12/09 21:41:30 youngde Exp $
+;;; $Id: parser.lisp,v 1.18 2000/12/09 21:57:06 youngde Exp $
 
 (in-package :lisa)
 
@@ -190,41 +190,6 @@
                       (error "CANONICALIZE-FACT: parse error at ~S." slots))))))
     (create-slots body 0)))
 
-(defun parse-fact-body (body)
-  (flet ((validate-fact-structure (slot)
-           (cond ((consp slot)
-                  (let ((name (first slot))
-                        (value (second slot)))
-                    (cond ((and (symbolp name)
-                                (literalp value))
-                           (values slot))
-                          ((and (symbolp name)
-                                (variablep value))
-                           (setf value (get-lexical-binding
-                                        (current-engine) value))
-                           (cl:assert (not (null value)))
-                           `(,name ,value))
-                          (t
-                           (error "PARSE-FACT-BODY: malformed slot ~S." slot)))))
-                 (t
-                  (error "PARSE-FACT-BODY: parse error at ~S." slot)))))
-    (if (consp (first body))
-        (mapcar #'validate-fact-structure body)
-      (canonicalize-fact body))))
-
-(defun parse-and-insert-fact (body)
-  "Parses a fact as the result of an ASSERT."
-  (let ((head (first body)))
-    (cond ((symbolp head)
-           (let ((class (find-imported-class head nil)))
-             (if (null class)
-                 (error "PARSE-FACT: no class object found for ~S." head)
-               (assert-fact (current-engine)
-                            (make-fact class 
-                                       (parse-fact-body (rest body)))))))
-          (t
-           (error "PARSE-FACT: parse error at ~S." body)))))
-
 (defun normalize-slots (&rest args)
   (labels ((compose-slots (pairs slot-name slots)
              (cond ((null pairs)
@@ -260,12 +225,20 @@
                                  (nconc bindings `(',name ,value))))))))
     (expand-slots slots nil)))
 
-(defun insert-new-fact (head slots)
-  (format t "inserting fact: ~S ~S~%" head slots))
-
 (defun parse-and-insert-fact (body)
-  `(insert-new-fact ',(first body)
-                    (normalize-slots ,@(expand-slot-variables (rest body)))))
+  (let ((head (first body))
+        (slots (rest body)))
+    (cond ((symbolp head)
+           (let ((class (find-imported-class head nil)))
+             (if (null class)
+                 (error "No class object found for ~S." head)
+               `(assert-fact (current-engine)
+                             (make-fact ,class
+                                        (normalize-slots
+                                         ,@(expand-slot-variables slots)))))))
+          (t
+           (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
 (defun parse-and-modify-fact (fact body)
-  (format t "modify ~S, ~S~%" fact (parse-fact-body body)))
+  `(format t "modify fact: ~S ~S~%" ,fact
+           (normalize-slots ,@(expand-slot-variables body))))
