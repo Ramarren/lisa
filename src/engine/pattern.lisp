@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.11 2000/12/23 02:01:00 youngde Exp $
+;;; $Id: pattern.lisp,v 1.12 2001/01/03 17:08:16 youngde Exp $
 
 (in-package :lisa)
 
@@ -72,15 +72,15 @@
                    (t
                     (error "Unrecognizable slot format."))))
            (create-slot-tests (slot)
-             (let* ((name (first slot))
-                    (value (second slot))
-                    (constraint (third slot))
-                    (tests
-                     `(,(make-test1-eq name) ,(make-test1-eq value))))
+             (format t "slot = ~S~%" slot)
+             (let* ((value (first slot))
+                    (constraint (second slot))
+                    (tests `(,(make-test1-eq value))))
                (unless (null constraint)
                  (setf tests
                    (append tests
                            `(,(create-constraint-test constraint)))))
+               (format t "tests for slot: ~S~%" tests)
                (values tests))))
     (mapc #'(lambda (slot-desc)
               (add-slot self (first slot-desc)

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.26 2000/12/22 21:35:00 youngde Exp $
+;;; $Id: parser.lisp,v 1.27 2001/01/03 17:08:16 youngde Exp $
 
 (in-package :lisa)
 
@@ -114,7 +114,7 @@
   (labels ((parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (assert-conditions ((symbolp name)
-                                   (literalp field)
+                                   (slot-valuep field)
                                    (constraintp constraint)))
                (list name field constraint)))
            (parse-pattern-body (body slots)
