@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.23 2001/03/15 20:53:29 youngde Exp $
+;;; $Id: slot.lisp,v 1.24 2001/04/16 18:31:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -98,7 +98,7 @@
         (eq (first ,constraint) 'not)
         (variablep (second ,constraint))))
 
-(defun make-slot (name value constraint global-bindings)
+(defun make-slot (name value constraint)
   "Factory function that constructs instances of various slot types."
   (macrolet ((generate-test (var value negated)
                `(if ,negated

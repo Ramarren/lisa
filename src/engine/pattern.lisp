@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.50 2001/04/03 15:07:25 youngde Exp $
+;;; $Id: pattern.lisp,v 1.51 2001/04/16 18:31:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -84,7 +84,7 @@
                 (add-constraint-bindings slot)))
           (get-slots pattern))))
 
-(defun canonicalize-slots (self global-bindings)
+(defun canonicalize-slots (self)
   (declare (type pattern self))
   (let ((slots (list))
         (meta (find-meta-class (get-name self))))
@@ -92,13 +92,12 @@
               (push
                (make-slot (find-meta-slot meta (first slot-desc))
                           (second slot-desc)
-                          (third slot-desc)
-                          global-bindings)
+                          (third slot-desc))
                     slots))
           (get-slots self))
     (setf (get-slots self) (nreverse slots))))
 
 (defmethod finalize-pattern ((self pattern) global-bindings)
-  (canonicalize-slots self global-bindings)
+  (canonicalize-slots self)
   (setup-pattern-bindings self global-bindings)
   (values self))

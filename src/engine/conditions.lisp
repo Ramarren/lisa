@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.15 2001/04/10 13:53:22 youngde Exp $
+;;; $Id: conditions.lisp,v 1.16 2001/04/16 18:31:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -41,7 +41,7 @@
      (let ((element (syntactical-error-element condition)))
        (if (null element)
            (format strm "Syntax error:~%")
-         (format strm "While evaluating the element ~S:~%" element))
+         (format strm "While evaluating the element ~S: ~%" element))
        (format strm (lisa-error-text condition)))))
   (:documentation
    "This condition represents syntactical errors discovered during the initial
@@ -108,8 +108,8 @@
          :reader command-structure-error-form))
   (:report
    (lambda (condition strm)
-     (format strm "While evaluating the form:")
-     (format strm "~S" (command-structure-error-form condition))
+     (format strm "While evaluating the form ~S~%"
+             (command-structure-error-form condition))
      (format strm (lisa-error-text condition))))
   (:documentation
    "This condition represents structural errors found while parsing specific
@@ -129,7 +129,7 @@
 
 (defmacro rule-structure-error (rule-name parse-condition)
   `(error 'rule-structure-error
-    :rule-name ,rule-name :element element
+    :rule-name ,rule-name
     :text (lisa-error-text ,parse-condition)))
 
 (defmacro rule-evaluation-error (rule condition)

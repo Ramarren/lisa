@@ -965,6 +965,9 @@
 ;;; MAKE package. A nice side-effect is that the short nickname
 ;;; MK is my initials.
 
+#+clisp
+(defpackage "MAKE" (:use "COMMON-LISP") (:nicknames "MK"))
+
 #-(or :cltl2 :lispworks)
 (in-package "MAKE" :nicknames '("MK"))
 
@@ -1002,10 +1005,6 @@
 (eval-when (compile load eval)
   (unless (find-package "MAKE")
     (make-package "MAKE" :nicknames '("MK") :use '("COMMON-LISP"))))
-
-;;; sds
-#+:clisp
-(defpackage "MAKE" (:use "COMMON-LISP") (:nicknames "MK"))
 
 ;;; *** Marco Antoniotti <marcoxa@icsi.berkeley.edu> 19951012
 ;;; Here I add the proper defpackage for CMU
@@ -2002,6 +2001,7 @@ D
 
 
 (defun new-file-type (pathname type)
+  ;; why not (make-pathname :type type :defaults pathname)?
   (make-pathname
    :host (pathname-host pathname)
    :device (pathname-device pathname)
@@ -2470,8 +2470,9 @@ D
 			   :absolute
 			   #-(and :CMU (not (or :cmu17 :cmu18)))
 			   (let ((dev (component-device component)))
-			     (when dev
-			       (pathname-device dev)))
+			     (if dev
+                                 (pathname-device dev)
+                                 (pathname-device pathname)))
 			   ;; :version :newest
 			   ))))))
 
@@ -3683,7 +3684,8 @@ D
   #+:cmu (extensions:run-program program arguments)
   #+:lispworks (foreign:call-system-showing-output
 		(format nil "~A~@[ ~{~A~^ ~}~]" program arguments))
-  #+clisp (lisp:run-program program :arguments arguments)
+  #+clisp (#+lisp=cl ext:run-program #-lisp=cl lisp:run-program
+                     program :arguments arguments)
   )
 
 #+(or symbolics (and :lispworks :harlequin-pc-lisp))
@@ -3722,7 +3724,7 @@ D
        (make-pathname :type type)
        (translate-logical-pathname (pathname path2)))
       (translate-logical-pathname (pathname path1))))
-	      
+
 
 (defun run-compiler (program
 		     arguments
@@ -3735,8 +3737,8 @@ D
   (flet ((make-useable-stream (&rest streams)
 	   (apply #'make-broadcast-stream (delete nil streams)))
 	 )
-    (let ((error-file error-file)
-	  (error-file-stream nil)
+    (let (#+cmu (error-file error-file)
+	  #+cmu (error-file-stream nil)
 	  (verbose-stream nil)
 	  (old-timestamp (file-write-date output-file))
 	  (fatal-error nil)
@@ -3761,7 +3763,7 @@ D
 		   (make-useable-stream
 		    #+cmu error-file-stream
 		    (and verbose *standard-input*)))
-    
+
 	     (format verbose-stream "Running ~A~@[ ~{~A~^ ~}~]~%" program arguments)
 
 	     (setf fatal-error
@@ -3782,7 +3784,7 @@ D
 		   (and (probe-file output-file)
 			(not (eql old-timestamp
 				  (file-write-date output-file)))))
-	     
+
 
 	     (when output-file-written
 	       (format verbose-stream "~A written~%" output-file))
@@ -3793,11 +3795,11 @@ D
 	  (close error-file-stream)
 	  (unless (or fatal-error (not output-file-written))
 	    (delete-file error-file)))
-	
+
 	(values (and output-file-written output-file)
 		fatal-error
 		fatal-error)))))
-	  
+
 
 
 (defun c-compile-file (filename &rest args
@@ -3840,7 +3842,7 @@ D
 	      ,(namestring (translate-logical-pathname output-file))
 	      ,@(map-options "-L" library-paths #'truename)
 	      ,@(map-options "-l" libraries))))
-      
+
       (multiple-value-bind (output-file warnings fatal-errors)
 	  (run-compiler *c-compiler*
 			arguments

@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.16 2001/03/27 20:57:14 youngde Exp $
+;;; $Id: debug.lisp,v 1.17 2001/04/16 18:31:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -111,6 +111,8 @@
 (defun find-object (addr)
   #+Lispworks
   (sys:pointer-from-address addr)
+  #-Lispworks
+  (declare (ignore addr))
   #-Lispworks
   (error "FIND-OBJECT Not implemented for this platform."))
 
