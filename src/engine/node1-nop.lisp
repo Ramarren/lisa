@@ -20,7 +20,7 @@
 ;;; File: node1-nop.lisp
 ;;; Description: Trivial Rete node whose test always fails.
 
-;;; $Id: node1-nop.lisp,v 1.3 2001/04/23 21:48:58 youngde Exp $
+;;; $Id: node1-nop.lisp,v 1.4 2001/08/27 20:59:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,8 +30,9 @@
    "Trivial Rete node whose test always fails."))
 
 (defmethod call-node-right ((self node1-nop) token)
-  (call-next-method self token)
-  (values nil))
+  (with-gatekeeper (self)
+    (call-next-method self token)
+    (values nil)))
 
 (defmethod equals ((self node1-nop) (obj node1-nop))
   (values t))

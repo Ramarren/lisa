@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.14 2001/04/16 18:31:54 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.15 2001/08/27 20:59:04 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,7 +30,8 @@
    "Represents a specialized two-input node for negated patterns."))
 
 (defmethod call-node-left ((self node2-not) (token add-token))
-  (call-next-method self (make-clone-token (class-of token) token)))
+  (with-gatekeeper (self)
+    (call-next-method self (make-clone-token (class-of token) token))))
 
 (defmethod pass-token-from-right ((self node2-not) left-token)
   (unless (is-negated-p left-token)

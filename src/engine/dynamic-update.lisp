@@ -21,8 +21,37 @@
 ;;; Description: This file contains code supporting LISA's dynamic update
 ;;; capabilities.
 
-;;; $Id: dynamic-update.lisp,v 1.1 2001/08/27 18:15:43 youngde Exp $
+;;; $Id: dynamic-update.lisp,v 1.2 2001/08/27 20:59:04 youngde Exp $
 
 (in-package "LISA")
 
+(defvar *in-dynamic-update* nil
+  "Set whenever a dynamic update is in progress.")
 
+(defun in-dynamic-update ()
+  (values *in-dynamic-update*))
+
+(defmacro with-gatekeeper ((node) &body body)
+  (let ((pass-the-gate (gensym)))
+    `(labels ((,pass-the-gate ()
+                ,@body))
+       (cond ((in-dynamic-update)
+              (if (of-dynamic-update ,node)
+                  (funcall #',pass-the-gate)
+                (values nil)))
+             (t (funcall #',pass-the-gate))))))
+
+(defmacro with-dynamic-update ((paths) &body body)
+  (let ((toggle-dynamic-update (gensym)))
+    `(flet ((,toggle-dynamic-update (on)
+              (dolist (path ,paths)
+                (mapc #'(lambda (node)
+                          (if on
+                              (set-dynamic-update node)
+                            (clear-dynamic-update node)))
+                      path))))
+       (let ((*in-dynamic-update* t))
+         (funcall ,toggle-dynamic-update t)
+         (progn ,@body)
+         (funcall ,toggle-dynamic-update nil)))))
+     
