@@ -133,7 +133,7 @@ in terms of time and size.</blockquote>
 
 <tr NOSAVE>
 
-<td WIDTH="80%" NOSAVE>(defimport <i>class-name</i> (&amp;key <i>use-inheritancep</i>))</td>
+<td WIDTH="80%" NOSAVE>(defimport <i>class-name</i>)</td>
 
 
 
@@ -145,17 +145,9 @@ in terms of time and size.</blockquote>
 
 
 
-<blockquote>Makes a CLOS class known to LISA and allows instances of this
-
-class to be asserted into the knowledge base. <i>Class-name</i>
-
-is the symbolic name of the class as it would be given to FIND-CLASS. If <i>use-inheritancep</i>
-
-  is non-NIL (the default), LISA makes the entire class hierarchy and slot
-
-  content available for pattern matching. Note that it is not necessary to
-
-  import the ancestors of <i>class-name</i> as LISA will do this automatically.</blockquote>
+<blockquote>A convenience macro that imports the symbols associated with a class
+  into whatever LISA-related package the developer wishes. The symbols imported
+  include the class name, slot names and accessors.</blockquote>
 
 
 
