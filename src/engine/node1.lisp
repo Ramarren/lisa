@@ -21,7 +21,7 @@
 ;;; Description: Single-input node of the Rete pattern network. NODE1
 ;;; is intended to be abstract.
 
-;;; $Id: node1.lisp,v 1.5 2000/12/07 02:28:36 youngde Exp $
+;;; $Id: node1.lisp,v 1.6 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -43,4 +43,5 @@
         (get-successors self)))
 
 (defmethod equals ((self node1) obj)
+  (declare (ignore obj))
   (values nil))

@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.43 2001/01/23 21:05:00 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.44 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,6 +56,7 @@
    "Generates the Rete pattern network."))
 
 (defmethod initialize-instance :after ((self rete-compiler) &rest args)
+  (declare (ignore args))
   (setf (slot-value self 'root-node) (make-root-node)))
 
 (defun add-simple-tests (pattern rule parent-node)
@@ -66,7 +67,7 @@
                              (= (get-pattern-count rule) 1)))
                 (setf last-node
                   (merge-successor last-node
-                                   (make-node1 slot pattern rule)
+                                   (make-node1 slot pattern)
                                    rule))))
           (get-slots pattern))
     (values last-node)))
@@ -94,11 +95,11 @@
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0) (make-node1-rtl) rule))))
     
-(defun add-node2-tests (rule node2 pattern)
+(defun add-node2-tests (node2 pattern)
   (flet ((add-constraint-test (slot)
            (add-test node2
                      (make-test2-eval
-                      (make-node-function-call slot pattern rule)))))
+                      (make-node-function-call slot pattern)))))
     (mapc #'(lambda (slot)
               (unless (or (localized-slotp slot)
                           (not (has-constraintp slot)))
@@ -129,7 +130,7 @@
                  (setf (aref terminals location) new-node))))
       (mapc #'(lambda (pattern)
                 (let ((node2 (make-join-node pattern (get-engine rule))))
-                  (add-node2-tests rule node2 pattern)
+                  (add-node2-tests node2 pattern)
                   (add-join-node node2 (get-location pattern))))
             (rest (get-patterns rule))))))
 
@@ -143,7 +144,7 @@
                (setf (aref terminals location) node2)))
       (mapc #'(lambda (pattern)
                 (let ((node2 (make-join-node pattern (get-engine rule))))
-                  (add-node2-tests rule node2 pattern)
+                  (add-node2-tests node2 pattern)
                   (add-join-node node2 (get-location pattern))))
             (rest (get-patterns rule))))))
 

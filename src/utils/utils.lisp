@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.13 2001/01/23 21:05:00 youngde Exp $
+;;; $Id: utils.lisp,v 1.14 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -73,7 +73,7 @@
            (values nil)))))
 
 (defun make-interned-symbol (&rest args)
-  (intern (make-symbol (apply #'format nil args))))
+  (intern (symbol-name (make-symbol (apply #'format nil args)))))
 
 (defun lsthash (func ht)
   "Applies FUNC to each entry in hashtable HT and, if FUNC so

@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.7 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: bindings.lisp,v 1.8 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -115,9 +115,9 @@
       (setf (gethash (get-name binding) table) binding))))
 
 (defun get-binding-list (table &key (test #'identity))
-  (declare (type (table 'binding-table)))
   (let ((bindings (list)))
     (maphash #'(lambda (key val)
+                 (declare (ignore key))
                  (when (funcall test val)
                    (push val bindings)))
              (get-table table))

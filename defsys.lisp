@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.10 2001/01/23 21:04:59 youngde Exp $
+;;; $Id: defsys.lisp,v 1.11 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :user)
 
@@ -69,6 +69,12 @@
                                     `(,dir)))))
       (unless (probe-file path)
         (mkdir path)))))
+
+#+CMU
+(progn
+  (pushnew 'cl:compile pcl::*defgeneric-times*)
+  (pushnew 'cl:compile pcl::*defmethod-times*)
+  (pushnew 'cl:compile pcl::*defclass-times*))
 
 (mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*

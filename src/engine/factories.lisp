@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.17 2001/01/23 21:05:00 youngde Exp $
+;;; $Id: factories.lisp,v 1.18 2001/01/23 21:34:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -49,19 +49,9 @@
   (error "The Join Node factory doesn't understand this pattern type: ~S~%"
          (class-of pattern)))
 
-#+ignore
-(defun make-node-function-call (slot pattern rule)
-  (flet ((reject-binding (binding)
-           (or (not (typep binding 'slot-binding))
-               (> (get-location binding)
-                  (get-location pattern)))))
-    (make-function-call
-     `(,(get-constraint slot))
-     (remove-if #'reject-binding (get-bindings rule)))))
-
-(defun make-node-function-call (slot pattern rule)
+(defun make-node-function-call (slot pattern)
   (make-function-call `(,(get-constraint slot)) (get-bindings pattern)))
 
-(defun make-node1 (slot pattern rule)
+(defun make-node1 (slot pattern)
   (make-node1-tfn (get-name slot)
-                  (make-node-function-call slot pattern rule)))
+                  (make-node-function-call slot pattern)))
