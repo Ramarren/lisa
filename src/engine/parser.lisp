@@ -24,9 +24,11 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.45 2001/03/30 18:35:51 youngde Exp $
+;;; $Id: parser.lisp,v 1.46 2001/03/30 20:25:44 youngde Exp $
 
 (in-package "LISA")
+
+(defconstant *rule-separator* '=>)
 
 (defmacro with-slot-components (((name field constraint) slot) &body body)
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
@@ -78,15 +80,17 @@
                                         (make-rule-pattern pattern))))
                      ((null pattern)
                       (values patterns))
-                     (t (error "parse-rule-body: parsing error on LHS at ~S~%" patterns)))))
+                     (t
+                      (parsing-error
+                       "There was trouble while parsing the LHS: ~S" pattern)))))
            (parse-rhs (actions)
              (values actions)))
     (multiple-value-bind (lhs remains)
-        (find-before '=> body :test #'eq)
+        (find-before *rule-separator* body :test #'eq)
       (if (not (null remains))
           (values (parse-lhs lhs nil)
-                  (parse-rhs (find-after '=> remains :test #'eq)))
-        (error "parse-rulebody: rule structure unsound.")))))
+                  (parse-rhs (find-after *rule-separator remains :test #'eq)))
+        (parsing-error "Missing rule separator.")))))
 
 (defun make-rule-pattern (template)
   (labels ((parse-pattern (p binding)
@@ -101,27 +105,32 @@
                          ((variablep head)
                           (if (null binding)
                               (parse-pattern (first (rest p)) head)
-                            (error "Parse error at ~S~%" p)))
+                            (parsing-error
+                             "Too many pattern variables: ~S" head)))
                          (t
                           (make-parsed-pattern
                            :pattern (make-default-pattern p)
                            :binding binding
                            :type :generic)))
-                 (error "Parse error at ~S~%" p)))))
+                 (parsing-error
+                  "Patterns must begin with a symbol: ~S" template)))))
     `(,(parse-pattern template nil))))
 
-(defun parse-unordered-pattern (pattern)
+(defun parse-default-pattern (pattern)
   (labels ((parse-pattern-head ()
              (let ((head (first pattern)))
                (if (has-meta-classp head)
                    (values head)
-                 (error "Pattern has no metaclass: ~S" pattern))))
+                 (parsing-error "This pattern has no meta class: ~S" head))))
            (parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
-               (assert-conditions ((symbolp name)
-                                   (slot-valuep field)
-                                   (constraintp constraint)))
-               `(,name ,field ,constraint)))
+               (cond ((and (symbolp name)
+                           (slot-valuep field)
+                           (constraintp constraint))
+                      `(,name ,field ,constraint))
+                     (t
+                      (parsing-error
+                       "In pattern ~S there are type problems with this slot: ~S" slot)))))
            (parse-pattern-body (body slots)
              (let ((slot (first body)))
                (cond ((consp slot)
@@ -131,12 +140,13 @@
                      ((null slot)
                       (values slots))
                      (t
-                      (error "parse-unordered-pattern: parse error at ~S~%" body))))))
+                      (parsing-error
+                       "This pattern has structural problems: ~S" pattern))))))
     `(,(parse-pattern-head)
       ,(parse-pattern-body (rest pattern) nil))))
 
 (defun make-default-pattern (p)
-  (parse-unordered-pattern p))
+  (parse-default-pattern p))
 
 (defun normalize-slots (slots)
   (flet ((normalize (slot)
@@ -149,7 +159,8 @@
                         ``(,',slot-name ,',slot-value)
                       ``(,',slot-name ,,slot-value)))
                    (t
-                    (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
+                    (parsing-error
+                     "There's a type problem in this slot: ~S" slot))))))
     `(list ,@(mapcar #'normalize slots))))
 
 (defun canonicalize-slot-names (meta-class slots)
@@ -168,7 +179,7 @@
                 (canonicalize-slot-names ,class
                  (,@(normalize-slots slots)))))))
           (t
-           (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
+           (parsing-error "A fact must begin with a symbol: ~S" head)))))
 
 (defun parse-and-modify-fact (fact body)
   `(modify-fact (current-engine) ,fact
@@ -176,10 +187,11 @@
      (,@(normalize-slots body)))))
 
 (defun redefine-deftemplate (name body)
-  (flet ((extract-slot (s)
-           (cond ((or (not (consp s))
-                      (not (eql (first s) 'slot))
-                      (not (= (length s) 2)))
-                  (error "Bad DEFTEMPLATE form for ~S: ~S" name s))
-                 (t (second s)))))
+  (flet ((extract-slot (slot)
+           (cond ((or (not (consp slot))
+                      (not (eql (first slot) 'slot))
+                      (not (= (length slot) 2)))
+                  (parsing-error
+                   "This slot has a structural problem: ~S" slot))
+                 (t (second slot)))))
     (create-class-template name (mapcar #'extract-slot body))))
