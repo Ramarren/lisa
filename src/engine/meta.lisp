@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.39 2002/08/06 01:17:03 youngde Exp $
+;;; $Id: meta.lisp,v 1.40 2002/08/06 17:40:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,9 +44,14 @@
                :documentation
                "A symbol representing the fully qualified CLOS class name.")
    (slot-table :reader get-slot-table
-               :initform (make-hash-table))
+               :initform (make-hash-table)
+               :documentation
+               "A hash table mapping symbolic slot names to their
+                corresponding effective slot names.")
    (slot-list :reader get-slot-list
-              :initform (list))
+              :initform (list)
+              :documentation
+              "A list containing the symbolic slot names for a fact.")
    (superclasses :initarg :superclasses
                  :initform '()
                  :reader get-superclasses
@@ -56,22 +61,21 @@
    "This class represents data about facts. Every LISA fact is backed by a
   CLOS instance that was either defined by the application or internally by
   LISA (via DEFTEMPLATE). META-FACT performs housekeeping chores; mapping
-  symbolic fact names to actual class names, slot names to their underlying
-  SLOT-NAME representation, etc."))
+  symbolic fact names to actual class names, slot names to their corresponding
+  effective slot names, etc."))
 
 (defmethod initialize-instance :after ((self meta-fact) 
-                                       &key effective-slots)
-  "Initializes instances of class META-FACT. SLOTS is a list of symbolic slot
-  names; EFFECTIVE-SLOTS is a list of actual slot names."
+                                       &key slot-pairs)
+  "Initializes instances of class META-FACT. SLOT-PAIRS is a list of CONS
+  cells; the CDR of each is a symbolic slot name, the CAR a corresponding
+  effective slot name."
   (with-slots ((table slot-table) (slot-list slot-list)) self
     (mapc #'(lambda (slot-pair)
-              (setf (gethash (car slot-pair) table) (cdr slot-pair)))
-          effective-slots)
-    ;;(setf (gethash :object table) :object)
-    (maphash #'(lambda (slot eslot)
-                 (declare (ignore eslot))
-                 (push slot slot-list))
-             table)
+              (let ((slot-name (car slot-pair))
+                    (effective-slot-name (cdr slot-pair)))
+                (setf (gethash slot-name table) effective-slot-name)
+                (push slot-name slot-list)))
+          slot-pairs)
     self))
 
 (defun make-meta-fact (name class-name superclasses slots)
@@ -86,13 +90,10 @@
     (mapcar #'(lambda (superclass)
                 (intern (symbol-name (class-name superclass))))
             superclasses)
-    :effective-slots
+    :slot-pairs
     (mapcar #'(lambda (slot-name)
                 (cons (intern (symbol-name slot-name)) slot-name))
             slots)))
-
-(defun get-slots-for-fact (meta-fact)
-  (get-slot-list meta-fact))
 
 (defun find-effective-slot (meta-fact slot-name)
   "Finds the actual CLOS slot name as identified by the symbolic name
@@ -157,7 +158,11 @@
          "The class of this instance is not known to LISA: ~S." instance))
       name)))
 
-(defmacro import-class (class-name use-inheritancep)
+(defmacro import-class (class-name use-inheritance-p)
+  "Imports an external class into LISA, making it available for
+  reasoning. CLASS-NAME is the symbolic name of the class; if
+  USE-INHERITANCE-P is T, the ancestors of the class are also imported and
+  made available for reasoning."
   `(labels ((import-one-class (class direct-superclasses)
               (let* ((class-name (class-name class))
                      (symbolic-name
@@ -172,7 +177,7 @@
                     (register-external-class symbolic-name class)))))
             (import-classes (class)
               (let ((superclasses
-                     (if ,use-inheritancep
+                     (if ,use-inheritance-p
                          (reflect:find-direct-superclasses class)
                        '())))
                 (import-one-class class superclasses)
