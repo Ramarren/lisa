@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description: Base class for all types of patterns found on a rule LHS.
 
-;;; $Id: pattern.lisp,v 1.53 2001/04/20 15:29:42 youngde Exp $
+;;; $Id: pattern.lisp,v 1.54 2001/09/05 23:31:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,7 +34,40 @@
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 
-(defstruct parsed-pattern
+(defstruct (parsed-pattern
+            (:constructor make-internal-parsed-pattern))
   (pattern nil :type list)
   (binding nil :type symbol)
   (type nil :type symbol))
+
+;;; This function traverses a parsed but uncompiled pattern and "fixes up" the
+;;; runtime bindings of any special variables. In other words, given a pattern
+;;; of the form (ROCKY (NAME ?NAME) (BUDDY ?BUDDY)) FIXUP-RUNTIME-BINDINGS
+;;; will look at each variable and replace it with its SYMBOL-VALUE if that
+;;; variable is BOUNDP. This binding typically occurs whenever a rule is
+;;; dynamically defined; i.e. it is created at runtime through the execution
+;;; of another rule.
+
+(defun fixup-runtime-bindings (pattern)
+  (labels ((fixup-bindings (part result)
+             (let ((token (first part))
+                   (new-token nil))
+               (cond ((null token)
+                      (return-from fixup-bindings (nreverse result)))
+                     ((and (variablep token)
+                           (boundp token))
+                      (setf new-token (symbol-value token)))
+                     ((listp token)
+                      (setf new-token (fixup-bindings token nil)))
+                     (t
+                      (setf new-token token)))
+               (fixup-bindings (rest part) (push new-token result)))))
+    (fixup-bindings pattern nil)))
+
+(defun make-parsed-pattern (&key pattern binding type)
+  (make-internal-parsed-pattern
+   :pattern (if *during-rule-execution*
+                (fixup-runtime-bindings pattern)
+              pattern)
+   :binding binding
+   :type type))
