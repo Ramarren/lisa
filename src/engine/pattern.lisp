@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.27 2001/01/17 22:06:08 youngde Exp $
+;;; $Id: pattern.lisp,v 1.28 2001/01/18 18:48:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,6 +51,10 @@
 (defun is-localized-patternp (pattern)
   (declare (type (pattern pattern)))
   (get-locality pattern))
+
+(defmethod print-object ((self pattern) strm)
+  (print-unreadable-object (self strm :identity t :type t)
+    (format strm "name ~S" (get-name self))))
 
 (defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
   (mapc #'(lambda (desc)
@@ -106,14 +110,18 @@
       (values))))
 
 (defun set-pattern-locality (pattern bindings)
+  (format t "~S~%" pattern)
   (labels ((is-localp (var)
              (let ((binding (lookup-binding bindings var)))
                (cl:assert (not (null binding)) ())
                (= (get-location binding) (get-location pattern))))
            (get-constraint-locality (constraint)
              (let ((obj (first constraint)))
+               (format t "looking at ~S~%" obj)
                (cond ((null constraint)
                       (values t))
+                     ((consp obj)
+                      (get-constraint-locality obj))
                      ((and (variablep obj)
                            (not (is-localp obj)))
                       (values nil))
@@ -123,9 +131,8 @@
              (let ((slot (first slots)))
                (cond ((null slot)
                       (values t))
-                     ((not (is-localp (get-value slot)))
-                      (values nil))
-                     ((not (get-constraint-locality (get-constraint slot)))
+                     ((or (not (is-localp (get-value slot)))
+                          (not (get-constraint-locality (get-constraint slot))))
                       (values nil))
                      (t
                       (get-slot-locality (rest slots)))))))
