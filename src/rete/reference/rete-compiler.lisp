@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.13 2002/09/03 19:18:58 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.14 2002/09/04 01:04:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -96,21 +96,31 @@
                            #'pass-token))
           (set-leaf-node node address))))))
 
-(defun add-join-node-test (join-node pattern slot)
-  (let ((binding (pattern-slot-slot-binding slot))
-        (address (parsed-pattern-address pattern)))
-    (unless (= address (binding-address binding))
-      (node2-add-test
-       join-node
-       (make-inter-pattern-test (pattern-slot-name slot) binding)))))
-
+(defun add-join-node-tests (join-node pattern slot)
+  (flet ((add-simple-join-node-test ()
+           (let ((binding (pattern-slot-slot-binding slot))
+                 (address (parsed-pattern-address pattern)))
+             (unless (= address (binding-address binding))
+               (node2-add-test join-node
+                               (make-inter-pattern-test
+                                (pattern-slot-name slot) binding)))))
+         (add-slot-constraint-test ()
+           (node2-add-test join-node
+                           (make-constraint-test
+                            (pattern-slot-constraint slot)
+                            (pattern-slot-constraint-bindings slot)))))
+    (cond ((simple-bound-slot-p slot)
+           (add-simple-join-node-test))
+          ((constrained-slot-p slot)
+           (add-slot-constraint-test)))
+    join-node))
+    
 (defun add-inter-pattern-nodes (patterns)
   (dolist (pattern (rest patterns))
     (let ((join-node (make-node2))
           (address (parsed-pattern-address pattern)))
       (dolist (slot (parsed-pattern-slots pattern))
-        (unless (simple-slot-p slot)
-          (add-join-node-test join-node pattern slot)))
+        (add-join-node-tests join-node pattern slot))
       (add-successor
        (left-input address) join-node #'pass-tokens-on-left)
       (add-successor

@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.4 2002/09/03 19:18:57 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.5 2002/09/04 01:04:19 youngde Exp $
 
 (in-package "LISA")
 
@@ -60,3 +60,22 @@
             (get-slot-value 
              (token-find-fact left-tokens (binding-address binding))
              (binding-slot-name binding))))))
+
+(defun make-constraint-test (form bindings)
+  (let* ((special-vars
+          (mapcar #'binding-variable bindings))
+         (predicate
+          (compile nil `(lambda ()
+                          (declare (special ,@special-vars))
+                          ,form))))
+    (function
+     (lambda (token)
+       (progv
+           `(,@special-vars)
+           `(,@(mapcar #'(lambda (binding)
+                           (get-slot-value
+                            (token-find-fact token (binding-address binding))
+                            (binding-slot-name binding)))
+                       bindings))
+         (funcall predicate))))))
+         

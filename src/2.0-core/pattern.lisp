@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.11 2002/09/03 15:48:10 youngde Exp $
+;;; $Id: pattern.lisp,v 1.12 2002/09/04 01:04:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -66,6 +66,13 @@
 
 (defun simple-slot-p (pattern-slot)
   (not (variablep (pattern-slot-value pattern-slot))))
+
+(defun constrained-slot-p (pattern-slot)
+  (not (null (pattern-slot-constraint pattern-slot))))
+
+(defun simple-slot-binding-p (pattern-slot)
+  (and (variablep (pattern-slot-value pattern-slot))
+       (not (constrained-slot-p pattern-slot))))
 
 (defun bound-pattern-p (parsed-pattern)
   (not (null (parsed-pattern-pattern-binding parsed-pattern))))
