@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.27 2002/09/26 01:54:25 youngde Exp $
+;;; $Id: parser.lisp,v 1.28 2002/09/26 15:21:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,6 +35,9 @@
 (defmacro make-equality-predicate (var atom)
   `(function
     (lambda () 
+      (print ,var)
+      (format t "equal: ~S~%"
+              (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))
       (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))))
 
 (defmacro make-generic-predicate (&rest body)
@@ -200,7 +203,21 @@
                        (every #'(lambda (b)
                                   (= location (binding-address b)))
                               ,bindings))))
-      (labels ((parse-slot (slot)
+      (labels ((parse-constraint (var constraint)
+                 (let ((bindings (list)))
+                   (cond ((simple-form-p constraint)
+                          (values 
+                           (make-equality-predicate var constraint) nil nil))
+                         ((simple-negated-form-p constraint)
+                          (values (make-equality-predicate 
+                                   var (second constraint))
+                                  nil t))
+                         (t
+                          (values (make-generic-predicate constraint)
+                                  (collect-constraint-bindings
+                                   constraint bindings)
+                                  nil)))))
+               (parse-slot (slot)
                  (let ((name (first slot))
                        (field (second slot))
                        (constraint (third slot))
@@ -219,23 +236,14 @@
                      (multiple-value-bind (binding exists-p)
                          (find-or-set-slot-binding field name location)
                        (setf slot-binding binding)
-                       (when exists-p
+                       (when (or exists-p
+                                 (not (null constraint)))
                          (push binding existing-bindings))))
                    (unless (null constraint)
-                     (cond ((simple-form-p constraint)
-                            (setf constraint
-                              (make-equality-predicate field constraint)))
-                           ((simple-negated-form-p constraint)
-                            (setf constraint
-                              (make-equality-predicate field (second constraint)))
-                            (setf negated t))
-                           (t
-                            (setf existing-bindings
-                              (append existing-bindings
-                                      (collect-constraint-bindings 
-                                       constraint constraint-bindings)))
-                            (setf constraint
-                              (make-generic-predicate constraint)))))
+                     (multiple-value-setq (constraint constraint-bindings negated)
+                       (parse-constraint field constraint))
+                     (setf existing-bindings
+                       (append existing-bindings constraint-bindings)))
                    (make-pattern-slot :name name 
                                       :value field
                                       :slot-binding slot-binding

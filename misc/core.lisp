@@ -26,7 +26,7 @@
   (slot age))
 
 (defrule frodo ()
-  (frodo (name ?name frodo))
+  (frodo (name ?name bilbo))
   =>
   (format t "frodo fired: ~S~%" ?name))
 
