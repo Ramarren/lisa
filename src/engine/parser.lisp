@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.47 2001/03/30 21:58:52 youngde Exp $
+;;; $Id: parser.lisp,v 1.48 2001/03/30 23:14:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -89,7 +89,7 @@
         (find-before *rule-separator* body :test #'eq)
       (if (not (null remains))
           (values (parse-lhs lhs nil)
-                  (parse-rhs (find-after *rule-separator remains :test #'eq)))
+                  (parse-rhs (find-after *rule-separator* remains :test #'eq)))
         (parsing-error "Missing rule separator.")))))
 
 (defun make-rule-pattern (template)
@@ -121,7 +121,7 @@
              (let ((head (first pattern)))
                (if (has-meta-classp head)
                    (values head)
-                 (parsing-error "This pattern has no meta class: ~S" head))))
+                 (parsing-error "This pattern has no meta class: ~S" pattern))))
            (parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (cond ((and (symbolp name)
@@ -130,7 +130,8 @@
                       `(,name ,field ,constraint))
                      (t
                       (parsing-error
-                       "In pattern ~S there are type problems with this slot: ~S" slot)))))
+                       "In pattern ~S there are type problems with this slot: ~S"
+                       pattern slot)))))
            (parse-pattern-body (body slots)
              (let ((slot (first body)))
                (cond ((consp slot)
