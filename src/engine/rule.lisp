@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.56 2001/08/28 22:05:52 youngde Exp $
+;;; $Id: rule.lisp,v 1.57 2001/09/06 15:51:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -136,16 +136,41 @@
   (push (make-special-binding +lisa-engine-var+ (get-engine self)) bindings)
   (values bindings))
 
+#+ignore
 (defmethod compile-actions ((self rule) rhs)
   (let ((global-bindings (get-binding-table self))
         (action-bindings nil))
     (flet ((add-binding (var)
              (let ((binding (lookup-binding global-bindings var)))
-               (cl:assert (not (null binding)) ()
-                 "There's no known binding for this variable: ~S" var)
-               (setf action-bindings
-                 (pushnew binding action-bindings
-                          :key #'get-name)))))
+               (cond ((null binding)
+                      (unless *during-rule-execution*
+                        (cl:assert nil ()
+                          "There's no known binding for this variable: ~S" var)))
+                     (t
+                      (setf action-bindings
+                        (pushnew binding action-bindings
+                                 :key #'get-name)))))))
+      (mapc #'(lambda (var) (add-binding var))
+            (collect #'(lambda (obj) (variablep obj))
+                     (flatten rhs)))
+      (setf action-bindings
+        (add-special-bindings self action-bindings))
+      (setf (get-actions self)
+        (make-function-call rhs action-bindings)))))
+
+(defmethod compile-actions ((self rule) rhs)
+  (let ((global-bindings (get-binding-table self))
+        (action-bindings nil))
+    (flet ((add-binding (var)
+             (let ((binding (lookup-binding global-bindings var)))
+               (cond ((null binding)
+                      (when *show-lisa-warnings*
+                        (warn "On the RHS of rule ~S; no binding for variable ~S."
+                              (get-name self) var)))
+                     (t
+                      (setf action-bindings
+                        (pushnew binding action-bindings
+                                 :key #'get-name)))))))
       (mapc #'(lambda (var) (add-binding var))
             (collect #'(lambda (obj) (variablep obj))
                      (flatten rhs)))

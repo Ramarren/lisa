@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.7 2001/09/05 23:31:52 youngde Exp $
+;;; $Id: preamble.lisp,v 1.8 2001/09/06 15:51:35 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,9 @@
 
 (defvar *during-rule-execution* nil
   "This variable is bound to T whenever LISA is executing a rule.")
+
+(defvar *show-lisa-warnings* t
+  "Bind this variable to NIL if you want to inhibit LISA warning messages.")
 
 (defgeneric equals (object-1 object-2))
 
