@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.38 2001/01/25 22:14:33 youngde Exp $
+;;; $Id: pattern.lisp,v 1.39 2001/01/26 14:14:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -98,21 +98,6 @@
   (mapc #'(lambda (slot)
             (canonicalize-slot pattern slot bindings))
         (get-slots pattern)))
-  
-#+ignore
-(defun setup-pattern-bindings (pattern global-bindings)
-  (labels ((add-local-binding (var)
-             (let ((binding (lookup-binding bindings var)))
-               (cl:assert (not (null binding)) ())
-               (pushnew binding (slot-value pattern 'bindings))))
-           (add-constraint-bindings (constraint)
-             (mapc #'add-local-binding
-                   (collect #'(lambda (obj) (variablep obj))
-                            (flatten constraint)))))
-    (mapc #'(lambda (slot)
-              (add-local-binding (get-value slot))
-              (add-constraint-bindings (get-constraint slot)))
-          (get-slots pattern))))
 
 (defun setup-pattern-bindings (pattern global-bindings)
   (labels ((add-global-binding (binding)
@@ -147,5 +132,4 @@
 (defmethod finalize-pattern ((self pattern) global-bindings)
   (canonicalize-slots self global-bindings)
   (setup-pattern-bindings self global-bindings)
-  (format t "pattern bindings for ~S are: ~S~%" (get-name self) (get-bindings self))
   (values self))
