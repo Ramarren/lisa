@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.3 2004/09/15 17:34:41 youngde Exp $
+;;; $Id: cf.lisp,v 1.4 2004/09/15 18:22:41 youngde Exp $
 
 (in-package :lisa.cf)
 
@@ -57,6 +57,6 @@
                        (loop for f in args collect (lisa:cf f)))
               (min (lisa:cf a) (lisa:cf b))))
         (rule-cf (lisa:cf (lisa:active-rule))))
-    (if rule-cf
-        (* cf rule-cf)
-      cf)))
+    (if (zerop rule-cf)
+        cf
+      (* cf rule-cf))))
