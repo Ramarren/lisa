@@ -76,7 +76,8 @@ should not have as its value the symbol <i>floor</i>.</blockquote>
 <blockquote>Assuming the variable <i>?chest</i> was bound in a previous
 pattern, matches facts of class <i>monkey</i> whose slot <i>holding</i>
 has the same value as <i>?chest</i>. Additionally, if the pattern is successfully
-matched, binds the fact object to the variable <i>?monkey</i>.</blockquote>
+matched, binds the fact object to the variable <i>?monkey</i>. The variable
+<i>?monkey</i> is called a <i>pattern binding</i>.</blockquote>
 
 <pre>(pump (flow-rate ?flow-rate (&lt; ?flow-rate 25)))</pre>
 
@@ -85,7 +86,31 @@ matched, binds the fact object to the variable <i>?monkey</i>.</blockquote>
 <i>?flow-rate</i>. In addition, there is a constraint on this slot declaring
 that the value of <i>?flow-rate</i> must be less than 25. In general, constraints
 can be arbitrary Lisp expressions that serve as predicates.</blockquote>
+
+<pre>(fact-with-list (list '(1 2 three)))</pre>
+
+<blockquote>Patterns can perform matching on lists as well as simpler data
+types. Here, the slot <i>list</i> must have the value <i>'(1 2 three)</i>.
+More complicated list analysis can be done using user-defined predicates.</blockquote>
 </blockquote>
+
+<pre>negated pattern</pre>
+
+<blockquote>This pattern type is the complement of most variations of the
+generic pattern. Negated patterns have the symbol <i>not</i> as their head,
+and match if a fact satisfying the pattern is <i>not</i> found. For example:
+<pre>(not (tank-level-warning (tank ?tank) (type low)))</pre>
+Note that negated patterns are not allowed to have pattern bindings.</blockquote>
+
+<pre>test pattern</pre>
+
+<blockquote>The <i>test</i> conditional element allows one to evaluate
+arbitrary Lisp code on the rule LHS; these Lisp forms serve as a predicate
+that determines whether or not the pattern will match. For example, the
+pattern
+<pre>(test (and (high-p ?tank) (intact-p ?tank)))</pre>
+will succeed if the AND form returns non-<i>nil</i>; i.e. the functions
+HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
 </blockquote>
 
 </body>
