@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.24 2002/12/04 15:05:41 youngde Exp $
+;;; $Id: rule.lisp,v 1.25 2004/02/28 17:40:23 youngde Exp $
 
 (in-package "LISA")
 
@@ -129,7 +129,12 @@
                            (eq (parsed-pattern-class (first patterns))
                                'initial-fact)) nil
              "Logical patterns must appear first within a rule.")
-           (reduce #'(lambda (first second)
+           ;; BUG FIX - FEB 17, 2004 - Aneil Mallavarapu
+           ;;         - replaced: 
+           ;; (reduce #'(lambda (first second) 
+           ;; arguments need to be inverted because address values are PUSHed
+           ;; onto the list ADDRESSES, and therefore are in reverse order
+           (reduce #'(lambda (second first)
                        (cl:assert (= second (1+ first)) nil
                          "All logical patterns within a rule must be contiguous.")
                        second)
