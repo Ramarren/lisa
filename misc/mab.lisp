@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.31 2001/03/02 16:12:06 youngde Exp $
+;;; $Id: mab.lisp,v 1.32 2001/03/02 17:57:49 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,13 +29,11 @@
 (defclass thing ()())
 (defclass chest ()())
 (defclass goal-is-to ()())
-(defclass hose-it () ())
 
 (defimport monkey lisa::monkey)
 (defimport thing lisa::thing)
 (defimport chest lisa::chest)
 (defimport goal-is-to lisa::goal-is-to)
-(defimport hose-it lisa::hose-it)
 
 ;;;(watch :activations)
 ;;;(watch :facts)
@@ -61,7 +59,6 @@
   (modify ?monkey (holding blank))
   (modify ?thing (location ?place) (on-top-of floor)))
 
-
 (defrule get-key-to-unlock
   (goal-is-to (action unlock) (argument-1 ?obj))
   (thing (name ?obj) (on-top-of floor))
@@ -72,7 +69,6 @@
   (assert (goal-is-to (action hold) (argument-1 ?key)
                       (argument-2 empty))))
 
-
 (defrule move-to-chest-with-key
   (goal-is-to (action unlock) (argument-1 ?chest))
   (thing (name ?chest) (location ?cplace) (on-top-of floor))
@@ -82,7 +78,6 @@
   =>
   (assert (goal-is-to (action walk-to) (argument-1 ?cplace)
                       (argument-2 empty))))
-
 
 (defrule unlock-chest-with-key
   (?goal (goal-is-to (action unlock) (argument-1 ?name)))
@@ -99,7 +94,6 @@
 
 ;;; Hold-object rules...
 
-
 (defrule unlock-chest-to-hold-object
   (goal-is-to (action hold) (argument-1 ?obj))
   (chest (name ?chest) (contents ?obj))
@@ -108,7 +102,6 @@
   (assert (goal-is-to (action unlock) (argument-1 ?chest)
                       (argument-2 empty))))
 
-
 (defrule use-ladder-to-hold
   (goal-is-to (action hold) (argument-1 ?obj))
   (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light))
@@ -116,7 +109,6 @@
   (not (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place)))
   =>
   (assert (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place))))
-
 
 (defrule climb-ladder-to-hold
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -127,7 +119,6 @@
   =>
   (assert (goal-is-to (action on) (argument-1 ladder)
                       (argument-2 empty))))
-
 
 (defrule grab-object-from-ladder
   (?goal (goal-is-to (action hold) (argument-1 ?name)))
@@ -141,7 +132,6 @@
   (modify ?monkey (holding ?name))
   (retract ?goal))
 
-
 (defrule climb-to-hold
   (goal-is-to (action hold) (argument-1 ?obj))
   (thing (name ?obj) (location ?place (not ceiling))
@@ -151,8 +141,6 @@
   =>
   (assert (goal-is-to (action on) (argument-1 ?on)
                       (argument-2 empty))))
-          
-
 
 (defrule walk-to-hold
   (goal-is-to (action hold) (argument-1 ?obj))
@@ -164,7 +152,6 @@
   (assert (goal-is-to (action walk-to) (argument-1 ?place)
                       (argument-2 empty))))
 
-
 (defrule drop-to-hold
   (goal-is-to (action hold) (argument-1 ?obj))
   (thing (name ?obj) (location ?place) (on-top-of ?on) (weight light))
@@ -173,7 +160,6 @@
   =>
   (assert (goal-is-to (action hold) (argument-1 blank)
                       (argument-2 empty))))
-
 
 (defrule grab-object
   (?goal (goal-is-to (action hold) (argument-1 ?name)))
@@ -185,7 +171,6 @@
   (modify ?thing (location held) (on-top-of held))
   (modify ?monkey (holding ?name))
   (retract ?goal))
-
 
 (defrule drop-object
   (?goal (goal-is-to (action hold) (argument-1 blank)))
@@ -200,7 +185,6 @@
 
 ;;; Move-object rules...
 
-
 (defrule unlock-chest-to-move-object
   (goal-is-to (action move) (argument-1 ?obj))
   (chest (name ?chest) (contents ?obj))
@@ -208,7 +192,6 @@
   =>
   (assert (goal-is-to (action unlock) (argument-1 ?chest)
                       (argument-2 empty))))
-
 
 (defrule hold-object-to-move
   (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
@@ -219,7 +202,6 @@
   (assert (goal-is-to (action hold) (argument-1 ?obj)
                       (argument-2 empty))))
 
-
 (defrule move-object-to-place
   (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
   (monkey (location (not ?place)) (holding ?obj))
@@ -227,7 +209,6 @@
   =>
   (assert (goal-is-to (action walk-to) (argument-1 ?place)
                       (argument-2 empty))))
-
 
 (defrule drop-object-once-moved
   (?goal (goal-is-to (action move) (argument-1 ?name) (argument-2 ?place)))
@@ -239,7 +220,6 @@
   (modify ?thing (location ?place) (on-top-of floor))
   (retract ?goal))
 
-
 (defrule already-moved-object
   (?goal (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place)))
   (thing (name ?obj) (location ?place))
@@ -248,13 +228,11 @@
 
 ;;; Walk-to-place rules...
 
-
 (defrule already-at-place
   (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
   (monkey (location ?place))
   =>
   (retract ?goal))
-
 
 (defrule get-on-floor-to-walk
   (goal-is-to (action walk-to) (argument-1 ?place))
@@ -264,7 +242,6 @@
   (assert (goal-is-to (action on) (argument-1 floor)
                       (argument-2 empty))))
 
-
 (defrule walk-holding-nothing
   (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
   (?monkey (monkey (location (not ?place)) (on-top-of floor) (holding blank)))
@@ -272,7 +249,6 @@
   (format t "Monkey walks to ~A.~%" ?place)
   (modify ?monkey (location ?place))
   (retract ?goal))
-
 
 (defrule walk-holding-object
   (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
@@ -285,7 +261,6 @@
 
 ;;; Get-on-object rules...
 
-
 (defrule jump-onto-floor
   (?goal (goal-is-to (action on) (argument-1 floor)))
   (?monkey (monkey (on-top-of ?on (not floor))))
@@ -293,7 +268,6 @@
   (format t "Monkey jumps off the ~A onto the floor.~%" ?on)
   (modify ?monkey (on-top-of floor))
   (retract ?goal))
-
 
 (defrule walk-to-place-to-climb
   (goal-is-to (action on) (argument-1 ?obj))
@@ -303,7 +277,6 @@
   =>
   (assert (goal-is-to (action walk-to) (argument-1 ?place)
                       (argument-2 empty))))
-
 
 (defrule drop-to-climb
   (goal-is-to (action on) (argument-1 ?obj))
@@ -326,7 +299,6 @@
   (assert (goal-is-to (action on) (argument-1 ?on)
                       (argument-2 empty))))
 
-
 (defrule climb-directly
   (?goal (goal-is-to (action on) (argument-1 ?obj)))
   (thing (name ?obj) (location ?place) (on-top-of ?on))
@@ -336,7 +308,6 @@
   (modify ?monkey (on-top-of ?obj))
   (retract ?goal))
 
-
 (defrule already-on-object
   (?goal (goal-is-to (action on) (argument-1 ?obj)))
   (monkey (on-top-of ?obj))
@@ -345,7 +316,6 @@
 
 ;;; Eat-object rules...
 
-
 (defrule hold-to-eat
   (goal-is-to (action eat) (argument-1 ?obj))
   (monkey (holding (not ?obj)))
@@ -353,7 +323,6 @@
   =>
   (assert (goal-is-to (action hold) (argument-1 ?obj)
                       (argument-2 empty))))
-
 
 (defrule satisfy-hunger
   (?goal (goal-is-to (action eat) (argument-1 ?name)))
@@ -366,7 +335,6 @@
   (retract ?thing))
 
 ;;; startup rule...
-
 
 (defrule startup
   =>
