@@ -23,7 +23,7 @@
 ;;; find and eat some bananas. This iteration also illustrates the use of
 ;;; pattern matching on an object hierarchy.
 
-;;; $Id: mab-clos.lisp,v 1.9 2002/05/25 00:57:20 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.10 2002/11/07 19:21:59 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -59,27 +59,6 @@
    (argument-1 :initarg :argument-1)
    (argument-2 :initarg :argument-2
                :initform nil)))
-
-;;; These DEFIMPORT forms make the MAB classes known to LISA. The first three
-;;; contain no slot specifications so LISA determines applicable slots via
-;;; introspection. The last form illustrates how one might limit the slots of
-;;; interest by specifying them explicitly...
-
-;;;(defimport mab-fundamental (lisa-user::mab-fundamental) ())
-
-;;;(defimport monkey (lisa-user::monkey (mab-fundamental)) ())
-
-;;;(defimport thing (lisa-user::thing (mab-fundamental)) ())
-
-;;;(defimport chest (lisa-user::chest (mab-fundamental)) ())
-
-;;;(defimport goal-is-to (lisa-user::goal-is-to (mab-fundamental))
-;;;  (action argument-1 argument-2))
-
-(defimport monkey :use-inheritancep t)
-(defimport thing :use-inheritancep t)
-(defimport chest :use-inheritancep t)
-(defimport goal-is-to :use-inheritancep t)
 
 ;;;(watch :activations)
 ;;;(watch :facts)
