@@ -21,19 +21,25 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.3 2000/11/15 16:34:34 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.4 2000/11/29 01:07:45 youngde Exp $
 
 (in-package :lisa)
 
 (defclass generic-pattern (pattern)
-  ()
+  ((bound-name :initarg :bound-name
+               :initform nil
+               :accessor get-bound-name))
   (:documentation
    "Represents  the default style of pattern found on rule LHSs, as in
    (fact (slot-0 1) (slot-1 blue))."))
 
-(defun make-generic-pattern (head body)
+(defmethod set-pattern-binding ((self generic-pattern) binding)
+  (setf (get-bound-name self) binding))
+
+(defun make-generic-pattern (head body &optional (bound-name nil))
   "Constructor for the GENERIC-PATTERN class."
-  (let ((pattern (make-instance 'generic-pattern :name head)))
+  (let ((pattern (make-instance 'generic-pattern
+                   :name head :bound-name bound-name)))
     (mapc #'(lambda (slot)
               (add-slot pattern (first slot)
                         (make-test1 (second slot))))

@@ -38,4 +38,4 @@
 ;(retract (fact-id 1))
 (assert (rocky (name "rocky")))
 (assert (boris (name "boris")))
-(retract (fact-id 2))
+(retract (fact-id 1))

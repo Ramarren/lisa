@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.14 2000/11/28 14:37:30 youngde Exp $
+;;; $Id: node2.lisp,v 1.15 2000/11/29 01:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -96,7 +96,7 @@
                        (make-derived-token
                         (class-of left-token)
                         left-token
-                        (get-top-fact left-token)))))
+                        (get-top-fact right-token)))))
     (maptree #'eval-tests tree)
     (values nil)))
 

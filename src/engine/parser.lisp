@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.12 2000/11/17 16:34:45 youngde Exp $
+;;; $Id: parser.lisp,v 1.13 2000/11/29 01:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -69,18 +69,15 @@
     (extract-headers body)))
 
 (defun parse-rulebody (body)
-  (labels ((parse-lhs (body &optional (patterns nil) (assign-to nil))
+  (labels ((parse-lhs (body &optional (patterns nil))
              (format t "parse-lhs: looking at ~S~%" body)
              (let ((pattern (first body)))
                (cond ((consp pattern)
                       (parse-lhs (rest body)
                                  (append patterns
-                                         (make-rule-pattern pattern
-                                                            assign-to))))
+                                         (make-rule-pattern pattern))))
                      ((null pattern)
                       (values patterns))
-                     ((variablep pattern)
-                      (parse-lhs (rest body) patterns pattern))
                      (t (error "parse-rule-body: parsing error on LHS at ~S~%" patterns)))))
            (parse-rhs (actions)
              (values actions)))
@@ -91,8 +88,8 @@
                   (parse-rhs (find-after '=> remains :test #'eq)))
         (error "parse-rulebody: rule structure unsound.")))))
 
-(defun make-rule-pattern (template &optional (assign-to nil))
-  (labels ((parse-pattern (p)
+(defun make-rule-pattern (template)
+  (labels ((parse-pattern (p &optional (binding nil))
              (let ((head (first p)))
                (if (symbolp head)
                    (cond ((eq head 'test)
@@ -100,8 +97,14 @@
                          ((eq head 'not)
                           (make-negated-pattern
                            (parse-pattern (first (rest p)))))
+                         ((variablep head)
+                          (if (null binding)
+                              (parse-pattern (first (rest p)) head)
+                            (error "Parse error at ~S~%" p)))
                          (t
-                          (make-default-pattern p)))
+                          (make-parsed-pattern
+                           :pattern (make-default-pattern p)
+                           :binding binding)))
                  (error "Parse error at ~S~%" p)))))
     `(,(parse-pattern template))))
 

@@ -20,9 +20,13 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.5 2000/11/16 14:31:55 youngde Exp $
+;;; $Id: pattern.lisp,v 1.6 2000/11/29 01:07:45 youngde Exp $
 
 (in-package :lisa)
+
+(defstruct parsed-pattern
+  (pattern nil :type cons)
+  (binding nil :type symbol))
 
 (defclass pattern ()
   ((name :initarg :name

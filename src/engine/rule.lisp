@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.8 2000/11/18 22:31:42 youngde Exp $
+;;; $Id: rule.lisp,v 1.9 2000/11/29 01:07:45 youngde Exp $
 
 (in-package :lisa)
 
@@ -74,9 +74,13 @@
   (length (get-patterns self)))
   
 (defmethod compile-patterns ((self rule) plist)
-  (mapc #'(lambda (p)
-            (add-pattern self (make-pattern (first p) (second p))))
-        plist))
+  (flet ((compile-pattern (p)
+           (let ((pattern (parsed-pattern-pattern p))
+                 (binding (parsed-pattern-binding p)))
+             (add-pattern self
+                          (make-pattern (first pattern)
+                                        (second pattern) binding)))))
+    (mapc #'compile-pattern plist)))
 
 (defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self) (compile-function rhs)))
