@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.16 2002/10/09 18:24:45 youngde Exp $
+;;; $Id: rete.lisp,v 1.17 2002/10/09 19:22:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -59,7 +59,7 @@
     (when (find-rule rete (rule-name rule))
       (forget-rule rete rule))
     (if (zerop (rete-fact-count rete))
-        (compile-rule-into-network (rete-network rete) rule patterns)
+        (compile-rule-into-network (rete-network rete) patterns rule)
       (merge-rule-into-network 
        (rete-network rete) patterns rule :loader #'load-facts))
     (setf (gethash (rule-name rule) (rete-rule-table rete)) rule)
