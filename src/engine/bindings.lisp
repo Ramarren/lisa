@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.1 2000/11/30 02:43:31 youngde Exp $
+;;; $Id: bindings.lisp,v 1.2 2000/12/04 16:44:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -44,8 +44,17 @@
 (defclass pattern-binding (binding)
   ()
   (:documentation
-   "This class represents a fact-to-pattern binding."))
+   "Represents a fact-assignment binding."))
 
 (defun make-pattern-binding (name location)
   (make-instance 'pattern-binding :name name :location location))
 
+(defclass slot-binding (binding)
+  ((slot-name :initarg :slot-name
+              :reader get-slot-name))
+  (:documentation
+   "Represents variable bindings that can occur within pattern slots."))
+
+(defun make-slot-binding (binding-name location slot-name)
+  (make-instance 'slot-binding :name binding-name
+                 :location location :slot-name slot-name))

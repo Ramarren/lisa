@@ -21,9 +21,9 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.6 2000/11/30 20:00:26 youngde Exp $
+;;; $Id: factories.lisp,v 1.7 2000/12/04 16:44:22 youngde Exp $
 
 (in-package "LISA")
 
-(defun make-pattern (head body binding)
-  (make-generic-pattern head body binding))
+(defun make-pattern (head body location binding)
+  (make-generic-pattern head body location binding))

@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.3 2000/11/14 20:45:58 youngde Exp $
+;;; $Id: slot.lisp,v 1.4 2000/12/04 16:44:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -28,9 +28,9 @@
   ((name :initarg :name
          :initform nil
          :reader get-name)
-   (test :initarg :test
-         :initform nil
-         :reader get-test))
+   (tests :initarg :tests
+          :initform nil
+          :reader get-tests))
   (:documentation
    "Represents a single slot within a pattern."))
 
@@ -38,6 +38,6 @@
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(name = ~S)" (get-name self))))
 
-(defun make-slot (name test)
-  (make-instance 'slot :name name :test test))
+(defun make-slot (name tests)
+  (make-instance 'slot :name name :tests tests))
 

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.14 2000/11/30 20:00:26 youngde Exp $
+;;; $Id: rule.lisp,v 1.15 2000/12/04 16:44:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -82,9 +82,10 @@
       (format t "context: ~S~%" context)
       (eval context))))
 
-(defmethod add-binding ((self rule) name)
-  (setf (gethash name (get-bindings self))
-    (make-pattern-binding name (get-pattern-count self))))
+(defmethod add-binding ((self rule) binding)
+  (with-accessors ((bindings get-bindings)) self
+    (unless (gethash (get-name binding) bindings)
+      (setf (gethash (get-name binding) bindings) binding))))
 
 (defmethod traverse-bindings ((self rule) token)
   (flet ((show-binding (b)
@@ -104,10 +105,27 @@
                     (traverse (get-parent token))))))
     (traverse token)))
 
+(defun record-pattern-bindings (pattern)
+  (flet ((record-binding (slot-name test)
+           (declare (type test1 test))
+           (let ((val (get-value test)))
+             (when (variablep val)
+               (add-binding self
+                            (make-slot-binding val (get-location pattern) 
+                                               slot-name)))))
+         (record-slot-bindings (slot)
+           (declare (type slot slot))
+           (mapc #'(lambda (test)
+                     (record-binding (get-name slot) test)))))
+    (mapc #'record-slot-bindings (get-slots slots))))
+
 (defmethod add-pattern ((self rule) pattern)
+  (when (has-binding-p pattern)
+    (add-binding self (make-pattern-binding
+                       (get-pattern-binding pattern)
+                       (get-location pattern))))
+  (record-pattern-bindings pattern)
   (with-accessors ((patterns get-patterns)) self
-    (when (has-binding-p pattern)
-      (add-binding self (get-pattern-binding pattern)))
     (setf patterns (nconc patterns `(,pattern))))
   (values pattern))
 
@@ -129,7 +147,9 @@
                  (binding (parsed-pattern-binding p)))
              (add-pattern self
                           (make-pattern (first pattern)
-                                        (second pattern) binding)))))
+                                        (second pattern) 
+                                        (get-pattern-count self)
+                                        binding)))))
     (mapc #'compile-pattern plist)))
 
 #+ignore

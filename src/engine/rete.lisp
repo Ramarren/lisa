@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.22 2000/11/30 20:00:26 youngde Exp $
+;;; $Id: rete.lisp,v 1.23 2000/12/04 16:44:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -138,7 +138,7 @@
 (defmethod retract-fact ((self rete) (fact-id integer))
   (let ((fact (find-fact self fact-id)))
     (unless (null fact)
-      (retract-fact fact))
+      (retract-fact self fact))
     (values fact)))
     
 (defmethod set-initial-state ((self rete))

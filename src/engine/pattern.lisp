@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.6 2000/11/29 01:07:45 youngde Exp $
+;;; $Id: pattern.lisp,v 1.7 2000/12/04 16:44:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,14 +32,16 @@
   ((name :initarg :name
          :reader get-name)
    (slots :initform nil
-          :accessor get-slots))
+          :accessor get-slots)
+   (location :initarg :location
+             :reader (get-location)))
   (:documentation
    "Base class for all types of patterns found on a rule LHS."))
 
-(defmethod add-slot ((self pattern) slot-name test)
+(defmethod add-slot ((self pattern) slot-name tests)
   (with-accessors ((slots get-slots)) self
     (setf slots
-      (nconc slots `(,(make-slot slot-name test))))))
+      (nconc slots `(,(make-slot slot-name tests))))))
 
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
