@@ -300,5 +300,157 @@ from within the knowledge base (i.e. via the <i>modify</i> operator). Applicatio
 can specialize on this function if they so choose. The <i>slot-name</i>
 specifies the affected slot.</blockquote>
 
+<h4>
+Engine-Related Operators</h4>
+These operators provide an interface to instances of the inference engine
+itself.
+<br>&nbsp;
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(reset &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Re-initializes the knowledge base of <i>engine;</i> removing
+facts, clearing the agenda, and asserting the <i>initial-fact</i>. By default,
+operates on the <i>current-engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(clear &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Re-initializes <i>engine</i> itself; forgetting the rulebase,
+facts and agenda. By default, operates on the <i>current-engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(run &amp;optional <i>engine</i> &amp;key <i>step)</i></td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Runs the inference engine bound to <i>engine</i>. Execution
+will continue until either the agenda is empty or the number of fired rules
+exceeds the value of <i>step</i>. By default, <i>step</i> is bound to a
+value that will cause the engine to run until the agenda is exhausted.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(walk &amp;optional <i>step</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Runs the engine in <i>step</i> increments, single-stepping
+by default. Here, "single-stepping" means "one rule at a time".</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(halt <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Halts the inference engine <i>engine</i>, even if the agenda
+still has activations. Typically used only on rule RHSs.</blockquote>
+
+<h4>
+Debugging-Related Operators</h4>
+These operators are typically used interactively to inspect the state of
+an inference engine. Some of these operators are only loosly defined and
+need further work.
+<br>&nbsp;
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(facts &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Prints on <i>standard output</i> the contents of the fact base
+belonging to <i>engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(rules &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Prints on <i>standard output</i> the contents of the rule base
+belonging to <i>engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(agenda &amp;optional <i>engine</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Prints on <i>standard output</i> the contents of the agenda
+belonging to <i>engine</i>.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(watch <i>event</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Asks LISA to report the occurrence of <i>event</i> to <i>standard
+output</i>. The entire watch facility needs work, especially to accommodate
+a multi-inference-engine environment. Also, it would be nice to generalize
+the facility such that it behaves more like a "publish/subscribe" mechansim
+with "real" events.
+<p>Currently, LISA allows monitoring of these events:
+<pre>:facts</pre>
+
+<blockquote>Triggers an event each time a fact is asserted or retracted.</blockquote>
+
+<pre>:activations</pre>
+
+<blockquote>Triggers an event each time a rule is added to or removed from
+the agenda.</blockquote>
+
+<pre>:rules</pre>
+
+<blockquote>Triggers an event each time a rule is fired.</blockquote>
+</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(unwatch <i>event</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Disables the monitoring of <i>event</i>. See the documentation
+for <i>watch</i> to see the allowable event types.</blockquote>
+
+<table WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(watching)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Displays the list of events currently being monitored.</blockquote>
+
+<br>&nbsp;
 </body>
 </html>
