@@ -27,7 +27,7 @@
 ;;; multiple inference engines and a single CLOS instance can reside in more
 ;;; than one.
 
-;;; $Id: clos.lisp,v 1.4 2001/05/01 19:52:37 youngde Exp $
+;;; $Id: clos.lisp,v 1.5 2001/05/01 21:01:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -65,6 +65,9 @@
   (with-writeable-clos-bindings (bindings instance)
     (setf bindings
       (delete engine bindings :key #'clos-instance-data-engine))))
+
+(defun unbind-all-clos-instances ()
+  (clrhash *clos-instance-map*))
 
 (defun find-shadow-fact (engine instance &optional (errorp t))
   (with-readonly-clos-bindings (bindings instance)

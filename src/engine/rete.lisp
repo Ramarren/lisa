@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.52 2001/05/01 19:52:37 youngde Exp $
+;;; $Id: rete.lisp,v 1.53 2001/05/01 21:01:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,8 +42,6 @@
               :reader get-null-fact)
    (fact-list :initform (make-hash-table)
               :accessor get-facts)
-   (instance-list :initform (make-hash-table)
-                  :reader get-instance-list)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id)
    (halt-engine :initform nil
@@ -194,8 +192,18 @@
   (assert-fact self (get-initial-fact self))
   (values t))
 
+(defun forget-clos-instances (self)
+  (declare (type rete self))
+  (maphash #'(lambda (key fact)
+               (declare (ignore key))
+               (when (typep fact 'shadow-fact)
+                 (unbind-clos-instance
+                  self (instance-of-shadow-fact fact))))
+           (get-facts self)))
+  
 (defun clear-engine (self)
   (declare (type rete self))
+  (forget-clos-instances self)
   (set-initial-state self)
   (remove-rules self)
   (setf (slot-value self 'compiler) (make-rete-compiler))
