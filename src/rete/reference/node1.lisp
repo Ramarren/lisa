@@ -20,7 +20,7 @@
 ;;; File: node1.lisp
 ;;; Description:
 
-;;; $Id: node1.lisp,v 1.11 2002/09/24 00:00:40 youngde Exp $
+;;; $Id: node1.lisp,v 1.12 2002/10/02 18:10:13 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,7 +52,7 @@
 
 (defmethod print-object ((self node1) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "~S" (node1-test self))))
+    (format strm "~S ; ~D" (node1-test self) (node-use-count self))))
 
 (defun make-node1 (test)
   (make-instance 'node1 :test test))

@@ -20,11 +20,12 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.28 2002/09/28 20:32:28 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.29 2002/10/02 18:10:13 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *root-nodes* nil)
+(defvar *rule-specific-nodes* nil)
 (defvar *leaf-nodes* nil)
 
 (defmacro set-leaf-node (node address)
@@ -43,16 +44,23 @@
   ((root-nodes :initform (make-hash-table)
                :reader rete-roots)))
 
-(defun add-root-node (class)
+(defun make-root-node (class)
   (let ((root (gethash class *root-nodes*)))
     (when (null root)
       (setf root (make-node1
                   (make-class-test class)))
       (setf (gethash class *root-nodes*) root))
+    (increment-use-count root)
     root))
 
-(defmethod add-successor ((self t) new-node connector)
+(defmethod add-successor ((parent t) new-node connector)
   (declare (ignore connector))
+  new-node)
+
+(defmethod add-successor :after (parent new-node connector)
+  (declare (ignore parent connector))
+  (push new-node *rule-specific-nodes*)
+  (increment-use-count new-node)
   new-node)
 
 (defun make-intra-pattern-node (slot)
@@ -66,10 +74,9 @@
     (make-node1 test)))
 
 (defun distribute-token (rete-network token)
-  (maphash #'(lambda (key root-node)
-               (declare (ignore key))
-               (accept-token root-node token))
-           (rete-roots rete-network)))
+  (loop for root-node being the hash-value 
+      of (rete-roots rete-network)
+      do (accept-token root-node token)))
 
 (defun make-rete-network ()
   (make-instance 'rete-network))
@@ -104,7 +111,7 @@
            (set-leaf-node t (parsed-pattern-address pattern)))
           (t
            (let ((node
-                  (add-root-node (parsed-pattern-class pattern)))
+                  (make-root-node (parsed-pattern-class pattern)))
                  (address (parsed-pattern-address pattern)))
              (set-leaf-node node address)
              (dolist (slot (parsed-pattern-slots pattern))
@@ -175,10 +182,13 @@
 
 (defun compile-rule-into-network (rete-network patterns &optional (rule nil))
   (let ((*root-nodes* (rete-roots rete-network))
+        (*rule-specific-nodes* (list))
         (*leaf-nodes* (make-array (length patterns))))
     (add-intra-pattern-nodes patterns)
     (add-inter-pattern-nodes patterns)
     (add-terminal-node rule)
+    (unless (null rule)
+      (attach-rule-nodes rule (nreverse *rule-specific-nodes*)))
     (setf (slot-value rete-network 'root-nodes) *root-nodes*)))
 
 (defvar *test-network* nil)

@@ -20,11 +20,11 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.6 2002/09/24 00:00:40 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.7 2002/10/02 18:10:13 youngde Exp $
 
 (in-package "LISA")
 
-(defclass shared-node ()
+(defclass shared-node (network-node)
   ((successors :initform (make-hash-table :test #'equal)
                :reader shared-node-successors)))
 

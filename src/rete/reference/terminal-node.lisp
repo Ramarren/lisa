@@ -20,11 +20,11 @@
 ;;; File: terminal-node.lisp
 ;;; Description:
 
-;;; $Id: terminal-node.lisp,v 1.8 2002/09/30 16:37:01 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.9 2002/10/02 18:10:13 youngde Exp $
 
 (in-package "LISA")
 
-(defclass terminal-node ()
+(defclass terminal-node (network-node)
   ((rule :initarg :rule
          :initform nil
          :reader terminal-node-rule)
@@ -34,11 +34,6 @@
 (defmethod accept-token ((self terminal-node) (tokens add-token))
   (let* ((rule (terminal-node-rule self))
          (activation (make-activation rule tokens)))
-    (when (eq (rule-name (terminal-node-rule self))
-              'hold-to-eat)
-      (format t "tokens: ~S~%" tokens)
-      (format t "facts: ~S~%" (token-facts tokens))
-      (break))
     (add-activation (rule-engine rule) activation)
     (setf (gethash (hash-key tokens) (terminal-node-rule-activations self))
       activation)
@@ -47,11 +42,6 @@
 (defmethod accept-token ((self terminal-node) (tokens remove-token))
   (with-accessors ((activations terminal-node-rule-activations)) self
     (let ((activation (gethash (hash-key tokens) activations)))
-      (when (eq (rule-name (terminal-node-rule self))
-                'hold-to-eat)
-        (format t "tokens: ~S~%" tokens)
-        (format t "facts: ~S~%" (token-facts tokens))
-      (break))
       (unless (null activation)
         (disable-activation (rule-engine (terminal-node-rule self)) activation)
         (remhash (hash-key tokens) activations)))
