@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.23 2000/12/13 18:02:28 youngde Exp $
+;;; $Id: parser.lisp,v 1.24 2000/12/13 20:57:37 youngde Exp $
 
 (in-package :lisa)
 
@@ -129,40 +129,16 @@
 (defun make-default-pattern (p)
   (parse-unordered-pattern p))
 
-(defun normalize-slots (&rest args)
-  (labels ((compose-slots (pairs slot-name slots)
-             (cond ((null pairs)
-                    (values slots))
-                   ((null slot-name)
-                    (compose-slots (rest pairs) (first pairs) slots))
-                   (t
-                    (compose-slots (rest pairs) nil
-                                   (nconc slots
-                                          `((,slot-name 
-                                             ,(first pairs)))))))))
-    (compose-slots args nil nil)))
-
-(defun expand-slot-variables (slots)
-  (labels ((validate-slot-structure (slot)
-             (if (consp slot)
-                 (let ((name (first slot))
-                       (value (second slot)))
-                   (cond ((and (symbolp name)
-                               (or (literalp value)
-                                   (variablep value)))
-                          (values name value))
-                         (t
-                          (error "EXPAND-SLOT-VARIABLES: malformed slot ~S." slot))))
-               (error "EXPAND-SLOT-VARIABLES: parse error at ~S." slot)))
-           (expand-slots (slots bindings)
-             (let ((slot (first slots)))
-               (if (null slot)
-                   (values bindings)
-                 (multiple-value-bind (name value)
-                     (validate-slot-structure slot)
-                   (expand-slots (rest slots)
-                                 (nconc bindings `(',name ,value))))))))
-    (expand-slots slots nil)))
+(defun normalize-slots (slots)
+  (flet ((normalize (slot)
+           (let ((slot-name (first slot))
+                 (slot-value (second slot)))
+             (if (and (symbolp slot-name)
+                      (or (literalp slot-value)
+                          (variable-p slot-value)))
+                 ``(,',slot-name ,,slot-value)
+               (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots)))))
+    `(list ,@(mapcar #'normalize slots))))
 
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
@@ -172,12 +148,9 @@
              (if (null class)
                  (error "No class object found for ~S." head)
                `(assert-fact (current-engine)
-                             (make-fact ,class
-                                        (normalize-slots
-                                         ,@(expand-slot-variables slots)))))))
+                             (make-fact ,class (,@(normalize-slots slots)))))))
           (t
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
 (defun parse-and-modify-fact (fact body)
-  `(modify-fact (current-engine)
-                ,fact (normalize-slots ,@(expand-slot-variables body))))
+  `(modify-fact (current-engine) ,fact (,@(normalize-slots body))))
