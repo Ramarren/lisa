@@ -335,9 +335,7 @@
 (defrule satisfy-hunger ""
   ?goal <- (goal-is-to (action eat) (argument-1 ?name))
   ?monkey <- (monkey (holding ?name))
-;;  ?thing <- (thing (name ?name))
-  ?thing <- (thing (name ?thing-name))
-  (test (eq ?name ?thing-name))
+  ?thing <- (thing (name ?name))
   =>
   (printout t "Monkey eats the " ?name "." crlf)
   (modify ?monkey (holding blank))
