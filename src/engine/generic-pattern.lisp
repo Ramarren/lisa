@@ -21,7 +21,7 @@
 ;;; Description: Class representing the default style of pattern found
 ;;; on rule LHSs, as in (fact (slot-0 1) (slot-1 blue)).
 
-;;; $Id: generic-pattern.lisp,v 1.4 2000/11/29 01:07:45 youngde Exp $
+;;; $Id: generic-pattern.lisp,v 1.5 2000/11/30 00:25:13 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,6 +35,12 @@
 
 (defmethod set-pattern-binding ((self generic-pattern) binding)
   (setf (get-bound-name self) binding))
+
+(defmethod get-pattern-binding ((self generic-pattern))
+  (get-bound-name self))
+
+(defmethod has-binding-p ((self generic-pattern))
+  (not (null (get-pattern-binding self))))
 
 (defun make-generic-pattern (head body &optional (bound-name nil))
   "Constructor for the GENERIC-PATTERN class."

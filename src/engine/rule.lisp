@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.9 2000/11/29 01:07:45 youngde Exp $
+;;; $Id: rule.lisp,v 1.10 2000/11/30 00:25:13 youngde Exp $
 
 (in-package :lisa)
 
@@ -38,6 +38,8 @@
              :accessor get-patterns)
    (actions :initform nil
             :accessor get-actions)
+   (bindings :initform (make-hash-table)
+             :accessor get-bindings)
    (nodes :initform nil
           :accessor get-nodes)
    (engine :initarg :engine
@@ -54,12 +56,27 @@
 
 (defmethod fire ((self rule) token)
   (with-accessors ((actions get-actions)) self
-    (format t "Firing rule ~S~%" (get-name self))
+    (format t "Firing rule ~S (token depth ~D)~%"
+            (get-name self) (size token))
     (funcall actions)))
+
+(defmethod add-binding ((self rule) name))
+
+(defmethod traverse-tokens ((self rule) token)
+  (labels ((traverse (token)
+             (cond ((null token)
+                    (values))
+                   (t
+                    (format t "~S~%" token)
+                    (traverse (get-parent token))))))
+    (traverse token)))
 
 (defmethod add-pattern ((self rule) pattern)
   (with-accessors ((patterns get-patterns)) self
-    (setf patterns (nconc patterns `(,pattern)))))
+    (setf patterns (nconc patterns `(,pattern)))
+    (when (has-binding-p pattern)
+      (add-binding self (get-pattern-binding pattern))))
+  (values pattern))
 
 (defmethod freeze-rule ((self rule))
   (when (= (get-pattern-count self) 0)

@@ -14,9 +14,12 @@
 ;  (printout t "nemesis fired!" crlf))
 
  (defrule schtum
-   (rocky (name "rocky"))
+   ?rocky <- (rocky (name "rocky"))
    (boris (name "boris"))
+   ?natasha <- (natasha (name "natasha"))
    =>
+   (retract ?rocky)
+   (retract ?natasha)
    (printout t "schtum!" crlf))
 
 ; (defrule schtum-shared
@@ -25,17 +28,22 @@
 ;   (printout t "schtum-shared!" crlf))
 
 ; (defrule schtum-simple
-;   (rocky (name "rocky"))
+;   ?f <- (rocky (name "rocky"))
 ;   =>
+;   (retract ?f)
 ;   (printout t "schtum-simple!" crlf))
 
 ; (defrule no-patterns
 ;   =>
 ;   (printout t "no-patterns!" crlf))
 
-(reset)
+;(reset)
 ;(assert (natasha (name "natasha") (nemesis "bullwinkle")))
 ;(retract (fact-id 1))
+(reset)
 (assert (rocky (name "rocky")))
 (assert (boris (name "boris")))
-(retract (fact-id 1))
+(assert (natasha (name "natasha")))
+(run)
+;(assert (boris (name "boris")))
+;(retract (fact-id 1))
