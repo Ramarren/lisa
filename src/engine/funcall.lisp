@@ -21,7 +21,7 @@
 ;;; Description: This class manages the mechanics of executing arbitrary Lisp
 ;;; code from conditional elements and rule RHSs.
 
-;;; $Id: funcall.lisp,v 1.7 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: funcall.lisp,v 1.8 2001/01/13 02:18:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -43,21 +43,19 @@
    "This class manages the mechanics of executing arbitrary Lisp code from
    conditional elements and rule RHSs."))
 
-(defmethod make-lexical-binding ((binding pattern-binding) token)
-  (let ((fact (find-fact token (get-location binding))))
+(defmethod make-lexical-binding ((binding pattern-binding) context)
+  (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
     `(,(get-name binding) ,fact)))
 
 (defmethod make-lexical-binding ((binding lexical-slot-binding) context)
-  (format t "making binding for ~S~%" binding)
   (let ((fact (find-fact (get-token context) (get-location binding))))
     (cl:assert (not (null fact)) ()
       "No fact for location ~D." (get-location binding))
     `(,(get-name binding) ,(get-slot-value fact (get-slot-name binding)))))
   
 (defmethod make-lexical-binding ((binding local-slot-binding) context)
-  (format t "making binding for ~S~%" binding)
   `(,(get-name binding) ,(get-slot-value (get-fact context)
                                          (get-slot-name binding))))
 
@@ -68,9 +66,7 @@
                                   (make-lexical-binding binding context))
                               (get-bindings funcall)))
                 ,@(get-forms funcall)))))
-    (let ((c (make-context)))
-      (format t "~S~%" c)
-      (eval c))))
+    (eval (make-context))))
 
 (defmethod evaluate ((self function-call) context)
   (funcall (create-lexical-context self context)))

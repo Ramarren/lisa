@@ -8,13 +8,14 @@
   (slot name)
   (slot nemesis))
 
-; (defrule rocky-boris-natasha
-;   ?f-1 <- (rocky (name "bullwinkle"))
-;   (boris (name ?boris-name&"boris"))
-;   (natasha (name "natasha") (nemesis ?boris-name))
-;   =>
-;   (printout t "rocky-boris-natasha fired (?boris-name = " ?name ")" crlf)
-;   (retract ?f-1))
+(defrule rocky-boris-natasha
+  ?f-1 <- (rocky (name ?n&:(= (str-compare "bullwinkle" ?n) 0)))
+  (boris (name ?boris-name&:(= (str-compare ?boris-name "boris") 0)))
+  (natasha (name ?name&:(= (str-compare ?name "natasha") 0))
+           (nemesis ?z&:(= (str-compare ?z ?boris-name) 0)))
+  =>
+  (printout t "rocky-boris-natasha fired (?boris-name = " ?boris-name ")" crlf)
+  (retract ?f-1))
 
 ; (defrule not-rocky
 ;   (not (rocky (name "rocky")))
@@ -62,7 +63,8 @@
 ;(assert (boris (name "boris")))
 ;(assert (natasha (name "natasha")))
 
-(assert (natasha (name "natasha") (nemesis "rocky")))
-(assert (rocky (name "rocky")))
+(assert (rocky (name "bullwinkle")))
+(assert (boris (name "boris")))
+(assert (natasha (name "natasha") (nemesis "boris")))
 
 ;(run)

@@ -21,7 +21,7 @@
 ;;; Description: This class contains a function-call test performed by
 ;;; two-input nodes.
 
-;;; $Id: test2-eval.lisp,v 1.3 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: test2-eval.lisp,v 1.4 2001/01/13 02:18:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -32,13 +32,8 @@
    "This class contains a function-call test performed by two-input nodes."))
 
 (defmethod do-test ((self test2-eval) left-token right-fact)
-  (format t "running predicate with token ~S, fact ~S~%"
-          left-token right-fact)
-  (let ((eval
-         (evaluate (get-predicate self) 
-                   (make-function-context left-token right-fact))))
-    (format t "predicate returned ~S~%" eval)
-    (values eval)))
+  (evaluate (get-predicate self) 
+            (make-function-context left-token right-fact)))
 
 (defmethod equals ((self test2-eval) (obj test2-eval))
   (equals (get-predicate self) (get-predicate obj)))

@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.24 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: pattern.lisp,v 1.25 2001/01/13 02:18:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -134,8 +134,7 @@
 
 (defmethod finalize-pattern ((self pattern) bindings)
   (mapc #'(lambda (slot)
-            (canonicalize-slot self slot bindings)
-            (format t "slot = ~S~%" slot))
+            (canonicalize-slot self slot bindings))
         (get-slots self))
   (set-pattern-locality self bindings)
   (values self))

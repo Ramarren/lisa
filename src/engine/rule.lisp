@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.33 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: rule.lisp,v 1.34 2001/01/13 02:18:34 youngde Exp $
 
 (in-package :lisa)
 
@@ -144,7 +144,6 @@
 
 (defmethod add-node ((self rule) (node node-test))
   (unless (member node (get-nodes self) :test #'equals)
-    (format t "adding new join node.~%")
     (add-new-node self node)))
 
 (defmethod add-node ((self rule) node)
