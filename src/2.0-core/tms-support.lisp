@@ -20,11 +20,13 @@
 ;;; File: tms-support.lisp
 ;;; Description: Support functions for LISA's Truth Maintenance System (TMS).
 
-;;; $Id: tms-support.lisp,v 1.1 2002/11/13 16:06:31 youngde Exp $
+;;; $Id: tms-support.lisp,v 1.2 2002/11/13 17:47:21 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *scheduled-dependencies*)
+
+(define-symbol-macro scheduled-dependencies *scheduled-dependencies*)
 
 (defun add-logical-dependency (rete fact dependency-set)
   (push (gethash dependency-set (rete-dependency-table rete)) fact))
@@ -39,10 +41,14 @@
     (nreverse dependencies)))
 
 (defun schedule-dependency-removal (rete dependency-set)
-  (push dependency-set *scheduled-dependencies*))
+  (push dependency-set scheduled-dependencies))
 
-(define-symbol-macro scheduled-depenencies *scheduled-dependencies*)
-
-(defmacro with-truth-maintenance (&body body)
-  `(let ((*scheduled-dependencies* nil))
-     ,@body))
+(defmacro with-truth-maintenance ((rete) &body body)
+  (let ((rval (gensym)))
+    `(let* ((scheduled-dependencies (list))
+            (,rval (progn ,@body)))
+       (dolist (dependency scheduled-dependencies)
+         (dolist (dependent-fact
+                     (gethash dependency (rete-dependency-table ,rete)))
+           (retract-fact ,rete dependent-fact)))
+       ,rval)))
