@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.8 2002/11/20 20:04:02 youngde Exp $
+;;; $Id: context.lisp,v 1.9 2002/11/21 15:54:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,6 +47,9 @@
 (defun add-rule-to-context (context rule)
   (setf (gethash (symbol-name (rule-name rule)) (context-rules context))
     rule))
+
+(defmethod conflict-set ((self context))
+  (context-strategy self))
 
 (defmethod remove-rule-from-context ((self context) (rule-name symbol))
   (remhash (symbol-name rule-name) (context-rules self)))

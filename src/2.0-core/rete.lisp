@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.43 2002/11/21 14:53:22 youngde Exp $
+;;; $Id: rete.lisp,v 1.44 2002/11/21 15:54:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -272,7 +272,7 @@
 (defmethod add-activation ((self rete) activation)
   (let ((rule (activation-rule activation)))
     (trace-enable-activation activation)
-    (add-activation (conflict-set) activation)
+    (add-activation (conflict-set rule) activation)
     (when (auto-focus-p rule)
       (push-context self (rule-context rule)))))
 
@@ -288,7 +288,7 @@
     (do ((count 0))
         ((or (= count step) (rete-halted self)) count)
       (let ((activation 
-             (next-activation (conflict-set))))
+             (next-activation (conflict-set (active-context)))))
         (cond ((null activation)
                (next-context self)
                (when (null (active-context))

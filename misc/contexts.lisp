@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: contexts.lisp,v 1.1 2002/11/21 15:04:04 youngde Exp $
+;;; $Id: contexts.lisp,v 1.2 2002/11/21 15:54:38 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -40,14 +40,15 @@
 (defrule frodo (:context :hobbits)
   (frodo)
   =>
-  (format t "frodo firing; focusing on :wizards.~%")
+  (format t "frodo fired; focusing on :wizards.~%")
   (assert (gandalf (name gandalf)))
   (focus :wizards))
 
 (defrule gandalf (:context :wizards)
   (gandalf (name gandalf))
   =>
-  (format t "gandalf firing; refocusing on :hobbits.~%")
+  (format t "gandalf fired; refocusing on :hobbits.~%")
+  (assert (legolas))
   (refocus))
 
 (defrule legolas (:context :elves)
@@ -55,6 +56,15 @@
   =>
   (format t "legolas firing; hopefully this was a manual focus.~%"))
 
-(defrule start ()
+(defrule start (:salience 100)
   =>
+  (format t "starting...~%")
   (focus :hobbits))
+
+(defrule finish ()
+  =>
+  (format t "finished.~%"))
+
+(reset)
+(assert (frodo))
+(run)

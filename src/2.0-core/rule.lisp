@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.22 2002/11/21 14:53:22 youngde Exp $
+;;; $Id: rule.lisp,v 1.23 2002/11/21 15:54:44 youngde Exp $
 
 (in-package "LISA")
 
@@ -90,6 +90,9 @@
   (setf (rule-behavior rule)
     (make-behavior (rule-actions-actions actions)
                    (rule-actions-bindings actions))))
+
+(defmethod conflict-set ((self rule))
+  (conflict-set (rule-context self)))
 
 (defmethod print-object ((self rule) strm)
   (print-unreadable-object (self strm :type t)
