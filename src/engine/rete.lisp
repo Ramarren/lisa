@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.51 2001/04/28 23:28:05 youngde Exp $
+;;; $Id: rete.lisp,v 1.52 2001/05/01 19:52:37 youngde Exp $
 
 (in-package "LISA")
 
@@ -138,8 +138,7 @@
   (values fact))
 
 (defmethod assert-fact ((self rete) (fact shadow-fact))
-  (setf (gethash (instance-of-shadow-fact fact)
-                 (get-instance-list self)) fact)
+  (bind-clos-instance self (instance-of-shadow-fact fact) fact)
   (call-next-method self fact))
 
 (defmethod retract-fact ((self rete) (fact fact))
@@ -150,8 +149,7 @@
   (values fact))
   
 (defmethod retract-fact ((self rete) (fact shadow-fact))
-  (remhash (instance-of-shadow-fact fact)
-           (get-instance-list self))
+  (unbind-clos-instance self (instance-of-shadow-fact fact))
   (call-next-method self fact))
   
 (defmethod retract-fact ((self rete) (fact-id integer))
@@ -167,10 +165,6 @@
         slot-changes)
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
-
-(defun find-shadow-fact (self instance)
-  (declare (type rete self))
-  (gethash instance (get-instance-list self)))
 
 (defun tell-externally-modified (self instance &optional (slot-id nil))
   (declare (type rete self))
