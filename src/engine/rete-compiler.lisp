@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.16 2000/12/06 16:13:08 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.17 2000/12/06 21:56:38 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,6 +51,8 @@
              :accessor get-hash-key)
    (root-node :initform (make-root-node)
               :reader get-root-node)
+   (varname-workspace :initform (make-hash-table)
+                      :accessor get-varname-workspace)
    (terminals :initform nil
               :accessor get-terminals)
    (roots :initform nil
@@ -81,9 +83,7 @@
 (defun create-single-nodes (compiler rule patterns)
   (with-accessors ((terminals get-terminals)
                    (roots get-roots)) compiler
-    (labels ((find-multifields ()
-               (values nil))
-             (first-pass (patterns i)
+    (labels ((first-pass (patterns i)
                (let ((pattern (first patterns)))
                  (cond ((null pattern)
                         (values t))
@@ -93,14 +93,69 @@
                                      (make-node1-tect
                                       (get-name pattern)) rule)))
                           (setf (aref roots i) last)
-                          (find-multifields)
                           (setf (aref terminals i)
                             (add-simple-tests (get-slots pattern) rule last))
                           (first-pass (rest patterns) (1+ i))))))))
       (first-pass patterns 0))))
 
-(defun search-for-variables (compiler rule)
-  (with-accessors ((terminals get-terminals)) compiler
+(defun find-multiple-references (compiler pattern rule)
+  (with-accessors ((occurrences get-varname-workspace)) compiler
+    (labels ((first-occurrence (varname)
+               (not (gethash varname occurrences)))
+             (add-occurrence (varname)
+               (setf (gethash varname occurrences) varname))
+             (add-multiple-reference-test (slot test reference)
+               (with-accessors ((terminals get-terminals)) compiler
+                 (let* ((location (get-location pattern))
+                        (node (aref terminals location))
+                        (ref-slot (car reference))
+                        (ref-test (cdr reference)))
+                   (setf (aref terminals location)
+                     (merge-successor node (make-node1tev1 slot ref-slot) rule)))))
+             (add-multiple-reference-tests (slot test references)
+               (mapc #'(lambda (ref)
+                         (add-multiple-reference-test slot test ref))
+                     references))
+             (find-initial-reference (slot)
+               (find-if #'(lambda (test)
+                            (and (value-is-variable-p test)
+                                 (first-occurrence (get-value test))))
+                        (get-tests slot)))
+             (find-remaining-references (slots varname references)
+               (let ((slot (first slots)))
+                 (cond ((null slot)
+                        (values references))
+                       (t
+                        (let ((test (find-if #'(lambda (test)
+                                                 (eq (get-value test) varname))
+                                             (get-tests slot))))
+                          (find-remaining-references
+                           (rest slots) varname
+                           (if (null test)
+                               references
+                             (nconc references
+                                    `(,(cons slot test))))))))))
+             (find-multiple-references-aux (slots)
+               (let ((slot (first slots)))
+                 (cond ((null slot)
+                        (values))
+                       (t
+                        (let ((test (find-initial-reference slot)))
+                          (unless (null test)
+                            (add-occurrence (get-value test))
+                            (add-multiple-reference-tests 
+                             slot test (find-remaining-references
+                                   (rest slots) (get-value test) nil)))
+                          (find-multiple-references-aux (rest slots))))))))
+      (find-multiple-references (get-slots pattern)))))
+  
+(defun search-for-multiple-variables (compiler rule)
+  (with-accessors ((terminals get-terminals)
+                   (occurrences get-varname-workspace)) compiler
+    (mapc #'(lambda (pattern)
+              (clrhash occurrences)
+              (find-multiple-references compiler pattern rule))
+          (get-patterns rule))
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0)
                        (make-node1-rtl) rule))))
@@ -155,7 +210,7 @@
   (setf (get-terminals self) (make-array (get-pattern-count rule)))
   (setf (get-roots self) (make-array (get-pattern-count rule)))
   (create-single-nodes self rule (get-patterns rule))
-  (search-for-variables self rule)
+  (search-for-multiple-variables self rule)
   (create-join-nodes self rule)
   (create-terminal-node self rule)
   (values rule))

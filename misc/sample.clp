@@ -8,11 +8,16 @@
   (slot name)
   (slot nemesis))
 
-(defrule nemesis
-  (natasha (name "natasha") (nemesis ?nemesis&"rocky"))
-  (rocky (name ?nemesis))
+(defrule duplicate-vars
+  (natasha (name ?name) (nemesis ?name))
   =>
-  (printout t "nemesis fired!" crlf))
+  (printout t "duplicate-vars fired!" crlf))
+
+; (defrule nemesis
+;   (natasha (name "natasha") (nemesis ?nemesis&"rocky"))
+;   (rocky (name ?nemesis))
+;   =>
+;   (printout t "nemesis fired!" crlf))
 
 ;  (defrule schtum
 ;    ?rocky <- (rocky (name "rocky"))
@@ -38,6 +43,8 @@
 ;   =>
 ;   (printout t "no-patterns!" crlf))
 
-(assert (rocky (name "rocky")))
-(assert (natasha (name "natasha") (nemesis "rocky")))
+;(assert (rocky (name "rocky")))
+;(assert (natasha (name "natasha") (nemesis "rocky")))
+(assert (natasha (name "natasha") (nemesis "natasha")))
+
 (run)

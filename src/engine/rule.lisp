@@ -18,9 +18,9 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ;;;
 ;;; File: rule.lisp
-;;; Description: The RULE class.
+;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.18 2000/12/06 17:13:06 youngde Exp $
+;;; $Id: rule.lisp,v 1.19 2000/12/06 21:56:38 youngde Exp $
 
 (in-package :lisa)
 
@@ -52,7 +52,7 @@
                     :reader get-initial-pattern
                     :allocation :class))
   (:documentation
-   "This class represents LISA rules."))
+   "This class represents LISA production rules."))
 
 (defmethod fire ((self rule) token)
   (with-accessors ((actions get-actions)) self
