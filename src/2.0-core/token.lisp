@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.11 2002/09/11 14:59:41 youngde Exp $
+;;; $Id: token.lisp,v 1.12 2002/09/11 20:00:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,6 +28,8 @@
   ((facts :initform
           (make-array 0 :adjustable t :fill-pointer t)
           :reader token-facts)
+   (not-counter :initform 0
+                :accessor token-not-counter)
    (contents :initform nil
              :reader token-contents)))
 
