@@ -1,6 +1,8 @@
 
 (in-package "LISA-USER")
 
+(use-default-engine)
+
 (defclass rocky ()
   ((name :initarg :name)
    (buddy :initarg :buddy)))
@@ -30,8 +32,7 @@
   (?boris (boris (name "boris")))
   =>
   (format t "boris fired!~%")
-  (modify ?boris (name "natasha"))
-  (halt (engine)))
+  (modify ?boris (name "natasha")))
 
 (defrule natasha ()
   (boris (name "natasha") (:object ?obj))

@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.27 2001/04/18 14:05:08 youngde Exp $
+;;; $Id: meta.lisp,v 1.28 2001/05/03 19:55:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -136,11 +136,18 @@
        "The class of this instance is not known to LISA: ~S." instance))
     (values name)))
 
+(defun generate-internal-methods (class)
+  (eval
+   `(defmethod mark-instance-as-changed ((self ,(class-name class)) &optional (slot-id nil))
+     (map-clos-instances #'mark-clos-instance-as-changed self slot-id)
+     (values t))))
+
 (defun import-class (symbolic-name class slot-specs)
   (let ((meta (make-meta-shadow-fact
                symbolic-name (class-name class) slot-specs)))
     (register-meta-class symbolic-name meta)
     (register-external-class symbolic-name class)
+    (generate-internal-methods class)
     (values meta)))
 
 (defun create-class-template (name slots)

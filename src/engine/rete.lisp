@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.53 2001/05/01 21:01:49 youngde Exp $
+;;; $Id: rete.lisp,v 1.54 2001/05/03 19:55:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -164,7 +164,7 @@
   (insert-token self (make-add-token :initial-fact fact))
   (values fact))
 
-(defun tell-externally-modified (self instance &optional (slot-id nil))
+(defun mark-clos-instance-as-changed (self instance &optional (slot-id nil))
   (declare (type rete self))
   (let ((shadow-fact (find-shadow-fact self instance)))
     (cond ((null shadow-fact)

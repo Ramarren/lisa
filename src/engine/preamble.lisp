@@ -20,10 +20,34 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.2 2001/04/25 00:04:08 youngde Exp $
+;;; $Id: preamble.lisp,v 1.3 2001/05/03 19:55:09 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant +lisa-engine-var+ (gentemp "?")
   "Used to represent the variable bound to a rule's RETE instance and
   accessible from a rule's LHS.")
+
+(defgeneric equals (object-1 object-2))
+
+(defgeneric mark-instance-as-changed (instance &optional (slot-id nil))
+  (:method ((instance t) &optional slot-id)
+           (declare (ignore slot-id))
+           (error
+            "LISA does not have a MARK-INSTANCE-AS-CHANGED method defined for class ~S."
+            (class-of instance)))
+  (:documentation
+   "This generic function describes the protocol by which LISA can be notified
+   that a CLOS instance has been changed outside of LISA's control. Primary
+   methods on this function are automatically generated as classes are
+   registered with LISA."))
+
+(defgeneric tell-lisa-modified-instance (instance slot)
+  (:method ((instance t) slot)
+           (declare (ignore slot))
+           t)
+  (:documentation
+   "This generic function serves as a notification protocol, whereby LISA
+   informs an application whenever a rule firing modifies an instance
+   slot. Interested code should provide its own specialized method(s)."))
+

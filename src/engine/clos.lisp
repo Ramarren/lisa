@@ -27,7 +27,7 @@
 ;;; multiple inference engines and a single CLOS instance can reside in more
 ;;; than one.
 
-;;; $Id: clos.lisp,v 1.5 2001/05/01 21:01:49 youngde Exp $
+;;; $Id: clos.lisp,v 1.6 2001/05/03 19:55:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,11 +77,9 @@
           (error "LISA doesn't know about this CLOS instance: ~S." instance))
         (clos-instance-data-fact binding))))
 
-(defun map-clos-instances (instance func &rest args)
+(defun map-clos-instances (func instance &rest args)
   (with-readonly-clos-bindings (bindings instance)
     (mapc #'(lambda (binding)
               (apply func 
                      (clos-instance-data-engine binding) instance args))
           bindings)))
-
-
