@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.27 2001/03/17 21:41:38 youngde Exp $
+;;; $Id: fact.lisp,v 1.28 2001/03/29 18:54:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,7 +30,7 @@
          :reader get-class)
    (fact-id :initform -1
             :reader get-fact-id)
-   (symbolic-id :reader get-symbolic-id)
+   (symbolic-id :initform nil)
    (slot-table :reader get-slot-table)
    (clock :initform 0
           :accessor get-clock))
@@ -47,7 +47,17 @@
   
 (defun set-slot-value (self slot-name value)
   (declare (type fact self) (type slot-name slot-name))
-  (setf (aref (get-slot-table self) (get-position slot-name)) value))
+  (setf (aref (get-slot-table self) (slot-name-position slot-name)) value))
+
+(defun get-symbolic-id (self)
+  (declare (type fact self))
+  (let ((id (slot-value self 'symbolic-id)))
+    (when (null id)
+      (setf id
+        (intern (symbol-name
+                 (make-symbol (format nil "F-~D" (get-fact-id self))))))
+      (setf (slot-value self 'symbolic-id) id))
+    (values id)))
 
 (defun get-slot-values (self)
   (declare (type fact self))
@@ -60,7 +70,7 @@
 
 (defun get-slot-value (self slot-name)
   (declare (type fact self) (type slot-name slot-name))
-  (aref (get-slot-table self) (get-position slot-name)))
+  (aref (get-slot-table self) (slot-name-position slot-name)))
 
 (defmethod get-time ((self fact))
   (get-clock self))

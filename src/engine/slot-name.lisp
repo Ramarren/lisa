@@ -22,10 +22,28 @@
 ;;; pattern matching, this class binds a symbolic slot name to a small integer
 ;;; representing the slot's position within its fact template.
 
-;;; $Id: slot-name.lisp,v 1.2 2001/03/16 16:02:07 youngde Exp $
+;;; $Id: slot-name.lisp,v 1.3 2001/03/29 18:54:54 youngde Exp $
 
 (in-package "LISA")
 
+(defstruct (slot-name
+             (:constructor create-slot-name))
+  (name nil)
+  (position nil))
+
+(defmethod print-object ((self slot-name) strm)
+  (print-unreadable-object (self strm :type t)
+    (format strm "(~S ; ~D)" (slot-name-name self)
+            (slot-name-position self))))
+
+(defmethod equals ((self slot-name) (obj slot-name))
+  (and (eq (slot-name-name self) (slot-name-name obj))
+       (= (slot-name-position self) (slot-name-position obj))))
+
+(defun make-slot-name (name pos)
+  (create-slot-name :name name :position pos))
+
+#|
 (defclass slot-name ()
   ((name :initarg :name
          :reader get-name)
@@ -45,4 +63,4 @@
 
 (defun make-slot-name (name pos)
   (make-instance 'slot-name :name name :position pos))
-
+|#

@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.32 2001/03/26 16:27:23 youngde Exp $
+;;; $Id: token.lisp,v 1.33 2001/03/29 18:54:54 youngde Exp $
 
 (in-package "LISA")
 
@@ -116,7 +116,7 @@
              (+ (ash (get-sort-code parent) 3)
                 (get-fact-id fact)))
            (setf (slot-value self 'clock) (+ (get-time fact)
-                                            (get-clock parent))))
+                                             (get-clock parent))))
          (init-clone (token)
            (setf (slot-value self 'fact) (get-top-fact token))
            (setf (slot-value self 'parent) (get-parent token))
