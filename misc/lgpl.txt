@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,4 +20,4 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: lgpl.txt,v 1.1 2001/03/14 18:54:36 youngde Exp $
+;;; $Id: lgpl.txt,v 1.2 2004/09/14 14:55:34 youngde Exp $

@@ -3,7 +3,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +22,7 @@
 ;;; File: install.lisp
 ;;; Description: 
 
-;;; $Id: install.lisp,v 1.3 2004/06/07 19:00:58 youngde Exp $
+;;; $Id: install.lisp,v 1.4 2004/09/14 14:57:48 youngde Exp $
 
 (in-package :cl-user)
 
