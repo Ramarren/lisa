@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.7 2002/08/29 15:29:25 youngde Exp $
+;;; $Id: pattern.lisp,v 1.8 2002/08/30 17:52:08 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,11 @@
   LISA variable; CONSTRAINT, if not NIL, represents a constraint placed on the
   slot's value. CONSTRAINT should only be non-NIL if VALUE is a variable, and
   can be one of the types listed for VALUE or a CONS representing arbitrary
-  Lisp code."
+  Lisp code; BINDINGS is a list of tuples representing variable bindings
+  associated with the slot. Each tuple is of the form (variable slot-name
+  address); VARIABLE is the symbol in the slot's VALUE field, SLOT-NAME is the
+  bound to VARIABLE, and ADDRESS is the location of the pattern holding the
+  VARIABLE declaration." 
   (name nil :type symbol)
   (value nil)
   (constraint nil)
@@ -58,6 +62,18 @@
 (defstruct rule-actions
   (bindings nil :type list)
   (actions nil :type list))
+
+(defun binding-variable (binding)
+  (first binding))
+
+(defun binding-slot-name (binding)
+  (second binding))
+
+(defun binding-address (binding)
+  (third binding))
+
+(defun simple-slot-p (pattern-slot)
+  (not (variablep (pattern-slot-value))))
 
 (defun bound-pattern-p (parsed-pattern)
   (not (null (parsed-pattern-pattern-binding parsed-pattern))))

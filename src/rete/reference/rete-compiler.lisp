@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.10 2002/08/30 16:54:00 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.11 2002/08/30 17:52:17 youngde Exp $
 
 (in-package "LISA")
 
@@ -79,13 +79,32 @@
     (let ((node
            (add-root-node (parsed-pattern-class pattern))))
       (dolist (slot (parsed-pattern-slots pattern))
-        (setf node
-          (add-successor node (make-intra-pattern-node slot)
-                         #'pass-token)))
+        (when (simple-slot-p slot)
+          (setf node
+            (add-successor node (make-intra-pattern-node slot)
+                           #'pass-token))))
       (add-new-terminal node))))
 
-(defun add-inter-pattern-nodes (patterns))
+(defun add-join-node-test (join-node pattern slot)
+  (let ((binding (first (pattern-slot-bindings slot)))
+        (address (parsed-pattern-address)))
+    (unless (= address (binding-address binding))
+      (node2-add-test
+       (make-inter-pattern-test (pattern-slot-name slot) binding)))))
     
+(defun add-inter-pattern-nodes (patterns)
+  (dolist (pattern (rest patterns))
+    (let ((join-node (make-node2))
+          (address (parsed-pattern-address)))
+      (dolist (slot (parsed-pattern-slots pattern))
+        (unless (simple-slot-p slot)
+          (add-join-node-test join-node pattern slot)))
+      (add-successor
+       (aref *terminals* (1- address) join-node #'pass-tokens-on-left))
+      (add-successor
+       (aref *terminals* address join-node #'pass-token-on-right))
+      (add-new-terminal join-node))))
+
 (defun compile-rule-into-network (rete-network patterns)
   (let ((*root-nodes* (rete-roots rete-network))
         (*terminals* (make-array 0 :adjustable t :fill-pointer t)))
