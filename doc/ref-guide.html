@@ -1,907 +1,1813 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+
 <html>
+
 <head>
+
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
    <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+
 </head>
+
 <body background="hierarchy-background.gif">
 
+
+
 <center>
+
 <h2>
+
 The LISA Reference Guide</h2></center>
+
 This guide describes in detail the programming interface to LISA. It is
+
 <i>not</i>
+
 a treatise on production-rule technology; readers are assumed to have a
+
 working knowledge of rule-based systems and their development. This document
+
 also avoids any detailed description of LISA's implementation of the Rete
+
 algorithm; perhaps at some future date I'll make an attempt.
+
 <center>
+
 <h2>
+
 Abbreviated Table of Contents</h2></center>
+
 <a href="#The Programming Language">The Programming Language</a>.
+
 <br><a href="#The Environment">The Environment</a>.
+
 <br><a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
+
 <br><a href="#Queries">Queries</a>
+
 <br><a href="#Conflict Resolution">Conflict Resolution</a>.
+
 <br><a href="#Getting Started">Getting Started</a>.
+
 <br><a href="#Things Yet to Do">Things Yet to Do</a>.
+
 <br><a href="#Supported Platforms">Supported Platforms</a>.
+
 <br>&nbsp;
+
 <h3>
+
 I.&nbsp;<a NAME="The Programming Language"></a>The Programming Language</h3>
+
 This section describes the publicly-available operators in the LISA language,
+
 separated into various categories:
+
 <blockquote><a href="#Fact-Related Operators">Fact-Related Operators</a>
+
 <blockquote>Language elements dealing with facts.</blockquote>
+
 <a href="#Rule-Related Operators">Rule-Related Operators</a>
+
 <blockquote>Language elements dealing with rules.</blockquote>
+
 <a href="#CLOS-Related Operators">CLOS-Related Operators</a>
+
 <blockquote>Language elements dealing with CLOS instances.</blockquote>
+
 <a href="#Engine-Related Operators">Engine-Related Operators</a>
+
 <blockquote>Language elements dealing with operations on an inference engine.</blockquote>
+
 <a href="#Environment-Related Operators">Environment-Related Operators</a>
+
 <blockquote>Language elements dealing with the LISA environment.</blockquote>
+
 <a href="#Debugging-Related Operators">Debugging-Related Operators</a>
+
 <blockquote>Language elements useful during system development.</blockquote>
+
 </blockquote>
 
+
+
 <h4>
+
 <a NAME="Fact-Related Operators"></a>Fact-Related Operators</h4>
+
 &nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(deftemplate <i>name</i> () (<i>slot-name*</i>))</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Creates an internal LISA class identified by <i>name</i> that
+
 can be instantiated as a fact within the knowledge base. The <i>slot-name</i>s
+
 are analogous to class slots, but without any of the keyword arguments.
+
 Templates are a convenient way of specifying concepts that don't need the
+
 full support of CLOS. Reasoning over them is slightly more efficient, both
+
 in terms of time and size.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(defimport <i>class-name</i> (&amp;key <i>use-inheritancep</i>))</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Makes a CLOS class known to LISA and allows instances of this
+
 class to be asserted into the knowledge base. <i>Class-name</i>
+
 is the symbolic name of the class as it would be given to FIND-CLASS. If <i>use-inheritancep</i>
+
   is non-NIL (the default), LISA makes the entire class hierarchy and slot
+
   content available for pattern matching. Note that it is not necessary to
+
   import the ancestors of <i>class-name</i> as LISA will do this automatically.</blockquote>
 
+
+
 <table WIDTH="100%" >
+
 <tr>
+
 <td WIDTH="80%">(deffacts <i>deffact-name</i> (<i>key</i>*) <i>fact-list</i>*)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Registers a list of facts that will be automatically inserted
+
 into the knowledge base upon each RESET. The <i>deffact-name</i> is the
+
 symbolic name that will be attached to this group of facts; <i>fact-list</i>
+
 is a list of fact specifiers. The format of each fact specifier is identical
+
 to that found in an ASSERT form, minus the <i>assert</i> keyword. There
+
 are currently no supported keywords for this macro.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(assert (<i>template-name</i> (<i>slot-name value</i>)*))</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Inserts a fact identified by <i>template-name</i> into the
+
 knowledge base. Slot values are assigned using a list of (<i>slot-name
+
 value</i>) pairs. The template associated with <i>template-name</i> must
+
 be known to LISA a priori.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(retract <i>fact</i> &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Removes a fact from the knowledge base. The symbol <i>fact</i>
+
 should be bound to either a LISA fact object or an integer representing
+
 the fact identifier. Unless <i>engine</i> is supplied, the inference engine
+
 returned by (current-engine) will be used.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(assert-instance <i>instance</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Inserts a CLOS instance into the knowledge base. The class
+
 of <i>instance</i> should already exist and have been identified to LISA
+
 via a <i>defimport</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(retract-instance <i>instance</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Removes a CLOS instance from the knowledge base. The class
+
 of <i>instance</i> should already exist and have been identified to LISA
+
 via a <i>defimport</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(modify <i>fact</i> (<i>slot-name value</i>)*)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Makes changes to the fact instance identified by <i>fact</i>.
+
 Affected slots and their new values are specified by (<i>slot-name value</i>).
+
 Note that <i>value</i> can be an arbitrary Lisp expression that will be
+
 evaluated at execution time.</blockquote>
 
+
+
 <h4>
+
 <a NAME="Rule-Related Operators"></a>Rule-Related Operators</h4>
+
 &nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(defrule <i>name (key*) pattern*</i> => <i>action*</i>)</td>
 
+
+
 <td NOSAVE>Macro</td>
+
 </tr>
+
 </table>
 
+
+
 <blockquote>Creates a rule identified by <i>name</i> and compiles it into
+
 the Rete network. <i>Name</i> is any Lisp form that evaluates to a symbol.
+
 The keyword arguments modify the rule as follows:
+
 <pre>:salience <i>integer</i></pre>
 
+
+
 <blockquote>Assigns a priority to the rule that will affect the firing
+
 order. The salience value is a small integer in the range (-250, 250).
+
 By default, all rules have salience 0.</blockquote>
+
+
 
 <pre>:module <i>name</i></pre>
 
+
+
 <blockquote>Binds the rule to a module identified by the symbol <i>name</i>.
+
 Currently unimplemented.</blockquote>
+
 If the rule identified by <i>name</i> already exists in the Rete network
+
 it is replaced by the new definition.
+
 <h5>
+
 Patterns</h5>
+
 Each rule consists of zero or more <i>pattern</i>s, or Conditional Elements
+
 (CEs). Collectively these patterns are known as the rule's Left Hand Side
+
 (LHS), and are the entities that participate in the pattern-matching process.
+
 LISA currently defines three pattern types:
+
 <pre>generic pattern</pre>
 
+
+
 <blockquote>This pattern type matches against facts in the knowledge base.
+
 The head of the pattern matches equivalently-named facts; the pattern body
+
 is optionally composed of slot-names, values, variables and predicates.
+
 The best way to understand these things is to look at some examples:
+
 <pre>(simple-pattern)</pre>
 
+
+
 <blockquote>The simplest type of pattern. This example will match any fact
+
 of class <i>simple-pattern</i>.</blockquote>
+
+
 
 <pre>(goal-is-to (action unlock))</pre>
 
+
+
 <blockquote>This pattern matches facts of class <i>goal-is-to</i>. In addition,
+
 it specifies that the slot named <i>action</i> must have as its value the
+
 symbol <i>unlock</i>.</blockquote>
+
+
 
 <pre>(thing (name ?chest) (on-top-of (not floor)))</pre>
 
+
+
 <blockquote>A bit more interesting. Matches facts of class <i>thing</i>;
+
 assuming this is the first appearance of the variable <i>?chest</i>, binds
+
 it to the value of the slot <i>name</i>; specifies that the slot <i>on-top-of</i>
+
 should not have as its value the symbol <i>floor</i>.</blockquote>
+
+
 
 <pre>(?monkey (monkey (holding ?chest)))</pre>
 
+
+
 <blockquote>Assuming the variable <i>?chest</i> was bound in a previous
+
 pattern, matches facts of class <i>monkey</i> whose slot <i>holding</i>
+
 has the same value as <i>?chest</i>. Additionally, if the pattern is successfully
+
 matched, binds the fact object to the variable <i>?monkey</i>. The variable
+
 <i>?monkey</i>
+
 is called a <i>pattern binding</i>.</blockquote>
+
+
 
 <pre>(pump (flow-rate ?flow-rate (&lt; ?flow-rate 25)))</pre>
 
+
+
 <blockquote>More interesting still. This pattern matches facts of class
+
 <i>pump</i>,
+
 and binds the value of the slot <i>flow-rate</i> to the variable
+
 <i>?flow-rate</i>.
+
 In addition, there is a constraint on this slot declaring that the value
+
 of <i>?flow-rate</i> must be less than 25. In general, constraints can
+
 be arbitrary Lisp expressions that serve as predicates.</blockquote>
+
+
 
 <pre>(fact-with-list (list '(1 2 three)))</pre>
 
+
+
 <blockquote>Patterns can perform matching on lists as well as simpler data
+
 types. Here, the slot <i>list</i> must have the value <i>'(1 2 three)</i>.
+
 More complicated list analysis can be done using user-defined predicates.</blockquote>
+
 </blockquote>
+
+
 
 <pre>negated pattern</pre>
 
+
+
 <blockquote>This pattern type is the complement of most variations of the
+
 generic pattern. Negated patterns have the symbol <i>not</i> as their head,
+
 and match if a fact satisfying the pattern is <i>not</i> found. For example:
+
 <pre>(not (tank-level-warning (tank ?tank) (type low)))</pre>
+
 Note that negated patterns are not allowed to have pattern bindings.</blockquote>
+
+
 
 <pre>test pattern</pre>
 
+
+
 <blockquote>The <i>test</i> conditional element allows one to evaluate
+
 arbitrary Lisp code on the rule LHS; these Lisp forms serve as a predicate
+
 that determines whether or not the pattern will match. For example, the
+
 pattern
+
 <pre>(test (and (high-p ?tank) (intact-p ?tank)))</pre>
+
 will succeed if the AND form returns non-<i>nil</i>; i.e. the functions
+
 HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
+
 If a rule provides no conditional elements, then it is said to match the
+
 <i>initial-fact</i>,
+
 which is asserted as the result of a call to <i>reset</i>. Thus, the following
+
 rule will always activate after each reset:
+
 <dl>
+
 <dd>
+
 (defrule always-fires ()</dd>
 
+
+
 <dd>
+
 &nbsp;&nbsp; =></dd>
 
+
+
 <dd>
+
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
+
+
 <dt>&nbsp;</dt>
+
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
+
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
+
 contains a special slot named <i>:object</i> that is bound to the corresponding
+
 CLOS instance. It is possible to bind this slot to a variable just like
+
 any other:
+
 <br>&nbsp;
+
 <dd>
+
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 
+
+
 <dt>&nbsp;</dt>
+
 <p>Once bound, method and function calls can be made on this object from
+
 the rule's LHS and RHS.
+
 <p>When reasoning over CLOS objects, LISA is capable of considering an
+
 instance's object hierarchy during pattern matching. In other words, it
+
 is possible to write rules that apply to many facts that share a common
+
 ancestry. The following code fragment provides an example:
+
 <br>&nbsp;
+
 <dd>
+
 (defclass fundamental () ())</dd>
 
+
+
 <dd>
+
 (defclass rocky (fundamental) ())</dd>
 
+
+
 <dd>
+
 (defclass boris (fundamental) ())</dd>
 
+
+
 <br>&nbsp;
 
+
+
 <dd>
+
 (defimport rocky)</dd>
 
+
+
 <dd>
+
 (defimport boris)</dd>
 
+
+
 <br>&nbsp;
+
 <dd>
+
 (defrule cleanup (:salience -100)</dd>
 
+
+
 <dd>
+
 &nbsp;&nbsp;&nbsp; (?fact (fundamental))</dd>
 
+
+
 <dd>
+
 &nbsp;&nbsp;&nbsp;&nbsp; =></dd>
 
+
+
 <dd>
+
 &nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
 
+
+
 <dt>&nbsp;</dt>
+
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
+
 and <i>boris</i> in the knowledge base, retracting each in turn. Note how it was
+
 unnecessary to import class <i>fundamental</i>, as LISA discovers the class
+
 hierarchy for <i>rocky</i> and <i>boris</i> and imports it automatically.</dl>
+
 </blockquote>
 
+
+
 <blockquote>
+
 <h5>
+
 Actions</h5>
+
 Following any conditional elements are the rule's actions, if any. Collectively
+
 known as the Right Hand Side (RHS), actions consist of arbitrary Lisp forms;
+
 all variables declared on the LHS are available, along with the special
+
 operator <i>engine</i>, which evaluates to the rule's inference engine
+
 object. Currently, each rule's RHS is given to the Lisp compiler during
+
 rule compilation, and executes within a special lexical environment established
+
 by LISA for each firing.</blockquote>
 
+
+
 <table BORDER=0 WIDTH="100%" >
+
 <tr>
+
 <td WIDTH="80%">(undefrule <i>name-or-instance</i> &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Undefines, or removes, a rule from the Rete network contained
+
 in <i>engine</i>. <i>Name-or-instance</i> is either a symbol representing
+
 the rule name or the CLOS instance of a rule. By default, operates on the
+
 <i>current-engine</i>.</blockquote>
 
+
+
 <h4>
+
 <a NAME="CLOS-Related Operators"></a>CLOS-Related Operators</h4>
+
 There are a few special operators and functions that LISA provides for
+
 managing CLOS instances within the knowledge base.
+
 <br>&nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(engine)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Returns the inference engine associated with a particular rule.
+
 Use of this macro only makes sense from within a rule's RHS.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance</i> &amp;optional
-<i>slot-id</i>)</td>
+
+<td WIDTH="80%" NOSAVE>(mark-instance-as-changed <i>instance </i>&amp;key <i>engine
+  slot-id</i>)</td>
+
+
 
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Notifies LISA that a change has been made to <i>instance</i>
+
 outside of the knowledge-base (i.e. not via the <i>modify</i> operator),
-and synchronizes the instance with its associated shadow fact. LISA automatically
-generates a specialized method for this function at <i>defimport</i> time;
-an application <i>must</i> call this method whenever a slot change occurs
+
+and synchronizes the instance with its associated fact. If <i>engine</i> is not
+  specified it defaults to the value of (CURRENT-ENGINE); <i>slot-id</i> is
+  either the symbolic name of a slot belonging to <i>instance</i> that has
+  changed value, or NIL (the default), in which case all slots are synchronized.
+  An application <i>must</i> call this method whenever a slot change occurs
+
 outside of LISA's control.</blockquote>
 
+
+
 <h4>
+
 <a NAME="Engine-Related Operators"></a>Engine-Related Operators</h4>
+
 These operators provide an interface to instances of the inference engine
+
 itself.
+
 <br>&nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(reset &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Re-initializes the knowledge base of <i>engine;</i> removing
+
 facts, clearing the agenda, and asserting the <i>initial-fact</i>. By default,
+
 operates on the <i>current-engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(clear &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Re-initializes <i>engine</i> itself; forgetting the rulebase,
+
 facts and agenda. By default, operates on the <i>current-engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(run &amp;optional <i>engine</i> &amp;key <i>step)</i></td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Runs the inference engine bound to <i>engine</i>. Execution
+
 will continue until either the agenda is empty or the number of fired rules
+
 exceeds the value of <i>step</i>. By default, <i>step</i> is bound to a
+
 value that will cause the engine to run until the agenda is exhausted.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(walk &amp;optional <i>step</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Runs the engine in <i>step</i> increments, single-stepping
+
 by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(halt <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
 
+
+
 <blockquote>Halts the inference engine <i>engine</i>, even if the agenda
+
 still has activations. Typically used only on rule RHSs.</blockquote>
 
+
+
 <h4>
+
 <a NAME="Environment-Related Operators"></a>Environment-Related Operators</h4>
+
+
 
 <blockquote>These operators are used to establish one or more LISA environments.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(use-default-engine)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Create and make available a default instance of the inference
+
 engine. Use this function when you want a basic, single-threaded LISA environment.
+
 Typically, this form will appear near the beginning of a file of LISA constructs
+
 (rules, templates, etc.). It is idempotent; that is, subsequent calls to
+
 the function will <i>not</i> create a new inference engine unless LISA
+
 is completely re-initialized.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(use-engine <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Make <i>engine</i> the default inference engine. Use this function
+
 with great care in a multi-processing environment.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(with-inference-engine (<i>engine</i>) <i>forms</i>*)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Evaluates <i>forms</i> within the context of the inference
+
 engine <i>engine</i>. Under most circumstances, use this macro in a multi-processing
+
 environment to safely load a knowledge base into <i>engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(current-engine)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Returns the currently-active inference engine. Usually only
+
 invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
+
+
 <table BORDER=0 WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(make-inference-engine &amp;key <i>strategy</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Creates an instance of LISA's default inference engine. An
+
 object representing a type of conflict resolution strategy may be supplied
+
 using the keyword <i>strategy</i>; by default, a breadth-first algorithm
+
 is employed. See the section on conflict resolution for details.</blockquote>
 
+
+
 <table BORDER=0 WIDTH="100%" >
+
 <tr>
+
 <td WIDTH="80%">(rule)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Within the context of an executing rule, returns the CLOS object
+
 representing that rule.</blockquote>
 
+
+
 <table BORDER=0 WIDTH="100%" >
+
 <tr>
+
 <td WIDTH="80%">(get-name <i>rule</i>)</td>
 
+
+
 <td>Generic function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Returns the symbolic name associated with rule instance <i>rule</i>.</blockquote>
 
+
+
 <h4>
+
 <a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
+
 These operators are typically used interactively to inspect the state of
+
 an inference engine. Some of these operators are only loosly defined and
+
 need further work.
+
 <br>&nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(facts &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Prints on <i>standard output</i> the contents of the fact base
+
 belonging to <i>engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(rules &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Prints on <i>standard output</i> the contents of the rule base
+
 belonging to <i>engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(agenda &amp;optional <i>engine</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Prints on <i>standard output</i> the contents of the agenda
+
 belonging to <i>engine</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(watch <i>event</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
 
+
+
 <blockquote>Asks LISA to report the occurrence of <i>event</i> to <i>standard
+
 output</i>. The entire watch facility needs work, especially to accommodate
+
 a multi-inference-engine environment. Also, it would be nice to generalize
+
 the facility such that it behaves more like a "publish/subscribe" mechanism
+
 with "real" events.
+
 <p>Currently, LISA allows monitoring of these events:
+
 <pre>:facts</pre>
+
+
 
 <blockquote>Triggers an event each time a fact is asserted or retracted.</blockquote>
 
+
+
 <pre>:activations</pre>
 
+
+
 <blockquote>Triggers an event each time a rule is added to or removed from
+
 the agenda.</blockquote>
+
+
 
 <pre>:rules</pre>
 
+
+
 <blockquote>Triggers an event each time a rule is fired.</blockquote>
+
 </blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(unwatch <i>event</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Disables the monitoring of <i>event</i>. See the documentation
+
 for <i>watch</i> to see the allowable event types.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(watching)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Displays the list of events currently being monitored.</blockquote>
 
+
+
 <h3>
+
 II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
+
 For application developers, LISA makes available two different types of
+
 environments. Package LISA-USER contains all of LISA's exported symbols, plus
+
 those of COMMON-LISP. User-level work can safely be done in this package.
+
 Alternatively, package LISA-LISP can be used with DEFPACKAGE forms to import a
+
 LISA environment into user-defined packages:
+
 <blockquote>
+
   <p>(defpackage &quot;FRODO&quot;<br>
+
   &nbsp; (:use &quot;LISA-LISP&quot;))</p>
+
 </blockquote>
+
 <p>As with LISA-USER, LISA-LISP exports all external symbols in the LISA and
+
 COMMON-LISP packages. See the
+
 various examples provided in "lisa:misc;".</p>
+
 <h3>
+
 III.&nbsp;<a NAME="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
+
 In addition to statically declared rules, LISA supports the definition
+
 of rules at runtime. That is, it is possible to create new rules from the
+
 RHSs of existing rules as they fire. These <i>dynamically defined</i> rules
+
 become immediately available to the inference engine for potential activation.
+
 As a simple example, consider the following rule:<br>
+
 <blockquote>(defrule rocky ()
+
 <br>&nbsp; (rocky (name ?name))
+
 <br>&nbsp; =>
+
 <br>&nbsp; (defrule boris ()
+
 <br>&nbsp;&nbsp;&nbsp; (boris (name ?name))
+
 <br>&nbsp;&nbsp;&nbsp; =>
+
 <br>&nbsp;&nbsp;&nbsp; (format t "Dynamic rule BORIS fired; NAME is ~S~%"
+
 ?name)))</blockquote>
+
 When rule ROCKY fires, its RHS creates a dynamically defined rule named
+
 BORIS. This new rule is inserted into the inference engine and immediately
+
 becomes part of the Rete network. Variables bound on the LHS of ROCKY behave
+
 as expected within the context of BORIS; this means that ?NAME in BORIS
+
 is bound to the same object as that found in ROCKY<sup>*</sup>.
+
 <p>Here's a more complicated example:
+
 <blockquote>(defrule rocky ()
+
 <br>&nbsp; (rocky (name ?name))
+
 <br>&nbsp; =>
+
 <br>&nbsp; (let ((dynamic-rule
+
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 (defrule (gensym) ()
+
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 (boris (name ?name))
+
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 =>
+
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 (format t "Dynamic rule ~A fired; name is ~S~%" (get-name (rule)) ?name))))
+
 <br>&nbsp;&nbsp;&nbsp; (format t "Rule ROCKY added dynamic rule ~A~%" (get-name
+
 dynamic-rule))))</blockquote>
+
 As before, rule ROCKY creates a dynamic rule when fired. However, this
+
 time the new rule is given a unique name by evaluating the form (GENSYM);
+
 either the name or the instance can then be remembered for use later. These
+
 two rules also introduce functions in the LISA API for retrieving both
+
 the currently executing rule and its name (RULE and GET-NAME, respectively).
+
 <p><sup>*</sup> Actually, this isn't precisely true. Whenever LISA encounters
+
 a dynamic rule during parsing it looks at all the rule's variables and
+
 substitutes any bound values. Thus, in rule BORIS the variable ?NAME would
+
 be replaced by the value of ?NAME as bound in rule ROCKY.
+
 <h3>
+
 IV.&nbsp;<a NAME="Queries"></a>Queries</h3>
+
 As of LISA version 1.2, a simple query language is supported that allows
+
 retrieval of facts from a knowledge base, either interactively via a Lisp
+
 listener or programmatically. The query engine leverages the inferencing
+
 component by transforming query expressions into rules and inserting them,
+
 at runtime, into the Rete network. Each query is assigned a unique identifier
+
 and cached upon first appearance; subsequent queries with semantically
+
 equivalent bodies will find the cached instance and execute with substantially
+
 improved performance, especially for larger knowledge bases. As an example,
+
 consider the following two query forms:
+
 <p>&nbsp; (retrieve (?x ?y)
+
 <br>&nbsp;&nbsp;&nbsp; (?x (hobbit (name ?name)))
+
 <br>&nbsp;&nbsp;&nbsp; (?y (ring-bearer (name ?name))))
+
 <p>&nbsp; (retrieve (?h1 ?h2)
+
 <br>&nbsp;&nbsp;&nbsp; (?h1 (hobbit (name ?hobbit-name)))
+
 <br>&nbsp;&nbsp;&nbsp; (?h2 (ring-bearer (name ?hobbit-name))))
+
 <p>The variables appearing in the first argument to RETRIEVE (e.g. '(?x
+
 ?y)) are used to establish bindings for each firing of the query; each
+
 variable must also appear in the query body as an appropriate pattern binding.
+
 Other than this requirement, query bodies are structurally identical to
+
 rule bodies; anything that is legal in a rule LHS is legal in a query body.
+
 Note that these two examples are semantically equivalent; although the
+
 variable names are different, the patterns appear in the same order and
+
 the relationships among variables are identical. Thus, firing either query
+
 will yield the same set of fact bindings. LISA is able to recognize such
+
 similarities in queries and implements a caching scheme that minimizes
+
 unnecessary dynamic rule creation.
+
 <p>RETRIEVE returns two values; a list of bindings for each query firing,
+
 and the symbolic name assigned by LISA to the query instance. The second
+
 value is probably only useful while developing/testing queries; using this
+
 symbol one can ask LISA to forget about a query by removing it from the
+
 cache and the Rete network. The binding list is the principal value of
+
 interest. Since a query is really a rule, it can fire an arbitrary number
+
 of times for each invocation. Each firing is represented as a list of CONS
+
 cells. The CAR of each cell is one of the variables specified in the query's
+
 binding list; its CDR is a fact bound to that variable that satisfies the
+
 variable's associated pattern. For example, assuming that the first of
+
 the above query examples fires twice during a certain invocation, RETRIEVE
+
 would return something like:
+
 <p>&nbsp; (((?X . &lt;HOBBIT INSTANCE 1>) (?Y . &lt;RING-BEARER INSTANCE
+
 1>))
+
 <br>&nbsp;&nbsp;&nbsp; ((?X . &lt;HOBBIT INSTANCE 2>) (?Y . &lt;RING-BEARER
+
 INSTANCE 2)))
+
 <br>&nbsp; #:G7777
+
 <p>As explained previously, the second value is the symbolic name LISA
+
 assigned to the query when its rule instance was initially created. Most
+
 of the time it will be ignored.
+
 <p>As of release 1.3, LISA incorporates a unified view of template- and
+
 CLOS-based facts; as a result queries now function for both types of facts. In
+
 the former case, LISA creates a class modeled around the template. Class and
+
 slot names are taken directly from the DEFTEMPLATE form; each slot is given a
+
 reader method named according to DEFSTRUCT conventions (i.e. <i>class name-slot
+
 name</i>). For example,&nbsp;
+
 <blockquote>
+
   <p>(deftemplate frodo ()<br>
+
   &nbsp; (slot companion (default merry)))
+
 </blockquote>
+
 <p>Will yield the following class specification:
+
 <blockquote>
+
   <p>(defclass frodo (inference-engine-object)<br>
+
   &nbsp; ((companion :initform 'merry :initarg :companion :reader
+
   frodo-companion)))
+
 </blockquote>
+
 <p>These functions and macros comprise the current interface to the query
+
 engine:
+
 <br>&nbsp;
+
 <table COLS=2 WIDTH="100%" >
+
 <tr>
+
 <td WIDTH="80%">(retrieve (<i>variables</i>*) <i>patterns</i>*)</td>
 
+
+
 <td>Macro</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Initiates a query against the knowledge base. Variable bindings
+
 for the query are found in <i>variables; patterns</i> consists of matching
+
 forms that comprise the body of the query rule. RETRIEVE returns two values:
+
 a list of CONS cells for each firing and the symbolic name LISA assigned
+
 to the query when it was initially constructed. The CAR of each CONS cell
+
 is one of the binding variables; the CDR is the CLOS instance bound to
+
 that variable.</blockquote>
 
+
+
 <table COLS=2 WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(forget-query <i>name</i>)</td>
 
+
+
 <td>Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Instructs LISA to forget about the query identified by the
+
 symbol <i>name</i>. Doing so removes the query's rule instance from the
+
 Rete network and the query itself from the cache. Useful only during query
+
 development, probably.</blockquote>
 
+
+
 <table border="0" width="100%">
+
   <tr>
+
     <td width="80%">(with-simple-query ((<i>var value</i>) <i>query-form</i>
+
       &amp;body <i>body</i>))</td>
+
     <td width="20%">Macro</td>
+
   </tr>
+
 </table>
+
 <blockquote>
+
   <p>Evaluates <i>query-form</i>. Then, iterates over the resulting list
+
   structure, binding each variable and fact to <i>var</i> and <i>value</i>,
+
   respectively, and evaluating <i>body</i>. This macro is useful if one is
+
   interested in just the individual variable/fact pairs and doesn't care much
+
   about the binding context that occurred during query firing.</p>
+
 </blockquote>
 
+
+
 <h3>
+
 V.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
+
 Conflict Resolution (CR) is the mechanism LISA employs to determine the
+
 order in which multiple activations will fire. Currently, LISA offers two
+
 "built-in" strategies; <i>breadth-first</i> and <i>depth-first</i>. It
+
 is possible to implement new CR algorithms by creating a class derived
+
 from <i>lisa:strategy</i> and implementing a few generic functions; instances
+
 of this new strategy can then be given to <i>make-inference-engine</i>.
+
 <br>&nbsp;
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(add-activation <i>strategy</i> <i>activation</i>)</td>
 
+
+
 <td>Generic Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Makes a new <i>activation</i> eligible for firing.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(find-activation <i>strategy</i> <i>rule</i> <i>token</i>)</td>
 
+
+
 <td>Generic Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Locates an activation associated with <i>rule</i> and <i>token</i>.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(next-activation <i>strategy</i>)</td>
 
+
+
 <td>Generic Function</td>
+
 </tr>
+
 </table>
+
+
 
 <blockquote>Returns the next eligible activation.</blockquote>
 
+
+
 <table WIDTH="100%" NOSAVE >
+
 <tr NOSAVE>
+
 <td WIDTH="80%" NOSAVE>(list-activations <i>strategy</i>)</td>
 
+
+
 <td>Generic Function</td>
+
 </tr>
+
 </table>
 
+
+
 <blockquote>Returns a list of eligible activations.</blockquote>
+
 Documentation for the CR interface is still fairly light. Look for improvements
+
 in upcoming releases.
+
 <h3>
+
 VI.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
+
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
+
 for your convenience, a copy is included in the distribution. Building
+
 LISA should be straight-forward. First, either load "lisa:lisa.system"
+
 or change your working directory to the LISA root directory; then, evaluate
+
 (mk:compile-system :lisa). Note that currently LISA includes a copy of
+
 the CLOCC package PORT; this will build automatically. If you already have
+
 PORT in your Lisp you'll have to edit lisa.system until I find a better
+
 way to manage this. One other thing. LISA uses logical pathnames in her
+
 defsystem, and translations that are suitable for a Linux environment are
+
 established there. They might work for you; perhaps not. Once again, until
+
 I figure out how to correctly place default translations you might have
+
 to do some hand editing. Sorry.
+
 <p>To build a knowledge base, write your production rules using the various
+
 source examples (and this document) as your guide and load the file(s)
+
 into Lisp. You can then change to the LISA-USER package and experiment.
+
 Look for the examples in "lisa:misc;".
+
 <p>A note to CLISP users. LISA requires that CLISP be run with full ANSI
+
 support enabled. Also, the baseline version with which LISA has been tested
+
 is 2.25.1. Earlier releases might work as well, but no guarantees.
+
 <h3>
+
 VII.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+
 This section is a list (albeit incomplete) of features that would improve
+
 LISA significantly.
+
 <ol>
+
 <li>
+
 <i>Ruleset partitioning</i>: LISA doesn't yet support the notion of rule
+
 "modules" or "packets". It might be nice to be able to group rules into
+
 packages that could be inserted and removed as necessary. Or, perhaps a
+
 mechanism akin to the CLIPS module system would be more useful. Or both...<br>
+
 <BR></li>
 
+
+
 <li>
+
 <i>Better language/engine interface</i>: This is a sore point that I intend
+
 to address eventually. I really want LISA to have clean separation between
+
 the rule language implementation and the inference engine. In other words,
+
 I'd like to have a "generic" Rete implementation upon which one can attach
+
 different rule programming languages. If you don't like the language that
+
 comes with LISA, write a new one. That sort of thing.<br>
+
 <BR></li>
 
+
+
 <li>
+
 <i>Truth maintenance</i>: LISA needs to support some mechanism similar
+
 to CLIPS' LOGICAL construct.</li>
+
 </ol>
 
+
+
 <h3>
+
 <a NAME="Supported Platforms"></a>VIII. Supported Platforms.</h3>
+
 LISA has been tested, and is known to run, on the following Common Lisp
+
 implementations:
+
 <ul>
+
 <li>
+
 Allegro Common Lisp, versions 5.0.1 and 6.x, Linux and Windows 2000.</li>
 
+
+
 <li>
+
 Xanalys LispWorks, version 4.1.20, Linux and Windows 2000.</li>
 
+
+
 <li>
+
 CLISP, version 2.27 and newer, Linux and Windows 2000.</li>
 
+
+
 <li>
+
 CMUCL, version 18c, Linux.</li>
+
 </ul>
 
+
+
 </body>
+
 </html>
+
