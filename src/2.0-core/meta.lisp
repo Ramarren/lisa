@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.12 2002/11/15 20:31:36 youngde Exp $
+;;; $Id: meta.lisp,v 1.13 2003/11/01 17:47:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,36 +49,41 @@
         symbolic-name))
     meta-fact))
 
+;;; Corrected version courtesy of Aneil Mallavarapu...
+
 (defun acquire-meta-data (actual-name)
-  (labels ((build-meta-object (class direct-superclasses)
+  (labels ((build-meta-object (class all-superclasses) ;  NEW LINE (AM 9/19/03)
              (let* ((class-name (class-name class))
                     (meta-data
                      (make-fact-meta-object
                       :class-name class-name
                       :slot-list (reflect:class-slot-list class)
-                      :superclasses direct-superclasses)))
+                      :superclasses all-superclasses))) ; new line (AM 9/19/03)
                (register-meta-object (inference-engine) class-name meta-data)
                meta-data))
            (examine-class (class-object)
              (let ((superclasses
                     (if *consider-taxonomy-when-reasoning*
-                        (reflect:find-direct-superclasses class-object)
+                        (reflect:class-all-superclasses class-object) ; NEW LINE (AM 9/19/03)
                       nil)))
                (build-meta-object class-object superclasses)
                (dolist (super superclasses)
                  (examine-class super)))))
     (examine-class (find-class actual-name))))
 
+;;; Corrected version courtesy of Aneil Mallavarapu...
+
 (defun import-class-specification (class-name)
-  (let ((class-object (find-class class-name))
-        (class-symbols (list class-name)))
-    (dolist (slot-name (reflect:class-slot-list class-object))
-      (push slot-name class-symbols))
-    (import class-symbols)
-    (when *consider-taxonomy-when-reasoning*
-      (dolist (ancestor (reflect:find-direct-superclasses class-object))
-        (import-class-specification ancestor)))
-    class-object))
+  (labels ((import-class-object (class-object) ; defined this internal function
+             (let ((class-symbols (list class-name)))
+               (dolist (slot-name (reflect:class-slot-list class-object))
+                 (push slot-name class-symbols))
+               (import class-symbols)
+               (when *consider-taxonomy-when-reasoning*
+                 (dolist (ancestor (reflect:find-direct-superclasses class-object))
+                   (import-class-object ancestor))) ; changed to import-class-object
+               class-object)))
+    (import-class-object (find-class class-name))))
 
 (defconstant +no-meta-data-reason+
     "LISA doesn't know about the template named by (~S). Either the name was

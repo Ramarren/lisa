@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.19 2003/06/02 15:02:54 youngde Exp $
+;;; $Id: fact.lisp,v 1.20 2003/11/01 17:50:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -32,8 +32,6 @@
    (slot-table :reader fact-slot-table
                :initform (make-hash-table :test #'equal))
    (clos-instance :reader fact-clos-instance)
-   (shadows :initform nil
-            :reader fact-shadowsp)
    (meta-data :reader fact-meta-data))
   (:documentation
    "This class represents all facts in the knowledge base."))
@@ -96,8 +94,10 @@
   instance."
   (fact-clos-instance fact))
 
-(defun has-superclass (fact symbolic-name)
-  (find symbolic-name (get-superclasses (fact-meta-data fact))))
+;;; Corrected version courtesy of Aneil Mallavarapu...
+
+(defun has-superclass (fact symbolic-name) ; fix converts symbolic-name to a class-object
+  (find (find-class symbolic-name) (get-superclasses (fact-meta-data fact))))
 
 (defun synchronize-with-instance (fact &optional (effective-slot nil))
   "Makes a fact's slot values and its CLOS instance's slot values match. If a
@@ -168,7 +168,6 @@
             (set-slot-from-instance fact instance slot-name))
         (get-slot-list meta-data))
   (setf (slot-value fact 'clos-instance) instance)
-  (setf (slot-value fact 'shadows) t)
   fact)
 
 (defun make-fact (name &rest slots)
