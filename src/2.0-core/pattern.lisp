@@ -22,7 +22,7 @@
 ;;; been analysed by the language parser. This is the canonical representation
 ;;; of parsed patterns that Rete compilers are intended to see.
 
-;;; $Id: pattern.lisp,v 1.19 2002/09/17 23:36:39 youngde Exp $
+;;; $Id: pattern.lisp,v 1.20 2002/09/26 01:54:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -56,7 +56,7 @@
   is a list of all variables found in the pattern's slots; TYPE is one of
   (:GENERIC :NEGATED :TEST) and indicates the kind of pattern represented."
   (class nil :type symbol)
-  (slots nil :type list)
+  (slots nil)
   (address 0 :type integer)
   (pattern-binding nil :type symbol)
   (test-bindings nil :type list)
@@ -71,6 +71,9 @@
 
 (defun test-pattern-p (pattern)
   (eq (parsed-pattern-type pattern) :test))
+
+(defun test-pattern-predicate (pattern)
+  (parsed-pattern-slots pattern))
 
 (defun negated-pattern-p (pattern)
   (eq (parsed-pattern-type pattern) :negated))

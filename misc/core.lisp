@@ -1,5 +1,5 @@
 
-(in-package "LISA-USER")
+(in-package "LISA")
 
 (use-default-engine)
 
@@ -24,6 +24,11 @@
   (slot name)
   (slot friend)
   (slot age))
+
+(defrule frodo ()
+  (frodo (name ?name frodo))
+  =>
+  (format t "frodo fired: ~S~%" ?name))
 
 #+ignore
 (defrule simple-rule ()
@@ -58,6 +63,7 @@
   =>
   )
 
+#+ignore
 (defrule constraints ()
   (frodo (name ?name))
   (samwise (name sam) (friend ?friend (not frodo)))

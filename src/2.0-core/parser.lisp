@@ -24,13 +24,21 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.26 2002/09/25 18:58:12 youngde Exp $
+;;; $Id: parser.lisp,v 1.27 2002/09/26 01:54:25 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant *rule-separator* '=>)
 
 (defvar *binding-table* nil)
+
+(defmacro make-equality-predicate (var atom)
+  `(function
+    (lambda () 
+      (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))))
+
+(defmacro make-generic-predicate (&rest body)
+  `(function (lambda () ,@body)))
 
 (defun find-or-set-slot-binding (var slot-name location)
   (multiple-value-bind (binding existsp)
@@ -72,6 +80,7 @@
   (with-rule-components ((doc-string lhs rhs) body)
     (format t "LHS: ~S~%" lhs)
     (format t "RHS: ~S~%" rhs)
+    (break)
     (add-new-rule 
      (inference-engine)
      (make-rule name (inference-engine) lhs rhs
@@ -121,7 +130,7 @@
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
-                :actions actions)))
+                :actions (make-generic-predicate (first actions)))))
       (multiple-value-bind (lhs remains)
           (utils:find-before *rule-separator* body :test #'eq)
         (cl:assert (not (null remains)) nil "Missing rule separator")
@@ -166,7 +175,8 @@
     (cl:assert (and (listp form)
                     (= (length form) 1)) nil
       "The body of a TEST CE must be a single Lisp form")
-    (values pattern (collect-bindings form))))
+    (values (list :test (make-generic-predicate form)) 
+            (collect-bindings form))))
 
 (defun parse-default-pattern (pattern location)
   (let ((head (first pattern)))
@@ -179,12 +189,6 @@
                         (pushnew (find-slot-binding obj)
                                  ,list :key #'first)))
                     ,list))
-               (make-equality-predicate (var atom)
-                 `(function
-                   (lambda () 
-                     (equal ,var ,@(if (symbolp atom) `(',atom) `(,atom))))))
-               (make-generic-predicate (&body body)
-                 `(function (lambda () ,@body)))
                (simple-form-p (form)
                  `(atom ,form))
                (simple-negated-form-p (form)
@@ -223,8 +227,8 @@
                               (make-equality-predicate field constraint)))
                            ((simple-negated-form-p constraint)
                             (setf constraint
-                              (make-equality-predicate field (second constraint))
-                              (setf negated t)))
+                              (make-equality-predicate field (second constraint)))
+                            (setf negated t))
                            (t
                             (setf existing-bindings
                               (append existing-bindings
