@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.9 2001/01/05 17:38:06 youngde Exp $
+;;; $Id: factories.lisp,v 1.10 2001/01/05 19:26:50 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,7 @@
                       (get-bindings rule))
              (values bindings))))
     (cond ((value-is-predicate-p test)
-           (make-node1-tev 
+           (make-node1-tfn
             (get-name slot) (make-function-call
                              (get-value test) (make-bindings))))
           (t
