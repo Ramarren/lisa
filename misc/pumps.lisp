@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.5 2001/05/08 20:37:45 youngde Exp $
+;;; $Id: pumps.lisp,v 1.6 2001/05/08 22:53:52 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -47,6 +47,12 @@
    (name :initarg :name
          :reader get-name)))
 
+(defmacro with-new-process ((name) &body body)
+  `(port:make-process
+    name #'(lambda ()
+             (let ((*package* (find-package "LISA-USER")))
+               (progn ,@body)))))
+
 (defun set-flow-rate (self new-rate)
   (declare (type pump self))
   (with-accessors ((rate get-flow-rate)) self
@@ -64,9 +70,8 @@
                  ((not (intact-p tank)) t)
                (add-water tank (get-flow-rate self))
                (sleep 0.10)))))
-    (port:make-process
-     (concatenate 'string "Pump Process " (get-name self))
-     #'add-water-to-tank)))
+    (with-new-process ((concatenate 'string "Pump:" (get-name self)))
+      (add-water-to-tank))))
 
 (defun make-pump (name tank)
   (make-instance 'pump :name name :tank tank))
@@ -106,14 +111,14 @@
            (do ()
                ((not (intact-p self)))
              (add-water self -1)
-             (sleep 0.025))
+             (sleep 0.250))
            (cond ((>= (get-level self) 1000)
-                  (format t "Tank ~S exploded!~%" self))
+                  (format t "Tank ~S exploded!~%" (get-name self)))
                  ((<= (get-level self) 0)
-                  (format t "Tank ~S ran dry and caught fire!~%" self)))))
-    (port:make-process
-     (concatenate 'string "Tank Process " (get-name self))
-     #'adjust-tank-level)))
+                  (format t "Tank ~S ran dry and caught fire!~%"
+                          (get-name self))))))
+    (with-new-process ((concatenate 'string "Tank:" (get-name self)))
+      (adjust-tank-level))))
 
 (defun make-tank (name)
   (make-instance 'tank :name name))
@@ -132,7 +137,9 @@
 
 (defun stop-run ()
   (halt (current-engine))
-  (mapc #'port:kill-process :key #'rest *equipment*)
+  (mapc #'(lambda (equip)
+            (port:kill-process (rest equip)))
+        *equipment*)
   (values nil))
 
 (defimport pump (lisa-user::pump) ())
@@ -193,7 +200,7 @@
   (?idle (idle (count ?count)))
   =>
   (retract ?idle)
-  (sleep 0.025)
+  (sleep 0.250)
   (assert (idle (count (1+ ?count)))))
 
 (defrule report-fire ()
