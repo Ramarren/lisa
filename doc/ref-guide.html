@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.9-31 i686) [Netscape]">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -19,13 +19,14 @@ algorithm; perhaps at some future date I'll make an attempt.
 <h2>
 Abbreviated Table of Contents</h2></center>
 <a href="#The Programming Language">The Programming Language</a>.
-<br><a href="#The Environment">The Environment</a>.<br>
-<a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
+<br><a href="#The Environment">The Environment</a>.
+<br><a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
+<br><a href="#Queries">Queries</a>
 <br><a href="#Conflict Resolution">Conflict Resolution</a>.
 <br><a href="#Getting Started">Getting Started</a>.
 <br><a href="#Things Yet to Do">Things Yet to Do</a>.
-<br><a href="#Supported Platforms">Supported Platforms</a>.<br>
-<br>
+<br><a href="#Supported Platforms">Supported Platforms</a>.
+<br>&nbsp;
 <h3>
 I.&nbsp;<a NAME="The Programming Language"></a>The Programming Language</h3>
 This section describes the publicly-available operators in the LISA language,
@@ -172,7 +173,8 @@ evaluated at execution time.</blockquote>
 </table>
 
 <blockquote>Creates a rule identified by <i>name</i> and compiles it into
-the Rete network. <i>Name</i> is any Lisp form that evaluates to a symbol. The keyword arguments modify the rule as follows:
+the Rete network. <i>Name</i> is any Lisp form that evaluates to a symbol.
+The keyword arguments modify the rule as follows:
 <pre>:salience <i>integer</i></pre>
 
 <blockquote>Assigns a priority to the rule that will affect the firing
@@ -183,10 +185,8 @@ By default, all rules have salience 0.</blockquote>
 
 <blockquote>Binds the rule to a module identified by the symbol <i>name</i>.
 Currently unimplemented.</blockquote>
-
-  <p>If the rule identified by <i>name</i> already exists in the Rete network it
-  is replaced by the new definition.</p>
-
+If the rule identified by <i>name</i> already exists in the Rete network
+it is replaced by the new definition.
 <h5>
 Patterns</h5>
 Each rule consists of zero or more <i>pattern</i>s, or Conditional Elements
@@ -264,7 +264,7 @@ If a rule provides no conditional elements, then it is said to match the
 <i>initial-fact</i>,
 which is asserted as the result of a call to <i>reset</i>. Thus, the following
 rule will always activate after each reset:
-  <dl>
+<dl>
 <dd>
 (defrule always-fires ()</dd>
 
@@ -274,6 +274,8 @@ rule will always activate after each reset:
 <dd>
 &nbsp;&nbsp; (format t "always-fires fired!~%"))</dd>
 
+<br>&nbsp;
+<p>&nbsp;
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
@@ -283,6 +285,8 @@ any other:
 <dd>
 (tank (name ?name) (:object&nbsp; ?tank-object))</dd>
 
+<br>&nbsp;
+<p>&nbsp;
 <p>Once bound, method and function calls can be made on this object from
 the rule's LHS and RHS.
 <p>When reasoning over CLOS objects, LISA is capable of considering an
@@ -322,12 +326,13 @@ ancestry. The following code fragment provides an example:
 <dd>
 &nbsp;&nbsp;&nbsp; (retract ?fact))</dd>
 
+<br>&nbsp;
+<p>&nbsp;
 <p>The rule <i>cleanup</i> will fire for every instance of <i>rocky</i>
 and <i>boris</i> in the knowledge base, retracting each in turn. Note how
 the <i>defimport</i> forms for <i>rocky</i> and <i>boris</i> specify the
 symbolic name of the ancestor class <i>fundamental</i>, rather than the
-CLOS identifier.
-  </dl>
+CLOS identifier.</dl>
 </blockquote>
 
 <blockquote>
@@ -341,19 +346,18 @@ object. Currently, each rule's RHS is given to the Lisp compiler during
 rule compilation, and executes within a special lexical environment established
 by LISA for each firing.</blockquote>
 
-<table border="0" width="100%">
-  <tr>
-    <td width="80%">(undefrule <i>name-or-instance</i> &amp;optional <i>engine</i>)</td>
-    <td>Macro</td>
-  </tr>
-</table>
-<blockquote>
+<table BORDER=0 WIDTH="100%" >
+<tr>
+<td WIDTH="80%">(undefrule <i>name-or-instance</i> &amp;optional <i>engine</i>)</td>
 
-<p>
-Undefines, or removes, a rule from the Rete network contained in <i>engine</i>. <i>Name-or-instance</i>
-is either a symbol representing the rule name or the CLOS instance of a rule. By
-default, operates on the <i>current-engine</i>.</p>
-</blockquote>
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Undefines, or removes, a rule from the Rete network contained
+in <i>engine</i>. <i>Name-or-instance</i> is either a symbol representing
+the rule name or the CLOS instance of a rule. By default, operates on the
+<i>current-engine</i>.</blockquote>
 
 <h4>
 <a NAME="CLOS-Related Operators"></a>CLOS-Related Operators</h4>
@@ -517,7 +521,7 @@ environment to safely load a knowledge base into <i>engine</i>.</blockquote>
 <blockquote>Returns the currently-active inference engine. Usually only
 invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
-<table WIDTH="100%" NOSAVE border="0" >
+<table BORDER=0 WIDTH="100%" NOSAVE >
 <tr NOSAVE>
 <td WIDTH="80%" NOSAVE>(make-inference-engine &amp;key <i>strategy</i>)</td>
 
@@ -530,29 +534,26 @@ object representing a type of conflict resolution strategy may be supplied
 using the keyword <i>strategy</i>; by default, a breadth-first algorithm
 is employed. See the section on conflict resolution for details.</blockquote>
 
-<table border="0" width="100%">
-  <tr>
-    <td width="80%">(rule)</td>
-    <td>Macro</td>
-  </tr>
-</table>
-<blockquote>
+<table BORDER=0 WIDTH="100%" >
+<tr>
+<td WIDTH="80%">(rule)</td>
 
-<p>
-Within the context of an executing rule, returns the CLOS object representing
-that rule.</p>
-</blockquote>
-<table border="0" width="100%">
-  <tr>
-    <td width="80%">(get-name <i>rule</i>)</td>
-    <td>Generic function</td>
-  </tr>
+<td>Macro</td>
+</tr>
 </table>
-<blockquote>
 
-<p>
-Returns the symbolic name associated with rule instance <i>rule</i>.</p>
-</blockquote>
+<blockquote>Within the context of an executing rule, returns the CLOS object
+representing that rule.</blockquote>
+
+<table BORDER=0 WIDTH="100%" >
+<tr>
+<td WIDTH="80%">(get-name <i>rule</i>)</td>
+
+<td>Generic function</td>
+</tr>
+</table>
+
+<blockquote>Returns the symbolic name associated with rule instance <i>rule</i>.</blockquote>
 
 <h4>
 <a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
@@ -644,62 +645,138 @@ for <i>watch</i> to see the allowable event types.</blockquote>
 
 <h3>
 II.&nbsp;<a NAME="The Environment"></a>The Environment</h3>
-
-<p>For application developers, LISA makes available the LISA-USER package.
+For application developers, LISA makes available the LISA-USER package.
 Generally, all user-level work should be done in this package; see the
 various examples provided in "lisa:misc;".
-
-<h3>III. <a name="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
-
-<p>In addition to statically declared rules, LISA supports the definition of
-rules at runtime. That is, it is possible to create new rules from the RHSs of
-existing rules as they fire. These <i>dynamically defined</i> rules become
-immediately available to the inference engine for potential activation. As a
-simple example, consider the following rule:
-<blockquote>
-
-<p>(defrule rocky ()<br>
-&nbsp; (rocky (name ?name))<br>
-&nbsp; =&gt;<br>
-&nbsp; (defrule boris ()<br>
-&nbsp;&nbsp;&nbsp; (boris (name ?name))<br>
-&nbsp;&nbsp;&nbsp; =&gt;<br>
-&nbsp;&nbsp;&nbsp; (format t &quot;Dynamic rule BORIS fired; NAME is ~S~%&quot;
-?name)))
-</blockquote>
-<p>When rule ROCKY fires, its RHS creates a dynamically defined rule named
-BORIS. This new rule is inserted into the inference engine and immediately
-becomes part of the Rete network. Variables bound on the LHS of ROCKY behave as
-expected within the context of BORIS; this means that ?NAME in BORIS is bound to
-the same object as that found in ROCKY<sup>*</sup>.<p>Here's a more complicated example:
-<blockquote>
-  <p>(defrule rocky ()<br>
-  &nbsp; (rocky (name ?name))<br>
-  &nbsp; =&gt;<br>
-  &nbsp; (let ((dynamic-rule<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (defrule
-  (gensym) ()<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  (boris (name ?name))<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  =&gt;<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  (format t &quot;Dynamic rule ~A fired; name is ~S~%&quot; (get-name (rule))
-  ?name))))<br>
-  &nbsp;&nbsp;&nbsp; (format t &quot;Rule ROCKY added dynamic rule ~A~%&quot;
-  (get-name dynamic-rule))))
-</blockquote>
-<p>As before, rule ROCKY creates a dynamic rule when fired. However, this time
-the new rule is given a unique name by evaluating the form (GENSYM); either the
-name or the instance can then be remembered for use later. These two rules also
-introduce functions in the LISA API for retrieving both the currently executing
-rule and its name (RULE and GET-NAME, respectively).<p><sup>*</sup> Actually,
-this isn't precisely true. Whenever LISA encounters a dynamic rule during
-parsing it looks at all the rule's variables and substitutes any bound values.
-Thus, in rule BORIS the variable ?NAME would be replaced by the value of ?NAME
-as bound in rule ROCKY.
 <h3>
-IV.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
+III.&nbsp;<a NAME="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
+In addition to statically declared rules, LISA supports the definition
+of rules at runtime. That is, it is possible to create new rules from the
+RHSs of existing rules as they fire. These <i>dynamically defined</i> rules
+become immediately available to the inference engine for potential activation.
+As a simple example, consider the following rule:
+<blockquote>(defrule rocky ()
+<br>&nbsp; (rocky (name ?name))
+<br>&nbsp; =>
+<br>&nbsp; (defrule boris ()
+<br>&nbsp;&nbsp;&nbsp; (boris (name ?name))
+<br>&nbsp;&nbsp;&nbsp; =>
+<br>&nbsp;&nbsp;&nbsp; (format t "Dynamic rule BORIS fired; NAME is ~S~%"
+?name)))</blockquote>
+When rule ROCKY fires, its RHS creates a dynamically defined rule named
+BORIS. This new rule is inserted into the inference engine and immediately
+becomes part of the Rete network. Variables bound on the LHS of ROCKY behave
+as expected within the context of BORIS; this means that ?NAME in BORIS
+is bound to the same object as that found in ROCKY<sup>*</sup>.
+<p>Here's a more complicated example:
+<blockquote>(defrule rocky ()
+<br>&nbsp; (rocky (name ?name))
+<br>&nbsp; =>
+<br>&nbsp; (let ((dynamic-rule
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(defrule (gensym) ()
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(boris (name ?name))
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+=>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(format t "Dynamic rule ~A fired; name is ~S~%" (get-name (rule)) ?name))))
+<br>&nbsp;&nbsp;&nbsp; (format t "Rule ROCKY added dynamic rule ~A~%" (get-name
+dynamic-rule))))</blockquote>
+As before, rule ROCKY creates a dynamic rule when fired. However, this
+time the new rule is given a unique name by evaluating the form (GENSYM);
+either the name or the instance can then be remembered for use later. These
+two rules also introduce functions in the LISA API for retrieving both
+the currently executing rule and its name (RULE and GET-NAME, respectively).
+<p><sup>*</sup> Actually, this isn't precisely true. Whenever LISA encounters
+a dynamic rule during parsing it looks at all the rule's variables and
+substitutes any bound values. Thus, in rule BORIS the variable ?NAME would
+be replaced by the value of ?NAME as bound in rule ROCKY.
+<h3>
+IV.&nbsp;<a NAME="Queries"></a>Queries</h3>
+As of LISA version 1.2, a simple query language is supported that allows
+retrieval of facts from a knowledge base, either interactively via a Lisp
+listener or programmatically. The query engine leverages the inferencing
+component by transforming query expressions into rules and inserting them,
+at runtime, into the Rete network. Each query is assigned a unique identifier
+and cached upon first appearance; subsequent queries with semantically
+equivalent bodies will find the cached instance and execute with substantially
+improved performance, especially for larger knowledge bases. As an example,
+consider the following two query forms:
+<p>&nbsp; (retrieve (?x ?y)
+<br>&nbsp;&nbsp;&nbsp; (?x (hobbit (name ?name)))
+<br>&nbsp;&nbsp;&nbsp; (?y (ring-bearer (name ?name))))
+<p>&nbsp; (retrieve (?h1 ?h2)
+<br>&nbsp;&nbsp;&nbsp; (?h1 (hobbit (name ?hobbit-name)))
+<br>&nbsp;&nbsp;&nbsp; (?h2 (ring-bearer (name ?hobbit-name))))
+<p>The variables appearing in the first argument to RETRIEVE (e.g. '(?x
+?y)) are used to establish bindings for each firing of the query; each
+variable must also appear in the query body as an appropriate pattern binding.
+Other than this requirement, query bodies are structurally identical to
+rule bodies; anything that is legal in a rule LHS is legal in a query body.
+Note that these two examples are semantically equivalent; although the
+variable names are different, the patterns appear in the same order and
+the relationships among variables are identical. Thus, firing either query
+will yield the same set of fact bindings. LISA is able to recognize such
+similarities in queries and implements a caching scheme that minimizes
+unnecessary dynamic rule creation.
+<p>RETRIEVE returns two values; a list of bindings for each query firing,
+and the symbolic name assigned by LISA to the query instance. The second
+value is probably only useful while developing/testing queries; using this
+symbol one can ask LISA to forget about a query by removing it from the
+cache and the Rete network. The binding list is the principal value of
+interest. Since a query is really a rule, it can fire an arbitrary number
+of times for each invocation. Each firing is represented as a list of CONS
+cells. The CAR of each cell is one of the variables specified in the query's
+binding list; its CDR is a fact bound to that variable that satisfies the
+variable's associated pattern. For example, assuming that the first of
+the above query examples fires twice during a certain invocation, RETRIEVE
+would return something like:
+<p>&nbsp; (((?X . &lt;HOBBIT INSTANCE 1>) (?Y . &lt;RING-BEARER INSTANCE
+1>))
+<br>&nbsp;&nbsp;&nbsp; ((?X . &lt;HOBBIT INSTANCE 2>) (?Y . &lt;RING-BEARER
+INSTANCE 2)))
+<br>&nbsp; #:G7777
+<p>As explained previously, the second value is the symbolic name LISA
+assigned to the query when its rule instance was initially created. Most
+of the time it will be ignored.
+<p><b>NB: The 1.2 implementation of queries will only function with facts
+representing CLOS instances; queries on template-based facts are not supported,
+and such queries will in fact fail ingloriously</b>.
+<p>These functions and macros comprise the current interface to the query
+engine:
+<br>&nbsp;
+<table COLS=2 WIDTH="100%" >
+<tr>
+<td WIDTH="80%">(retrieve (<i>variables</i>*) <i>patterns</i>*)</td>
+
+<td>Macro</td>
+</tr>
+</table>
+
+<blockquote>Initiates a query against the knowledge base. Variable bindings
+for the query are found in <i>variables; patterns</i> consists of matching
+forms that comprise the body of the query rule. RETRIEVE returns two values:
+a list of CONS cells for each firing and the symbolic name LISA assigned
+to the query when it was initially constructed. The CAR of each CONS cell
+is one of the binding variables; the CDR is the CLOS instance bound to
+that variable.</blockquote>
+
+<table COLS=2 WIDTH="100%" NOSAVE >
+<tr NOSAVE>
+<td WIDTH="80%" NOSAVE>(forget-query <i>name</i>)</td>
+
+<td>Function</td>
+</tr>
+</table>
+
+<blockquote>Instructs LISA to forget about the query identified by the
+symbol <i>name</i>. Doing so removes the query's rule instance from the
+Rete network and the query itself from the cache. Useful only during query
+development, probably.</blockquote>
+
+<h3>
+V.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
 Conflict Resolution (CR) is the mechanism LISA employs to determine the
 order in which multiple activations will fire. Currently, LISA offers two
 "built-in" strategies; <i>breadth-first</i> and <i>depth-first</i>. It
@@ -749,65 +826,68 @@ of this new strategy can then be given to <i>make-inference-engine</i>.
 Documentation for the CR interface is still fairly light. Look for improvements
 in upcoming releases.
 <h3>
-V.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
+VI.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 for your convenience, a copy is included in the distribution. Building
-LISA should be straight-forward. First, either load "lisa:lisa.system" or change
-your working directory to the LISA root directory; then, evaluate (mk:compile-system
-:lisa). Note that currently LISA includes a copy of the CLOCC package PORT;
-this will build automatically. If you already have PORT in your Lisp you'll
-have to edit lisa.system until I find a better way to manage this. One
-other thing. LISA uses logical pathnames in her defsystem, and translations
-that are suitable for a Linux environment are established there. They might
-work for you; perhaps not. Once again, until I figure out how to correctly
-place default translations you might have to do some hand editing. Sorry.
+LISA should be straight-forward. First, either load "lisa:lisa.system"
+or change your working directory to the LISA root directory; then, evaluate
+(mk:compile-system :lisa). Note that currently LISA includes a copy of
+the CLOCC package PORT; this will build automatically. If you already have
+PORT in your Lisp you'll have to edit lisa.system until I find a better
+way to manage this. One other thing. LISA uses logical pathnames in her
+defsystem, and translations that are suitable for a Linux environment are
+established there. They might work for you; perhaps not. Once again, until
+I figure out how to correctly place default translations you might have
+to do some hand editing. Sorry.
 <p>To build a knowledge base, write your production rules using the various
-source examples (and this document) as your guide and load the file(s) into
-Lisp. You can then change to the LISA-USER package and experiment. Look
-for the examples in "lisa:misc;".
+source examples (and this document) as your guide and load the file(s)
+into Lisp. You can then change to the LISA-USER package and experiment.
+Look for the examples in "lisa:misc;".
 <p>A note to CLISP users. LISA requires that CLISP be run with full ANSI
 support enabled. Also, the baseline version with which LISA has been tested
 is 2.25.1. Earlier releases might work as well, but no guarantees.
 <h3>
-VI.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+VII.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 This section is a list (albeit incomplete) of features that would improve
 LISA significantly.
 <ol>
 <li>
 <i>Ruleset partitioning</i>: LISA doesn't yet support the notion of rule
-"modules" or "packets". It might be nice to be able to group rules into packages
-that could be inserted and removed as necessary. Or, perhaps a mechanism akin to
-the CLIPS module system would be more useful. Or both...<br>
-<br>
-</li>
+"modules" or "packets". It might be nice to be able to group rules into
+packages that could be inserted and removed as necessary. Or, perhaps a
+mechanism akin to the CLIPS module system would be more useful. Or both...<br>
+<BR></li>
 
 <li>
 <i>Better language/engine interface</i>: This is a sore point that I intend
-to address eventually. I really want LISA to have clean separation between the
-rule language implementation and the inference engine. In other words,
+to address eventually. I really want LISA to have clean separation between
+the rule language implementation and the inference engine. In other words,
 I'd like to have a "generic" Rete implementation upon which one can attach
 different rule programming languages. If you don't like the language that
 comes with LISA, write a new one. That sort of thing.<br>
-<br>
-</li>
+<BR></li>
 
 <li>
-<i>Query language</i>: There should be a way to query the knowlege base
-for information. Something similar to Loom's query language would be very
-nice.</li>
+<i>Truth maintenance</i>: LISA needs to support some mechanism similar
+to CLIPS' LOGICAL construct.</li>
 </ol>
 
-<h3><a name="Supported Platforms">VII. Supported Platforms</a>.</h3>
-<p>LISA has been tested, and is known to run, on the following Common Lisp
-implementations:</p>
+<h3>
+<a NAME="Supported Platforms"></a>VIII. Supported Platforms.</h3>
+LISA has been tested, and is known to run, on the following Common Lisp
+implementations:
 <ul>
-  <li>Allegro Common Lisp, versions 5.0.1 and 6.0, Linux and Windows 2000.<br>
-  </li>
-  <li>Xanalys LispWorks, version 4.1.20, Linux and Windows 2000.<br>
-  </li>
-  <li>CLISP, version 2.27, Linux and Windows 2000.<br>
-  </li>
-  <li>CMUCL, version 18c, Linux.</li>
+<li>
+Allegro Common Lisp, versions 5.0.1 and 6.x, Linux and Windows 2000.</li>
+
+<li>
+Xanalys LispWorks, version 4.1.20, Linux and Windows 2000.</li>
+
+<li>
+CLISP, version 2.27 and newer, Linux and Windows 2000.</li>
+
+<li>
+CMUCL, version 18c, Linux.</li>
 </ul>
 
 </body>

@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="GENERATOR" content="Mozilla/4.78 [en] (X11; U; Linux 2.4.9-31 i686) [Netscape]">
 </head>
 <body text="#000000" bgcolor="#FFFFFF" link="#0000EF" vlink="#52188C" alink="#FF0000" background="hierarchy-background.gif">
 &nbsp;
@@ -11,7 +11,7 @@
 <td NOSAVE><img SRC="http://sourceforge.net/sflogo.php?group_id=12453&type=1" NOSAVE height=31 width=88></td>
 
 <td>
-<div align=right><i>LISA Release 1.1 is now available!</i></div>
+<div align=right><i>LISA Release 1.2 is now available!</i></div>
 </td>
 </tr>
 </table>
@@ -46,10 +46,9 @@ LISA was the apparent dearth of lightweight, <i>current, freely-available</i>
 toolkits for constructing Lisp-based intelligent systems. There are a number
 of very fine commercial and restricted-use products out there (see the
 links below), but these systems do not necessarily address the needs of
-the Open Source community.<br>
-<br>
-</li>
+the Open Source community.</li>
 
+<br>&nbsp;
 <li>
 <i>Portability</i>: Vendor neutrality is a significant project goal. As
 previously mentioned, LISA is implemented in ANSI Common Lisp; currently,
@@ -61,26 +60,23 @@ to gain more complete coverage. Every effort will be made to avoid the
 use of implementation-specific functionality; in the cases where a non-ANSI
 feature must be used (e.g. multiprocessing support), LISA will attempt
 to support the major Lisp implementations either through conditional evaluation
-or the use of a common library such as <a href="http://clocc.sourceforge.net">CLOCC</a>.<br>
-<br>
-</li>
+or the use of a common library such as <a href="http://clocc.sourceforge.net">CLOCC</a>.</li>
 
+<br>&nbsp;
 <li>
 <i>Familiarity</i>: LISA's production-rule system has its roots in CLIPS
 and JESS, making it readily familiar to developers who've worked with either
 of these systems. Indeed, the CLIPS and JESS languages both have their
-roots in Lisp.<br>
-<br>
-</li>
+roots in Lisp.</li>
 
+<br>&nbsp;
 <li>
 <i>Flexibility</i>: As previously mentioned, LISA reasons over CLOS objects
 without requiring changes to an application's class hierarchy. In addition,
 the full power of Common Lisp is available for use within productions;
-there is no dichotomy between LISA's programming language and her implementation.<br>
-<br>
-</li>
+there is no dichotomy between LISA's programming language and her implementation.</li>
 
+<br>&nbsp;
 <li>
 <i>Simplicity</i>: Along with portability, the project is striving for
 simplicity and elegance at the functional, architecture and source code
@@ -95,29 +91,27 @@ Project People</h3>
 
 <ul>
 <li>
-<a href="mailto:de.young@computer.org">David E. Young</a>: I've been a
-senior engineer at Fujitsu for just over five years. As of 1 June our Raleigh
-facility is closing and I'll be moving on to better opportunities. If you
-want to know more about me technically, have a look at my <a href="resume.html">resume</a>.</li>
+<a href="mailto:de.young@computer.org">David E. Young</a>: Presently a
+knowledge engineer at Bloodhound Software, Inc.</li>
 </ul>
 
 <h3>
 Project Status</h3>
-LISA had its first production release (Version 1.0) on 31 August, 2001 and is
-considered &quot;stable&quot; software; it should now be possible to develop
-sophisticated knowledge bases for Real Systems. LISA has successfully run
-adaptations of the &quot;monkey and bananas&quot; (MAB) planning problem on all
-four target Lisp platforms, and full reasoning capabilities are available for
-CLOS objects in a multi-threaded environment. Release 1.1 offers support for <i>dynamic
-rule definition</i>, the ability to create new rules from existing rules at
-runtime. Currently, development efforts are
-concentrated on building support for a
-preliminary query language. For the most current information
-on the project, including mailing lists, latest news and available downloads,
-see the <a href="http://sourceforge.net/projects/lisa">official project
-page</a>. If you prefer, you may contact the project staff directly (see
-<i>Project
-People</i>).
+LISA had its first production release (Version 1.0) on 31 August, 2001
+and is considered "stable" software; it should now be possible to develop
+reasonably sophisticated knowledge bases for Real Systems. LISA has successfully
+run adaptations of the "monkey and bananas" (MAB) planning problem on all
+four target Lisp platforms, and full reasoning capabilities are available
+for CLOS objects in a multi-threaded environment. Release 1.1 offers support
+for <i>dynamic rule definition</i>, the ability to create new rules from
+existing rules at runtime; version 1.2 includes a new query facility that
+allows interactive and programatic retrieval of CLOS instances from a knowledge
+base. Currently, development efforts are concentrated on completely documenting
+the source code. For the most current information on the project, including
+mailing lists, latest news and available downloads, see the <a href="http://sourceforge.net/projects/lisa">official
+project page</a>. If you prefer, you may contact the project staff directly
+(see
+<i>Project People</i>).
 <h3>
 Documentation</h3>
 Currently, documentation for LISA is a work-in-progress. However, there
@@ -126,6 +120,22 @@ Guide</a> that should help you get started. Also, you may see the source
 code for LISA's two versions of the MAB, <a href="http://lisa.sourceforge.net/mab.lisp">mab.lisp</a>
 and <a href="http://lisa.sourceforge.net/mab-clos.lisp">mab-clos.lisp</a>
 (a "CLOS-ified" version of the default MAB implementation).
+<h3>
+News</h3>
+<i>16 April, 2002</i>: Release 1.2 is out, and I've taken a step back to
+survey the project. LISA has been in development now for about eighteen
+months. In the beginning, I had this (probably unrealistic) notion that
+LISA would grow to be some type of Grand Unified Agent&nbsp;Development
+Platform for Lisp. Lately however, I've begun to see LISA as something
+more modest and practical; a relatively light, clean inference engine for
+small to medium scale Lisp applications that would benefit from production
+rule technology. The fact that I'm the sole developer probably has something
+to do with this philosophical shift (if indeed it is a shift); there's
+only so much time to go around. Rather than move on to new feature work
+for version 1.3, I've decided to pause development and concentrate on fully
+documenting the source code. If someone needs some capability in LISA and
+just can't wait I'll consider revising my plans, but for now documentation
+and cleanup is my principal immediate goal.
 <h3>
 Related Links</h3>
 This section contains a small collection of topics related to LISA and
@@ -185,8 +195,8 @@ system, or... you get the idea.
 Emacs Lisp package that integrates a number of Lisp implementations.</li>
 
 <li>
-<a href="http://clocc.sourceforge.net">CLOCC</a>: The Common Lisp Open Code
-Collection.</li>
+<a href="http://clocc.sourceforge.net">CLOCC</a>: The Common Lisp Open
+Code Collection.</li>
 </ul>
 </td>
 
