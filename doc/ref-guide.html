@@ -107,13 +107,16 @@ via a <i>defimport</i>.</blockquote>
 
 <table BORDER WIDTH="100%" NOSAVE >
 <tr NOSAVE>
-<td WIDTH="80%" NOSAVE>(modify <i>fact</i> (<i>slot-name value</i>))</td>
+<td WIDTH="80%" NOSAVE>(modify <i>fact</i> (<i>slot-name value</i>)*)</td>
 
 <td>Macro</td>
 </tr>
 </table>
 
-<blockquote>Makes changes to the fact instance identified by <i>fact</i>.</blockquote>
+<blockquote>Makes changes to the fact instance identified by <i>fact</i>.
+Affected slots and their new values are specified by (<i>slot-name value</i>).
+Note that <i>value</i> can be an arbitrary Lisp expression that will be
+evaluated at execution time.</blockquote>
 
 <h4>
 Rule-related Operators</h4>
