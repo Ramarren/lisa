@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.14 2001/04/06 15:54:17 youngde Exp $
+;;; $Id: conditions.lisp,v 1.15 2001/04/10 13:53:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -115,19 +115,22 @@
    "This condition represents structural errors found while parsing specific
    LISA functions."))
 
-(defmacro pattern-error (pattern format-string &rest args)
+(defmacro syntactical-error (element format-string &rest args)
   `(error 'syntactical-error
-    :element ,pattern
+    :element ,element
     :text (format nil ,format-string ,@args)))
+
+(defmacro pattern-error (pattern format-string &rest args)
+  `(syntactical-error ,pattern ,format-string ,args))
 
 (defmacro parsing-error (format-string &rest args)
   `(error 'syntactical-error
     :text (format nil ,format-string ,@args)))
 
 (defmacro rule-structure-error (rule-name parse-condition)
-  `(with-slots (text element) ,parse-condition
-    (error 'rule-structure-error
-     :rule-name ,rule-name :element element :text text)))
+  `(error 'rule-structure-error
+    :rule-name ,rule-name :element element
+    :text (lisa-error-text ,parse-condition)))
 
 (defmacro rule-evaluation-error (rule condition)
   `(error 'rule-evaluation-error :rule ,rule :condition ,condition))
@@ -136,9 +139,8 @@
   `(error 'evaluation-error :condition ,condition :forms ,forms))
 
 (defmacro command-structure-error (form parse-condition)
-  `(with-slots (text) ,parse-condition
-    (error 'command-structure-error
-     :form ,form :text text)))
+  `(error 'command-structure-error
+    :form ,form :text (lisa-error-text ,parse-condition)))
 
 (defmacro environment-error (format-string &rest args)
   `(error 'environment-error

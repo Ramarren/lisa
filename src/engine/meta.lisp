@@ -21,7 +21,7 @@
 ;;; Description: Meta operations that LISA uses to support the manipulation of
 ;;; facts and instances.
 
-;;; $Id: meta.lisp,v 1.18 2001/04/09 19:52:06 youngde Exp $
+;;; $Id: meta.lisp,v 1.19 2001/04/10 13:53:22 youngde Exp $
 
 (in-package "LISA")
 
@@ -94,10 +94,15 @@
     (rest method)))
 
 (defun make-meta-shadow-fact (symbolic-name class-name methods)
-  (make-instance 'meta-shadow-fact :symbolic-name symbolic-name
-                 :class-name class-name
-                 :slots (mapcar #'(lambda (slot) (first slot)) methods)
-                 :methods methods))
+  (let ((slots
+         (append
+          (mapcar #'(lambda (slot) (first slot)) methods)
+          `(,:object))))
+    (make-instance 'meta-shadow-fact
+                   :symbolic-name symbolic-name
+                   :class-name class-name
+                   :slots slots
+                   :methods methods)))
 
 (let ((meta-map (make-hash-table)))
   (defun register-meta-class (name meta-object)
@@ -120,10 +125,10 @@
       (values meta-object))))
 
 (defun import-class (symbolic-name class-name slot-specs)
-  (print symbolic-name)
-  (print class-name)
-  (print slot-specs)
-  (values))
+  (let ((meta (make-meta-shadow-fact
+               symbolic-name class-name slot-specs)))
+    (register-meta-class symbolic-name meta)
+    (values meta)))
 
 (defun create-class-template (name slots)
   (let* ((class (eval `(defclass ,name (deftemplate) ())))
