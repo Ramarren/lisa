@@ -1,0 +1,106 @@
+
+ext.lisp
+(defpackage "PORT" ...)
+(define-condition code ...)
+(define-condition case-error ...)
+(define-condition not-implemented ...)
+(defmacro defsubst ...)
+(defmacro defcustom ...)
+(defmacro defconst ...)
+(defmacro mk-arr ...)
+(defmacro with-gensyms ...)
+(defmacro map-in ...)
+(defun gc ...)
+(defun quit ...)
+(defconst +eof+ ...)
+(defun eof-p ...)
+(defun string-tokens ...)
+(defmacro compose ...)
+(defun compose-f ...)
+(defun compose-all ...)
+
+gray.lisp
+
+net.lisp
+(defun ipaddr-to-dotted ...)
+(defun dotted-to-ipaddr ...)
+(defstruct hostent ...)
+(defun resolve-host-ipaddr ...)
+(deftype socket ...)
+(defun open-socket ...)
+(defun socket-host/port ...)
+(defun socket-string ...)
+(deftype socket-server ...)
+(defun open-socket-server ...)
+(defun socket-accept ...)
+(defun socket-server-close ...)
+(defun socket-server-host/port ...)
+(defun wait-for-stream ...)
+(defun open-unix-socket ...)
+(defun report-network-condition ...)
+(define-condition network ...)
+(define-condition timeout ...)
+(define-condition login ...)
+(define-condition net-path ...)
+(defstruct servent ...)
+(defun socket-service-port ...)
+
+sys.lisp
+(defun getenv ...)
+(defun (setf ...)
+(defun finalize ...)
+(defun variable-special-p ...)
+(defun arglist ...)
+(defun sysinfo ...)
+(defconst +month-names+ ...)
+(defconst +week-days+ ...)
+(defconst +time-zones+ ...)
+(defun tz->string ...)
+(defun string->tz ...)
+(defun current-time ...)
+
+shell.lisp
+(defun run-prog ...)
+(defun pipe-output ...)
+(defun pipe-input ...)
+(defun close-pipe ...)
+(defmacro with-open-pipe ...)
+
+proc.lisp
+(defconstant +threads-p+ ...)
+(defun make-process ...)
+(defun process-wait ...)
+(defun process-wait-with-timeout ...)
+(defun with-timeout-f ...)
+(defmacro with-timeout ...)
+(defun y-or-n-p-timeout ...)
+(defun maybe-y-or-n-p ...)
+(defmacro without-scheduling ...)
+(defun process-yield ...)
+(defun kill-process ...)
+(defun interrupt-process ...)
+(defun restart-process ...)
+(defun process-p ...)
+(defun process-name ...)
+(defun process-active-p ...)
+(defun process-whostate ...)
+(defun process-state ...)
+(defun current-process ...)
+(defun all-processes ...)
+(defun show-processes ...)
+(defun make-lock ...)
+(defun get-lock ...)
+(defun giveup-lock ...)
+(defmacro with-lock ...)
+
+path.lisp
+(defun pathname-ensure-name ...)
+(defun probe-directory ...)
+(defun default-directory ...)
+(defun chdir ...)
+(defsetf default-directory ...)
+(defun mkdir ...)
+(defun rmdir ...)
+(defun load-logical-host-def ...)
+(defcustom *logical-hosts-definitions* ...)
+(defun load-logical-host ...)
