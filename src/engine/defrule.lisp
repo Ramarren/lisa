@@ -20,7 +20,7 @@
 ;;; File: defrule.lisp
 ;;; Description: The DEFRULE class.
 ;;;
-;;; $Id: defrule.lisp,v 1.3 2000/10/19 20:28:04 youngde Exp $
+;;; $Id: defrule.lisp,v 1.4 2000/10/20 18:08:46 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,7 +39,10 @@
    (patterns :initform nil
              :accessor get-patterns)
    (actions :initform nil
-            :accessor get-actions))
+            :accessor get-actions)
+   (rule-source :initform nil
+                :initarg :rule-source
+                :reader get-rule-source))
   (:documentation
    "This class represents LISA rules."))
 
@@ -50,10 +53,11 @@
 (defmethod set-actions ((rule defrule) function)
   (setf (get-actions rule) function))
 
-(defun make-defrule (name &key (doc-string nil) (salience 0))
+(defun make-defrule (name &key (doc-string nil) (salience 0) (source nil))
   "Constructor for class DEFRULE."
   (let ((rule
-         (make-instance 'defrule :name name :comment doc-string :salience salience)))
+         (make-instance 'defrule :name name :comment doc-string
+                        :salience salience :rule-source source)))
     (push rule *rete*)
     (values rule)))
 
