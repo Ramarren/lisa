@@ -22,7 +22,7 @@
 ;;; Expert System Shell (Jess). This is a pretty good test of LISA's MP
 ;;; support.
 
-;;; $Id: pumps.lisp,v 1.8 2001/05/09 20:12:56 youngde Exp $
+;;; $Id: pumps.lisp,v 1.9 2001/05/10 13:32:25 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -110,7 +110,7 @@
   (flet ((adjust-tank-level ()
            (do ()
                ((not (intact-p self)))
-             (add-water self -10)
+             (add-water self (- (random 25)))
              (sleep 0.250))
            (cond ((>= (get-level self) 1000)
                   (format t "Tank ~S exploded!~%" (get-name self)))

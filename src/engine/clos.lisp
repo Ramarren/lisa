@@ -27,7 +27,7 @@
 ;;; multiple inference engines and a single CLOS instance can reside in more
 ;;; than one.
 
-;;; $Id: clos.lisp,v 1.6 2001/05/03 19:55:09 youngde Exp $
+;;; $Id: clos.lisp,v 1.7 2001/05/10 13:32:26 youngde Exp $
 
 (in-package "LISA")
 
@@ -51,6 +51,13 @@
           (setf (gethash ,instance *clos-instance-map*) ,bindings))
         (values ,rval)))))
 
+(defmacro with-readonly-clos-bindings ((bindings instance) &body body)
+  `(let ((,bindings
+          (with-clos-map-lock
+              (gethash ,instance *clos-instance-map*))))
+     ,@body))
+
+#+ignore
 (defmacro with-readonly-clos-bindings ((bindings instance) &body body)
   `(with-clos-map-lock
     (let ((,bindings (gethash ,instance *clos-instance-map*)))
