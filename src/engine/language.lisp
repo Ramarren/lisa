@@ -18,9 +18,9 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ;;;
 ;;; File: language.lisp
-;;; Description: Macros that implement the LISA programming language.
+;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.6 2000/10/19 20:28:04 youngde Exp $
+;;; $Id: language.lisp,v 1.7 2000/10/20 02:32:43 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,6 +39,10 @@
 (defun make-pattern (p)
   (list p))
 
+(defmacro defrule (name &body body)
+  "Creates or redefines a rule in the network."
+  `(redefine-defrule ',name ',body))
+
 (defmacro variablep (sym)
   `(and (symbolp ,sym)
     (eq (elt (symbol-name ,sym) 0) #\?)))
@@ -53,27 +57,23 @@
   `(destructuring-bind (,name ,field &optional ,constraint) ,slot
     ,@body))
 
-(defmacro defrule (name &body body)
-  "Creates or redefines a rule in the network."
-  `(redefine-defrule ',name ',body))
+(defmacro with-rule-components (((doc-string decls lhs rhs) rule-form) &body body)
+  (let ((remains (gensym)))
+    `(multiple-value-bind (,doc-string ,decls ,remains)
+         (extract-rule-headers ,rule-form)
+       (multiple-value-bind (,lhs ,rhs)
+           (parse-rulebody ,remains)
+         ,@body))))
 
 (defun redefine-defrule (name body)
-  (multiple-value-bind (doc-string decls lhs rhs)
-      (evaluate-defrule body)
+  (with-rule-components ((doc-string decls lhs rhs) body)
     (let ((rule (make-defrule name :doc-string doc-string)))
       (mapc #'(lambda (p)
                 (add-pattern rule p))
             lhs)
       (set-actions rule (compile-function rhs))
       (values rule))))
-      
-(defun evaluate-defrule (body)
-  (multiple-value-bind (doc-string decls remains)
-      (extract-rule-headers body)
-    (multiple-value-bind (lhs rhs)
-        (parse-rulebody remains)
-      (values doc-string decls lhs rhs))))
-
+    
 (defun extract-rule-headers (body)
   (labels ((extract-headers (headers &key (doc nil))
              (let ((obj (first headers)))
@@ -90,6 +90,31 @@
                      (t (values doc nil headers))))))
     (extract-headers body)))
 
+(defun parse-rulebody (body)
+  (labels ((parse-lhs (body &optional (patterns nil) (assign-to nil))
+             (format t "parse-lhs: looking at ~S~%" body)
+             (let ((pattern (first body)))
+               (cond ((consp pattern)
+                      (parse-lhs (rest body)
+                                 (append patterns
+                                         (make-rule-pattern pattern
+                                                            assign-to))))
+                     ((null pattern)
+                      (values patterns))
+                     ((variablep pattern)
+                      (parse-lhs (rest body) patterns pattern))
+                     (t (error "parse-rule-body: parsing error on LHS at ~S~%" patterns)))))
+           (parse-rhs (actions)
+             (values actions))
+           (overall-structure-ok (body)
+             (< (position 'when body :test #'eq :key #'car)
+                (position 'then body :test #'eq :key #'car))))
+    (if (overall-structure-ok body)
+        (values (parse-lhs (rest (find 'when body :test #'eq :key #'car)))
+                (parse-rhs (rest (find 'then body :test #'eq :key #'car))))
+      (error "Parsing error: overall structure unsound"))))
+  
+#+ignore
 (defun parse-rulebody (body)
   (labels ((parse-lhs (body &optional (patterns nil) (assign-to nil))
              (let ((pattern (first body)))
