@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab-kw.lisp,v 1.1 2001/03/20 21:31:46 youngde Exp $
+;;; $Id: mab-kw.lisp,v 1.2 2001/03/23 00:06:05 youngde Exp $
 
 (require "kw")
 
@@ -96,258 +96,258 @@
 
 ;;; Hold-object rules...
 
-(defrule unlock-chest-to-hold-object
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (chest (name ?chest) (contents ?obj))
-  (not (goal-is-to (action unlock) (argument-1 ?chest)))
-  =>
-  (assert (goal-is-to (action unlock) (argument-1 ?chest)
-                      (argument-2 empty))))
+(defrule unlock-chest-to-hold-object :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (chest ? name ?chest contents ?obj)
+  (not (goal-is-to ? action unlock argument-1 ?chest))
+  -->
+  (assert (goal-is-to ? action unlock argument-1 ?chest)))
 
-(defrule use-ladder-to-hold
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light))
-  (not (thing (name ladder) (location ?place)))
-  (not (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place)))
-  =>
-  (assert (goal-is-to (action move) (argument-1 ladder) (argument-2 ?place))))
+(defrule use-ladder-to-hold :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ceiling weight light)
+  (not (thing ? name ladder location ?place))
+  (not (goal-is-to ? action move argument-1 ladder argument-2 ?place))
+  -->
+  (assert (goal-is-to ? action move argument-1 ladder argument-2 ?place)))
 
-(defrule climb-ladder-to-hold
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place) (on-top-of ceiling) (weight light))
-  (thing (name ladder) (location ?place) (on-top-of floor))
-  (monkey (on-top-of (not ladder)))
-  (not (goal-is-to (action on) (argument-1 ladder)))
-  =>
-  (assert (goal-is-to (action on) (argument-1 ladder)
-                      (argument-2 empty))))
+(defrule climb-ladder-to-hold :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ceiling weight light)
+  (thing ? name ladder location ?place on-top-of floor)
+  (not (monkey ? on-top-of ladder))
+  (not (goal-is-to ? action on argument-1 ladder))
+  -->
+  (assert (goal-is-to ? action on argument-1 ladder)))
 
-(defrule grab-object-from-ladder
-  (?goal (goal-is-to (action hold) (argument-1 ?name)))
-  (?thing (thing (name ?name) (location ?place) 
-                 (on-top-of ceiling) (weight light)))
-  (thing (name ladder) (location ?place))
-  (?monkey (monkey (location ?place) (on-top-of ladder) (holding blank)))
-  =>
-  (format t "Monkey grabs the ~A.~%" ?name)
-  (modify ?thing (location held) (on-top-of held))
-  (modify ?monkey (holding ?name))
-  (retract ?goal))
+(defrule grab-object-from-ladder :forward :context mab
+  (goal-is-to ?goal action hold argument-1 ?name)
+  (thing ?thing name ?name location ?place 
+         on-top-of ceiling weight light)
+  (thing ? name ladder location ?place)
+  (monkey ?monkey location ?place on-top-of ladder holding blank)
+  -->
+  ((format t "Monkey grabs the ~A.~%" ?name))
+  (assert (thing ?thing location held on-top-of held))
+  (assert (monkey ?monkey holding ?name))
+  (erase ?goal))
 
-(defrule climb-to-hold
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place (not ceiling))
-         (on-top-of ?on) (weight light))
-  (monkey (location ?place) (on-top-of (not ?on)))
-  (not (goal-is-to (action on) (argument-1 ?on)))
-  =>
-  (assert (goal-is-to (action on) (argument-1 ?on)
-                      (argument-2 empty))))
+(defrule climb-to-hold :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ?on
+         weight light)
+  (test (not (eql ?place 'ceiling)))
+  (monkey ? location ?place on-top-of ?top)
+  (test (not (eql ?top ?on)))
+  (not (goal-is-to ? action on argument-1 ?on))
+  -->
+  (assert (goal-is-to ? action on argument-1 ?on)))
 
-(defrule walk-to-hold
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place) (on-top-of (not ceiling))
-         (weight light))
-  (monkey (location (not ?place)))
-  (not (goal-is-to (action walk-to) (argument-1 ?place)))
-  =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place)
-                      (argument-2 empty))))
+(defrule walk-to-hold :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ?top weight light)
+  (test (not (eql (?top ceiling))))
+  (monkey ? location ?loc)
+  (test (not (eql ?loc ?place)))
+  (not (goal-is-to ? action walk-to argument-1 ?place))
+  -->
+  (assert (goal-is-to ? action walk-to argument-1 ?place)))
 
-(defrule drop-to-hold
-  (goal-is-to (action hold) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place) (on-top-of ?on) (weight light))
-  (monkey (location ?place) (on-top-of ?on) (holding (not blank)))
-  (not (goal-is-to (action hold) (argument-1 blank)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 blank)
-                      (argument-2 empty))))
+(defrule drop-to-hold :forward :context mab
+  (goal-is-to ? action hold argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ?on weight light)
+  (monkey ? location ?place on-top-of ?on holding ?hold)
+  (test (not (eql ?hold 'blank)))
+  (not (goal-is-to ? action hold argument-1 blank))
+  -->
+  (assert (goal-is-to ? action hold argument-1 blank)))
 
-(defrule grab-object
-  (?goal (goal-is-to (action hold) (argument-1 ?name)))
-  (?thing (thing (name ?name) (location ?place) 
-                 (on-top-of ?on) (weight light)))
-  (?monkey (monkey (location ?place) (on-top-of ?on) (holding blank)))
-  =>
-  (format t "Monkey grabs the ~A.~%" ?name)
-  (modify ?thing (location held) (on-top-of held))
-  (modify ?monkey (holding ?name))
-  (retract ?goal))
+(defrule grab-object :forward :context mab
+  (goal-is-to ?goal action hold argument-1 ?name)
+  (thing ?thing name ?name location ?place 
+                 on-top-of ?on weight light)
+  (monkey ?monkey location ?place on-top-of ?on holding blank)
+  -->
+  ((format t "Monkey grabs the ~A.~%" ?name))
+  (assert (thing ?thing location held on-top-of held))
+  (assert (monkey ?monkey holding ?name))
+  (erase ?goal))
 
-(defrule drop-object
-  (?goal (goal-is-to (action hold) (argument-1 blank)))
-  (?monkey (monkey (location ?place) (on-top-of ?on) 
-                   (holding ?name (not blank))))
-  (?thing (thing (name ?name)))
-  =>
-  (format t "Monkey drops the ~A.~%" ?name)
-  (modify ?monkey (holding blank))
-  (modify ?thing (location ?place) (on-top-of ?on))
-  (retract ?goal))
+(defrule drop-object :forward :context mab
+  (goal ?goal action hold argument-1 blank)
+  (monkey ?monkey location ?place on-top-of ?on
+          holding ?name)
+  (test (not (eql ?name blank)))
+  (thing ?thing name ?name)
+  -->
+  ((format t "Monkey drops the ~A.~%" ?name))
+  (assert (monkey ?monkey holding blank))
+  (assert (thing ?thing location ?place on-top-of ?on))
+  (erase ?goal))
 
 ;;; Move-object rules...
 
-(defrule unlock-chest-to-move-object
-  (goal-is-to (action move) (argument-1 ?obj))
-  (chest (name ?chest) (contents ?obj))
-  (not (goal-is-to (action unlock) (argument-1 ?chest)))
-  =>
-  (assert (goal-is-to (action unlock) (argument-1 ?chest)
-                      (argument-2 empty))))
+(defrule unlock-chest-to-move-object :forward :context mab
+  (goal-is-to ? action move argument-1 ?obj)
+  (chest ? name ?chest contents ?obj)
+  (not (goal-is-to ? action unlock argument-1 ?chest))
+  -->
+  (assert (goal-is-to ? action unlock argument-1 ?chest)))
 
-(defrule hold-object-to-move
-  (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
-  (thing (name ?obj) (location (not ?place)) (weight light))
-  (monkey (holding (not ?obj)))
-  (not (goal-is-to (action hold) (argument-1  ?obj)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 ?obj)
-                      (argument-2 empty))))
+(defrule hold-object-to-move :forward :context mab
+  (goal-is-to ? action move argument-1 ?obj argument-2 ?place)
+  (thing ? name ?obj location ?loc weight light)
+  (test (not (eql ?loc ?place)))
+  (monkey ? holding ?hold)
+  (test (not (eql ?hold ?obj)))
+  (not (goal-is-to ? action hold argument-1  ?obj))
+  -->
+  (assert (goal-is-to ? action hold argument-1 ?obj)))
 
-(defrule move-object-to-place
-  (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place))
-  (monkey (location (not ?place)) (holding ?obj))
-  (not (goal-is-to (action walk-to) (argument-1 ?place)))
-  =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place)
-                      (argument-2 empty))))
+(defrule move-object-to-place :forward :context mab
+  (goal-is-to ? action move argument-1 ?obj argument-2 ?place)
+  (monkey ? location ?loc holding ?obj)
+  (test (not (eql ?loc ?place)))
+  (not (goal-is-to ? action walk-to argument-1 ?place))
+  -->
+  (assert (goal-is-to ? action walk-to argument-1 ?place)))
 
-(defrule drop-object-once-moved
-  (?goal (goal-is-to (action move) (argument-1 ?name) (argument-2 ?place)))
-  (?monkey (monkey (location ?place) (holding ?obj)))
-  (?thing (thing (name ?name) (weight light)))
-  =>
-  (format t "Monkey drops the ~A.~%" ?name)
-  (modify ?monkey (holding blank))
-  (modify ?thing (location ?place) (on-top-of floor))
-  (retract ?goal))
+(defrule drop-object-once-moved :forward :context mab
+  (goal-is-to ?goal action move argument-1 ?name argument-2 ?place)
+  (monkey ?monkey location ?place holding ?obj)
+  (thing ?thing name ?name weight light)
+  -->
+  ((format t "Monkey drops the ~A.~%" ?name))
+  (assert monkey ?monkey holding blank)
+  (assert (thing ?thing location ?place on-top-of floor)
+  (erase ?goal))
 
-(defrule already-moved-object
-  (?goal (goal-is-to (action move) (argument-1 ?obj) (argument-2 ?place)))
-  (thing (name ?obj) (location ?place))
-  =>
-  (retract ?goal))
+(defrule already-moved-object :forward :context mab
+  (goal-is-to ?goal action move argument-1 ?obj argument-2 ?place)
+  (thing ? name ?obj location ?place)
+  -->
+  (erase ?goal))
 
 ;;; Walk-to-place rules...
 
-(defrule already-at-place
-  (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
-  (monkey (location ?place))
-  =>
-  (retract ?goal))
+(defrule already-at-place :forward :context mab
+  (goal-is-to ?goal action walk-to argument-1 ?place)
+  (monkey ? location ?place)
+  -->
+  (erase ?goal))
 
-(defrule get-on-floor-to-walk
-  (goal-is-to (action walk-to) (argument-1 ?place))
-  (monkey (location (not ?place)) (on-top-of (not floor)))
-  (not (goal-is-to (action on) (argument-1 floor)))
-  =>
-  (assert (goal-is-to (action on) (argument-1 floor)
-                      (argument-2 empty))))
+(defrule get-on-floor-to-walk :forward :context mab
+  (goal-is-to ? action walk-to argument-1 ?place)
+  (monkey ? location ?loc on-top-of ?on)
+  (test (and (not (eql ?loc ?place))
+             (not (eql ?on 'floor))))
+  (not (goal-is-to ? action on argument-1 floor))
+  -->
+  (assert (goal-is-to ? action on argument-1 floor)))
 
-(defrule walk-holding-nothing
-  (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
-  (?monkey (monkey (location (not ?place)) (on-top-of floor) (holding blank)))
-  =>
-  (format t "Monkey walks to ~A.~%" ?place)
-  (modify ?monkey (location ?place))
-  (retract ?goal))
+(defrule walk-holding-nothing :forward :context mab
+  (goal-is-to ?goal action walk-to argument-1 ?place)
+  (monkey ?monkey location ?loc on-top-of floor holding blank)
+  (test (not (eql ?loc ?place)))
+  -->
+  ((format t "Monkey walks to ~A.~%" ?place))
+  (assert (monkey ?monkey location ?place))
+  (erase ?goal))
 
-(defrule walk-holding-object
-  (?goal (goal-is-to (action walk-to) (argument-1 ?place)))
-  (?monkey (monkey (location (not ?place)) (on-top-of floor) (holding ?obj)))
-  (thing (name ?obj))
-  =>
-  (format t "Monkey walks to ~A holding the ~A.~%" ?place ?obj)
-  (modify ?monkey (location ?place))
-  (retract ?goal))
+(defrule walk-holding-object :forward :context mab
+  (goal-is-to ?goal action walk-to argument-1 ?place)
+  (monkey ?monkey location ?loc on-top-of floor holding ?obj)
+  (test (not (eql ?loc ?place)))
+  (thing ? name ?obj)
+  -->
+  ((format t "Monkey walks to ~A holding the ~A.~%" ?place ?obj))
+  (assert (monkey ?monkey location ?place))
+  (erase ?goal))
 
 ;;; Get-on-object rules...
 
-(defrule jump-onto-floor
-  (?goal (goal-is-to (action on) (argument-1 floor)))
-  (?monkey (monkey (on-top-of ?on (not floor))))
-  =>
-  (format t "Monkey jumps off the ~A onto the floor.~%" ?on)
-  (modify ?monkey (on-top-of floor))
-  (retract ?goal))
+(defrule jump-onto-floor :forward :context mab
+  (goal-is-to ?goal action on argument-1 floor)
+  (monkey ?monkey on-top-of ?on)
+  (test (not (eql ?on 'floor)))
+  -->
+  ((format t "Monkey jumps off the ~A onto the floor.~%" ?on))
+  (assert (monkey ?monkey on-top-of floor))
+  (erase ?goal))
 
-(defrule walk-to-place-to-climb
-  (goal-is-to (action on) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place))
-  (monkey (location (not ?place)))
-  (not (goal-is-to (action walk-to) (argument-1 ?place)))
-  =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place)
-                      (argument-2 empty))))
+(defrule walk-to-place-to-climb :forward :context mab
+  (goal-is-to ? action on argument-1 ?obj)
+  (thing ? name ?obj location ?place)
+  (monkey ? location ?loc)
+  (test (not (eql ?loc ?place)))
+  (not (goal-is-to ? action walk-to argument-1 ?place))
+  -->
+  (assert (goal-is-to ? action walk-to argument-1 ?place)))
 
-(defrule drop-to-climb
-  (goal-is-to (action on) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place))
-  (monkey (location ?place) (holding (not blank)))
-  (not (goal-is-to (action hold) (argument-1 blank)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 blank)
-                      (argument-2 empty))))
+(defrule drop-to-climb :forward :context mab
+  (goal-is-to ? action on argument-1 ?obj)
+  (thing ? name ?obj location ?place)
+  (monkey ? location ?place holding ?hold)
+  (test (not (eql ?hold blank)))
+  (not (goal-is-to ? action hold argument-1 blank))
+  -->
+  (assert (goal-is-to ? action hold argument-1 blank)))
 
-(defrule climb-indirectly
-  (goal-is-to (action on) (argument-1 ?obj))
-  (thing (name ?obj) (location ?place) (on-top-of ?on))
-  (monkey (location ?place) (on-top-of ?top
-                                       (and (not (eq ?top ?on))
-                                            (not (eq ?top ?obj))))
-          (holding blank))
-  (not (goal-is-to (action on) (argument-1 ?on)))
-  =>
-  (assert (goal-is-to (action on) (argument-1 ?on)
-                      (argument-2 empty))))
+(defrule climb-indirectly :forward :context mab
+  (goal-is-to ? action on argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ?on)
+  (monkey ? location ?place on-top-of ?top holding blank)
+  (test (and (not (eql ?top ?on))
+             (not (eql ?top ?obj))))
+  (not (goal-is-to ? action on argument-1 ?on))
+  -->
+  (assert (goal-is-to ? action on argument-1 ?on)))
 
-(defrule climb-directly
-  (?goal (goal-is-to (action on) (argument-1 ?obj)))
-  (thing (name ?obj) (location ?place) (on-top-of ?on))
-  (?monkey (monkey (location ?place) (on-top-of ?on) (holding blank)))
-  =>
-  (format t "Monkey climbs onto the ~A.~%" ?obj)
-  (modify ?monkey (on-top-of ?obj))
-  (retract ?goal))
+(defrule climb-directly :forward :context mab
+  (goal-is-to ?goal action on argument-1 ?obj)
+  (thing ? name ?obj location ?place on-top-of ?on)
+  (monkey ?monkey location ?place on-top-of ?on holding blank)
+  -->
+  ((format t "Monkey climbs onto the ~A.~%" ?obj))
+  (assert (monkey ?monkey on-top-of ?obj))
+  (erase ?goal))
 
-(defrule already-on-object
-  (?goal (goal-is-to (action on) (argument-1 ?obj)))
-  (monkey (on-top-of ?obj))
-  =>
-  (retract ?goal))
+(defrule already-on-object :forward :context mab
+  (goal-is-to ?goal action on argument-1 ?obj)
+  (monkey ? on-top-of ?obj)
+  -->
+  (erase ?goal))
 
 ;;; Eat-object rules...
 
-(defrule hold-to-eat
-  (goal-is-to (action eat) (argument-1 ?obj))
-  (monkey (holding (not ?obj)))
-  (not (goal-is-to (action hold) (argument-1 ?obj)))
-  =>
-  (assert (goal-is-to (action hold) (argument-1 ?obj)
-                      (argument-2 empty))))
+(defrule hold-to-eat :forward :context mab
+  (goal-is-to ? action eat argument-1 ?obj)
+  (monkey ? holding ?hold)
+  (test (not (eql ?hold ?obj)))
+  (not (goal-is-to ? action hold argument-1 ?obj))
+  -->
+  (assert (goal-is-to ? action hold argument-1 ?obj)))
 
-(defrule satisfy-hunger
-  (?goal (goal-is-to (action eat) (argument-1 ?name)))
-  (?monkey (monkey (holding ?name)))
-  (?thing (thing (name ?name)))
+(defrule satisfy-hunger :forward :context mab
+  (goal-is-to ?goal action eat argument-1 ?name)
+  (monkey ?monkey holding ?name)
+  (think ?thing name ?name)
   =>
-  (format t "Monkey eats the ~A.~%" ?name)
-  (modify ?monkey (holding blank))
-  (retract ?goal)
-  (retract ?thing))
+  ((format t "Monkey eats the ~A.~%" ?name))
+  (assert (monkey ?monkey holding blank))
+  (erase ?goal)
+  (erase ?thing))
 
 ;;; startup rule...
 
-(defrule startup
-  =>
-  (assert (monkey (location t5-7) (on-top-of green-couch)
-                  (location green-couch) (holding blank)))
-  (assert (thing (name green-couch) (location t5-7) (weight heavy)
-                 (on-top-of floor)))
-  (assert (thing (name red-couch) (location t2-2) 
-                 (on-top-of floor) (weight heavy)))
-  (assert (thing (name big-pillow) (location t2-2) 
-                 (weight light) (on-top-of red-couch)))
+(defun startup ()
+  (assert (monkey ? location t5-7 on-top-of green-couch holding blank))
+  (assert (thing ? name green-couch location t5-7 weight heavy
+                 on-top-of floor))
+  (assert (thing ? name red-couch location t2-2 
+                 on-top-of floor weight heavy))
+  (assert (thing ? name big-pillow location t2-2 
+                 weight light on-top-of red-couch))
   (assert (thing (name red-chest) (location t2-2) 
                  (weight light) (on-top-of big-pillow)))
   (assert (chest (name red-chest) (contents ladder) (unlocked-by red-key)))
