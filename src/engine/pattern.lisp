@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.9 2000/12/13 18:02:28 youngde Exp $
+;;; $Id: pattern.lisp,v 1.10 2000/12/22 21:35:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,6 +47,7 @@
 (defmethod get-slot-count ((self pattern))
   (length (get-slots self)))
 
+#+ignore
 (defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
   (flet ((create-slot-tests (slot)
            (remove-if #'null
@@ -54,6 +55,26 @@
                                   (unless (null field)
                                     (make-test1 field)))
                               slot))))
+    (mapc #'(lambda (slot-desc)
+              (add-slot self (first slot-desc)
+                        (create-slot-tests (rest slot-desc))))
+          slot-list)))
+
+(defmethod initialize-instance :after ((self pattern) &key (slot-list nil))
+  (labels ((create-constraint-test (constraint)
+             (cond ((literalp constraint)
+                    (make-test1 constraint))
+                   ((consp constraint)
+           (create-slot-tests (slot)
+             (let* ((name (first slot))
+                    (value (second slot))
+                    (constraint (third slot))
+                    (tests
+                     `(,(make-test1 name) ,(make-test1 value))))
+               (unless (null constraint)
+                 (setf tests (append tests
+                                     `(,(create-constraint-test constraint)))))
+               (values tests))))
     (mapc #'(lambda (slot-desc)
               (add-slot self (first slot-desc)
                         (create-slot-tests (rest slot-desc))))

@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.3 2000/11/16 21:26:17 youngde Exp $
+;;; $Id: macros.lisp,v 1.4 2000/12/22 21:35:00 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,5 +33,11 @@
             (not (variablep ,sym)))
        (numberp ,sym) (stringp ,sym)))
 
-(defmacro unordered-pattern-p (p)
-  `(consp (second ,p)))
+(defmacro constraintp (constraint)
+  `(or (null ,constraint)
+       (literalp ,constraint)
+       (consp ,constraint)))
+
+(defmacro assert-conditions ((&rest forms))
+  `(unless (and ,@forms)
+     (error "ASSERT-CONDITION fired.")))
