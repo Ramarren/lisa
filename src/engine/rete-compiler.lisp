@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.37 2001/01/17 22:06:08 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.38 2001/01/18 19:49:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -113,6 +113,31 @@
 
 ;;; the "third pass"...
 
+(defun create-join-nodes (compiler rule)
+  (with-accessors ((terminals get-terminals)) compiler
+    (labels ((resolve-node (node2)
+               (let ((clone-1 (resolve (aref terminals (1- location)) node2)))
+                 (cond ((eq node2 clone-1)
+                        (values node2 nil))
+                       ((eq clone-1 (resolve (aref terminals location) node2))
+                        (values clone-1 t))
+                       (t (values node2 nil)))))
+             (add-join-node (node2 location)
+               (multiple-value-bind (new-node existsp)
+                   (resolve-node node2)
+                 (unless existsp
+                   (add-successor (aref terminals (1- location)) new-node rule)
+                   (add-successor (aref terminals location) new-node rule))
+                 (add-node rule new-node)
+                 (setf (aref terminals (1- location)) new-node)
+                 (setf (aref terminals location) new-node))))
+      (mapc #'(lambda (pattern)
+                (let ((node2 (make-join-node pattern (get-engine rule))))
+                  (add-node2-tests rule node2 pattern)
+                  (add-join-node node2 (get-location pattern))))
+            (rest (get-patterns rule))))))
+
+#+ignore
 (defun create-join-nodes (compiler rule)
   (flet ((add-join-node (node location)
            (with-accessors ((terminals get-terminals)) compiler

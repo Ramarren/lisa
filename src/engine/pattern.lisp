@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.28 2001/01/18 18:48:49 youngde Exp $
+;;; $Id: pattern.lisp,v 1.29 2001/01/18 19:49:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -110,14 +110,12 @@
       (values))))
 
 (defun set-pattern-locality (pattern bindings)
-  (format t "~S~%" pattern)
   (labels ((is-localp (var)
              (let ((binding (lookup-binding bindings var)))
                (cl:assert (not (null binding)) ())
                (= (get-location binding) (get-location pattern))))
            (get-constraint-locality (constraint)
              (let ((obj (first constraint)))
-               (format t "looking at ~S~%" obj)
                (cond ((null constraint)
                       (values t))
                      ((consp obj)
