@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.21 2002/12/03 18:28:16 youngde Exp $
+;;; $Id: preamble.lisp,v 1.22 2002/12/11 19:02:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -51,6 +51,8 @@
   (not (null (active-rule))))
 
 (defgeneric equals (a b))
+(defgeneric slot-value-of-instance (object slot-name))
+(defgeneric (setf slot-value-of-instance) (new-value object slot-name))
 
 (defvar *consider-taxonomy-when-reasoning* nil)
 (defvar *allow-duplicate-facts* t)

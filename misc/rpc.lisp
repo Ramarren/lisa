@@ -20,7 +20,7 @@
 ;;; File: rpc.lisp
 ;;; Description:
 
-;;; $Id: rpc.lisp,v 1.4 2002/12/10 16:31:37 youngde Exp $
+;;; $Id: rpc.lisp,v 1.5 2002/12/11 19:02:05 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -43,23 +43,31 @@
    (age :initform 0
         :accessor frodo-age)))
 
+(defmethod print-object ((self frodo) strm)
+  (print-unreadable-object (strm strm :type t :identity t)
+    (format strm "~S, ~S" (frodo-name self) (frodo-age self))))
+
 (defclass remote-frodo (rpc-remote-ref) ())
 
 (defmethod frodo-name ((self remote-frodo))
   (rcall 'frodo-name self))
 
-(defmethod (setf frodo-age) (new-value (self remote-frodo))
-  (rcall '|SETF FRODO-AGE| new-value self))
-
+(defmethod (setf slot-value-of-instance) 
+    (new-value (instance rpc-remote-ref) slot-name)
+  (rcall 'set-instance-slot instance slot-name new-value))
+  
 (defun assert-instance (object)
-  (format t "Frodo's name: ~S~%" (frodo-name object))
-  (setf (frodo-age object) 100)
+  (format t "instance is ~S~%" object)
+  (format t "class-of instance is ~S~%" (class-of object))
+  (setf (slot-value-of-instance object 'age) 100)
   object)
 
 (defun initialize-client-environment (port)
-  (pprint "initialising client environment")
-  (terpri)
+  (format t "Initialising client environment~%")
   (import-remote-class port 'remote-frodo "frodo"))
+
+(defun set-instance-slot (object slot value)
+  (setf (slot-value object slot) value))
 
 (defun make-server ()
   (make-rpc-server
@@ -93,4 +101,11 @@
   (multiple-value-bind (port stuff)
       (make-client)
     (with-remote-port (port :close t)
-      (rcall 'assert-instance (make-instance 'frodo :name 'frodo)))))
+      (let ((frodo (make-instance 'frodo :name 'frodo)))
+        (rcall 'assert-instance frodo)
+        (format t "frodo instance after remote call: ~S~%" frodo)
+        frodo))))
+
+(defun run-sample ()
+  (start-server)
+  (run-client))

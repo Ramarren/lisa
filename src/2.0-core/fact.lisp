@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.17 2002/11/25 16:02:00 youngde Exp $
+;;; $Id: fact.lisp,v 1.18 2002/12/11 19:02:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -40,6 +40,12 @@
   (and (eq (fact-name fact-1) (fact-name fact-2))
        (equalp (fact-slot-table fact-1) (fact-slot-table fact-2))))
 
+(defmethod slot-value-of-instance ((object t) slot-name)
+  (slot-value object slot-name))
+
+(defmethod (setf slot-value-of-instance) (new-value (object t) slot-name)
+  (setf (slot-value object slot-name) new-value))
+
 (defun fact-symbolic-id (fact)
   (format nil "F-~D" (fact-id fact)))
 
@@ -48,7 +54,7 @@
   instance. SLOT-NAME is a symbol; VALUE is the new value for the
   slot."
   (with-auto-notify (object (find-instance-of-fact fact))
-    (setf (slot-value object slot-name) value)
+    (setf (slot-value-of-instance object slot-name) value)
     (initialize-slot-value fact slot-name value)))
 
 (defun initialize-slot-value (fact slot-name value)
@@ -64,7 +70,7 @@
   affected slot."
   (initialize-slot-value
    fact slot-name
-   (slot-value instance slot-name)))
+   (slot-value-of-instance instance slot-name)))
 
 (defun get-slot-values (fact)
   "Returns a list of slot name / value pairs for every slot in a fact. FACT is
