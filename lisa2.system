@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.37 2002/11/19 15:56:58 youngde Exp $
+;;; $Id: lisa2.system,v 1.38 2002/11/22 17:26:38 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -45,13 +45,13 @@
 
 (defvar *lisa-binary-pathname*
   #+Allegro
-  (translate-logical-pathname "lisa:lib;lisa2;acl;")
+  (translate-logical-pathname "lisa:lib;lisa;acl;")
   #+LispWorks
-  (translate-logical-pathname "lisa:lib;lisa2;lispworks;")
+  (translate-logical-pathname "lisa:lib;lisa;lispworks;")
   #+CMU
-  (translate-logical-pathname "lisa:lib;lisa2;cmucl;")
+  (translate-logical-pathname "lisa:lib;lisa;cmucl;")
   #+CLISP
-  (translate-logical-pathname "lisa:lib;lisa2;clisp;")
+  (translate-logical-pathname "lisa:lib;lisa;clisp;")
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
@@ -81,10 +81,10 @@
     (dolist (dir lisa-binary-directories)
       (let ((pathname
              (translate-logical-pathname
-              (concatenate 'string "lisa:lib;lisa2;" lisp ";" dir ";"))))
+              (concatenate 'string "lisa:lib;lisa;" lisp ";" dir ";"))))
         (ensure-directories-exist pathname)))))
 
-(mk:defsystem :lisa2
+(mk:defsystem :lisa
     :source-pathname *lisa-source-pathname*
     :binary-pathname *lisa-binary-pathname*
     :source-extension "lisp"
@@ -174,8 +174,8 @@
                           :depends-on (core20)))
     :initially-do
     (progn
-      (mk:system-source-size :lisa2 :all)
-      (mk:system-source-size :lisa2 :new-source-and-dependents)))
+      (mk:system-source-size :lisa :all)
+      (mk:system-source-size :lisa :new-source-and-dependents)))
 
 (defmacro with-quiet-compile (&body body)
   `(let ((*compile-print* nil))
@@ -184,11 +184,11 @@
 
 (defun compile-lisa ()
   (with-quiet-compile
-      (mk:compile-system :lisa2)))
+      (mk:compile-system :lisa)))
 
 (defun load-lisa ()
   (with-quiet-compile
-      (mk:load-system :lisa2)))
+      (mk:load-system :lisa)))
 
 (defun clean-lisa ()
-  (mk:clean-system :lisa2))
+  (mk:clean-system :lisa))
