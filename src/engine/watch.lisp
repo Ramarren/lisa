@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.6 2001/02/02 18:20:59 youngde Exp $
+;;; $Id: watch.lisp,v 1.7 2001/02/03 21:55:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -70,7 +70,8 @@
 
 (defmethod fire-rule :before ((act activation))
   (when (watching-p :rules)
-    (format t "FIRE: ~S ~S~%"
+    (format t "FIRE ~D: ~S ~S~%"
+            (get-fired-rule-count (get-engine (get-rule act)))
             (get-name (get-rule act)) (activation-fact-list act))))
 
 (defun show-fact-detail (direction fact)

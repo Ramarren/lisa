@@ -2,13 +2,15 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 ;;;
-;;; $Id: pkgdecl.lisp,v 1.4 2000/11/16 20:47:13 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.5 2001/02/03 21:55:22 youngde Exp $
 
 (in-package :cl-user)
 
 (defpackage :lisa
-  (:use #:common-lisp)
-  (:shadow #:assert))
+  (:use :common-lisp)
+  #+LispWorks
+  (:import-from :user pwd cd exit)
+  (:shadow :assert))
 
 ;;; accommodate implementations whose CLOS is really PCL, like CMUCL...
 

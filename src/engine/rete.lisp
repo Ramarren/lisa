@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.35 2001/02/02 18:20:59 youngde Exp $
+;;; $Id: rete.lisp,v 1.36 2001/02/03 21:55:22 youngde Exp $
 
 (in-package :lisa)
 
@@ -46,7 +46,9 @@
    (fact-list :initform (make-hash-table)
               :accessor get-facts)
    (next-fact-id :initform 0
-                 :accessor get-next-fact-id))
+                 :accessor get-next-fact-id)
+   (fired-rule-count :initform 0
+                     :reader get-fired-rule-count))
   (:documentation
    "Represents the inference engine itself."))
 
@@ -137,6 +139,7 @@
   (remove-activations (get-strategy self))
   (setf (get-next-fact-id self) 0)
   (setf (get-clock self) 0)
+  (setf (slot-value self 'fired-rule-count) 0)
   (values t))
 
 (defmethod reset-engine ((self rete))
@@ -182,6 +185,7 @@
           (cond ((null activation)
                  (return count))
                 ((eligible-p activation)
+                 (incf (slot-value self 'fired-rule-count))
                  (fire-rule activation)
                  (incf count))))))))
 
