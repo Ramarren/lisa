@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.8 2002/11/07 20:03:42 youngde Exp $
+;;; $Id: preamble.lisp,v 1.9 2002/11/08 15:53:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -99,16 +99,14 @@
        (literalp ,constraint)
        (consp ,constraint)))
 
-(defun make-inference-engine ()
-  (let ((engine (make-rete)))
-    (when (null *active-engine*)
-      (setf *active-engine* engine))
-    engine))
+(defun make-default-inference-engine ()
+  (when (null *active-engine*)
+    (setf *active-engine* (make-inference-engine)))
+  *active-engine*)
 
 (defun use-default-engine ()
-  "Create and make available a default instance of the inference engine. Use
-    this function when you want a basic, single-threaded LISA environment."
-  (warn "USE-DEFAULT-ENGINE is deprecated. Use MAKE-INFERENCE-ENGINE instead.")
+  (warn "USE-DEFAULT-ENGINE is deprecated. LISA now automatically creates a
+  default instance of the inference engine at load time.")
   (when (null *active-engine*)
     (setf *active-engine* (make-inference-engine)))
   *active-engine*)

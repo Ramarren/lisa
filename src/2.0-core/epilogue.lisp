@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.2 2002/10/10 20:20:42 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.3 2002/11/08 15:53:47 youngde Exp $
 
 (in-package "LISA")
 
@@ -28,3 +28,6 @@
 
 (deftemplate query-fact ()
   (slot query-name))
+
+(eval-when (:load-toplevel :execute)
+  (make-default-inference-engine))

@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.7 2002/11/07 17:46:06 youngde Exp $
+;;; $Id: meta.lisp,v 1.8 2002/11/08 15:53:48 youngde Exp $
 
 (in-package "LISA")
 
@@ -90,6 +90,7 @@
                  (import-classes super)))))
     (import-classes (find-class actual-name))))
   
+#+ignore
 (defun ensure-meta-data-exists (symbolic-name actual-name)
   (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
     (when (null meta-data)
@@ -98,3 +99,24 @@
       (setf meta-data
         (acquire-meta-data symbolic-name actual-name)))
     meta-data))
+
+(defconstant +no-meta-data-reason+
+    "LISA doesn't know about the class or template named by (~A). Either the
+    class name was mistyped or you forgot to declare it.")
+
+(defun ensure-meta-data-exists (symbolic-name actual-name)
+  (flet ((ensure-class-definition ()
+           (loop
+             (when (find-class actual-name nil)
+               (return))
+             (cerror "Enter a class or template definition now."
+                     +no-meta-data-reason+ actual-name)
+             (format t "Enter a DEFCLASS or DEFTEMPLATE form: ")
+             (eval (read))
+             (fresh-line))))
+    (let ((meta-data (find-meta-object (inference-engine) symbolic-name)))
+      (when (null meta-data)
+        (ensure-class-definition)
+        (setf meta-data
+          (acquire-meta-data symbolic-name actual-name)))
+      meta-data)))
