@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.21 2001/04/25 00:04:08 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.22 2001/04/26 17:00:34 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -51,6 +51,12 @@
                 "TELL-EXTERNALLY-MODIFIED" "TELL-LISA-MODIFIED-INSTANCE"
                 "SLOT" "TEST" "ENGINE" "=>"))
 
+(defpackage "LISA.MULTIPROCESSING"
+  (:use "COMMON-LISP")
+  (:nicknames "LMP" "THREAD")
+  (:export "MAKE-PROCESS" "MAKE-LOCK" "GET-LOCK" "GIVEUP-LOCK" "WITH-LOCK"
+           "WITHOUT-SCHEDULING"))
+
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
@@ -61,3 +67,5 @@
   (:export "CLASS-SLOT-LIST"
            "FINALIZE-INHERITANCE"
            "CLASS-FINALIZED-P"))
+
+(pushnew :lisa *features*)
