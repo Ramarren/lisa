@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.24 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: fact.lisp,v 1.25 2001/03/15 20:53:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -88,7 +88,7 @@
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "f-~D ; ~S ; ~S" (get-fact-id self)
-            (class-name (get-class self))
+            (get-class self)
             (get-slot-values self))))
 
 (defmethod initialize-instance :after ((self fact) &rest args)

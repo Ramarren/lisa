@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.39 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: parser.lisp,v 1.40 2001/03/15 20:53:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -148,7 +148,8 @@
     (cond ((symbolp head)
            (let ((class (find-registered-class head)))
              `(assert-fact (current-engine)
-               (make-fact ,class (,@(normalize-slots slots))))))
+               (make-fact `,(get-name ,class)
+                (,@(normalize-slots slots))))))
           (t
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 
@@ -161,5 +162,5 @@
                       (not (eql (first s) 'slot))
                       (not (= (length s) 2)))
                   (error "Bad DEFTEMPLATE form for ~S: ~S" name s))
-                 (t `(,(second s))))))
+                 (t (second s)))))
     (create-class-template name (mapcar #'extract-slot body))))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.46 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: rete.lisp,v 1.47 2001/03/15 20:53:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -35,13 +35,13 @@
    (clock :initform 0
           :accessor get-clock)
    (initial-fact :initform 
-                 (make-fact (find-class 'initial-fact) nil)
+                 (make-fact (class-name (find-class 'initial-fact)) nil)
                  :reader get-initial-fact)
    (clear-fact :initform
-               (make-fact (find-class 'clear-fact) nil)
+               (make-fact (class-name (find-class 'clear-fact)) nil)
                :reader get-clear-fact)
    (null-fact :initform
-              (make-fact (find-class 'not-or-test-fact) nil)
+              (make-fact (class-name (find-class 'not-or-test-fact)) nil)
               :reader get-null-fact)
    (fact-list :initform (make-hash-table)
               :accessor get-facts)

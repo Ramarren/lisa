@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.22 2001/03/15 16:31:40 youngde Exp $
+;;; $Id: slot.lisp,v 1.23 2001/03/15 20:53:29 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,9 +50,8 @@
 
 (defmethod print-object ((self slot) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(name = ~S ; value = ~S ; constraint = ~S ; negated = ~S)"
+    (format strm "(name = ~S ; value = ~S ; negated = ~S)"
             (get-name self) (get-value self)
-            (get-constraint self)
             (get-negated self))))
 
 (defclass optimisable () ())
@@ -73,6 +72,12 @@
   (:documentation
    "A subclass of SLOT describing instances that have constraints. Possession
    of a constraint implies a variable value."))
+
+(defmethod print-object ((self constraint-slot) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(name = ~S ; value = ~S ; constraint = ~S ; negated = ~S)"
+            (get-name self) (get-value self)
+            (get-constraint self) (get-negated self))))
 
 (defclass simple-variable-slot (variable-slot) ())
 (defclass simple-constraint-slot (constraint-slot optimisable) ())
@@ -109,10 +114,7 @@
              :name name :value (second value) :negated t))
           ;; Then the slot value must be a variable...
           ((null constraint)
-           (if (lookup-binding global-bindings value)
-               (make-instance 'simple-variable-slot 
-                 :name name :value value)
-             (make-instance 'slot :name name :value value)))
+           (make-instance 'simple-variable-slot :name name :value value))
           ;; The value is a variable and there is a constraint...
           ((literalp constraint)
            (make-instance 'simple-constraint-slot 

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.32 2001/03/15 16:00:28 youngde Exp $
+;;; $Id: defsys.lisp,v 1.33 2001/03/15 20:53:28 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -97,6 +97,7 @@
                                        (:file "lisa-kb-class")
                                        (:file "deftemplate")
                                        (:file "special-facts")
+                                       (:file "slot-name")
                                        (:file "meta")
                                        (:file "strategies")
                                        (:file "bindings")
