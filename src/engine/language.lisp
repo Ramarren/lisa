@@ -20,13 +20,9 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.32 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: language.lisp,v 1.33 2001/03/16 21:07:28 youngde Exp $
 
 (in-package "LISA")
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(defrule assert defimport reset clear run halt facts rules retract
-            modify)))
 
 (defmacro defrule (name &body body)
   "Creates or redefines a rule in the network."
@@ -56,7 +52,7 @@
 (defmacro clear ()
   `(progn
     (clear-engine (current-engine))
-    (forget-registered-classes)
+    (forget-meta-classes)
     (values)))
 
 (defmacro run (&optional (step t))

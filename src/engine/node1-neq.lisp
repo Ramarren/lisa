@@ -21,7 +21,7 @@
 ;;; Description: A one-input node that tests a slot's value and negates the
 ;;; result.
 
-;;; $Id: node1-neq.lisp,v 1.4 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: node1-neq.lisp,v 1.5 2001/03/16 21:07:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,7 +47,7 @@
            (values nil)))))
 
 (defmethod equals ((self node1-neq) (obj node1-neq))
-  (and (eql (get-slot self) (get-slot obj))
+  (and (equals (get-slot self) (get-slot obj))
        (equal (get-value self) (get-value obj))))
 
 (defmethod print-object ((self node1-neq) strm)

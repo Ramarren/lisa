@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.40 2001/03/15 20:53:29 youngde Exp $
+;;; $Id: parser.lisp,v 1.41 2001/03/16 21:07:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -103,9 +103,9 @@
 (defun parse-unordered-pattern (pattern)
   (labels ((parse-pattern-head ()
              (let ((head (first pattern)))
-               (if (registered-classp head)
+               (if (has-meta-classp head)
                    (values head)
-                 (error "Pattern has no registered class: ~S" pattern))))
+                 (error "Pattern has no metaclass: ~S" pattern))))
            (parse-slot (slot)
              (with-slot-components ((name field constraint) slot)
                (assert-conditions ((symbolp name)
@@ -128,7 +128,8 @@
 (defun make-default-pattern (p)
   (parse-unordered-pattern p))
 
-(defun normalize-slots (slots)
+#+ignore
+(defun normalize-slots (slots meta-class)
   (flet ((normalize (slot)
            (let ((slot-name (first slot))
                  (slot-value (second slot)))
@@ -142,14 +143,30 @@
                     (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
     `(list ,@(mapcar #'normalize slots))))
 
+(defun normalize-slots (slots meta-class)
+  (flet ((normalize (slot)
+           (let ((slot-name (first slot))
+                 (slot-value (second slot)))
+             (cond ((and (symbolp slot-name)
+                         (or (literalp slot-value)
+                             (variablep slot-value)))
+                    (if (quotablep slot-value)
+                        ``(,,(find-meta-slot meta-class slot-name)
+                           ,',slot-value)
+                      ``(,,(find-meta-slot meta-class slot-name)
+                         ,,slot-value)))
+                   (t
+                    (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots))))))
+    `(list ,@(mapcar #'normalize slots))))
+
 (defun parse-and-insert-fact (body)
   (let ((head (first body))
         (slots (rest body)))
     (cond ((symbolp head)
-           (let ((class (find-registered-class head)))
+           (let ((class (find-meta-class head)))
              `(assert-fact (current-engine)
                (make-fact `,(get-name ,class)
-                (,@(normalize-slots slots))))))
+                (,@(normalize-slots slots class))))))
           (t
            (error "PARSE-AND-INSERT-FACT: parse error at ~S." body)))))
 

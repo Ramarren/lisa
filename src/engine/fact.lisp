@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.25 2001/03/15 20:53:29 youngde Exp $
+;;; $Id: fact.lisp,v 1.26 2001/03/16 21:07:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,10 +31,7 @@
    (fact-id :initform -1
             :reader get-fact-id)
    (symbolic-id :reader get-symbolic-id)
-   (slot-source :initarg :slot-source
-                :reader get-slot-source)
-   (slot-table :initform nil
-               :accessor get-slot-table)
+   (slot-table :reader get-slot-table)
    (clock :initform 0
           :accessor get-clock))
   (:documentation
@@ -48,25 +45,22 @@
   (setf (slot-value self 'symbolic-id)
     (intern (symbol-name (make-symbol (format nil "F-~D" id))))))
   
-(defun set-slot-value (fact slot value)
-  (declare (type fact fact) (type symbol slot))
-  (with-accessors ((slot-table get-slot-table)) fact
-    (let ((sv (assoc slot slot-table)))
-      (if (null sv)
-          (setf slot-table
-            (acons slot value slot-table))
-        (rplacd sv value)))))
+(defun set-slot-value (self slot-name value)
+  (declare (type fact self) (type slot-name slot-name))
+  (setf (aref (get-slot-table self) (get-position slot-name)) value))
 
-(defun get-slot-values (fact)
-  (declare (type fact fact))
-  (mapcar #'(lambda (slot)
-              `(,(car slot) ,(cdr slot)))
-          (get-slot-table fact)))
+(defun get-slot-values (self)
+  (declare (type fact self))
+  (let ((meta (find-meta-class (get-class self)))
+        (table (get-slot-table self)))
+    (mapcar #'(lambda (meta-slot)
+                `(,(get-name meta-slot)
+                  ,(aref table (get-position meta-slot))))
+            (meta-slot-list meta))))
 
-(defun get-slot-value (fact slot)
-  (declare (type fact fact)
-           (type symbol slot))
-  (cdr (assoc slot (get-slot-table fact))))
+(defun get-slot-value (self slot-name)
+  (declare (type fact self) (type slot-name slot-name))
+  (aref (get-slot-table self) (get-position slot-name)))
 
 (defmethod get-time ((self fact))
   (get-clock self))
@@ -82,25 +76,23 @@
     (print `(assert ,(reconstruct-fact self)) strm)))
 
 (defmethod equals ((self fact) (obj fact))
+  (cl:assert nil () "Why is FACT.EQUALS being called?")
   (and (equal (get-class self) (get-class obj))
        (equal (get-slot-table self) (get-slot-table obj))))
 
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "f-~D ; ~S ; ~S" (get-fact-id self)
-            (get-class self)
-            (get-slot-values self))))
+            (get-class self) (get-slot-values self))))
 
-(defmethod initialize-instance :after ((self fact) &rest args)
-  (declare (ignore args))
-  (mapc #'(lambda (pair)
-            (set-slot-value self (first pair) (second pair)))
-        (get-slot-source self))
-  (setf (get-slot-table self)
-        (sort (get-slot-table self)
-              #'(lambda (s1 s2)
-                  (string< (symbol-name (car s1))
-                           (symbol-name (car s2)))))))
+(defmethod initialize-instance :after ((self fact) &key slots)
+  (let ((meta (find-meta-class (get-class self))))
+    (setf (slot-value self 'slot-table)
+      (make-array (meta-slot-count meta)
+                  :initial-element nil))
+    (mapc #'(lambda (pair)
+              (set-slot-value self (first pair) (second pair)))
+          slots)))
 
 (defun make-fact (class slots)
-  (make-instance 'fact :class class :slot-source slots))
+  (make-instance 'fact :class class :slots slots))

@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.8 2001/03/16 16:02:07 youngde Exp $
+;;; $Id: meta.lisp,v 1.9 2001/03/16 21:07:28 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,6 +39,18 @@
       (error "No meta slot for symbol ~S." slot-name))
     (values slot)))
 
+(defun meta-slot-count (self)
+  (declare (type meta-fact self))
+  (hash-table-count (get-slots self)))
+
+(defun meta-slot-list (self)
+  (declare (type meta-fact self))
+  (let ((slots '()))
+    (maphash #'(lambda (key slot-name)
+                 (push slot-name slots))
+             (get-slots self))
+    (values slots)))
+
 (defmethod initialize-instance :after ((self meta-fact) &key slots)
   (let ((slot-table (get-slots self))
         (position -1))
@@ -52,30 +64,56 @@
                  :class-name class-name :slots slots))
 
 (let ((meta-map (make-hash-table)))
-  (defun register-class (name meta-object)
+  (defun register-meta-class (name meta-object)
     (setf (gethash name meta-map) meta-object))
 
-  (defun forget-registered-class (name)
+  (defun forget-meta-class (name)
     (remhash name meta-map))
 
-  (defun forget-registered-classes ()
+  (defun forget-meta-classes ()
     (clrhash meta-map))
 
-  (defun registered-classp (name)
+  (defun has-meta-classp (name)
     (gethash name meta-map))
   
-  (defun find-registered-class (name &optional (errorp t))
+  (defun find-meta-class (name &optional (errorp t))
     (let ((meta-object (gethash name meta-map)))
       (when (and (null meta-object) errorp)
-        (error "Fact ~S does not have a registered class." name))
+        (error "Fact ~S does not have a registered metaclass." name))
       (values meta-object))))
 
 (defun import-and-register-class (symbolic-name real-name)
-  (register-class symbolic-name (find-class real-name)))
+  (register-meta-class symbolic-name (find-class real-name)))
 
 (defun create-class-template (name slots)
-  (let ((meta (make-meta-fact
-               name (class-name (find-class 'deftemplate)) slots)))
-    (register-class name meta)
-    (values meta)))
+  (let* ((class (eval `(defclass ,name (deftemplate) ())))
+         (meta (make-meta-fact name (class-name class) slots)))
+    (register-meta-class name meta)
+    (values class)))
+  
+(let ((initial-fact nil)
+      (clear-fact nil)
+      (not-or-test-fact nil))
+
+  (defun make-special-fact (class-name)
+    (create-class-template class-name '())
+    (make-fact class-name nil))
+    
+  (defun make-initial-fact ()
+    (when (null initial-fact)
+      (setf initial-fact (make-special-fact 'initial-fact)))
+    (values initial-fact))
+
+  (defun make-clear-fact ()
+    (when (null clear-fact)
+      (setf clear-fact (make-special-fact 'clear-fact)))
+    (values clear-fact))
+
+  (defun make-not-or-test-fact ()
+    (when (null not-or-test-fact)
+      (setf not-or-test-fact (make-special-fact 'not-or-test-fact)))
+    (values not-or-test-fact)))
+
+
+  
   
