@@ -40,7 +40,8 @@ Abbreviated Table of Contents</h2></center>
 
 <a href="#The Programming Language">The Programming Language</a>.
 
-<br><a href="#The Environment">The Environment</a>.
+<br><a href="#The Environment">The Environment</a>.<br>
+<a href="#Contexts">Contexts</a>.
 
 <br><a href="#Dynamic Rule Definition">Dynamic Rule Definition</a>
 
@@ -1324,7 +1325,134 @@ various examples provided in "lisa:misc;".</p>
 
 <h3>
 
-III.&nbsp;<a NAME="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
+III. <a name="Contexts">Contexts</a></h3>
+
+<p>
+
+LISA Contexts are a way of partitioning a knowledge base into distinct groups of
+rules. The mechanism is similar to Modules in CLIPS and recent versions of Jess,
+in that individual rule groups can be invoked &quot;procedurally&quot; without
+resorting to the use of control facts to manipulate firing order. Contexts can
+also serve as an organizational construct when working with larger knowledge
+bases. Each context has its own agenda and conflict resolution strategy.</p>
+
+<p>
+
+Each inference engine instance created in LISA contains a default context, named
+&quot;The Initial Context&quot; (or INITIAL-CONTEXT). Unless arrangements are
+made otherwise, all rules will reside in this context.&nbsp; The DEFCONTEXT
+macro creates a new context; rules may then be loaded into the new context by
+supplying the :CONTEXT keyword to DEFRULE. Contexts serve as a form of namespace
+for rules; thus, it is legal for identically named rules to reside in different
+contexts. Rules are distinctly identified by qualifying the rule name with the
+context name; for example, rule <i>wizards.gandalf</i> is a rule named <i>gandalf</i>
+that resides within the <i>wizards</i> context.</p>
+
+<p>
+
+Activations in the Initial Context are always available for firing. Otherwise,
+activations in other contexts will only fire if those contexts are explicitly
+given control, via the FOCUS operator. Each inference engine maintains its own
+focus stack; before a new context is given control, the active context is pushed
+onto the focus stack. The REFOCUS operator may be used on a rule's RHS to leave
+the active context and return control to the previous context on the stack.
+Control automatically returns to the previous context if the active context runs
+out of activations. When all contexts have exhausted their activations, the
+inference engine halts.</p>
+
+<p>
+
+A rule can be tagged with the <i>auto-focus</i> attribute by supplying the
+AUTO-FOCUS keyword to DEFRULE. If an auto-focus rule activates, that rule's
+context is automatically pushed onto the focus stack and given control when the
+rule completes its firing.</p>
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(defcontext <i>context-name</i> &amp;key <i>strategy</i>)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Creates a new context identified by <i>context-name</i>, which must be a
+  string designator. If <i>strategy</i> is non-NIL then it must be an object
+  implementing a suitable conflict resolution strategy.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(undefcontext <i>context-name</i>)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+  <p>Destroys the context identified by <i>context-name</i>, which must be a
+  string designator. All rules bound to the context are removed from the Rete
+  network, along with their activations, if any.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(focus &amp;rest <i>context-names</i>)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+
+If <i>context-names</i> is non-NIL, it should be a collection of context names
+that will be added to the focus stack. If no names are specified, then FOCUS
+returns the active context object.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(refocus)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+
+Activates the next available context.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(focus-stack)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+
+Returns the inference engine's focus stack.</p>
+
+</blockquote>
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(contexts)</td>
+    <td width="20%">Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+
+Returns a list of all the inference engine's defined contexts.</p>
+
+<p>
+
+&nbsp;</p>
+
+</blockquote>
+
+<h3>
+
+IV.&nbsp;<a NAME="Dynamic Rule Definition"></a>Dynamic Rule Definition</h3>
 
 In addition to statically declared rules, LISA supports the definition
 
@@ -1412,7 +1540,7 @@ be replaced by the value of ?NAME as bound in rule ROCKY.
 
 <h3>
 
-IV.&nbsp;<a NAME="Queries"></a>Queries</h3>
+V.&nbsp;<a NAME="Queries"></a>Queries</h3>
 
 As of LISA version 1.2, a simple query language is supported that allows
 
@@ -1634,7 +1762,7 @@ development, probably.</blockquote>
 
 <h3>
 
-V.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
+VI.&nbsp;<a NAME="Conflict Resolution"></a>Conflict Resolution</h3>
 
 Conflict Resolution (CR) is the mechanism LISA employs to determine the
 
@@ -1731,7 +1859,7 @@ of this new strategy can then be given to <i>make-inference-engine</i>.
 Documentation for the CR interface is still fairly light. Look for improvements
 
 in upcoming releases.
-<h3>VI. <a name="The LISA Debugger">The LISA Debugger</a></h3>
+<h3>VII. <a name="The LISA Debugger">The LISA Debugger</a></h3>
 <p>New as of 2.0 alpha 4, the LISA debugger is a simple monitoring and
 inspection utility that may be used to &quot;debug&quot; production rules.
 Although one cannot step through a rule pattern by pattern, breakpoints may be
@@ -1868,7 +1996,7 @@ Sets a breakpoint in the rule identified by the symbol <i>rule-name.</i></p>
 
 <h3>
 
-VII.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
+VIII.&nbsp;<a NAME="Getting Started"></a>Getting Started</h3>
 
 LISA requires the Portable Defsystem as maintained by the CLOCC project;
 
@@ -1903,24 +2031,13 @@ is 2.25.1. Earlier releases might work as well, but no guarantees.
 
 <h3>
 
-VIII.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
+IX.&nbsp;<a NAME="Things Yet to Do"></a>Things Yet to Do.</h3>
 
 This section is a list (albeit incomplete) of features that would improve
 
 LISA significantly.
 
 <ol>
-
-<li>
-
-<i>Ruleset partitioning</i>: LISA doesn't yet support the notion of rule
-
-"modules" or "packets". It might be nice to be able to group rules into
-
-packages that could be inserted and removed as necessary. Or, perhaps a
-
-mechanism akin to the CLIPS module system would be more useful. Or both...<br>
-</li>
 
 
 
@@ -1932,19 +2049,13 @@ algorithm that has concurrent access to working memory (i.e. along with Rete).<b
 
 
 
-<li>
-
-<i>The EXISTS conditional element.</i></li>
-
-
-
 </ol>
 
 
 
 <h3>
 
-<a NAME="Supported Platforms"></a>IX. Supported Platforms.</h3>
+<a NAME="Supported Platforms"></a>X. Supported Platforms.</h3>
 
 LISA has been tested, and is known to run, on the following Common Lisp
 
