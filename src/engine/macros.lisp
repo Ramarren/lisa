@@ -20,12 +20,12 @@
 ;;; File: macros.lisp
 ;;; Description: General LISA macros.
 
-;;; $Id: macros.lisp,v 1.18 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: macros.lisp,v 1.19 2001/03/15 16:31:40 youngde Exp $
 
 (in-package "LISA")
 
 (defmacro starts-with-? (sym)
-  `(eq (elt (symbol-name ,sym) 0) #\?))
+  `(eq (aref (symbol-name ,sym) 0) #\?))
 
 (defmacro variablep (sym)
   `(and (symbolp ,sym)

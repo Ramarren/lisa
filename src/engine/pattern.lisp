@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.46 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: pattern.lisp,v 1.47 2001/03/15 16:31:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -78,9 +78,10 @@
                    (collect #'(lambda (obj) (variablep obj))
                             (flatten (get-constraint slot))))))
     (mapc #'(lambda (slot)
-              (unless (is-literal-slotp slot)
+              (unless (typep slot 'literal-slot)
                 (add-new-binding (get-value slot) slot))
-              (add-constraint-bindings slot))
+              (when (typep slot 'complex-slot)
+                (add-constraint-bindings slot)))
           (get-slots pattern))))
 
 (defun canonicalize-slots (self global-bindings)

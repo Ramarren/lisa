@@ -20,7 +20,7 @@
 ;;; File: slot.lisp
 ;;; Description: Represents a single slot within a pattern.
 
-;;; $Id: slot.lisp,v 1.21 2001/03/15 16:00:31 youngde Exp $
+;;; $Id: slot.lisp,v 1.22 2001/03/15 16:31:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,9 +30,6 @@
          :reader get-name)
    (value :initarg :value
           :accessor get-value)
-   (constraint :initarg :constraint
-               :initform nil
-               :accessor get-constraint)
    (negated :initarg :negated
             :initform nil
             :reader get-negated)
@@ -41,25 +38,9 @@
   (:documentation
    "Represents a single slot within a pattern."))
 
-(defun is-literal-slotp (self)
-  (declare (type slot self))
-  (literalp (get-value self)))
-
-(defun is-variable-slotp (self)
-  (declare (type slot self))
-  (variablep (get-value self)))
-
 (defun is-negatedp (self)
   (declare (type slot self))
   (get-negated self))
-
-(defun has-constraintp (slot)
-  (declare (type slot slot))
-  (not (null (get-constraint slot))))
-
-(defun has-complex-constraintp (slot)
-  (declare (type slot slot))
-  (consp (get-constraint slot)))
 
 (defun localized-slotp (slot)
   (get-locality slot))
@@ -87,14 +68,15 @@
    "A subclass of SLOT describing instances that contain variables."))
 
 (defclass constraint-slot (slot)
-  ()
+  ((constraint :initarg :constraint
+               :reader get-constraint))
   (:documentation
    "A subclass of SLOT describing instances that have constraints. Possession
    of a constraint implies a variable value."))
 
 (defclass simple-variable-slot (variable-slot) ())
 (defclass simple-constraint-slot (constraint-slot optimisable) ())
-(defclass complex-slot (slot) ())
+(defclass complex-slot (constraint-slot) ())
 
 (defmacro negated-constraintp (constraint)
   `(and (consp ,constraint)

@@ -20,7 +20,7 @@
 ;;; File: meta.lisp
 ;;; Description: Meta operations that LISA uses to inspect fact classes.
 
-;;; $Id: meta.lisp,v 1.5 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: meta.lisp,v 1.6 2001/03/15 16:31:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -53,7 +53,7 @@
 (defun create-class-template (name slots)
   (let ((template
          (eval `(defclass ,name (deftemplate) (,@slots)))))
-    (mop:finalize-inheritance template)
+    (clos:finalize-inheritance template)
     (register-class name template)
     (values template)))
   
