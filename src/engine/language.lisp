@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.43 2001/04/25 00:04:08 youngde Exp $
+;;; $Id: language.lisp,v 1.44 2001/04/26 20:43:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,26 +42,29 @@
 (defmacro assert-instance (instance)
   `(parse-and-insert-instance ,instance))
   
-(defmacro facts ()
-  `(print-fact-list (current-engine)))
+(defmacro facts (&optional (engine (current-engine)))
+  `(print-fact-list ,engine))
 
-(defmacro rules ()
-  `(print-rule-list (current-engine)))
+(defmacro rules (&optional (engine (current-engine)))
+  `(print-rule-list ,engine))
 
-(defmacro agenda ()
-  `(print-activation-list (current-engine)))
+(defmacro agenda (&optional (engine (current-engine)))
+  `(print-activation-list ,engine))
 
-(defmacro reset ()
-  `(reset-engine (current-engine)))
+(defmacro reset (&optional (engine (current-engine)))
+  `(reset-engine ,engine))
 
-(defmacro clear ()
-  `(clear-environment (current-engine)))
+(defmacro clear (&optional (engine (current-engine)))
+  `(clear-environment ,engine))
 
-(defmacro run (&optional (step t))
+(defmacro run (&optional (engine (current-engine)) &key (step t))
+  `(run-engine ,engine ,step))
+
+(defmacro walk (&optional (step 1))
   `(run-engine (current-engine) ,step))
 
-(defmacro retract (fact-id)
-  `(retract-fact (current-engine) ,fact-id))
+(defmacro retract (fact-id &optional (engine (current-engine)))
+  `(retract-fact ,engine ,fact-id))
 
 (defmacro modify (fact &body body)
   (parse-and-modify-fact fact body))
@@ -75,7 +78,7 @@
 (defmacro watching ()
   `(format t "Watching: ~S~%" (get-watches)))
 
-(defmacro halt ()
+(defmacro halt (&optional (engine (current-engine)))
   `(values))
 
 (defun print-activation-list (engine)
