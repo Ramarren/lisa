@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.17 2002/09/28 20:32:28 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.18 2002/09/30 16:37:01 youngde Exp $
 
 (in-package "LISA")
 
@@ -33,7 +33,10 @@
         (setf test
           (setf (gethash key *node-test-table*)
             (funcall constructor))))
-      test)))
+      test))
+  
+  (defun clear-node-test-table ()
+    (clrhash *node-test-table*)))
 
 (defun make-class-test (class)
   (find-test class
@@ -49,6 +52,9 @@
        (let ((test
               (function
                (lambda (token)
+                 (format t "testing value ~S with slot-name ~S, value ~S~%"
+                         value slot-name (get-slot-value
+                                          (token-top-fact token) slot-name))
                  (equal value
                         (get-slot-value
                          (token-top-fact token)

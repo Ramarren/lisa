@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.34 2002/09/28 20:32:27 youngde Exp $
+;;; $Id: parser.lisp,v 1.35 2002/09/30 16:36:57 youngde Exp $
 
 (in-package "LISA")
 
@@ -70,8 +70,8 @@
 
 (defun define-rule (name body &optional (salience 0) (module nil))
   (with-rule-components ((doc-string lhs rhs) body)
-    #+ignore (format t "LHS: ~S~%" lhs)
-    #+ignore (format t "RHS: ~S~%" rhs)
+    #+lisa (format t "LHS: ~S~%" lhs)
+    #+lisa (format t "RHS: ~S~%" rhs)
     (add-new-rule 
      (inference-engine)
      (make-rule name (inference-engine) lhs rhs
@@ -121,7 +121,7 @@
              (parse-rhs (actions) 
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
-                :actions (first actions))))
+                :actions actions)))
       (multiple-value-bind (lhs remains)
           (utils:find-before *rule-separator* body :test #'eq)
         (cl:assert (not (null remains)) nil "Missing rule separator")

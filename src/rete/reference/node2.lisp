@@ -20,19 +20,11 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.17 2002/09/25 14:43:20 youngde Exp $
+;;; $Id: node2.lisp,v 1.18 2002/09/30 16:37:01 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2 (join-node) ())
-
-(defmethod test-tokens ((self node2) left-tokens right-token)
-  (token-push-fact left-tokens (token-top-fact right-token))
-  (prog1
-      (every #'(lambda (test)
-                 (funcall test left-tokens))
-             (join-node-tests self))
-    (token-pop-fact left-tokens)))
 
 (defmethod test-against-right-memory ((self node2) left-tokens)
   (loop for right-token being the hash-value 

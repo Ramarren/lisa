@@ -20,12 +20,13 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.10 2002/09/25 14:43:20 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.11 2002/09/30 16:37:01 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-not (join-node) ())
 
+#+ignore
 (defmethod test-tokens ((self node2-not) left-tokens right-token)
   (let ((tests (join-node-tests self)))
     (setf (token-not-counter left-tokens) 0)
@@ -38,6 +39,18 @@
     (token-pop-fact left-tokens)
     (zerop (token-not-counter left-tokens))))
 
+#+ignore
+(defmethod test-tokens ((self node2-not) left-tokens right-token)
+  (let ((tests (join-node-tests self)))
+    (token-push-fact left-tokens (token-top-fact right-token))
+    (prog1
+        (or (endp tests)
+            (some #'(lambda (test)
+                      (funcall test left-tokens))
+                  tests))
+      (token-pop-fact left-tokens))))
+
+#+ignore
 (defmethod test-tokens ((self node2-not) left-tokens 
                         (right-token remove-token))
   (let ((tests (join-node-tests self)))
@@ -52,20 +65,20 @@
     (zerop (token-not-counter left-tokens))))
 
 (defmethod test-against-right-memory ((self node2-not) left-tokens)
-  (if (zerop (right-memory-count self))
-      (pass-tokens-to-successor self (combine-tokens left-tokens t))
-    (loop for right-token being the hash-value 
-        of (join-node-right-memory self)
-        do (when (test-tokens self left-tokens right-token)
-             (pass-tokens-to-successor 
-              self (combine-tokens left-tokens t))))))
+  (loop for right-token being the hash-value 
+      of (join-node-right-memory self)
+      do (when (test-tokens self left-tokens right-token)
+           (token-increment-not-counter left-tokens)))
+  (unless (token-negated-p left-tokens)
+    (pass-tokens-to-successor 
+     self (combine-tokens left-tokens t))))
 
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token add-token))
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
-      do (if (test-tokens self left-tokens right-token)
-             (pass-tokens-to-successor self (combine-tokens left-tokens t))
+      do (when (test-tokens self left-tokens right-token)
+           (token-increment-not-counter left-tokens)
            (pass-tokens-to-successor 
             self (combine-tokens (make-remove-token left-tokens) t)))))
   
@@ -74,7 +87,9 @@
   (loop for left-tokens being the hash-value 
       of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
-           (pass-tokens-to-successor self (combine-tokens left-tokens t)))))
+           (token-decrement-not-counter left-tokens)
+           (unless (token-negated-p left-tokens)
+             (pass-tokens-to-successor self (combine-tokens left-tokens t))))))
   
 (defmethod accept-tokens-from-left ((self node2-not) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
