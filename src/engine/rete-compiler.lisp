@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.50 2001/02/06 21:42:20 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.51 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -113,22 +113,46 @@
           (get-slots pattern))
     (values node2)))
 
+
+#+ignore
 (defun add-node2-tests (node2 pattern)
   (macrolet ((first-variable-occurrence (var pattern)
                (let ((binding (gensym)))
                  `(let ((,binding (lookup-binding ,pattern ,var)))
                     (cl:assert (not (null ,binding)) ()
                       "Missing binding for ~S" ,var)
-                    (= (get-location ,pattern) (get-location ,binding))))))
+                   (eql (get-location ,pattern) (get-location ,binding))))))
     (flet ((add-constraint-test (slot)
-             (unless (and (first-variable-occurrence (get-value slot) pattern)
-                          (not (has-constraintp slot)))
-               (add-test node2 (make-node2-test slot pattern)))))
+             (when (not (typep slot 'optimisable-slot))
+               (break))
+             (unless (first-variable-occurrence (get-value slot) pattern)
+               (format t "adding test for slot ~S~%" slot)
+               (let ((node (make-node2-test slot pattern)))
+                 (unless (null node)
+                   (add-test node2 node))))))
       (mapc #'(lambda (slot)
                 (unless (simple-slotp slot)
                   (add-constraint-test slot)))
             (get-slots pattern))
       (values node2))))
+
+(defun add-node2-tests (node2 pattern)
+  (labels ((first-variable-occurrence (var)
+             (let ((binding (lookup-binding pattern var)))
+               (cl:assert (not (null binding)) ()
+                          "Missing binding for ~S" var)
+               (= (get-location pattern) (get-location binding))))
+           (add-constraint-test (slot)
+             (unless (and (first-variable-occurrence (get-value slot))
+                          (not (has-constraintp slot)))
+               (let ((node (make-node2-test slot pattern)))
+                 (unless (null node)
+                   (add-test node2 node))))))
+    (mapc #'(lambda (slot)
+              (unless (simple-slotp slot)
+                (add-constraint-test slot)))
+          (get-slots pattern))
+    (values node2)))
 
 ;;; the "third pass"...
 

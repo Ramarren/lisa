@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: This class represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.17 2001/01/30 22:18:44 youngde Exp $
+;;; $Id: fact.lisp,v 1.18 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -100,7 +100,8 @@
   `(,(class-name (get-class self)) ,@(get-slot-values self)))
 
 (defmethod equals ((self fact) (obj fact))
-  (equal (get-class self) (get-class obj)))
+  (and (equal (get-class self) (get-class obj))
+       (equal (get-slot-table self) (get-slot-table obj))))
 
 (defmethod print-object ((self fact) strm)
   (print-unreadable-object (self strm :type t :identity t)
@@ -111,7 +112,12 @@
 (defmethod initialize-instance :after ((self fact) &key (slots nil))
   (mapc #'(lambda (pair)
             (set-slot-value self (first pair) (second pair)))
-        slots))
+        slots)
+  (setf (get-slot-table self)
+        (sort (get-slot-table self)
+              #'(lambda (s1 s2)
+                  (string< (symbol-name (car s1))
+                           (symbol-name (car s2)))))))
 
 (defun make-fact (class slots)
   (make-instance 'fact :class class :slot-source slots :slots slots))

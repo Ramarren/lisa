@@ -21,7 +21,7 @@
 ;;; Description: Parent class of all nodes in the Rete pattern network. This
 ;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.15 2001/02/09 01:49:59 youngde Exp $
+;;; $Id: node.lisp,v 1.16 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,7 +60,7 @@
 (defmethod remove-successor ((self node) node)
   (with-accessors ((successors get-successors)) self
     (setf successors
-      (delete node successors :test #'equals))))
+      (delete node successors :test #'equals :count 1))))
 
 (defmethod merge-successor ((self node) node rule)
   "Merges a node into the list of successors. Returns either NODE or the

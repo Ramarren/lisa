@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.15 2001/02/02 19:29:47 youngde Exp $
+;;; $Id: defsys.lisp,v 1.16 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :user)
 
@@ -123,8 +123,10 @@
                                        (:file "test2-eq")
                                        (:file "test2-neq")
                                        (:file "test2-eval")
-                                       (:file "node2")
-                                       (:file "node2-not")
+                                       (:file "node2"
+                                              :depends-on (token-tree))
+                                       (:file "node2-not"
+                                              :depends-on (node2))
                                        (:file "terminal-node")
                                        (:file "slot")
                                        (:file "pattern")

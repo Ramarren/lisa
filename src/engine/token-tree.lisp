@@ -20,7 +20,7 @@
 ;;; File: token-tree.lisp
 ;;; Description: Maintains a hashed collection of tokens.
 
-;;; $Id: token-tree.lisp,v 1.14 2001/02/09 15:19:56 youngde Exp $
+;;; $Id: token-tree.lisp,v 1.15 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -81,21 +81,6 @@
   (declare (type token-tree self))
   (get-size self))
 
-#+ignore
-(defmacro with-tree-iterator ((key value tree) &body body)
-  "Iterates over each element in TREE (an instance of TOKEN-TREE) and
-  evaluates BODY. RETURN may be used to exit from the iterator with
-  specified results."
-  (let ((generator (gensym))
-        (foundp (gensym)))
-    `(with-hash-table-iterator (,generator (get-table ,tree))
-       (loop
-         (multiple-value-bind (,foundp ,key ,value)
-             (,generator)
-           (if ,foundp
-               (progn ,@body)
-             (return nil)))))))
-
 (defmacro with-tree-iterator ((key value tree) &body body)
   "Iterates over each element in TREE (an instance of TOKEN-TREE) and
   evaluates BODY. RETURN may be used to exit from the iterator with
@@ -103,7 +88,6 @@
   (let ((generator (gensym))
         (foundp (gensym))
         (token-list (gensym))
-        (token (gensym))
         (rval (gensym)))
     `(with-hash-table-iterator (,generator (get-table ,tree))
        (loop
@@ -111,8 +95,7 @@
              (,generator)
            (if ,foundp
                (let ((,rval
-                      (dolist (,token ,token-list)
-                        (setf ,value ,token)
+                      (dolist (,value ,token-list)
                         ,@body)))
                  (when ,rval
                    (return ,rval)))

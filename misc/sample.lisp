@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.58 2001/02/09 01:49:59 youngde Exp $
+;;; $Id: sample.lisp,v 1.59 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -92,9 +92,17 @@
   =>
   (format t "rocky-not fired.~%"))
 
-(defrule nemesis
+(defrule nemesis-1
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name (not ?nemesis)))
+  =>
+  (assert (boris (name "boris")))
+  (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis))
+
+(defrule nemesis-2
+  (natasha (name "natasha") (nemesis ?nemesis "rocky"))
+  (rocky (name (not ?nemesis)))
+  (not (boris (name "boris"))
   =>
   (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis))
 
@@ -139,6 +147,7 @@
     =>
   (format t "no-patterns fired!~%"))
 
+#+ignore
 (defrule simple-predicate
   (?fact (boris (name ?name (string= ?name "boris"))))
   =>

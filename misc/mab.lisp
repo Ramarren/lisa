@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.23 2001/02/09 01:49:59 youngde Exp $
+;;; $Id: mab.lisp,v 1.24 2001/02/09 22:11:30 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,7 +35,7 @@
 (defimport chest lisa::chest)
 (defimport goal-is-to lisa::goal-is-to)
 
-(watch :activations)
+;;;(watch :activations)
 (watch :facts)
 (watch :rules)
 
