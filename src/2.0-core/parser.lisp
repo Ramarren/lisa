@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.69 2002/11/25 18:09:14 youngde Exp $
+;;; $Id: parser.lisp,v 1.70 2002/12/07 18:06:50 youngde Exp $
 
 (in-package "LISA")
 
@@ -98,7 +98,7 @@
                                         (context nil)
                                         (auto-focus nil))
   (with-rule-components ((doc-string lhs rhs) body)
-    #+ignore (format t "LHS: ~S~%" lhs)
+    (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
     (if *compound-patterns-p*
         (make-composite-rule 
