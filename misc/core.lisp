@@ -89,7 +89,6 @@
   =>
   (format t "Rule samwise fired.~%"))
 
-#+ignore
 (defrule test-rule ()
   (frodo (name ?name))
   (samwise (friend ?name) (age ?age))

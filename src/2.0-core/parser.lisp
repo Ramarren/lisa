@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.31 2002/09/27 15:29:44 youngde Exp $
+;;; $Id: parser.lisp,v 1.32 2002/09/27 16:15:16 youngde Exp $
 
 (in-package "LISA")
 
@@ -166,8 +166,7 @@
     (cl:assert (and (listp form)
                     (= (length form) 1)) nil
       "The body of a TEST CE must be a single Lisp form")
-    (values (list :test form
-            (collect-bindings form)))))
+    (values pattern (collect-bindings form))))
 
 (defun parse-default-pattern (pattern location)
   (let ((head (first pattern)))
