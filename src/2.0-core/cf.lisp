@@ -20,7 +20,7 @@
 ;;; File: cf.lisp
 ;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: cf.lisp,v 1.10 2004/09/17 18:04:16 youngde Exp $
+;;; $Id: cf.lisp,v 1.11 2004/09/17 19:08:24 youngde Exp $
 
 (in-package :lisa.cf)
 
@@ -51,18 +51,6 @@
 (defmethod combine ((a number) (b number) &rest args)
   (declare (ignore args))
   (cf-combine a b))
-
-(defmethod combine ((a lisa:fact) (b lisa:fact) &rest args)
-  (assert (lisa:in-rule-firing-p) nil
-    "COMBINE only makes sense within the context of a rule firing.")
-  (let ((cf (if args
-                (apply #'min (lisa:cf a) (lisa:cf b)
-                       (loop for f in args collect (lisa:cf f)))
-              (min (lisa:cf a) (lisa:cf b))))
-        (rule-cf (lisa:cf (lisa:active-rule))))
-    (if (zerop rule-cf)
-        cf
-      (* cf rule-cf))))
 
 (defmethod conjunct-cf (facts)
   (let ((conjuncts
