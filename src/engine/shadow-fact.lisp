@@ -21,7 +21,7 @@
 ;;; Description: This class represents LISA facts that are actually CLOS
 ;;; instances.
 
-;;; $Id: shadow-fact.lisp,v 1.3 2001/04/11 14:20:59 youngde Exp $
+;;; $Id: shadow-fact.lisp,v 1.4 2001/04/17 20:01:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,7 +50,6 @@
 
 (defmethod set-slot-value :after ((self shadow-fact) slot-name value)
   (let ((meta (get-meta-fact self)))
-    (format t "Setting slot-value of instance using ~S~%" meta)
     (setf (slot-value (instance-of-shadow-fact self)
                       (find-effective-slot meta slot-name))
       value)))
