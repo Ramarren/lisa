@@ -147,7 +147,9 @@ in terms of time and size.</blockquote>
 
 <blockquote>A convenience macro that imports the symbols associated with a class
   into whatever LISA-related package the developer wishes. The symbols imported
-  include the class name, slot names and accessors.</blockquote>
+  reflect the name of the class name and all of its immediate slots. If
+  taxonomic reasoning is enabled, then the class's ancestors are imported as
+  well.</blockquote>
 
 
 
@@ -249,7 +251,7 @@ returned by (current-engine) will be used.</blockquote>
 
 
 
-<blockquote>Inserts a CLOS instance into the knowledge base. The class
+<blockquote><i>Deprecated</i>. Inserts a CLOS instance into the knowledge base. The class
 
 of <i>instance</i> should already exist and have been identified to LISA
 
@@ -273,7 +275,7 @@ via a <i>defimport</i>.</blockquote>
 
 
 
-<blockquote>Removes a CLOS instance from the knowledge base. The class
+<blockquote><i>Deprecated</i>. Removes a CLOS instance from the knowledge base. The class
 
 of <i>instance</i> should already exist and have been identified to LISA
 
@@ -538,26 +540,30 @@ HIGH-P and INTACT-P both return non-<i>nil</i> values.</blockquote>
     <p>The <i>logical</i> conditional element implements LISA's notion of truth
     maintenance. Patterns appearing within a LOGICAL form in a rule are
     conditionally bound to facts asserted from that rule's RHS. If during
-    inferencing one or more logical facts are retracted, all facts bound to
-    those logical facts are also retracted. Here's an example:</p>
+    inferencing one or more logical facts are retracted (or asserted in the case
+    of negated patterns), all facts bound to
+    those logical facts are retracted. Here's an example:</p>
     <dl>
-      <dd>(defrule frodo ()&nbsp;</dd>
-      <dd>&nbsp;&nbsp;&nbsp; (frodo)&nbsp;</dd>
-      <dd>&nbsp;&nbsp;&nbsp; (logical (bilbo)&nbsp;</dd>
-      <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        (gandalf))</dd>
+      <dd>(defrule frodo ()</dd>
+      <dd>&nbsp;&nbsp;&nbsp; (logical&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (bilbo)&nbsp;</dd>
+      <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(not (gandalf)))</dd>
+      <dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        (frodo)</dt>
       <dd>=&gt;</dd>
       <dd>(assert (pippin)))</dd>
     </dl>
     <p>When rule FRODO fires, it asserts a PIPPIN fact that is dependent on the
-    existence of the BILBO and GANDALF facts matched on the LHS. If either BILBO
-    or GANDALF are retracted, PIPPIN will be removed also.</p>
-    <p>LISA's implementation of LOGICAL is not as powerful as
-    that found in other production rule systems (notably Jess and CLIPS).
-    Specifically, negated patterns are not allowed within a LOGICAL form,
-    primarily because I'm not quite sure how to implement this aspect. However,
-    LOGICAL forms may appear anywhere within a rule's LHS, and multiple LOGICAL
-    forms within the same rule are legal.</p>
+    existence of BILBO and the absence of GANDALF. If either BILBO is retracted or GANDALF
+    asserted, PIPPIN will be removed also.</p>
+    <p>A LOGICAL conditional element must be the first pattern in a rule.
+    Multiple LOGICAL forms within the same rule are allowed, but they must be
+    contiguous.</p>
+    <p><b>NB</b>: A rule beginning with the LOGICAL conditional element
+    implicitly matches the INITIAL-FACT; thus, in order for rules employing
+    truth maintenance to function correctly, a RESET must be always be performed
+    prior to any operation affecting working memory. LISA's behavior is
+    undefined otherwise.&nbsp;</p>
   </blockquote>
 
 </blockquote>
@@ -650,23 +656,8 @@ ancestry. The following code fragment provides an example:
 
 
 
-<br>&nbsp;
-
-
-
-<dd>
-
-(defimport rocky)</dd>
-
-
-
-<dd>
-
-(defimport boris)</dd>
-
-
-
-<br>&nbsp;
+<dt>&nbsp;</dt>
+&nbsp;
 
 <dd>
 
@@ -967,7 +958,7 @@ still has activations. Typically used only on rule RHSs.</blockquote>
 
 
 
-<blockquote>Create and make available a default instance of the inference
+<blockquote><i>Deprecated</i>. Create and make available a default instance of the inference
 
 engine. Use this function when you want a basic, single-threaded LISA environment.
 
@@ -978,28 +969,6 @@ Typically, this form will appear near the beginning of a file of LISA constructs
 the function will <i>not</i> create a new inference engine unless LISA
 
 is completely re-initialized.</blockquote>
-
-
-
-<table WIDTH="100%" NOSAVE >
-
-<tr NOSAVE>
-
-<td WIDTH="80%" NOSAVE>(use-engine <i>engine</i>)</td>
-
-
-
-<td>Function</td>
-
-</tr>
-
-</table>
-
-
-
-<blockquote>Make <i>engine</i> the default inference engine. Use this function
-
-with great care in a multi-processing environment.</blockquote>
 
 
 
@@ -1114,6 +1083,25 @@ representing that rule.</blockquote>
 
 
 <blockquote>Returns the symbolic name associated with rule instance <i>rule</i>.</blockquote>
+
+
+
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(consider-taxonomy)</td>
+    <td width="20%">Function</td>
+  </tr>
+</table>
+<blockquote>
+
+
+
+<p>
+
+Tells LISA to consider an object's taxonomy, or ancestors, during pattern
+matching.</p>
+
+</blockquote>
 
 
 
