@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.3 2002/10/01 18:09:24 youngde Exp $
+;;; $Id: preamble.lisp,v 1.4 2002/10/01 18:17:21 youngde Exp $
 
 (in-package "LISA")
 
@@ -34,7 +34,8 @@
 (defmacro register-clear-handler (tag func)
   `(eval-when (:load-toplevel)
      (unless (assoc ,tag *clear-handlers* :test #'string=)
-       (push (cons ,tag ,func) *clear-handlers*))))
+       (setf *clear-handlers*
+         (acons ,tag ,func *clear-handlers*)))))
 
 (defun clear-system-environment ()
   (mapc #'(lambda (assoc)
