@@ -20,7 +20,7 @@
 ;;; File: epilogue.lisp
 ;;; Description:
 
-;;; $Id: epilogue.lisp,v 1.4 2002/11/19 15:57:04 youngde Exp $
+;;; $Id: epilogue.lisp,v 1.5 2002/11/19 19:04:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -30,5 +30,7 @@
   (slot query-name))
 
 (eval-when (:load-toplevel :execute)
-  (make-default-inference-engine))
+  (make-default-inference-engine)
+  (setf *active-context* 
+    (find-context (inference-engine) :initial-context)))
 

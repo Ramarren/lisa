@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.18 2002/11/19 15:57:04 youngde Exp $
+;;; $Id: rule.lisp,v 1.19 2002/11/19 19:04:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -91,8 +91,12 @@
                    (rule-actions-bindings actions))))
 
 (defmethod print-object ((self rule) strm)
-  (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(~S)" (rule-name self))))
+  (print-unreadable-object (self strm :type t)
+    (if (initial-context-p (rule-context self))
+        (format strm "~A" (rule-name self))
+      (format strm "~A.~A" 
+              (context-name (rule-context self))
+              (rule-name self)))))
 
 (defun compile-rule (rule patterns actions)
   (compile-rule-behavior rule actions)
@@ -143,8 +147,8 @@
        :comment doc-string
        :salience salience
        :context (if (null context)
-                    (find-context 'initial-context)
-                  context)
+                    (find-context (inference-engine) 'initial-context)
+                  (find-context (inference-engine) context))
        :auto-focus auto-focus
        :logical-marker (find-any-logical-boundaries patterns)
        :binding-set (make-rule-binding-set))

@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.3 2002/11/19 15:57:04 youngde Exp $
+;;; $Id: context.lisp,v 1.4 2002/11/19 19:04:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,10 +36,45 @@
   (print-unreadable-object (self strm :type t)
     (format strm "~A" (context-name self))))
 
+(defun find-rule-in-context (context rule-name)
+  (values (gethash rule-name (context-rules context))))
+
+(defun add-rule-to-context (context rule)
+  (setf (gethash (rule-name rule) (context-rules context)) rule))
+
+(defmethod remove-rule-from-context ((self context) (rule-name symbol))
+  (remhash rule-name (context-rules self)))
+
+(defmethod remove-rule-from-context ((self context) (rule t))
+  (remhash (rule-name rule) (context-rules self)))
+
+(defun clear-activations (context)
+  (remove-activations (context-strategy context)))
+
+(defun context-activation-list (context)
+  (list-activations (context-strategy context)))
+
+(defun context-rule-list (context)
+  (loop for rule being the hash-value of (context-rules context)
+      collect rule))
+
+(defun clear-context (context)
+  (clear-activations context)
+  (clrhash (context-rules context)))
+
+(defun initial-context-p (context)
+  (string= (context-name context) "INITIAL-CONTEXT"))
+
 (defun make-context-name (defined-name)
-  (etypecase defined-name
+  (typecase defined-name
     (symbol (symbol-name defined-name))
-    (string defined-name)))
+    (string defined-name)
+    (otherwise
+     (error "The context name must be a string designator."))))
+
+(defmacro with-context (context &body body)
+  `(let ((*active-context* ,context))
+     ,@body))
 
 (defun make-context (name &key (strategy nil))
   (make-instance 'context

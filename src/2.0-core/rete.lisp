@@ -20,14 +20,12 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.36 2002/11/19 15:57:04 youngde Exp $
+;;; $Id: rete.lisp,v 1.37 2002/11/19 19:04:45 youngde Exp $
 
 (in-package "LISA")
 
 (defclass rete ()
-  ((rule-table :initform (make-hash-table)
-               :reader rete-rule-table)
-   (fact-table :initform (make-hash-table)
+  ((fact-table :initform (make-hash-table)
                :reader rete-fact-table)
    (instance-table :initform (make-hash-table)
                    :reader rete-instance-table)
@@ -48,10 +46,7 @@
    (halted :initform nil
            :accessor rete-halted)
    (firing-count :initform 0
-                 :accessor rete-firing-count)
-   (strategy :initarg :strategy
-             :initform nil
-             :reader rete-strategy)))
+                 :accessor rete-firing-count)))
 
 (defmethod initialize-instance :after ((self rete) &rest initargs)
   (push-context 
@@ -76,7 +71,8 @@
   (hash-table-count (rete-fact-table rete)))
 
 (defun find-rule (rete rule-name)
-  (values (gethash rule-name (rete-rule-table rete))))
+  (declare (ignore rete))
+  (find-rule-in-context (active-context) rule-name))
 
 (defun add-rule-to-network (rete rule patterns)
   (flet ((load-facts (network)
@@ -89,7 +85,7 @@
         (compile-rule-into-network (rete-network rete) patterns rule)
       (merge-rule-into-network 
        (rete-network rete) patterns rule :loader #'load-facts))
-    (setf (gethash (rule-name rule) (rete-rule-table rete)) rule)
+    (add-rule-to-context (rule-context rule) rule)
     rule))
 
 (defmethod forget-rule ((self rete) (rule-name symbol))
@@ -97,12 +93,12 @@
                `(mapc #'(lambda (activation)
                           (setf (activation-eligible activation) nil))
                       (find-all-activations
-                       (rete-strategy ,rete) ,rule))))
+                       (context-strategy (rule-context ,rule)) ,rule))))
     (let ((rule (find-rule self rule-name)))
       (cl:assert (not (null rule)) nil
         "The rule named ~S is not known to be defined." rule-name)
       (remove-rule-from-network (rete-network self) rule)
-      (remhash rule-name (rete-rule-table self))
+      (remove-rule-from-context (rule-context rule) rule)
       (disable-activations self rule)
       (when (composite-rule-p rule)
         (dolist (subrule (rule-subrules rule))
@@ -174,6 +170,10 @@
   (assert-fact self fact)
   fact)
 
+(defun clear-contexts (rete)
+  (loop for context being the hash-value of (rete-contexts rete)
+      do (clear-activations context)))
+
 (defun clear-focus-stack (rete)
   (setf (rete-focus-stack rete) (list)))
 
@@ -182,7 +182,7 @@
 
 (defun set-initial-state (rete)
   (forget-all-facts rete)
-  (remove-activations (rete-strategy rete))
+  (clear-contexts rete)
   (clear-focus-stack rete)
   (push-context rete (find-context rete :initial-context))
   (setf (rete-next-fact-id rete) -1)
@@ -197,11 +197,12 @@
   t)
 
 (defun make-rule-list (rete)
-  (loop for rule being the hash-value of (rete-rule-table rete)
-      collect rule))
+  (loop for context being the hash-value of (rete-contexts rete)
+      append (context-rule-list context)))
 
 (defun make-activation-list (rete)
-  (list-activations (rete-strategy rete)))
+  (loop for context being the hash-value of (rete-contexts rete)
+      append (context-activation-list context)))
 
 (defun find-fact-using-instance (rete instance)
   (gethash instance (rete-instance-table rete)))
@@ -221,15 +222,20 @@
            (add-fact-to-network network fact)))
     instance))
 
-(defun find-context (rete defined-name)
-  (gethash (make-context-name defined-name) (rete-contexts rete)))
+(defun find-context (rete defined-name &optional (errorp t))
+  (let ((context
+         (gethash (make-context-name defined-name) (rete-contexts rete))))
+    (if (and (null context) errorp)
+        (error "There's no context named: ~A" defined-name)
+      context)))
 
 (defun register-new-context (rete context)
   (setf (gethash (context-name context) (rete-contexts rete)) context))
 
 (defmethod add-activation ((self rete) activation)
   (trace-enable-activation activation)
-  (add-activation (rete-strategy self) activation))
+  (add-activation
+   (context-strategy (activation-rule activation)) activation))
 
 (defmethod disable-activation ((self rete) activation)
   (when (eligible-p activation)
@@ -237,7 +243,8 @@
     (setf (activation-eligible activation) nil)))
 
 (defmethod run-engine ((self rete) &optional (step -1))
-  (let ((strategy (rete-strategy self)))
+  (let* ((*active-context* (first (rete-focus-stack self)))
+         (strategy (context-strategy (active-context))))
     (setf (rete-halted self) nil)
     (do ((count 0))
         ((or (= count step) (rete-halted self)) count)
@@ -252,9 +259,8 @@
 (defun halt-engine (rete)
   (setf (rete-halted rete) t))
 
-(defun make-rete (&optional (strategy nil))
-  (make-instance 'rete 
-    :strategy (if strategy strategy (make-breadth-first-strategy))))
+(defun make-rete ()
+  (make-instance 'rete))
 
 (defun make-inference-engine ()
   (make-rete))
