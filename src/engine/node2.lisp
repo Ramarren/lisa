@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.30 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: node2.lisp,v 1.31 2001/03/20 19:06:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -69,6 +69,7 @@
     (run-tests-vary-left self token (get-left-tree self)))
   (values t))
 
+#+ignore
 (defmethod run-tests-vary-left ((self node2) right-token tree)
   (with-tree-iterator (key left-token tree)
     (when (or (not (has-tests-p self))
@@ -79,10 +80,29 @@
                         (get-top-fact right-token)))))
   (values nil))
 
+(defmethod run-tests-vary-left ((self node2) right-token tree)
+  (with-tree-iterator (key left-token tree)
+    (when (run-tests self left-token (get-top-fact right-token))
+      (pass-along self (make-derived-token 
+                        (class-of right-token)
+                        left-token
+                        (get-top-fact right-token)))))
+  (values nil))
+
+#+ignore
 (defmethod run-tests-vary-right ((self node2) left-token tree)
   (with-tree-iterator (key right-token tree)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))
+      (pass-along self (make-derived-token
+                        (class-of left-token)
+                        left-token
+                        (get-top-fact right-token)))))
+  (values nil))
+
+(defmethod run-tests-vary-right ((self node2) left-token tree)
+  (with-tree-iterator (key right-token tree)
+    (when (run-tests self left-token (get-top-fact right-token))
       (pass-along self (make-derived-token
                         (class-of left-token)
                         left-token

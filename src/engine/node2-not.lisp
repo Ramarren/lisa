@@ -20,7 +20,7 @@
 ;;; File: node2-not.lisp
 ;;; Description: Specialized two-input node for negated patterns.
 
-;;; $Id: node2-not.lisp,v 1.11 2001/03/15 16:00:30 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.12 2001/03/20 19:06:51 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,10 +42,17 @@
         (pass-along self token))))
   (values nil))
 
+#+ignore
 (defmethod run-tests-vary-right ((self node2-not) (left-token add-token) tree)
   (with-tree-iterator (key right-token tree)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))
+      (increment-negation-count left-token)))
+  (pass-token-from-right self left-token))
+
+(defmethod run-tests-vary-right ((self node2-not) (left-token add-token) tree)
+  (with-tree-iterator (key right-token tree)
+    (when (run-tests self left-token (get-top-fact right-token))
       (increment-negation-count left-token)))
   (pass-token-from-right self left-token))
 
@@ -71,10 +78,17 @@
         (pass-along self token))))
   (values))
 
+#+ignore
 (defmethod run-tests-vary-left ((self node2-not) right-token tree)
   (with-tree-iterator (key left-token tree)
     (when (or (not (has-tests-p self))
               (run-tests self left-token (get-top-fact right-token)))
+      (pass-token-from-left self right-token left-token)))
+  (values nil))
+
+(defmethod run-tests-vary-left ((self node2-not) right-token tree)
+  (with-tree-iterator (key left-token tree)
+    (when (run-tests self left-token (get-top-fact right-token))
       (pass-token-from-left self right-token left-token)))
   (values nil))
 
