@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.40 2001/01/28 20:03:26 youngde Exp $
+;;; $Id: pattern.lisp,v 1.41 2001/01/28 20:29:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -80,8 +80,10 @@
                      (slot-constraint get-constraint)) slot
       (cond ((literalp slot-value)
              (change-class slot 'optimisable-slot))
-            ((negated-rewritable-constraintp slot-value)
+            ((negated-rewritable-literal-constraintp slot-value)
              (change-class slot 'optimisable-negated-slot))
+            ((negated-rewritable-constraintp slot-value)
+             (rewrite-slot (make-slot-variable) (second slot-value) t))
             ;; Then the slot value must be a variable...
             ((null slot-constraint)
              (when (lookup-binding global-bindings slot-value)
