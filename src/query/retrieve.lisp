@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.13 2002/04/08 20:12:46 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.14 2002/04/12 20:23:53 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,6 +31,9 @@
   (slot name))
 
 (defun run-query (query)
+  "Runs a query (RULE instance). Query results are collected in *QUERY-RESULT*
+  as the query rules fire; RUN-QUERY returns both the value of *QUERY-RESULT*
+  and the query name itself."
   (with-inference-engine ((current-engine))
     (let* ((?name (get-name query))
            (*query-result* '())
@@ -40,20 +43,29 @@
       (values *query-result* ?name))))
 
 (defun define-query (name body)
+  "The actual query definition function. Creates a RULE instance identified by
+  the symbol NAME, with BODY as its LHS and RHS, and adds the new rule to the
+  rete network."
   (let ((rule (define-rule name body)))
     (add-rule (current-engine) rule)
     (values rule)))
 
 (defmacro defquery (name &body body)
+  "Defines a new query identified by the symbol NAME."
   `(define-query ,name ',body))
 
 (defmacro retrieve ((&rest varlist) &body body)
+  "Issues a query against the knowledge base. First, the query body is
+  normalized to produce a hash code. Next, the cache is checked to see if the
+  query already exists; if it doesn't, then a new query (rule) is created,
+  cached and added to the rete network. Finally, the query is run."
   (flet ((make-query-binding (var)
            `(cons ',var (instance-of-shadow-fact ,var))))
     (let ((query-name (gensym))
           (hash (gensym))
           (query (gensym)))
       `(let* ((,hash (sxhash (normalize-query ',body)))
+              (,query-name (gensym))
               (,query (find-query ,hash)))
          (when (null ,query)
            (setf ,query
@@ -70,9 +82,12 @@
     (make-hash-table))
 
 (defun forget-all-queries ()
+  "Discards all queries from both *QUERY-MAP* and the rete network."
   (clrhash *query-map*))
 
 (defun forget-query (name)
+  "Discards a query from the cache by 1) removing it from *QUERY-MAP*; and 2)
+  removing it from the rete network."
   (flet ((remove-query (key name)
            (remhash key *query-map*)
            (undefrule name (current-engine))))
@@ -86,12 +101,19 @@
               (remove-query key value))))))))
 
 (defun remember-query (hash query)
+  "Binds the name of QUERY (a RULE instance) to HASH by entering it into the
+  hash table *QUERY-MAP*."
   (setf (gethash hash *query-map*) (get-name query)))
 
 (defmethod clear-engine :after ((self rete))
+  "Removes all queries from *QUERY-MAP* whenever an inference engine is
+  CLEARed."
   (forget-all-queries))
 
 (defun find-query (hash)
+  "Looks up a query name in the local query table *QUERY-MAP*, indexed by
+  HASH. Then, attempts to resolve that name to a rule instance in the current
+  inference engine."
   (let ((query-name (gethash hash *query-map*)))
     (if (not (null query-name))
         (progn
@@ -99,7 +121,29 @@
           (find-rule (current-engine) query-name))
       (values nil))))
 
+;;; NORMALIZE-QUERY transforms a query body like this: An incoming body,
+;;;
+;;;  ((?x (frodo (name ?name)))
+;;;   (?y (ring-bearer (name ?name))))
+;;;
+;;; will normalize to,
+;;;
+;;;  (("#:?_1" "#:?_2" "FRODO" "NAME") 
+;;;   ("#:?_2" "#:?_3" "NAME" "RING-BEARER"))
+;;;
+;;; Note how the variable relationships are preserved.
+
 (defun normalize-query (body)
+  "Takes a query body (BODY), which really just has the same structure as a
+  rule LHS, and normalizes it such that semantically equivalent bodies will
+  hash to the same value. Each pattern within the body is considered
+  individually and transformed like this: 1) the pattern (a list) is
+  flattened; 2) variables are replaced with symbols composed of a
+  monotonically increasing integer, with their semantic relationships
+  preserved; 3) other objects are replaced with their string representations;
+  4) the pattern is sorted. The result is a list of 'flattened' patterns
+  suitable for use as a hash key. See this function's source file for a
+  concrete example."
   (let ((varlist '())
         (index 0))
     (labels ((map-variable (var)
