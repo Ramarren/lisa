@@ -365,10 +365,6 @@
          (run)
          (bind ?n (- ?n 1))))
 
-(run-n-times 256)
+;;(run-n-times 256)
 ;;(run-n-times 1)
-
-(printout t "Elapsed time: " (integer (- (time) ?*time*)) crlf)
-
-
-
+;;(printout t "Elapsed time: " (integer (- (time) ?*time*)) crlf)

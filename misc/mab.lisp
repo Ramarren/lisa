@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.14 2001/01/25 22:14:33 youngde Exp $
+;;; $Id: mab.lisp,v 1.15 2001/01/26 18:04:52 youngde Exp $
 
 (in-package :lisa)
 
@@ -35,7 +35,7 @@
 (defimport chest lisa::chest)
 (defimport goal-is-to lisa::goal-is-to)
 
-(watch :activations)
+;;;(watch :activations)
 
 ;;; Chest-unlocking rules...
 
@@ -86,7 +86,8 @@
   (format t "Monkey opens the ~A with the ~A revealing the ~A.~%"
           ?name ?key ?contents)
   (modify ?chest (contents nothing))
-  (assert (thing (name ?contents) (location ?place) (on-top-of ?name)))
+  (assert (thing (name ?contents) (location ?place) 
+                 (weight light) (on-top-of ?name)))
   (retract ?goal))
 
 ;;; Hold-object rules...
@@ -297,7 +298,9 @@
 (defrule climb-indirectly
   (goal-is-to (action on) (argument-1 ?obj))
   (thing (name ?obj) (location ?place) (on-top-of ?on))
-  (monkey (location ?place) (on-top-of ?top (not (oreq ?top ?on ?obj)))
+  (monkey (location ?place) (on-top-of ?top
+                                       (and (not (eq ?top ?on))
+                                            (not (eq ?top ?obj))))
           (holding blank))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
@@ -346,18 +349,28 @@
 
 (defrule startup
   =>
-  (assert (monkey (location t5-7) (on-top-of green-couch) (holding blank)))
-  (assert (thing (name green-couch) (location t5-7) (weight heavy)))
-  (assert (thing (name red-couch) (location t2-2) (weight heavy)))
-  (assert (thing (name big-pillow) (location t2-2) (on-top-of red-couch)))
-  (assert (thing (name red-chest) (location t2-2) (on-top-of big-pillow)))
+  (assert (monkey (location t5-7) (on-top-of green-couch)
+                  (location green-counch) (holding blank)))
+  (assert (thing (name green-couch) (location t5-7) (weight heavy)
+                 (on-top-of floor)))
+  (assert (thing (name red-couch) (location t2-2) 
+                 (on-top-of floor) (weight heavy)))
+  (assert (thing (name big-pillow) (location t2-2) 
+                 (weight light) (on-top-of red-couch)))
+  (assert (thing (name red-chest) (location t2-2) 
+                 (weight light) (on-top-of big-pillow)))
   (assert (chest (name red-chest) (contents ladder) (unlocked-by red-key)))
-  (assert (thing (name blue-chest) (location t7-7) (on-top-of ceiling)))
-  (assert (thing (name grapes) (location t7-8) (on-top-of ceiling)))
+  (assert (thing (name blue-chest) (location t7-7) 
+                 (weight light) (on-top-of ceiling)))
+  (assert (thing (name grapes) (location t7-8) 
+                 (weight light) (on-top-of ceiling)))
   (assert (chest (name blue-chest) (contents bananas) (unlocked-by blue-key)))
-  (assert (thing (name blue-couch) (location t8-8) (weight heavy)))
-  (assert (thing (name green-chest) (location t8-8) (on-top-of ceiling)))
+  (assert (thing (name blue-couch) (location t8-8) 
+                 (on-top-of floor) (weight heavy)))
+  (assert (thing (name green-chest) (location t8-8) 
+                 (weight light) (on-top-of ceiling)))
   (assert (chest (name green-chest) (contents blue-key) (unlocked-by red-key)))
-  (assert (thing (name red-key) (location t1-3)))
+  (assert (thing (name red-key) 
+                 (on-top-of floor) (weight light) (location t1-3)))
   (assert (goal-is-to (action eat) (argument-1 bananas))))
 

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.36 2001/01/23 15:56:34 youngde Exp $
+;;; $Id: rule.lisp,v 1.37 2001/01/26 18:04:53 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,8 +56,6 @@
 
 (defmethod fire ((self rule) token)
   (with-accessors ((actions get-actions)) self
-    (format t "Firing rule ~S (token depth ~D)~%"
-            (get-name self) (size token))
     (evaluate (make-function-call
                (get-actions self) (get-bindings self))
               (make-function-context token (get-top-fact token)))))
