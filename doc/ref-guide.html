@@ -341,6 +341,20 @@ object. Currently, each rule's RHS is given to the Lisp compiler during
 rule compilation, and executes within a special lexical environment established
 by LISA for each firing.</blockquote>
 
+<table border="0" width="100%">
+  <tr>
+    <td width="80%">(undefrule <i>name-or-instance</i> &amp;optional <i>engine</i>)</td>
+    <td>Macro</td>
+  </tr>
+</table>
+<blockquote>
+
+<p>
+Undefines, or removes, a rule from the Rete network contained in <i>engine</i>. <i>Name-or-instance</i>
+is either a symbol representing the rule name or the CLOS instance of a rule. By
+default, operates on the <i>current-engine</i>.</p>
+</blockquote>
+
 <h4>
 <a NAME="CLOS-Related Operators"></a>CLOS-Related Operators</h4>
 There are a few special operators and functions that LISA provides for
