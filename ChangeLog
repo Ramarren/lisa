@@ -1,4 +1,74 @@
-2002-04-16  David E. Young  <de.young@computer.org>
+2002-06-03    <de.young@computer.org>
+
+	LISA snapshot release 1.3a. First time for an official CVS-only
+	release; these snapshots are intended as sneak previews of
+	upcoming official versions. Many changes and enhancements:
+
+	* Internal fact representation: I've merged the CLOS and template
+	representations of facts into a single model. Gone are
+	SHADOW-FACTS and separate methods of handling DEFTEMPLATE and
+	DEFIMPORT facts. A unified view is now in place. The immediate
+	ramifications are 1) queries now function with both types of
+	facts, as LISA creates a class representing each template and
+	instantiates it for each fact; 2) the ASSERT macro can be used
+	with DEFIMPORTS, in addition to the traditional
+	ASSERT-INSTANCE. Point (2) was a surprising side-effect; I hadn't
+	anticipated this.
+
+	* DEFTEMPLATE changes: Addition of the DEFAULT modifier to slot
+	specifications. It's now possible to write something like:
+
+	  (deftemplate frodo ()
+	    (slot name (default frodo)))
+
+	* DEFIMPORT changes: DEFIMPORT has been completely rewritten and
+	simplified. The new specification is:
+
+	  (defimport classname &key (use-inheritancep t))
+
+	By default, LISA makes available all slots and all classes in the
+	hierarchy. If USE-INHERITANCEP is NIL, only the immediate slots
+	are available and the hierarchy is not considered during pattern
+	matching. This change will break existing code, but I believe the
+	simplified interface is much improved and makes better sense.
+
+	* Query changes: Addition of WITH-SIMPLE-QUERY macro.
+
+	* Environment changes: Paul Werkowski submitted this nice
+	enhancement that creates a package (LISA-LISP) containing all of
+	LISA's exported symbols plus those from COMMON-LISP. Now one can
+	write:
+
+	  (defpackage "LISA-MAB"
+	    (:use "LISA-LISP"))
+
+	  (in-package "LISA-MAB")
+
+	rather than having to work in LISA-USER all the time.
+
+	* Documentation: The code base is being completely
+	documented. I've only done a handful of files but work is 
+	proceeding. A tedious but necessary task, and it is reacquainting
+	me with aspects of LISA that have been stable for over a year.
+
+	* MP support: I've removed most MP synchronization code from LISA,
+	placing the burden of multi-thread access on the developer (for
+	now). My current approach to MP is not the way it should be 
+	done. This doesn't mean LISA won't be re-entrant; multiple threads
+	may be in LISA as long as each thread is operating on a different
+	inference engine instance. However, if an application has several
+	threads that operate concurrently within THE SAME engine then the
+	application must manage synchronization. No more than one thread
+	may be running within the same engine at any one time. To assist
+	developers here, the macro WITH-INFERENCE-ENGINE will remain, and
+	I'll also export a special variable, representing the "active
+	inference engine", that may be let-bound. In the future, I might
+	employ the concept of multiple working memories; i.e. each thread
+	would own its working memory and thus multiple threads could be
+	running concurrently within the same engine. This will need
+	exploration.
+
+2002-04-16    <de.young@computer.org>
 
 	LISA release 1.2. Support for a simple but functional query
 	language; updated included PORT to latest release.
