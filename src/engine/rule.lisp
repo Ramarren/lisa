@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.55 2001/08/24 15:37:01 youngde Exp $
+;;; $Id: rule.lisp,v 1.56 2001/08/28 22:05:52 youngde Exp $
 
 (in-package "LISA")
 
@@ -141,7 +141,8 @@
         (action-bindings nil))
     (flet ((add-binding (var)
              (let ((binding (lookup-binding global-bindings var)))
-               (cl:assert (not (null binding)) ())
+               (cl:assert (not (null binding)) ()
+                 "There's no known binding for this variable: ~S" var)
                (setf action-bindings
                  (pushnew binding action-bindings
                           :key #'get-name)))))
