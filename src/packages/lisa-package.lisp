@@ -20,7 +20,7 @@
 ;;; File: lisa-package.lisp
 ;;; Description: Package support code for LISA.
 
-;;; $Id: lisa-package.lisp,v 1.3 2001/09/06 15:51:35 youngde Exp $
+;;; $Id: lisa-package.lisp,v 1.4 2001/09/13 13:54:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -31,7 +31,7 @@
     "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
     "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
     "MAKE-INFERENCE-ENGINE" "ASSERT-FROM-STRING" "USE-LISA" "=>"
-    "*SHOW-LISA-WARNINGS*"))
+    "GET-NAME" "RULE" "*SHOW-LISA-WARNINGS*"))
 
 (defparameter *lisa-shadow-imports*
     '("ASSERT"))

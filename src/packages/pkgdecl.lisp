@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.37 2001/09/06 15:51:35 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.38 2001/09/13 13:54:09 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -39,8 +39,8 @@
            "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
            "MARK-INSTANCE-AS-CHANGED" "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST"
            "ENGINE" "USE-ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
-           "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE"
-           "ASSERT-FROM-STRING" "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*")
+           "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE" "GET-NAME"
+           "RULE" "ASSERT-FROM-STRING" "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*")
   (:shadow "ASSERT"))
 
 (defpackage "LISA-USER"
@@ -53,8 +53,9 @@
                 "RETRACT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
                 "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE"
                 "USE-ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
-                "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE"
-                "ASSERT-FROM-STRING" "=>" "DEFFACTS" "*SHOW-LISA-WARNINGS*"))
+                "WITH-INFERENCE-ENGINE" "MAKE-INFERENCE-ENGINE" "GET-NAME"
+                "RULE" "ASSERT-FROM-STRING" "=>" "DEFFACTS"
+                "*SHOW-LISA-WARNINGS*"))
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")

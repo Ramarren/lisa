@@ -22,7 +22,7 @@
 ;;; variable bindings that form the lexical environment of rule
 ;;; left- and right-hand-sides.
 
-;;; $Id: bindings.lisp,v 1.15 2001/04/24 20:37:13 youngde Exp $
+;;; $Id: bindings.lisp,v 1.16 2001/09/13 13:54:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -130,3 +130,29 @@
 
 (defun make-binding-table ()
   (make-instance 'binding-table))
+
+;;; This function traverses a parsed but uncompiled pattern and "fixes up" the
+;;; runtime bindings of any special variables. In other words, given a pattern
+;;; of the form (ROCKY (NAME ?NAME) (BUDDY ?BUDDY)) FIXUP-RUNTIME-BINDINGS
+;;; will look at each variable and replace it with its SYMBOL-VALUE if that
+;;; variable is BOUNDP. This binding typically occurs whenever a rule is
+;;; dynamically defined; i.e. it is created at runtime through the execution
+;;; of another rule.
+
+(defun fixup-runtime-bindings (pattern &optional (unbound-handler nil))
+  (labels ((fixup-bindings (part result)
+             (declare (optimize (speed 3) (debug 1) (safety 1)))
+             (let* ((token (first part))
+                    (new-token token))
+               (cond ((null token)
+                      (return-from fixup-bindings (nreverse result)))
+                     ((and (variablep token)
+                           (boundp token))
+                      (setf new-token (symbol-value token)))
+                     ((variablep token)
+                      (unless (null unbound-handler)
+                        (funcall unbound-handler token)))
+                     ((listp token)
+                      (setf new-token (fixup-bindings token nil))))
+               (fixup-bindings (rest part) (push new-token result)))))
+    (fixup-bindings pattern nil)))

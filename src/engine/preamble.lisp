@@ -20,14 +20,19 @@
 ;;; File: preamble.lisp
 ;;; Description: Stuff here must be built before the engine module.
 
-;;; $Id: preamble.lisp,v 1.8 2001/09/06 15:51:35 youngde Exp $
+;;; $Id: preamble.lisp,v 1.9 2001/09/13 13:54:09 youngde Exp $
 
 (in-package "LISA")
 
 (defconstant +lisa-engine-var+ 
     (intern (symbol-name (gensym "?")))
   "Used to represent the variable bound to a rule's RETE instance and
-  accessible from a rule's LHS.")
+  accessible from a rule's RHS.")
+
+(defconstant +lisa-rule-var+
+    (intern (symbol-name (gensym "?")))
+  "Used to represent the variable bound to a rule's CLOS instance and
+    accessible from a rule's RHS.")
 
 (defvar *during-rule-execution* nil
   "This variable is bound to T whenever LISA is executing a rule.")

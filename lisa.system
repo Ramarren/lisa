@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.4 2001/08/27 20:59:04 youngde Exp $
+;;; $Id: lisa.system,v 1.5 2001/09/13 13:54:08 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -170,7 +170,8 @@
                                        (:file "terminal-node"
                                               :depends-on (node))
                                        (:file "slot")
-                                       (:file "pattern")
+                                       (:file "pattern"
+                                              :depends-on (bindings))
                                        (:file "generic-pattern"
                                               :depends-on (pattern))
                                        (:file "not-pattern"
@@ -188,7 +189,8 @@
                                        (:file "rule"
                                               :depends-on
                                               (test-pattern generic-pattern
-                                                            not-pattern pattern))
+                                                            not-pattern pattern
+                                                            bindings))
                                        (:file "network-management"
                                               :depends-on (rete-compiler))
                                        (:file "deffacts")
