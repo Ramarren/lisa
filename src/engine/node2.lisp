@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.20 2000/12/13 18:02:28 youngde Exp $
+;;; $Id: node2.lisp,v 1.21 2000/12/14 18:18:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -111,10 +111,11 @@
 
 (defmethod print-object ((self node2) strm)
   (print-unreadable-object (self strm :type t :identity t)
-    (format strm "(left = ~D ; right = ~D ; tests = ~D)"
+    (format strm "(left = ~D ; right = ~D ; tests = ~D ; use-count = ~D)"
             (token-tree-count (get-left-tree self))
             (token-tree-count (get-right-tree self))
-            (get-test-count self))))
+            (get-test-count self)
+            (get-use-count self))))
 
 (defun make-node2 (engine)
   (make-instance 'node2 :engine engine))

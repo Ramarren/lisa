@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.25 2000/12/14 01:10:26 youngde Exp $
+;;; $Id: sample.lisp,v 1.26 2000/12/14 18:18:10 youngde Exp $
 
 (in-package :lisa)
 
@@ -55,21 +55,17 @@
 (defimport boris lisa::boris)
 (defimport natasha lisa::natasha)
 
-#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name ?nemesis))
   =>
   (format t "nemesis fired! Value of ?nemesis is ~S~%" ?nemesis)
-  (assert (boris (name ?nemesis))))
+  (assert (boris (name "boris"))))
 
-#+ignore
 (defrule boris
-  (?fact (boris (name ?name "rocky")))
+  (boris (name ?name "boris"))
   =>
-  (format t "boris fired!~%")
-  (modify ?fact (name ?name))
-  (retract ?fact))
+  (format t "boris fired (name = ~S).~%" ?name))
 
 #+ignore
 (defrule multiple-references
@@ -77,25 +73,23 @@
   =>
   (format t "multiple-references fired! Value of ?name is ~S~%" ?name))
 
-#+ignore
 (defrule schtum
   (?f-1 (rocky (name "rocky")))
   =>
   (format t "schtum fired (?f-1 = ~S).~%" ?f-1)
-  (modify ?f-1 (name "boris")))
+  (modify ?f-1 (name "bullwinkle")))
 
 (defrule rocky-boris-natasha
-  (?f-1 (rocky (name ?name "boris")))
+  (?f-1 (rocky (name ?name "bullwinkle")))
   (boris (name "boris"))
   (natasha (name "natasha"))
   =>
-  (format t "rocky-boris-natasha fired (name =  ~S).~%" ?name)
+  (format t "rocky-boris-natasha fired (name = ~S).~%" ?name)
   (retract ?f-1))
 
-#+ignore
 (defrule not-pattern
   (boris (name "boris"))
-  (not (rocky (name "rocky")))
+  (not (rocky (name "bullwinkle")))
   =>
   (format t "not-pattern fired.~%"))
 

@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.24 2000/12/13 18:02:28 youngde Exp $
+;;; $Id: rule.lisp,v 1.25 2000/12/14 18:18:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -153,10 +153,19 @@
   (when (= (get-pattern-count self) 0)
     (add-pattern self (get-initial-pattern self))))
 
-(defmethod add-node ((self rule) node)
-  (with-accessors ((nodes get-nodes)) self
+(defun add-new-node (rule node)
+  (declare (type rule rule))
+  (with-accessors ((nodes get-nodes)) rule
     (setf nodes (nconc nodes `(,node)))
     (increase-use-count node)))
+
+(defmethod add-node ((self rule) (node node-test))
+  (unless (member node (get-nodes self) :test #'equals)
+    (format t "adding new join node.~%")
+    (add-new-node self node)))
+
+(defmethod add-node ((self rule) node)
+  (add-new-node self node))
 
 (defun has-patterns-p (rule)
   (not (= (get-pattern-count rule) 0)))
@@ -170,22 +179,6 @@
                         (make-pattern parsed-pattern
                                       (get-pattern-count self)))))
     (mapc #'compile-pattern plist)))
-
-#+ignore
-(defmethod compile-patterns ((self rule) plist)
-  (flet ((compile-pattern (p)
-           (let ((pattern (parsed-pattern-pattern p))
-                 (binding (parsed-pattern-binding p)))
-             (add-pattern self
-                          (make-pattern (first pattern)
-                                        (second pattern) 
-                                        (get-pattern-count self)
-                                        binding)))))
-    (mapc #'compile-pattern plist)))
-
-#+ignore
-(defmethod compile-actions ((self rule) rhs)
-  (setf (get-actions self) (compile-function rhs)))
 
 (defmethod compile-actions ((self rule) rhs)
   (setf (get-actions self) rhs))

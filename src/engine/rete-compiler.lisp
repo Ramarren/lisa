@@ -30,7 +30,7 @@
 ;;; LISA "models the Rete net more literally as a set of networked
 ;;; Node objects with interconnections."
 
-;;; $Id: rete-compiler.lisp,v 1.20 2000/12/13 18:02:28 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.21 2000/12/14 18:18:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -197,11 +197,17 @@
                         (third-pass (rest patterns) (1+ i))))))))
     (third-pass (rest (get-patterns rule)) 1)))
 
+#+ignore
 (defun create-terminal-node (compiler rule)
   (with-accessors ((terminals get-terminals)) compiler
     (setf (aref terminals 0)
       (merge-successor (aref terminals 0)
                        (make-terminal-node rule) rule))))
+
+(defun create-terminal-node (compiler rule)
+  (merge-successor
+   (aref (get-terminals compiler) (1- (get-pattern-count rule)))
+   (make-terminal-node rule) rule))
 
 (defmethod add-rule-to-network ((self rete-compiler) rule)
   "Adds a rule to the pattern network."

@@ -18,9 +18,10 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: node.lisp
-;;; Description: Parent class of all nodes in the Rete pattern network.
+;;; Description: Parent class of all nodes in the Rete pattern network. This
+;;; class is intended to be abstract.
 
-;;; $Id: node.lisp,v 1.9 2000/12/14 01:10:27 youngde Exp $
+;;; $Id: node.lisp,v 1.11 2000/12/14 18:18:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -30,7 +31,8 @@
    (successors :initform nil
                :accessor get-successors))
   (:documentation
-   "Parent class of all nodes in the Rete pattern network."))
+   "Parent class of all nodes in the Rete pattern network. This class is
+   intended to be abstract."))
 
 (defgeneric call-node-left (node token))
 (defgeneric call-node-right (node token))
@@ -73,6 +75,7 @@
     (merge-maybe (get-successors self))))
 
 (defmethod resolve ((self node) node)
-  (or (find-if #'(lambda (n) (equals n node))
+  (or (find-if #'(lambda (n)
+                   (equals n node))
                (get-successors self))
       node))

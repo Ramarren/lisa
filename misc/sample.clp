@@ -8,10 +8,18 @@
   (slot name)
   (slot nemesis))
 
-(defrule not-rocky
-  (not (rocky (name "rocky")))
+(defrule rocky-boris-natasha
+  ?f-1 <- (rocky (name ?name&"boris"))
+  (boris (name "boris"))
+  (natasha (name "natasha"))
   =>
-  (printout t "not-rocky fired." crlf))
+  (printout t "rocky-boris-natasha fired (name = " ?name ")" crlf)
+  (retract ?f-1))
+
+; (defrule not-rocky
+;   (not (rocky (name "rocky")))
+;   =>
+;   (printout t "not-rocky fired." crlf))
 
 ; (defrule duplicate-vars
 ;   (natasha (name ?name) (nemesis ?name))
@@ -48,9 +56,10 @@
 ;   =>
 ;   (printout t "no-patterns!" crlf))
 
-(reset)
+;(reset)
 (assert (rocky (name "boris")))
-(retract (fact-id 1))
+(assert (boris (name "boris")))
+(assert (natasha (name "natasha")))
 
 ;(assert (natasha (name "natasha") (nemesis "rocky")))
 ;(assert (natasha (name "natasha") (nemesis "natasha")))

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.24 2000/12/13 20:57:37 youngde Exp $
+;;; $Id: parser.lisp,v 1.25 2000/12/14 18:18:12 youngde Exp $
 
 (in-package :lisa)
 
@@ -135,7 +135,7 @@
                  (slot-value (second slot)))
              (if (and (symbolp slot-name)
                       (or (literalp slot-value)
-                          (variable-p slot-value)))
+                          (variablep slot-value)))
                  ``(,',slot-name ,,slot-value)
                (error "NORMALIZE-SLOTS found a problem parsing ~S.~%" slots)))))
     `(list ,@(mapcar #'normalize slots))))
