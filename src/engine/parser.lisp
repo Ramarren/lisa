@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.52 2001/04/02 21:05:21 youngde Exp $
+;;; $Id: parser.lisp,v 1.53 2001/04/02 21:25:18 youngde Exp $
 
 (in-package "LISA")
 
@@ -242,33 +242,13 @@
       (lisa-error (condition)
         (command-structure-error 'modify-fact condition)))))
 
-#+ignore
-(defun parse-and-modify-fact (body)
-  (flet ((generate-modify ()
-           (with-modify-form ((class binding slots) body)
-           (cond ((and (symbolp class)
-                       (variablep binding)
-                       (consp slots))
-                  (let ((slot-list
-                         (canonicalize-slot-names
-                          (find-meta-class class) slots)))
-                    `(modify-fact (current-engine) ,binding
-                      (,@(normalize-slots slot-list)))))
-                 (t
-                  (parsing-error
-                   "There's a structural error with this form: ~S" body))))))
-    (handler-case
-        (generate-modify)
-      (lisa-error (condition)
-        (command-structure-error 'modify-fact condition)))))
-
 (defmacro with-modify-form (((class binding slots) modify) &body body)
   `(destructuring-bind (,class ,binding &rest ,slots) ,modify
     ,@body))
 
 (defun parse-and-modify-fact (body)
   (flet ((generate-modify ()
-           (with-modify-form ((class binding slots) (first body))
+           (with-modify-form ((class binding slots) body)
              (cond ((and (symbolp class)
                          (variablep binding)
                          (consp slots))
