@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.54 2001/05/03 19:55:09 youngde Exp $
+;;; $Id: rete.lisp,v 1.55 2001/05/05 17:46:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -44,8 +44,7 @@
               :accessor get-facts)
    (next-fact-id :initform 0
                  :accessor get-next-fact-id)
-   (halt-engine :initform nil
-                :accessor get-halt-engine)
+   (halted-p :initform nil)
    (fired-rule-count :initform 0
                      :reader get-fired-rule-count))
   (:documentation
@@ -60,6 +59,10 @@
 (defun remove-rules (self)
   (declare (type rete self))
   (clrhash (get-rules self)))
+
+(defun engine-halted-p (self)
+  (declare (type rete self))
+  (slot-value self 'halted-p))
 
 (defmethod add-activation ((self rete) activation)
   (watchpoint 'enable-activation activation)
@@ -222,38 +225,24 @@
   (declare (type rete self))
   (list-activations (get-strategy self)))
 
-(defun run-engine (self &optional (step t))
-  (declare (type rete self))
-  (let ((strategy (get-strategy self)))
-    (setf (get-halt-engine self) nil)
-    (do ((count 0))
-        ((or (eql count step) (get-halt-engine self)) count)
-      (let ((activation (next-activation strategy)))
-        (cond ((null activation)
-               (setf (get-halt-engine self) t))
-              ((eligible-p activation)
-               (incf (slot-value self 'fired-rule-count))
-               (fire-rule activation)
-               (incf count)))))))
-
-(defun halt-engine (self)
-  (declare (type rete self))
-  (setf (get-halt-engine self) t))
-
-#+ignore
-(defun run-engine (self &optional (step t))
-  (let ((strategy (get-strategy self))
-        (count 0))
-    (loop
-      (if (eql count step)
-          (return count)
+(defmethod run-engine ((self rete) &optional (step t))
+  (flet ((prepare-for-run ()
+           (setf (slot-value self 'halted-p) nil)))
+    (let ((strategy (get-strategy self)))
+      (prepare-for-run)
+      (do ((count 0))
+          ((or (eql count step) (engine-halted-p self)) count)
         (let ((activation (next-activation strategy)))
           (cond ((null activation)
-                 (return count))
+                 (halt-engine self))
                 ((eligible-p activation)
                  (incf (slot-value self 'fired-rule-count))
                  (fire-rule activation)
                  (incf count))))))))
 
-(defun make-rete (&key (strategy (make-breadth-first-strategy)))
+(defun halt-engine (self)
+  (declare (type rete self))
+  (setf (slot-value self 'halted-p) t))
+
+(defun make-rete (strategy)
   (make-instance 'rete :strategy strategy))

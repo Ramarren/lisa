@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.27 2001/05/03 19:55:09 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.28 2001/05/05 17:46:42 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -38,9 +38,9 @@
   (:export "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS" "RULES"
            "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH" "UNWATCH"
            "WATCHING" "HALT" "ASSERT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
-           "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE" "USE-ENGINE"
+           "TELL-LISA-MODIFIED-INSTANCE" "SLOT" "TEST" "ENGINE"
            "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
-           "ASSERT-FROM-STRING" "=>"))
+           "MAKE-INFERENCE-ENGINE" "ASSERT-FROM-STRING" "=>"))
 
 (defpackage "LISA-USER"
   (:use "COMMON-LISP")
@@ -51,9 +51,9 @@
                 "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
                 "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
                 "MARK-INSTANCE-AS-CHANGED" "TELL-LISA-MODIFIED-INSTANCE"
-                "SLOT" "TEST" "ENGINE" "USE-ENGINE" "WITH-INFERENCE-ENGINE"
+                "SLOT" "TEST" "ENGINE" "WITH-INFERENCE-ENGINE"
                 "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "ASSERT-FROM-STRING"
-                "=>"))
+                "MAKE-INFERENCE-ENGINE" "=>"))
 
 (defpackage "LISA.MULTIPROCESSING"
   (:use "COMMON-LISP")

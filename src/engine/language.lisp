@@ -20,7 +20,7 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.46 2001/04/27 18:58:28 youngde Exp $
+;;; $Id: language.lisp,v 1.47 2001/05/05 17:46:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -39,47 +39,47 @@
 (defmacro assert ((&body body))
   (parse-and-insert-fact body))
 
-(defmacro assert-instance (instance)
-  `(parse-and-insert-instance ,instance))
+(defun assert-instance (instance)
+  (parse-and-insert-instance instance))
 
-(defmacro assert-from-string (str)
-  `(eval (read-from-string ,str)))
+(defun assert-from-string (str)
+  (eval (read-from-string str)))
 
-(defmacro facts (&optional (engine (current-engine)))
-  `(print-fact-list ,engine))
+(defun facts (&optional (engine (current-engine)))
+  (print-fact-list engine))
 
-(defmacro rules (&optional (engine (current-engine)))
-  `(print-rule-list ,engine))
+(defun rules (&optional (engine (current-engine)))
+  (print-rule-list engine))
 
-(defmacro agenda (&optional (engine (current-engine)))
-  `(print-activation-list ,engine))
+(defun agenda (&optional (engine (current-engine)))
+  (print-activation-list engine))
 
-(defmacro reset (&optional (engine (current-engine)))
-  `(reset-engine ,engine))
+(defun reset (&optional (engine (current-engine)))
+  (reset-engine engine))
 
-(defmacro clear (&optional (engine (current-engine)))
-  `(clear-environment ,engine))
+(defun clear (&optional (engine (current-engine)))
+  (clear-environment engine))
 
-(defmacro run (&optional (engine (current-engine)) &key (step t))
-  `(run-engine ,engine ,step))
+(defun run (&optional (engine (current-engine)) &key (step t))
+  (run-engine engine step))
 
-(defmacro walk (&optional (step 1))
-  `(run-engine (current-engine) ,step))
+(defun walk (&optional (step 1))
+  (run-engine (current-engine) step))
 
-(defmacro retract (fact-id &optional (engine (current-engine)))
-  `(retract-fact ,engine ,fact-id))
+(defun retract (fact &optional (engine (current-engine)))
+  (retract-fact engine fact))
 
 (defmacro modify (fact &body body)
   (parse-and-modify-fact fact body))
 
-(defmacro watch (event)
-  `(watch-event ,event))
+(defun watch (event)
+  (watch-event event))
 
-(defmacro unwatch (event)
-  `(unwatch-event ,event))
+(defun unwatch (event)
+  (unwatch-event event))
 
-(defmacro watching ()
-  `(format t "Watching: ~S~%" (get-watches)))
+(defun watching ()
+  (format t "Watching: ~S~%" (get-watches)))
 
 (defun halt (engine)
   (halt-engine engine))

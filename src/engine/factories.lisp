@@ -21,7 +21,7 @@
 ;;; Description: Factory code responsible for creating various types
 ;;; of LISA entities.
 
-;;; $Id: factories.lisp,v 1.33 2001/04/20 18:35:15 youngde Exp $
+;;; $Id: factories.lisp,v 1.34 2001/05/05 17:46:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -109,3 +109,8 @@
        (error "The Pattern factory doesn't recognize this raw pattern type ~S."
               (parsed-pattern-type pp))))))
 
+(defun make-inference-engine (&key (strategy (make-breadth-first-strategy))
+                              (with-mp nil))
+  (if with-mp
+      (make-rete-mp strategy)
+    (make-rete strategy)))

@@ -21,7 +21,7 @@
 ;;; Description: This class and its associated methods implement an MP-safe
 ;;; version of class RETE.
 
-;;; $Id: rete-mp.lisp,v 1.1 2001/05/05 17:14:25 youngde Exp $
+;;; $Id: rete-mp.lisp,v 1.2 2001/05/05 17:46:42 youngde Exp $
 
 (in-package "LISA")
 
@@ -47,3 +47,8 @@
 (defmethod run-engine ((self rete-mp) &optional (step t))
   (lmp:with-lock ((get-lock self))
     (call-next-method self step)))
+
+(defmethod run-engine-forever ((self rete-mp)))
+
+(defun make-rete-mp (strategy)
+  (make-instance 'rete-mp :strategy strategy))
