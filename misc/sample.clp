@@ -4,6 +4,15 @@
 (deftemplate boris
   (slot name))
 
+(deftemplate natasha
+  (slot name)
+  (slot nemesis))
+
+(defrule nemesis
+  (natasha (name "natasha") (nemesis "bullwinkle"))
+  =>
+  (printout t "nemesis fired!" crlf))
+
 ; (defrule schtum
 ;   (rocky (name "rocky"))
 ;   (boris (name "boris"))
@@ -20,11 +29,10 @@
 ;   =>
 ;   (printout t "schtum-simple!" crlf))
 
-(defrule no-patterns
-  =>
-  (printout t "no-patterns!" crlf))
+;;;(defrule no-patterns
+;;;  =>
+;;;  (printout t "no-patterns!" crlf))
 
-(reset)
-
-(assert (rocky (name "rocky")))
-(assert (boris (name "boris")))
+;;;(reset)
+;;;(assert (rocky (name "rocky")))
+;;;(assert (boris (name "boris")))

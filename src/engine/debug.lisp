@@ -21,19 +21,20 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.4 2000/11/13 20:12:11 youngde Exp $
+;;; $Id: debug.lisp,v 1.5 2000/11/18 22:31:42 youngde Exp $
 
 (in-package :lisa)
 
-(defun trace-rete (root-node)
-  (labels ((trace-nodes (nodes level)
-             (let ((node (first nodes)))
-               (cond ((null node)
-                      (values nil))
-                     (t
-                      (format t "~,,V<~S~>~%" level node)
-                      (trace-nodes (get-successors node) (+ level 3))
-                      (trace-nodes (rest nodes) level))))))
-    (format t "~S~%" root-node)
-    (trace-nodes (get-successors root-node) 3)))
+(defun trace-rete (engine)
+  (let ((root-node (get-root-node (get-compiler engine))))
+    (labels ((trace-nodes (nodes level)
+               (let ((node (first nodes)))
+                 (cond ((null node)
+                        (values nil))
+                       (t
+                        (format t "~,,V<~S~>~%" level node)
+                        (trace-nodes (get-successors node) (+ level 3))
+                        (trace-nodes (rest nodes) level))))))
+      (format t "~S~%" root-node)
+      (trace-nodes (get-successors root-node) 3))))
 

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.14 2000/11/18 02:42:11 youngde Exp $
+;;; $Id: rete.lisp,v 1.15 2000/11/18 22:31:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -108,6 +108,13 @@
   (set-initial-state self)
   (setf (slot-value self 'compiler) (make-rete-compiler))
   (values t))
+
+(defmethod get-rule-list ((self rete))
+  (let ((rules (list)))
+    (maphash #'(lambda (key val)
+                 (push val rules))
+             (get-rules self))
+    (values rules)))
 
 (defmethod run-engine ((self rete))
   (mapc #'(lambda (activation)

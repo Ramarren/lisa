@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description: Represents facts in the knowledge base.
 
-;;; $Id: fact.lisp,v 1.6 2000/11/17 21:45:22 youngde Exp $
+;;; $Id: fact.lisp,v 1.7 2000/11/18 22:31:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,6 +56,11 @@
 
 (defmethod equals ((self fact) (obj fact))
   (equal (get-class self) (get-class obj)))
+
+(defmethod print-object ((self fact) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "f-~D (~S)" (get-fact-id self)
+            (class-name (get-class self)))))
 
 (defmethod initialize-instance :after ((self fact) &key (slots nil))
   (let ((map (slot-value self 'slot-table)))

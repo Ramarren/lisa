@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: The RULE class.
 ;;;
-;;; $Id: rule.lisp,v 1.7 2000/11/17 21:45:22 youngde Exp $
+;;; $Id: rule.lisp,v 1.8 2000/11/18 22:31:42 youngde Exp $
 
 (in-package :lisa)
 
@@ -85,6 +85,10 @@
   (compile-patterns self lhs)
   (compile-actions self rhs)
   (values self))
+
+(defmethod print-object ((self rule) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "(~S)" (get-name self))))
 
 (defun make-rule (name engine &key (doc-string nil) (salience 0) (source nil))
   "Constructor for class DEFRULE."
