@@ -22,7 +22,7 @@
 ;;; this node compare slot values and types in facts from the left and right
 ;;; inputs.
 
-;;; $Id: node2.lisp,v 1.25 2001/02/13 18:22:02 youngde Exp $
+;;; $Id: node2.lisp,v 1.26 2001/02/13 21:16:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -47,6 +47,12 @@
 
 (defmethod call-node-left ((self node2) (token add-token))
   (add-to-left-tree self token)
+  (when (instrumentedp self)
+    (format t "~%~%*** call-node-left: ~S~%" self)
+    (format t "add-token:~%")
+    (show-token token)
+    (format t "~%~% node memories...~%")
+    (show-node2-memories self))
   (run-tests-vary-right self token (get-right-tree self)))
 
 (defmethod call-node-left ((self node2) (token clear-token))
@@ -57,11 +63,23 @@
 
 (defmethod call-node-left ((self node2) (token remove-token))
   (when (remove-token (get-left-tree self) token)
+    (when (instrumentedp self)
+      (format t "~%~%*** call-node-left: ~S~%" self)
+      (format t "remove-token:~%")
+      (show-token token)
+      (format t "~%~% node memories...~%")
+      (show-node2-memories self))
     (run-tests-vary-right self token (get-right-tree self)))
   (values t))
 
 (defmethod call-node-right ((self node2) (token add-token))
   (add-to-right-tree self token)
+  (when (instrumentedp self)
+    (format t "~%~%*** call-node-right: ~S~%" self)
+    (format t "add-token:~%")
+    (show-token token)
+    (format t "~%~% node memories...~%")
+    (show-node2-memories self))
   (run-tests-vary-left self token (get-left-tree self)))
 
 (defmethod call-node-right ((self node2) (token clear-token))
@@ -69,6 +87,12 @@
 
 (defmethod call-node-right ((self node2) (token remove-token))
   (when (remove-token (get-right-tree self) token)
+    (when (instrumentedp self)
+      (format t "~%~%*** call-node-right: ~S~%" self)
+      (format t "remove-token:~%")
+      (show-token token)
+      (format t "~%~% node memories...~%")
+      (show-node2-memories self))
     (run-tests-vary-left self token (get-left-tree self)))
   (values t))
 

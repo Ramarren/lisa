@@ -21,7 +21,7 @@
 ;;; Description: Utilities and functions useful for inspection and
 ;;; debugging of Lisa during development.
 
-;;; $Id: debug.lisp,v 1.12 2001/02/13 18:22:02 youngde Exp $
+;;; $Id: debug.lisp,v 1.13 2001/02/13 21:16:32 youngde Exp $
 
 (in-package :lisa)
 
@@ -112,4 +112,21 @@
   #+Lispworks
   (sys:pointer-from-address addr)
   #-Lispworks
-  (error "Not implemented for this platform."))
+  (error "FIND-OBJECT Not implemented for this platform."))
+
+(defun show-token (token)
+  (do ((tok token (get-parent tok)))
+      ((null tok) t)
+    (describe tok))
+  (terpri))
+
+(defun show-node2-memories (node2)
+  (format t "Right memory for node ~S~%" node2)
+  (with-tree-iterator (key token (get-right-tree node2))
+    (show-token token))
+  (terpri)
+  (format t "Left memory for node ~S~%" node2)
+  (with-tree-iterator (key token (get-left-tree node2))
+    (show-token token))
+  (values t))
+  
