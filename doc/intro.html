@@ -2,7 +2,7 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; SunOS 5.8 sun4u) [Netscape]">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (X11; U; Linux 2.2.14-5.0 i586) [Netscape]">
 </head>
 <body background="hierarchy-background.gif">
 
@@ -22,29 +22,15 @@ of which can be found in the project's <i>misc</i> directory. It is possible
 to interact with LISA in much the way one interacts with JESS and CLIPS;
 there's a fairly decent programming and command language (mentioned later)
 that one can use to inspect the knowledge base, fire rules, save facts
-to a file, etc. It is <i>not</i> possible, I believe, to build even a small
-system suitable for deployment; there are simply too many missing features.
-However, one can get a good feel for the environment right now, so I think
-in that sense a software release at this point is reasonable.
+to a file, etc. It is becoming possible, I believe, to build&nbsp; systems
+suitable for deployment; there are really only a few remaining missing
+features that stand in the way of LISA's first production release.
 <br>&nbsp;
 <h4>
 II. What can't LISA do right now?</h4>
 This list is long, but development continues at a pretty good clip. In
 no particular order, missing features include but are not limited to:
 <ol>
-<li>
-<i>True reasoning over CLOS objects</i>: Right now LISA performs what I
-call "symbolic reasoning". This means that rule patterns (and facts in
-the knowledge base) manipulate the equivalent of JESS <i>unordered facts</i>,
-or <i>deftemplates</i>. Although each fact name must be backed by a CLOS
-class, LISA doesn't do anything with these classes right now. You'll see
-how this works in the MAB example.</li>
-
-<br>&nbsp;
-<li>
-<i>No TEST conditional element</i>.</li>
-
-<br>&nbsp;
 <li>
 <i>No rule redefinition</i>: LISA doesn't yet support dynamic redefinition
 of rules. Before reloading an existing knowledge base one must first CLEAR
@@ -94,15 +80,6 @@ comes with LISA, write a new one. That sort of thing.</li>
 inference engines within the same Lisp world, but there are a couple of
 places where I haven't decided just how to manage this. So for now, just
 one engine per Lisp world please.</li>
-
-<br>&nbsp;
-<li>
-<i>Sub-optimal performance</i>: No doubt about it; LISA doesn't yet run
-as quickly as she eventually will. I've done a small amount of profiling
-to identify some bottlenecks; in particular, slot lookup during pattern
-matching is slow, but I've designed a scheme that should allow constant-time
-access. This work is actually at the top of my list, just to get it out
-of the way.</li>
 </ol>
 
 <h4>
@@ -132,46 +109,70 @@ today. Most commands are pretty obvious; none are sufficiently documented.
 <li>
 <i>defrule</i>: Defines a production rule. If you're familiar with CLIPS
 or JESS you're in great shape; LISA has her roots in those two systems.
-If not you'll have to muddle throught the MAB example for now.</li>
+If not you'll have to muddle throught the MAB example for now.<br>
+<BR></li>
 
 <li>
-<i>assert</i>: Asserts a fact into the knowledge base.</li>
+<i>deftemplate</i>: Defines a type representing a LISA "unordered" fact.<br>
+<BR></li>
+
+<li>
+<i>defimport</i>: Makes a CLOS class known to LISA and allows instances
+of this class to be inserted into the knowledge base.<br>
+<BR></li>
+
+<li>
+<i>assert</i>: Asserts a fact into the knowledge base.<br>
+<BR></li>
+
+<li>
+<i>assert-instance</i>: Asserts a CLOS instance into the knowledge base.<br>
+<BR></li>
 
 <li>
 <i>retract</i>: Removes a fact from the knowledge base. You can give <i>retract</i>
-either the fact identifier (an integer) or a fact object.</li>
+either the fact identifier (an integer) or a fact object.<br>
+<BR></li>
 
 <li>
 <i>modify</i>: Modifies a fact. In essence, this function causes a <i>retract</i>
-followed by an <i>assert</i>.</li>
+followed by an <i>assert</i>.<br>
+<BR></li>
 
 <li>
-<i>facts</i>: Prints a list of facts.</li>
+<i>facts</i>: Prints a list of facts.<br>
+<BR></li>
 
 <li>
-<i>agenda</i>: Prints the current rule activations.</li>
+<i>agenda</i>: Prints the current rule activations.<br>
+<BR></li>
 
 <li>
 <i>reset</i>: Clears all facts from the knowledge base, resets the inference
-engine and asserts the <i>initial fact</i>.</li>
+engine and asserts the <i>initial fact</i>.<br>
+<BR></li>
 
 <li>
 <i>clear</i>: Re-initializes the inference engine and destroys any existing
-Rete network.</li>
+Rete network.<br>
+<BR></li>
 
 <li>
 <i>run</i>: Runs the engine until there are no more activations. Optionally
 takes as an argument an integer indicating the number of rules to fire
-before halting.</li>
+before halting.<br>
+<BR></li>
 
 <li>
-<i>halt</i>. Not yet implemented.</li>
+<i>halt</i>. Not yet implemented.<br>
+<BR></li>
 
 <li>
 <i>watch</i>: Asks the engine to indicate the occurrence of certain events.
 Currently, one can monitor assertions, retractions, activations and firings;
 give <i>watch</i> one of the keywords '(:facts :activations :rules) depending
-on what you want to monitor.</li>
+on what you want to monitor.<br>
+<BR></li>
 
 <li>
 <i>unwatch</i>: Undoes the effect of a previous <i>watch</i>.</li>
