@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.13 2001/04/17 18:18:35 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.14 2001/04/17 19:10:19 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -34,54 +34,39 @@
 (defpackage "LISA-USER"
   (:use "COMMON-LISP")
   (:shadowing-import-from "LISA"
-                          lisa:assert)
+                          "ASSERT")
   (:import-from "LISA"
-                lisa:defrule
-                lisa:deftemplate
-                lisa:defimport
-                lisa:facts
-                lisa:rules
-                lisa:agenda
-                lisa:reset
-                lisa:clear
-                lisa:run
-                lisa:retract
-                lisa:modify
-                lisa:watch
-                lisa:unwatch
-                lisa:watching
-                lisa:halt
-                lisa:assert-instance
-                lisa:slot
-                lisa:=>))
+                "DEFRULE" "DEFTEMPLATE" "DEFIMPORT" "FACTS" "RULES"
+                "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
+                "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "SLOT" "=>"))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
   #+(or Allegro CMUCL)
   (:import-from "CLOS"
-                clos:class-slots
-                clos:slot-definition-name
-                clos:finalize-inheritance
-                clos:class-finalized-p)
+                "CLASS-SLOTS"
+                "SLOT-DEFINITION-NAME"
+                "FINALIZE-INHERITANCE"
+                "CLASS-FINALIZED-P")
   #+Lispworks
   (:import-from "HCL"
-                hcl:class-slots
-                hcl:slot-definition-name)
+                "CLASS-SLOTS"
+                "SLOT-DEFINITION-NAME")
   #+Lispworks
   (:import-from "CLOS"
-                clos:finalize-inheritance
-                clos:class-finalized-p)
+                "FINALIZE-INHERITANCE"
+                "CLASS-FINALIZED-P")
   #+CLISP
   (:import-from "CLOS"
                 clos::class-slots
                 clos::slot-definition-name)
   #-(or Allegro CMUCL Lispworks CLISP)
   (error "Unsupported implementation.")
-  (:export slot-definition-name
-           class-slots
-           finalize-inheritance
-           class-finalized-p))
+  (:export "CLASS-SLOTS"
+           "SLOT-DEFINITION-NAME"
+           "FINALIZE-INHERITANCE"
+           "CLASS-FINALIZED-P"))
 
 ;;; accommodate implementations whose CLOS is really PCL, like CMUCL...
 

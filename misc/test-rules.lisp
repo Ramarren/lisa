@@ -1,4 +1,5 @@
-(in-package :lisa)
+
+(in-package "LISA-USER")
 
 (defclass rocky ()
   ((name :initarg :name)
@@ -8,30 +9,30 @@
   ((name :initarg :name)
    (comrade :initarg :comrade)))
 
-(defimport rocky (lisa::rocky)
+(defimport rocky (lisa-user::rocky)
   (name buddy))
 
-(defimport boris (lisa::boris)
+(defimport boris (lisa-user::boris)
   (name comrade))
 
 (defparameter *rocky*
   (make-instance 'rocky :name "rocky" :buddy "bullwinkle"))
 (defparameter *boris* nil)
 
-(defrule rocky
+(defrule rocky ()
   (rocky (name "rocky") (buddy ?buddy))
   =>
   (format t "rocky fired!~%")
   (setf *boris* (make-instance 'boris :name "boris" :comrade ?buddy))
   (assert-instance *boris*))
 
-(defrule boris
+(defrule boris ()
   (?boris (boris (name "boris")))
   =>
   (format t "boris fired!~%")
   (modify ?boris (name "natasha")))
 
-(defrule natasha
+(defrule natasha ()
   (boris (name "natasha") (:object ?obj))
   =>
   (format t "natasha fired! Instance is ~S~%" ?obj))
