@@ -23,7 +23,7 @@
 ;;; method for system monitoring will be developed, enabling observation from
 ;;; outside entities.
 
-;;; $Id: watch.lisp,v 1.7 2001/02/03 21:55:22 youngde Exp $
+;;; $Id: watch.lisp,v 1.8 2001/02/04 01:39:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -82,6 +82,11 @@
   (when (watching-p :facts)
     (show-fact-detail "==>" (get-top-fact token))))
 
+(defvar *token* nil)
+
 (defmethod insert-token :before ((engine rete) (token remove-token))
   (when (watching-p :facts)
+    (when (= (get-fact-id (get-top-fact token)) 26)
+      (setf *token* token)
+      (break))
     (show-fact-detail "<==" (get-top-fact token))))

@@ -20,30 +20,39 @@
 ;;; File: terminal-node.lisp
 ;;; Description: Represents terminal nodes in the Rete network.
 
-;;; $Id: terminal-node.lisp,v 1.15 2001/02/02 18:20:59 youngde Exp $
+;;; $Id: terminal-node.lisp,v 1.16 2001/02/04 01:39:02 youngde Exp $
 
 (in-package :lisa)
 
 (defclass terminal-node (node)
   ((rule :initarg :rule
-         :initform nil
-         :reader get-rule))
+         :reader get-rule)
+   (activations :initform (make-hash-table)
+                :reader get-rule-activations))
   (:documentation
    "Represents terminal nodes in the Rete network."))
 
 (defmethod call-node-left ((self terminal-node) (token add-token))
-  (with-accessors ((rule get-rule)) self
-    (create-activation (get-engine rule) rule token)
+  (with-accessors ((rule get-rule)
+                   (activations get-rule-activations)) self
+    (let ((activation (make-activation rule token)))
+      (add-activation (get-engine rule) activation)
+      (setf (gethash (hash-code token) activations) activation))
     (values t)))
 
 (defmethod call-node-left ((self terminal-node) (token clear-token))
   (values t))
 
 (defmethod call-node-left ((self terminal-node) (token remove-token))
-  (let* ((engine (get-engine (get-rule self)))
-         (activation (find-activation engine (get-rule self) token)))
+  (let* ((activations (get-rule-activations self))
+         (index (hash-code token))
+         (activation (gethash index activations)))
+    (format t "looking for activation at key ~D~%" index)
+    (when (null activation)
+      (format t "sigh; there isn't one.~%"))
     (unless (null activation)
-      (disable-activation engine activation))
+      (disable-activation (get-engine (get-rule self)) activation)
+      (remhash index activations))
     (values t)))
 
 (defmethod print-object ((self terminal-node) strm)

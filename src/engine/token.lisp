@@ -23,7 +23,7 @@
 ;;; subclasses of TOKEN represent network operations (eg. ADD,
 ;;; REMOVE).
 
-;;; $Id: token.lisp,v 1.19 2001/02/03 21:55:22 youngde Exp $
+;;; $Id: token.lisp,v 1.20 2001/02/04 01:39:02 youngde Exp $
 
 (in-package :lisa)
 
@@ -58,20 +58,6 @@
     (delete-if #'(lambda (fact)
                    (= (get-fact-id fact) -1))
                (collect-facts self nil))))
-
-#+ignore
-(defmethod find-fact ((self token) level)
-  (labels ((traverse (token level)
-             (cond ((<= level 0)
-                    (values token))
-                   (t
-                    (traverse (get-parent token) (1- level))))))
-    (let ((tok (traverse self (- (get-depth self) level))))
-      (cond ((null tok)
-             (break)
-             (values nil))
-            (t
-             (get-top-fact tok))))))
 
 (defun find-fact (token level)
   (declare (type token token) (type integer level))
