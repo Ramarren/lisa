@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.33 2002/05/22 21:03:24 youngde Exp $
+;;; $Id: meta.lisp,v 1.34 2002/05/25 00:57:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -120,7 +120,10 @@
   (make-instance 'meta-fact
     :symbolic-name name
     :class-name class-name
-    :superclasses superclasses
+    :superclasses 
+    (mapcar #'(lambda (superclass)
+                (intern (symbol-name (class-name superclass))))
+            superclasses)
     :slots
     (append
      (mapcar #'(lambda (slot)
@@ -144,7 +147,10 @@
 (defparameter *meta-map* (make-hash-table)
   "A hash table mapping a symbolic class name to its associated META-FACT
   instance.")
-(defparameter *class-map* (make-hash-table))
+
+(defparameter *class-map* (make-hash-table)
+  "A hash table mapping a symbolic name to its associated effective class
+  name.")
 
 (defun register-meta-fact (symbolic-name meta-fact)
   "Binds SYMBOLIC-NAME to a META-FACT instance."
@@ -187,33 +193,38 @@
    `(defmethod mark-instance-as-changed ((self ,(class-name class))
                                          &optional (slot-id nil))
      (map-clos-instances #'mark-clos-instance-as-changed self slot-id)
-     (values t))))
+     t)))
 
-(defun import-class (class-name package-symbol use-inheritancep))
-  
-#+ignore
-(defun import-class (symbolic-name class superclasses slot-specs)
-  (flet ((validate-superclasses (class-list)
-           (mapc #'(lambda (class-name)
-                     (unless (has-meta-classp class-name)
-                       (environment-error
-                        "This class has not been registered: ~S" class-name)))
-                 class-list)))
-    (let ((meta (make-meta-shadow-fact
-                 symbolic-name (class-name class) 
-                 (validate-superclasses superclasses) slot-specs)))
-      (register-meta-fact symbolic-name meta)
-      (register-external-class symbolic-name class)
-      (generate-internal-methods class)
-      (values meta))))
-
+(defun import-class (class use-inheritancep)
+  (flet ((import-one-class (class direct-superclasses)
+           (let ((symbolic-name
+                  (intern (symbol-name (class-name class)))))
+             (unless (find-meta-fact symbolic-name nil)
+               (let ((meta (make-meta-fact
+                            symbolic-name
+                            (class-name class)
+                            direct-superclasses
+                            (reflect:class-slot-list class))))
+                 (register-meta-fact symbolic-name meta)
+                 (register-external-class symbolic-name class)
+                 (generate-internal-methods class)))
+             t)))
+    (let ((superclasses
+           (if use-inheritancep
+               (reflect:find-direct-superclasses class)
+             '())))
+      (import-one-class class superclasses)
+      (dolist (super superclasses)
+        (import-class super use-inheritancep))
+      t)))
+             
 (defun register-template (name class)
   "Creates and remembers the meta fact instance associated with a class. NAME
   is the symbolic name of the fact as used in rules; CLASS is the CLOS class
   instance associated with the fact."
   (let ((meta-fact
          (make-meta-fact name (class-name class)
-                         nil (find-class-slots class))))
+                         nil (reflect:class-slot-list class))))
     (register-meta-fact name meta-fact)
     meta-fact))
 
@@ -229,7 +240,7 @@
 
 (defmacro make-special-fact (class-name)
   `(progn
-     (defclass ,class-name () ())
+     (defclass ,class-name (inference-engine-object) ())
      (register-meta-fact 
       ',class-name (make-meta-fact ',class-name ',class-name '() '()))
      (make-fact ',class-name '())))
@@ -248,6 +259,3 @@
   (when (null *not-or-test-fact*)
     (setf *not-or-test-fact* (make-special-fact not-or-test-fact)))
   *not-or-test-fact*)
-
-(defun find-class-slots (class)
-  (reflect:class-slot-list class))

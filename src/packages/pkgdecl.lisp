@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.42 2002/05/22 21:03:24 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.43 2002/05/25 00:57:40 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -82,6 +82,7 @@
   (:import-from "CLOS"
                 "FINALIZE-INHERITANCE"
                 "ENSURE-CLASS"
+                "CLASS-DIRECT-SUPERCLASSES"
                 "CLASS-FINALIZED-P")
   #+CMU
   (:import-from "CLOS"
@@ -90,7 +91,9 @@
   (:export "CLASS-SLOT-LIST"
            "FINALIZE-INHERITANCE"
            "ENSURE-CLASS"
-           "CLASS-FINALIZED-P"))
+           "CLASS-FINALIZED-P"
+           "FIND-DIRECT-SUPERCLASSES"
+           "CLASS-ALL-SUPERCLASSES"))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (pushnew :lisa *features*))

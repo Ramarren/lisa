@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.65 2002/05/22 21:03:24 youngde Exp $
+;;; $Id: rete.lisp,v 1.66 2002/05/25 00:57:40 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,7 +85,7 @@
   (with-dynamic-update (rete rule)
     (mapc #'(lambda (fact)
               (insert-token 
-               self (make-add-token :initial-fact fact)))
+               rete (make-add-token :initial-fact fact)))
           (get-fact-list rete))))
   
 (defun add-rule (rete rule)
@@ -141,7 +141,7 @@
 
 (defun lookup-fact (rete id)
   (declare (type integer id))
-  (gethash id (get-facts self)))
+  (gethash id (get-facts rete)))
 
 (defun remove-fact (rete fact)
   (remhash (get-fact-id fact) (get-facts rete)))
@@ -233,7 +233,7 @@
   t)
 
 (defun bind-clos-instance (rete fact)
-  (setf (gethash (instance-of-fact)
+  (setf (gethash (instance-of-fact fact)
                  (get-instance-table rete)) fact))
 
 (defun unbind-clos-instance (rete fact)
