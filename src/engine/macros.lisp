@@ -20,7 +20,7 @@
 ;;; File:
 ;;; Description:
 
-;;; $Id: macros.lisp,v 1.11 2001/01/09 21:03:51 youngde Exp $
+;;; $Id: macros.lisp,v 1.12 2001/01/13 21:00:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,7 +31,7 @@
   `(and (symbolp ,sym)
     (starts-with-? ,sym)))
 
-(defmacro quotable (obj)
+(defmacro quotablep (obj)
   `(and (symbolp ,obj)
         (not (starts-with-? ,obj))))
 

@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.32 2001/01/12 21:14:51 youngde Exp $
+;;; $Id: parser.lisp,v 1.33 2001/01/13 21:00:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -130,7 +130,7 @@
              (cond ((and (symbolp slot-name)
                          (or (literalp slot-value)
                              (variablep slot-value)))
-                    (if (symbolp slot-value)
+                    (if (quotablep slot-value)
                         ``(,',slot-name ,',slot-value)
                       ``(,',slot-name ,,slot-value)))
                    (t

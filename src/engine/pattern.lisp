@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.25 2001/01/13 02:18:34 youngde Exp $
+;;; $Id: pattern.lisp,v 1.26 2001/01/13 21:00:29 youngde Exp $
 
 (in-package :lisa)
 
@@ -60,11 +60,11 @@
 
 (defmacro generate-test (var value negated)
   `(cond (,negated
-          (if (quotable ,value)
+          (if (quotablep ,value)
               `(not (eq ,,var ',,value))
             `(not (equal ,,var ,,value))))
          (t
-          (if (quotable ,value)
+          (if (quotablep ,value)
               `(eq ,,var ',,value)
             `(equal ,,var ,,value)))))
        
