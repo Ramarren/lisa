@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: defsys.lisp,v 1.56 2001/05/09 20:12:56 youngde Exp $
+;;; $Id: defsys.lisp,v 1.57 2001/05/22 16:24:48 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -195,3 +195,9 @@
 
 (defun clean-lisa ()
   (mk:clean-system :lisa))
+
+;;; Just until I determine how to properly deal with MP initialization in
+;;; LispWorks...
+
+#+LispWorks
+(mp:initialize-multiprocessing)
