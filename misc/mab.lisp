@@ -21,7 +21,7 @@
 ;;; Description: The "Monkey And Bananas" sample implementation, a common AI
 ;;; planning problem. The monkey's objective is to find and eat some bananas.
 
-;;; $Id: mab.lisp,v 1.24 2001/02/09 22:11:30 youngde Exp $
+;;; $Id: mab.lisp,v 1.25 2001/02/12 15:59:57 youngde Exp $
 
 (in-package :lisa)
 
@@ -29,13 +29,15 @@
 (defclass thing ()())
 (defclass chest ()())
 (defclass goal-is-to ()())
+(defclass hose-it () ())
 
 (defimport monkey lisa::monkey)
 (defimport thing lisa::thing)
 (defimport chest lisa::chest)
 (defimport goal-is-to lisa::goal-is-to)
+(defimport hose-it lisa::hose-it)
 
-;;;(watch :activations)
+(watch :activations)
 (watch :facts)
 (watch :rules)
 
@@ -47,7 +49,8 @@
   (monkey (holding (not ?chest)))
   (not (goal-is-to (action hold) (argument-1 ?chest)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 ?chest))))
+  (assert (goal-is-to (action hold) (argument-1 ?chest)
+                      (argument-2 empty))))
 
 (defrule put-chest-on-floor
   (goal-is-to (action unlock) (argument-1 ?chest))
@@ -66,7 +69,8 @@
   (monkey (holding (not ?key)))
   (not (goal-is-to (action hold) (argument-1 ?key)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 ?key))))
+  (assert (goal-is-to (action hold) (argument-1 ?key)
+                      (argument-2 empty))))
 
 
 (defrule move-to-chest-with-key
@@ -76,7 +80,8 @@
   (chest (name ?chest) (unlocked-by ?key))
   (not (goal-is-to (action walk-to) (argument-1 ?cplace)))
   =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?cplace))))
+  (assert (goal-is-to (action walk-to) (argument-1 ?cplace)
+                      (argument-2 empty))))
 
 
 (defrule unlock-chest-with-key
@@ -100,7 +105,8 @@
   (chest (name ?chest) (contents ?obj))
   (not (goal-is-to (action unlock) (argument-1 ?chest)))
   =>
-  (assert (goal-is-to (action unlock) (argument-1 ?chest))))
+  (assert (goal-is-to (action unlock) (argument-1 ?chest)
+                      (argument-2 empty))))
 
 
 (defrule use-ladder-to-hold
@@ -119,7 +125,8 @@
   (monkey (on-top-of (not ladder)))
   (not (goal-is-to (action on) (argument-1 ladder)))
   =>
-  (assert (goal-is-to (action on) (argument-1 ladder))))
+  (assert (goal-is-to (action on) (argument-1 ladder)
+                      (argument-2 empty))))
 
 
 (defrule grab-object-from-ladder
@@ -142,7 +149,9 @@
   (monkey (location ?place) (on-top-of (not ?on)))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
-  (assert (goal-is-to (action on) (argument-1 ?on))))
+  (assert (goal-is-to (action on) (argument-1 ?on)
+                      (argument-2 empty))))
+          
 
 
 (defrule walk-to-hold
@@ -152,7 +161,8 @@
   (monkey (location (not ?place)))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place))))
+  (assert (goal-is-to (action walk-to) (argument-1 ?place)
+                      (argument-2 empty))))
 
 
 (defrule drop-to-hold
@@ -161,7 +171,8 @@
   (monkey (location ?place) (on-top-of ?on) (holding (not blank)))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 blank))))
+  (assert (goal-is-to (action hold) (argument-1 blank)
+                      (argument-2 empty))))
 
 
 (defrule grab-object
@@ -195,7 +206,8 @@
   (chest (name ?chest) (contents ?obj))
   (not (goal-is-to (action unlock) (argument-1 ?chest)))
   =>
-  (assert (goal-is-to (action unlock) (argument-1 ?chest))))
+  (assert (goal-is-to (action unlock) (argument-1 ?chest)
+                      (argument-2 empty))))
 
 
 (defrule hold-object-to-move
@@ -204,7 +216,8 @@
   (monkey (holding (not ?obj)))
   (not (goal-is-to (action hold) (argument-1  ?obj)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 ?obj))))
+  (assert (goal-is-to (action hold) (argument-1 ?obj)
+                      (argument-2 empty))))
 
 
 (defrule move-object-to-place
@@ -212,7 +225,8 @@
   (monkey (location (not ?place)) (holding ?obj))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place))))
+  (assert (goal-is-to (action walk-to) (argument-1 ?place)
+                      (argument-2 empty))))
 
 
 (defrule drop-object-once-moved
@@ -247,7 +261,8 @@
   (monkey (location (not ?place)) (on-top-of (not floor)))
   (not (goal-is-to (action on) (argument-1 floor)))
   =>
-  (assert (goal-is-to (action on) (argument-1 floor))))
+  (assert (goal-is-to (action on) (argument-1 floor)
+                      (argument-2 empty))))
 
 
 (defrule walk-holding-nothing
@@ -286,7 +301,8 @@
   (monkey (location (not ?place)))
   (not (goal-is-to (action walk-to) (argument-1 ?place)))
   =>
-  (assert (goal-is-to (action walk-to) (argument-1 ?place))))
+  (assert (goal-is-to (action walk-to) (argument-1 ?place)
+                      (argument-2 empty))))
 
 
 (defrule drop-to-climb
@@ -295,7 +311,8 @@
   (monkey (location ?place) (holding (not blank)))
   (not (goal-is-to (action hold) (argument-1 blank)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 blank))))
+  (assert (goal-is-to (action hold) (argument-1 blank)
+                      (argument-2 empty))))
 
 (defrule climb-indirectly
   (goal-is-to (action on) (argument-1 ?obj))
@@ -306,7 +323,8 @@
           (holding blank))
   (not (goal-is-to (action on) (argument-1 ?on)))
   =>
-  (assert (goal-is-to (action on) (argument-1 ?on))))
+  (assert (goal-is-to (action on) (argument-1 ?on)
+                      (argument-2 empty))))
 
 
 (defrule climb-directly
@@ -333,7 +351,8 @@
   (monkey (holding (not ?obj)))
   (not (goal-is-to (action hold) (argument-1 ?obj)))
   =>
-  (assert (goal-is-to (action hold) (argument-1 ?obj))))
+  (assert (goal-is-to (action hold) (argument-1 ?obj)
+                      (argument-2 empty))))
 
 
 (defrule satisfy-hunger
@@ -374,7 +393,26 @@
   (assert (chest (name green-chest) (contents blue-key) (unlocked-by red-key)))
   (assert (thing (name red-key) 
                  (on-top-of floor) (weight light) (location t1-3)))
-  (assert (goal-is-to (action eat) (argument-1 bananas))))
+  (assert (goal-is-to (action eat) (argument-1 bananas) (argument-2 empty))))
+
+#+ignore
+(defrule startup
+  =>
+  (assert (thing (name red-chest) (on-top-of big-pillow)
+                 (weight light)))
+  (assert (goal-is-to (action unlock) (argument-1 red-chest)
+                      (argument-2 empty)))
+  (assert (goal-is-to (action hold) (argument-1 red-chest)
+                      (argument-2 empty)))
+  (assert (monkey (holding blank) (location t2-2) (on-top-of big-pillow))))
+
+(defrule hose-it
+  (?fact (hose-it))
+  (?goal (goal-is-to (action hold) (argument-1 red-chest)
+                     (argument-2 empty)))
+  =>
+  (retract ?fact)
+  (retract ?goal))
 
 (defun run-mab (&optional (ntimes 1))
   (let ((start (get-internal-real-time)))

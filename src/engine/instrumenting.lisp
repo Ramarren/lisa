@@ -22,7 +22,7 @@
 ;;; analyse a Rete network. The idea is that this stuff can be used to
 ;;; help debug a malfunctioning complex network. We'll see...
 
-;;; $Id: instrumenting.lisp,v 1.3 2001/02/09 01:49:59 youngde Exp $
+;;; $Id: instrumenting.lisp,v 1.4 2001/02/12 15:59:57 youngde Exp $
 
 (in-package :lisa)
 
@@ -49,7 +49,7 @@
            rule-name)
   (values t))
 
-(defmethod call-node-right :around ((self node) (token add-token))
+(defmethod call-node-right :around ((self node) (token token))
   (let ((instrumented (get-instrumenting self)))
     (when instrumented
       (format t "call-node-right (~S)~%" self)
@@ -57,7 +57,7 @@
         (format t "  token is ~S~%" token)))
     (call-next-method self token)))
 
-(defmethod call-node-left :around ((self node) (token add-token))
+(defmethod call-node-left :around ((self node) (token token))
   (let ((instrumented (get-instrumenting self)))
     (when instrumented
       (format t "call-node-left (~S)~%" self))

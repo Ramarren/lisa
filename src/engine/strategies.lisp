@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: strategies.lisp,v 1.18 2001/02/02 18:20:59 youngde Exp $
+;;; $Id: strategies.lisp,v 1.19 2001/02/12 15:59:57 youngde Exp $
 
 (in-package :lisa)
 
@@ -105,7 +105,7 @@
                             (push act activations)))
                       (aref queue inode)))
             (get-inodes plist)))
-    (values activations)))
+    (nreverse activations)))
 
 (defun make-indexed-priority-list (func)
   (make-instance 'indexed-priority-list :insertion-function func))
