@@ -24,7 +24,7 @@
 ;;; modify) is performed elsewhere as these constructs undergo additional
 ;;; transformations.
 ;;;
-;;; $Id: parser.lisp,v 1.78 2002/01/09 19:13:21 youngde Exp $
+;;; $Id: parser.lisp,v 1.79 2002/05/22 21:03:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -135,7 +135,7 @@
 
 (defun parse-default-pattern (pattern)
   (let* ((head (first pattern))
-         (meta (find-meta-class head nil)))
+         (meta (find-meta-fact head nil)))
     (when (null meta)
       (pattern-error
        pattern "This pattern is not supported by any known class."))
@@ -190,7 +190,7 @@
         (slots (rest body)))
     (cond ((symbolp head)
            (let ((meta-class (gensym)))
-             `(let ((,meta-class (find-meta-class ',head)))
+             `(let ((,meta-class (find-meta-fact ',head)))
                (assert-fact (current-engine)
                 (make-fact ',head
                  (canonicalize-slot-names
@@ -202,7 +202,7 @@
 (defun parse-and-modify-fact (fact body)
   (flet ((generate-modify ()
            (let ((meta-class (gensym)))
-             `(let ((,meta-class (find-meta-class (fact-name ,fact))))
+             `(let ((,meta-class (find-meta-fact (fact-name ,fact))))
                (modify-fact (current-engine) ,fact
                 (canonicalize-slot-names ,meta-class
                  (,@(normalize-slots body))))))))
@@ -211,21 +211,36 @@
       (lisa-error (condition)
         (command-structure-error 'modify-fact condition)))))
 
-(defun redefine-deftemplate (name body)
-  (labels ((extract-slot (slot)
-             (cond ((or (not (consp slot))
-                        (not (eql (first slot) 'slot))
-                        (not (= (length slot) 2)))
-                    (parsing-error
-                     "This slot has a structural problem: ~S." slot))
-                   (t (second slot))))
-           (define-template ()
-               (create-class-template name (mapcar #'extract-slot body))))
-    (handler-case
-        (define-template)
-      (lisa-error (condition)
-        (command-structure-error 'deftemplate condition)))))
+(defun create-template-class-slots (class-name slot-list)
+  (labels ((determine-default (default-form)
+             (cl:assert (and (consp default-form)
+                             (eq (first default-form) 'default)
+                             (= (length default-form) 2)) ()
+                        "Bogus DEFAULT operator (~S) in DEFTEMPLATE form."
+                        default-form)
+             (second default-form))
+           (build-one-slot (template)
+             (destructuring-bind (keyword slot-name &optional default)
+                 template
+               (cl:assert (eq keyword 'slot) ()
+                          "Unrecognized keyword (~S) in DEFTEMPLATE form."
+                          keyword)
+               `(,slot-name
+                 :initarg ,(intern (symbol-name slot-name) 'keyword)
+                 :initform
+                 ,(if (null default) nil (determine-default default))
+                 :reader 
+                 ,(intern (format nil "~S-~S" class-name slot-name))))))
+    (mapcar #'build-one-slot slot-list)))
 
+(defun redefine-deftemplate (class-name body)
+  (let ((class (gensym)))
+    `(let ((,class
+            (defclass ,class-name ()
+              ,@(list (create-template-class-slots class-name body)))))
+       (register-template ',class-name ,class)
+       ,class)))
+  
 (defun redefine-defimport (symbolic-name class-name superclasses slot-specs)
   (labels ((validate-defimport-slots (class slots)
              (let ((class-slots (find-class-slots class)))
@@ -257,11 +272,11 @@
 (defun parse-and-insert-instance (instance)
   (assert-fact
    (current-engine)
-   (make-shadow-fact (find-symbolic-name instance) instance)))
+   (make-fact (find-symbolic-name instance) instance)))
 
 (defun parse-and-retract-instance (instance)
   (let ((engine (current-engine)))
-    (retract-fact engine (find-shadow-fact engine instance))))
+    (retract-fact engine (find-fact-using-instance engine instance))))
 
 (defun show-deffacts (deffact)
   (format t "~S~%" deffact)
@@ -271,7 +286,7 @@
   `(let ((deffacts '()))
      (dolist (fact ',body)
        (let* ((head (first fact))
-              (meta-class (find-meta-class head)))
+              (meta-class (find-meta-fact head)))
          (push (make-fact 
                 head (canonicalize-slot-names meta-class (rest fact)))
                deffacts)))

@@ -21,7 +21,7 @@
 ;;; Description: This class represents LISA facts that are actually CLOS
 ;;; instances.
 
-;;; $Id: shadow-fact.lisp,v 1.8 2001/05/24 19:55:46 youngde Exp $
+;;; $Id: shadow-fact.lisp,v 1.9 2002/05/22 21:03:24 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,60 +29,3 @@
   ()
   (:documentation
    "This class represents LISA facts that are actually CLOS instances."))
-
-(defmethod initialize-instance :after ((self shadow-fact) &key instance)
-  (let ((meta (get-meta-fact self)))
-    (maphash #'(lambda (key slot)
-                 (declare (ignore key))
-                 (if (eq (slot-name-name slot) :object)
-                     (initialize-slot-value self slot instance)
-                   (set-slot-from-instance self meta instance slot)))
-             (get-slots meta))))
-
-(defun set-slot-from-instance (self meta instance slot-name)
-  (declare (type shadow-fact self) (type meta-shadow-fact meta)
-           (type slot-name slot-name))
-  (initialize-slot-value
-   self slot-name
-   (slot-value instance (find-effective-slot meta slot-name))))
-
-(defun instance-of-shadow-fact (self)
-  (declare (type shadow-fact self))
-  (get-slot-value self (find-meta-slot (get-meta-fact self) :object)))
-
-(defun has-superclass (self symbolic-name)
-  (declare (type shadow-fact self))
-  (member symbolic-name (get-superclasses (get-meta-fact self))))
-
-(defun slot->meta-slot (self slot-id)
-  (declare (type shadow-fact self) (type symbol slot-id))
-  (find-meta-slot (get-meta-fact self) (intern-lisa-symbol slot-id)))
-
-(defun synchronize-with-instance (self &optional (slot-id nil))
-  (declare (type shadow-fact self))
-  (let ((instance (instance-of-shadow-fact self))
-        (meta (get-meta-fact self)))
-    (flet ((synchronize-all-slots ()
-             (maphash #'(lambda (key slot)
-                          (declare (ignore key))
-                          (unless (eq (slot-name-name slot) :object)
-                            (set-slot-from-instance self meta instance slot)))
-                      (get-slots meta)))
-           (synchronize-this-slot (slot)
-             (set-slot-from-instance
-              self meta instance (slot->meta-slot self slot))))
-      (if (null slot-id)
-          (synchronize-all-slots)
-        (synchronize-this-slot slot-id)))
-    (values)))
-
-(defmethod set-slot-value :after ((self shadow-fact) slot-name value)
-  (let* ((meta (get-meta-fact self))
-         (instance (instance-of-shadow-fact self))
-         (effective-slot (find-effective-slot meta slot-name)))
-    (setf (slot-value instance effective-slot) value)
-    (tell-lisa-modified-instance instance effective-slot)))
-
-(defun make-shadow-fact (name instance)
-  (make-instance 'shadow-fact :name name :instance instance))
-

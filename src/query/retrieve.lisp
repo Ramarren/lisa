@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's initial query
 ;;; language implementation.
 
-;;; $Id: retrieve.lisp,v 1.16 2002/04/17 01:46:44 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.17 2002/05/22 21:03:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -81,7 +81,7 @@
   variable's pattern binding. RETRIEVE returns two values; the value of
   *QUERY-RESULT* and the name of the rule implementing the query."
   (flet ((make-query-binding (var)
-           `(cons ',var (instance-of-shadow-fact ,var))))
+           `(cons ',var (instance-of-fact ,var))))
     (let ((query-name (gensym))
           (hash (gensym))
           (query (gensym)))
