@@ -33,6 +33,7 @@
 
 (defrule variable-rule ()
   (frodo (name ?name))
+  (not (gandalf))
   (samwise (friend ?name))
   =>
   )

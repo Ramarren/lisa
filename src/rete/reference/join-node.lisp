@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.2 2002/09/07 23:52:43 youngde Exp $
+;;; $Id: join-node.lisp,v 1.3 2002/09/13 15:12:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -52,6 +52,12 @@
 (defun remove-token-from-right-memory (join-node token)
   (forget-token (join-node-right-memory join-node) token))
 
+(defun left-memory-count (join-node)
+  (hash-table-count (join-node-left-memory join-node)))
+
+(defun right-memory-count (join-node)
+  (hash-table-count (join-node-right-memory join-node)))
+
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)
     (make-successor successor-node connector)))
@@ -59,3 +65,9 @@
 (defmethod join-node-add-test ((self join-node) test)
   (push test (join-node-tests self)))
 
+(defmethod print-object ((self join-node) strm)
+  (print-unreadable-object (self strm :type t :identity t)
+    (format strm "left ~S ; right ~S ; tests ~S"
+            (left-memory-count self)
+            (right-memory-count self)
+            (length (join-node-tests self)))))

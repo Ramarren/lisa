@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.14 2002/09/12 23:42:54 youngde Exp $
+;;; $Id: token.lisp,v 1.15 2002/09/13 15:12:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -50,7 +50,7 @@
 (defun token-pop-fact (token)
   (with-slots ((fact-vector facts)) token
     (unless (zerop (fill-pointer fact-vector))
-      (aref fact-fector (decf (fill-pointer fact-vector))))))
+      (aref fact-vector (decf (fill-pointer fact-vector))))))
 
 (defun token-terminal-contents (token)
   "Danger! This function should only be called after the token has reached its

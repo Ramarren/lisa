@@ -20,7 +20,7 @@
 ;;; File: network-crawler.lisp
 ;;; Description:
 
-;;; $Id: network-crawler.lisp,v 1.3 2002/09/07 00:20:53 youngde Exp $
+;;; $Id: network-crawler.lisp,v 1.4 2002/09/13 15:12:34 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,7 +42,7 @@
                  (typecase node
                    (shared-node
                     (trace-nodes (get-successors node) (+ level 3)))
-                   (node2
+                   (join-node
                     (trace-nodes (get-successor node) (+ level 3)))
                    (terminal-node
                     nil))
