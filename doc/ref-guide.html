@@ -19,9 +19,23 @@ algorithm; perhaps at some future date I'll make an attempt.
 <h3>
 I. The Programming Language</h3>
 This section describes the publicly-available operators in the LISA language,
-separated into various categories.
+separated into various categories:
+<blockquote><a href="#Fact-Related Operators">Fact-Related Operators</a>
+<blockquote>Language elements dealing with facts.</blockquote>
+<a href="#Rule-Related Operators">Rule-Related Operators</a>
+<blockquote>Language elements dealing with rules.</blockquote>
+<a href="#CLOS-Related Operators">CLOS-Related Operators</a>
+<blockquote>Language elements dealing with CLOS instances.</blockquote>
+<a href="#Engine-Related Operators">Engine-Related Operators</a>
+<blockquote>Language elements dealing with operations on an inference engine.</blockquote>
+<a href="#Environment-Related Operators">Environment-Related Operators</a>
+<blockquote>Language elements dealing with the&nbsp;LISA environment.</blockquote>
+<a href="#Debugging-Related Operators">Debugging-Related Operators</a>
+<blockquote>Language elements useful during system development.</blockquote>
+</blockquote>
+
 <h4>
-Fact-related Operators</h4>
+<a NAME="Fact-Related Operators"></a>Fact-Related Operators</h4>
 &nbsp;
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
@@ -119,7 +133,7 @@ Note that <i>value</i> can be an arbitrary Lisp expression that will be
 evaluated at execution time.</blockquote>
 
 <h4>
-Rule-related Operators</h4>
+<a NAME="Rule-Related Operators"></a>Rule-Related Operators</h4>
 &nbsp;
 <table WIDTH="100%" NOSAVE >
 <tr NOSAVE>
@@ -231,6 +245,10 @@ rule will always activate after each reset:
 
 <br>&nbsp;
 <p>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
 <p>When a CLOS instance is asserted into the knowledge-base, LISA creates
 a special type of fact object to manage it. This object, known as a <i>shadow-fact</i>,
 contains a special slot named <i>:object</i> that is bound to the corresponding
@@ -257,7 +275,7 @@ rule compilation, and executes within a special lexical environment established
 by LISA for each firing.</blockquote>
 
 <h4>
-CLOS-Related Operators</h4>
+<a NAME="CLOS-Related Operators"></a>CLOS-Related Operators</h4>
 There are a few special operators and functions that LISA provides for
 managing CLOS instances within the knowledge base.
 <br>&nbsp;
@@ -302,7 +320,7 @@ can specialize on this function if they so choose. The <i>slot-name</i>
 specifies the affected slot.</blockquote>
 
 <h4>
-Engine-Related Operators</h4>
+<a NAME="Engine-Related Operators"></a>Engine-Related Operators</h4>
 These operators provide an interface to instances of the inference engine
 itself.
 <br>&nbsp;
@@ -365,7 +383,7 @@ by default. Here, "single-stepping" means "one rule at a time".</blockquote>
 still has activations. Typically used only on rule RHSs.</blockquote>
 
 <h4>
-Environment-Related Operators</h4>
+<a NAME="Environment-Related Operators"></a>Environment-Related Operators</h4>
 
 <blockquote>These operators are used to establish one or more LISA environments.</blockquote>
 
@@ -419,7 +437,7 @@ environment to safely load a knowledge base into <i>engine</i>.</blockquote>
 invoked by code running within the context of <i>with-inference-engine</i>.</blockquote>
 
 <h4>
-Debugging-Related Operators</h4>
+<a NAME="Debugging-Related Operators"></a>Debugging-Related Operators</h4>
 These operators are typically used interactively to inspect the state of
 an inference engine. Some of these operators are only loosly defined and
 need further work.
