@@ -20,7 +20,7 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.19 2002/11/25 16:02:00 youngde Exp $
+;;; $Id: preamble.lisp,v 1.20 2002/12/02 16:21:45 youngde Exp $
 
 (in-package "LISA")
 
@@ -145,6 +145,13 @@
     macro is MP-safe."
   `(let ((*active-engine* ,engine))
     (progn ,@body)))
+
+#+lisa-fancy-assert
+(eval-when (:load-toplevel)
+  (set-dispatch-macro-character
+   #\# #\^ #'(lambda (strm subchar arg)
+               (declare (ignore subchar arg))
+               (list 'identity (read strm t nil t)))))
 
 (register-clear-handler
  "environment" 
