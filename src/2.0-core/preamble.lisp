@@ -20,20 +20,20 @@
 ;;; File: preamble.lisp
 ;;; Description:
 
-;;; $Id: preamble.lisp,v 1.13 2002/11/20 20:04:03 youngde Exp $
+;;; $Id: preamble.lisp,v 1.14 2002/11/20 20:23:31 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *active-rule* nil)
 (defvar *active-engine* nil)
 (defvar *active-tokens* nil)
-(defvar *active-context*)
+(defvar *active-context* nil)
 
 (defun active-context ()
   *active-context*)
 
-(defmacro conflict-set ()
-  `(context-strategy *active-context*))
+(defun conflict-set ()
+  (context-strategy *active-context*))
 
 (defun active-tokens ()
   *active-tokens*)
@@ -134,4 +134,5 @@
 (register-clear-handler
  "environment" 
  #'(lambda ()
-     (setf *active-engine* (make-inference-engine))))
+     (setf *active-engine* (make-inference-engine))
+     (setf *active-context* (find-context (inference-engine) :initial-context))))
