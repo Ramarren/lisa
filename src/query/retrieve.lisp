@@ -21,7 +21,7 @@
 ;;; Description: Macros and functions implementing LISA's early attempt at a
 ;;; query language.
 
-;;; $Id: retrieve.lisp,v 1.4 2002/01/10 15:40:42 youngde Exp $
+;;; $Id: retrieve.lisp,v 1.5 2002/01/10 16:36:59 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,11 +29,12 @@
 
 (defun define-and-run-query (name body)
   (let ((*query-result* '())
-        (query-engine (make-rete)))
+        (query-engine (make-inference-engine)))
     (setf (get-facts query-engine) (get-facts (current-engine)))
-    (add-rule query-engine (define-rule name body))
-    (run-engine query-engine)
-    (values *query-result*)))
+    (with-inference-engine (query-engine)
+      (add-rule query-engine (define-rule name body))
+      (run)
+      (values *query-result*))))
 
 (defmacro defquery (name &body body)
   (let ((rule-name (gensym)))
@@ -47,4 +48,5 @@
     `(defquery (gensym)
        ,@body
        =>
+       (format t "Firing query~%")
        (push (list ,@(mapcar #'make-query-binding varlist)) *query-result*))))
