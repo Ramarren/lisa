@@ -20,12 +20,9 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa.system,v 1.16 2002/11/07 19:57:53 youngde Exp $
+;;; $Id: lisa.system,v 1.17 2002/11/22 17:26:38 youngde Exp $
 
 (in-package "CL-USER")
-
-(error "This is the DEFSYSTEM for LISA 1.x, which is deprecated. Comment this
-line if you really want to use 1.x")
 
 (defvar *lisa-root-pathname*
     (make-pathname :directory
@@ -40,6 +37,7 @@ line if you really want to use 1.x")
 (setf (logical-pathname-translations "lisa")
   `(("src;**;" ,(make-lisa-path "src/**/"))
     ("lib;**;*.*" ,(make-lisa-path "lib/**/"))
+    ("debugger;*.*" ,(make-lisa-path "src/debugger/"))
     ("contrib;**;" ,(make-lisa-path "contrib/**/"))))
 
 (defvar *lisa-source-pathname*
@@ -47,27 +45,43 @@ line if you really want to use 1.x")
 
 (defvar *lisa-binary-pathname*
   #+Allegro
-  (translate-logical-pathname "lisa:lib;acl;")
+  (translate-logical-pathname "lisa:lib;lisa;acl;")
   #+LispWorks
-  (translate-logical-pathname "lisa:lib;lispworks;")
+  (translate-logical-pathname "lisa:lib;lisa;lispworks;")
   #+CMU
-  (translate-logical-pathname "lisa:lib;cmucl;")
+  (translate-logical-pathname "lisa:lib;lisa;cmucl;")
   #+CLISP
-  (translate-logical-pathname "lisa:lib;clisp;")
+  (translate-logical-pathname "lisa:lib;lisa;clisp;")
   #-(or Allegro LispWorks CMU CLISP)
   (error "Unsupported implementation."))
 
+(defun lisa-debugger ()
+  (translate-logical-pathname "lisa:debugger;lisa-debugger.lisp"))
+
+;;; Sets up the environment so folks can use the non-portable form of REQUIRE
+;;; with some implementations...
+
+#+Allegro
+(setf system:*require-search-list*
+  (append system:*require-search-list*
+          `(:newest ,(lisa-debugger))))
+
+#+clisp
+(setf custom:*load-paths*
+  (append custom:*load-paths* `(,(lisa-debugger))))
+          
 ;;; Make sure the binary directory structure exists...
 
 (let ((lisa-binary-directories
-       '("engine" "packages" "reflect" "utils" "implementations"))
+       '("engine" "core20" "packages" "reflect" "utils" "implementations"
+         "rete-compiler" "debugger"))
       (lisa-supported-lisps
        '("acl" "lispworks" "cmucl" "clisp")))
   (dolist (lisp lisa-supported-lisps)
     (dolist (dir lisa-binary-directories)
       (let ((pathname
              (translate-logical-pathname
-              (concatenate 'string "lisa:lib;" lisp ";" dir ";"))))
+              (concatenate 'string "lisa:lib;lisa;" lisp ";" dir ";"))))
         (ensure-directories-exist pathname)))))
 
 (mk:defsystem :lisa
@@ -78,9 +92,7 @@ line if you really want to use 1.x")
                           :source-pathname "packages"
                           :binary-pathname "packages"
                           :components 
-                          ((:file "pkgdecl")
-                           (:file "lisa-package"
-                                  :depends-on (pkgdecl))))
+                          ((:file "pkgdecl")))
                  (:module "implementations"
                           :source-pathname "implementations"
                           :binary-pathname "implementations"
@@ -100,112 +112,66 @@ line if you really want to use 1.x")
                           ((:file "reflect"))
                           :depends-on (utils))
                  (:module "preamble"
-                          :source-pathname "engine"
-                          :binary-pathname "engine"
-                          :components ((:file "macros")
-                                       (:file "inference-engine-object")
-                                       (:file "preamble"))
+                          :source-pathname "2.0-core"
+                          :binary-pathname "core20"
+                          :components ((:file "preamble"))
                           :depends-on (packages))
-                 (:module "conditions"
-                          :source-pathname "engine"
-                          :binary-pathname "engine"
-                          :components ((:file "conditions"))
-                          :depends-on (packages))
-                 (:module "engine"
-                          :source-pathname "engine"
-                          :binary-pathname "engine"
-                          :components ((:file "deftemplate")
-                                       (:file "meta")
-                                       (:file "strategies")
-                                       (:file "bindings")
-                                       (:file "token")
-                                       (:file "add-token"
-                                              :depends-on (token))
+                 (:module "core20"
+                          :source-pathname "2.0-core"
+                          :binary-pathname "core20"
+                          :components ((:file "deffacts")
                                        (:file "fact")
-                                       (:file "shadow-fact"
-                                              :depends-on (fact))
-                                       (:file "dynamic-update")
+                                       (:file "watches")
+                                       (:file "activation")
+                                       (:file "strategies")
+                                       (:file "context")
+                                       (:file "rule")
+                                       (:file "tms-support")
                                        (:file "rete"
-                                              :depends-on (fact 
-                                                           shadow-fact
-                                                           dynamic-update
-                                                           language
-                                                           environment
-                                                           rule))
-                                       (:file "clear-token"
-                                              :depends-on (token))
-                                       (:file "remove-token"
-                                              :depends-on (token))
-                                       (:file "token-tree")
-                                       (:file "node"
-                                              :depends-on (dynamic-update))
-                                       (:file "node1"
-                                              :depends-on (node))
-                                       (:file "node1-tect"
-                                              :depends-on (node1))
-                                       (:file "node1-nop"
-                                              :depends-on (node1))
-                                       (:file "node1-tfn"
-                                              :depends-on (node1))
-                                       (:file "node1-teq"
-                                              :depends-on (node1))
-                                       (:file "node1-neq"
-                                              :depends-on (node1))
-                                       (:file "node1-rtl"
-                                              :depends-on (node1))
-                                       (:file "test")
-                                       (:file "node-test")
-                                       (:file "test2-eq")
-                                       (:file "test2-neq")
-                                       (:file "test2-eval")
-                                       (:file "node2"
-                                              :depends-on (node token-tree))
-                                       (:file "node2-not"
-                                              :depends-on (node2))
-                                       (:file "terminal-node"
-                                              :depends-on (node))
-                                       (:file "slot")
-                                       (:file "pattern"
-                                              :depends-on (bindings))
-                                       (:file "generic-pattern"
-                                              :depends-on (pattern))
-                                       (:file "not-pattern"
-                                              :depends-on (generic-pattern))
-                                       (:file "bound-pattern"
-                                              :depends-on (generic-pattern))
-                                       (:file "test-pattern"
-                                              :depends-on (pattern))
-                                       (:file "rete-compiler"
-                                              :depends-on
-                                              (test-pattern generic-pattern
-                                              not-pattern pattern))
-                                       (:file "factories")
-                                       (:file "funcall")
-                                       (:file "rule"
-                                              :depends-on
-                                              (test-pattern generic-pattern
-                                                            not-pattern 
-                                                            bound-pattern
-                                                            pattern
-                                                            bindings))
-                                       (:file "network-management"
-                                              :depends-on (rete-compiler))
-                                       (:file "deffacts")
+                                              :depends-on (language tms-support))
+                                       (:file "meta")
+                                       (:file "binding")
+                                       (:file "pattern")
+                                       (:file "token")
                                        (:file "parser"
-                                              :depends-on (deffacts))
+                                              :depends-on (pattern))
                                        (:file "language"
                                               :depends-on (parser))
-                                       (:file "activation")
-                                       (:file "environment")
-                                       (:file "watch")
-                                       (:file "debug")
-                                       (:file "instrumenting"))
-                          :depends-on (packages conditions reflect utils preamble))
-                 (:module "query"
-                          :source-pathname "query"
-                          :binary-pathname "engine"
-                          :components ((:file "retrieve"))
-                          :depends-on (engine)))
+                                       (:file "retrieve"))
+                          :depends-on (packages reflect utils preamble))
+                 (:module "rete compiler"
+                          :source-pathname "rete/reference"
+                          :binary-pathname "rete-compiler"
+                          :components
+                          ((:file "node-tests")
+                           (:file "shared-node")
+                           (:file "successor")
+                           (:file "node-pair")
+                           (:file "terminal-node")
+                           (:file "node1")
+                           (:file "join-node")
+                           (:file "node2")
+                           (:file "node2-not")
+                           (:file "node2-test")
+                           (:file "node2-exists")
+                           (:file "rete-compiler")
+                           (:file "tms" :depends-on (join-node))
+                           (:file "network-ops")
+                           (:file "network-crawler"))
+                          :depends-on
+                          (core20))
+                 (:module "debugger"
+                          :source-pathname "debugger"
+                          :binary-pathname "debugger"
+                          :compile-only t
+                          #|:components ((:file "debugger"))|#
+                          :depends-on (core20))
+                 (:module "epilogue"
+                          :source-pathname "2.0-core"
+                          :binary-pathname "core20"
+                          :components
+                          ((:file "epilogue"))
+                          :depends-on (core20)))
     :initially-do
     (progn
       (mk:system-source-size :lisa :all)
