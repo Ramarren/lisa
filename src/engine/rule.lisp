@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.46 2001/04/03 17:39:31 youngde Exp $
+;;; $Id: rule.lisp,v 1.47 2001/04/03 19:22:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -149,7 +149,8 @@
   (print-unreadable-object (self strm :type t :identity t)
     (format strm "(~S)" (get-name self))))
 
-(defmethod initialize-instance :after ((self rule) &key (directives nil))
+(defmethod initialize-instance :after ((self rule)
+                                       &key (directives nil) #+CLISP &allow-other-keys)
   (flet ((handle-directives (directive)
            (typecase directive
              (salience-directive

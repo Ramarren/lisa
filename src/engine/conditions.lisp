@@ -21,7 +21,7 @@
 ;;; Description: This file contains the condition hierarchy and error recovery
 ;;; support for LISA.
 
-;;; $Id: conditions.lisp,v 1.12 2001/04/03 18:12:07 youngde Exp $
+;;; $Id: conditions.lisp,v 1.13 2001/04/03 19:22:25 youngde Exp $
 
 (in-package "LISA")
 
@@ -42,8 +42,8 @@
        (if (null element)
            (format strm "Syntax error:~%")
          (format strm "While evaluating the element ~S:~%" element))
-       (format strm (lisa-error-text condition))))
-   :documentation
+       (format strm (lisa-error-text condition)))))
+  (:documentation
    "This condition represents syntactical errors discovered during the initial
    parsing pass."))
 
@@ -51,8 +51,8 @@
   ()
   (:report
    (lambda (condition strm)
-     (format strm "~A" (lisa-error-text condition)))
-   :documentation
+     (format strm "~A" (lisa-error-text condition))))
+  (:documentation
    "This condition represents LISA environmental errors."))
 
 (define-condition rule-structure-error (lisa-error)
@@ -68,8 +68,8 @@
      (unless (null (rule-structure-error-element condition))
        (format strm "While parsing element ~S~%"
                (rule-structure-error-element condition)))
-     (format strm (lisa-error-text condition)))
-   :documentation
+     (format strm (lisa-error-text condition))))
+  (:documentation
    "This condition represents structural errors found while parsing DEFRULE
    forms."))
 
@@ -83,8 +83,8 @@
      (format strm "While evaluation these forms:~%")
      (format strm "~S~%" (evaluation-error-forms condition))
      (format strm "LISA encountered an error:~%")
-     (princ (evaluation-error-condition condition) strm))
-   :documentation
+     (princ (evaluation-error-condition condition) strm)))
+  (:documentation
    "This condition represents errors encountered while Lisa is evaluating
    user-defined Lisp code, such as rule RHSs."))
 
@@ -98,8 +98,8 @@
      (format strm "While executing rule ~S...~%"
              (get-name (rule-evaluation-error-rule condition)))
      (format strm "LISA discovered a problem on this rule's RHS:~%")
-     (princ (rule-evaluation-error-condition condition) strm))
-   :documentation
+     (princ (rule-evaluation-error-condition condition) strm)))
+  (:documentation
    "This condition represents runtime errors that occur during rule
    execution."))
 
@@ -111,8 +111,8 @@
    (lambda (condition strm)
      (format strm "While evaluating the form:")
      (format strm "~S" (command-structure-error-form condition))
-     (format strm (lisa-error-text condition)))
-   :documentation
+     (format strm (lisa-error-text condition))))
+  (:documentation
    "This condition represents structural errors found while parsing specific
    LISA functions."))
 
