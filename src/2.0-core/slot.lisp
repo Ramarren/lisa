@@ -17,30 +17,14 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: pattern.lisp
-;;; Description: Base class for all types of patterns found on a rule LHS.
+;;; File: slot.lisp
+;;; Description:
 
-;;; $Id: pattern.lisp,v 1.4 2002/08/23 00:16:27 youngde Exp $
+;;; $Id: slot.lisp,v 1.1 2002/08/23 00:16:27 youngde Exp $
 
 (in-package "LISA")
 
-(defstruct (parsed-pattern
-            (:constructor make-internal-parsed-pattern))
-  (class nil :type symbol)
-  (slots nil :type list)
-  (location nil :type integer)
-  (binding nil :type symbol)
-  (variables nil :type list)
-  (type nil :type symbol))
-
-(defun bound-pattern-p (parsed-pattern)
-  (not (null (parsed-pattern-binding parsed-pattern))))
-
-(defun make-parsed-pattern (&key class slots binding type location variables)
-  (make-internal-parsed-pattern
-   :class class
-   :slots slots
-   :binding binding
-   :type type
-   :variables variables
-   :location location))
+(defstruct slot
+  (name nil :type symbol)
+  (field nil)
+  (constraint nil))

@@ -20,7 +20,7 @@
 ;;; File: defsys.lisp
 ;;; Description: System definition file for LISA project.
 ;;;
-;;; $Id: lisa2.system,v 1.2 2002/08/21 19:57:05 youngde Exp $
+;;; $Id: lisa2.system,v 1.3 2002/08/23 00:16:25 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -57,7 +57,7 @@
 ;;; Make sure the binary directory structure exists...
 
 (let ((lisa-binary-directories
-       '("engine" "2.0-core" "packages" "reflect" "utils" "implementations"))
+       '("engine" "core20" "packages" "reflect" "utils" "implementations"))
       (lisa-supported-lisps
        '("acl" "lispworks" "cmucl" "clisp")))
   (dolist (lisp lisa-supported-lisps)
@@ -103,11 +103,13 @@
                           :depends-on (packages))
                  (:module "2.0 core"
                           :source-pathname "2.0-core"
-                          :binary-pathname "2.0-core"
+                          :binary-pathname "core20"
                           :components ((:file "meta")
                                        (:file "rete")
                                        (:file "pattern")
-                                       (:file "parser")
+                                       (:file "slot")
+                                       (:file "parser"
+                                              :depends-on (slot))
                                        (:file "language"
                                               :depends-on (parser))
                                        (:file "environment"))
