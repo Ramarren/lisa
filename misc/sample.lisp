@@ -20,7 +20,7 @@
 ;;; File: sample.lisp
 ;;; Description: Some simple classes useful in early Lisa testing.
 
-;;; $Id: sample.lisp,v 1.52 2001/01/23 00:32:10 youngde Exp $
+;;; $Id: sample.lisp,v 1.53 2001/01/23 15:26:16 youngde Exp $
 
 (in-package :lisa)
 
@@ -66,21 +66,20 @@
   =>
   (format t "fearless-leader fired.~%"))
 
+#+ignore
 (defrule rocky-1
   (rocky (name ?name "rocky"))
   (boris (name ?name))
   =>
   (format t "rocky-1 fired: ?name = ~S~%" ?name))
 
+#+ignore
 (defrule rocky-2
   (rocky (name ?name "rocky"))
   (boris (name ?name))
-  (rocky (name ?name "rocky"))
-  (boris (name ?boris (not ?name)))
   =>
   (format t "rocky-2 fired: ?name = ~S~%" ?name))
 
-#+ignore
 (defrule nemesis
   (natasha (name "natasha") (nemesis ?nemesis "rocky"))
   (rocky (name ?nemesis))

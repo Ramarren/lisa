@@ -20,7 +20,7 @@
 ;;; File: pattern.lisp
 ;;; Description:
 
-;;; $Id: pattern.lisp,v 1.33 2001/01/22 21:58:52 youngde Exp $
+;;; $Id: pattern.lisp,v 1.34 2001/01/23 15:26:17 youngde Exp $
 
 (in-package :lisa)
 
@@ -118,9 +118,10 @@
               (intern (make-symbol (format nil "?~A" (gensym))))))
            (new-slot-binding (var)
              (unless (lookup-binding bindings var)
-               (make-slot-binding var (get-location pattern)
-                                  (get-name slot))
-               (add-binding bindings binding)))
+               (add-binding bindings
+                            (make-slot-binding var
+                                               (get-location pattern)
+                                               (get-name slot)))))
            (rewrite-slot (var value negated)
              (let ((varname (get-variable-name var)))
                (setf (get-value slot) varname)
@@ -147,7 +148,7 @@
 
 (defun canonicalize-slots (pattern bindings)
   (mapc #'(lambda (slot)
-            (canonicalize-slot self slot bindings))
+            (canonicalize-slot pattern slot bindings))
         (get-slots pattern)))
   
 (defun set-slot-localities (pattern bindings)
@@ -178,9 +179,9 @@
                (cl:assert (not (null binding)) ())
                (pushnew binding (slot-value pattern 'bindings))))
            (add-constraint-bindings (constraint)
-             (dolist ((list (flatten constraint)))
-               (when (variablep obj)
-                 (add-local-binding obj)))))
+             (mapc #'add-local-binding
+                   (collect #'(lambda (obj) (variablep obj))
+                            (flatten constraint)))))
     (mapc #'(lambda (slot)
               (add-local-binding (get-value slot))
               (add-constraint-bindings (get-constraint slot)))

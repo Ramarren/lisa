@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description: This class represents LISA production rules.
 ;;;
-;;; $Id: rule.lisp,v 1.34 2001/01/13 02:18:34 youngde Exp $
+;;; $Id: rule.lisp,v 1.35 2001/01/23 15:26:17 youngde Exp $
 
 (in-package :lisa)
 
@@ -127,13 +127,12 @@
     (add-binding self (make-pattern-binding
                        (get-pattern-binding pattern)
                        (get-location pattern))))
-;;;  (record-slot-bindings self pattern)
   (do-special-ce-handling self pattern)
   (add-new-pattern self pattern)
   (values pattern))
 
 (defmethod freeze-rule ((self rule))
-  (when (= (get-pattern-count self) 0)
+  (when (zerop (get-pattern-count self))
     (add-pattern self (get-initial-pattern self))))
 
 (defun add-new-node (rule node)

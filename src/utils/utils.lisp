@@ -20,7 +20,7 @@
 ;;; File: utils.lisp
 ;;; Description: Miscellaneous utility functions.
 
-;;; $Id: utils.lisp,v 1.11 2001/01/22 21:58:52 youngde Exp $
+;;; $Id: utils.lisp,v 1.12 2001/01/23 15:26:17 youngde Exp $
 
 (in-package :lisa)
 
@@ -72,35 +72,10 @@
              (compare2 predicate (rest lst1) (rest lst2))
            (values nil)))))
 
-(defun map-while (predicate args &key (condition t) (empty-p nil))
-  "Maps PREDICATE over the list ARGS. Returns T if PREDICATE evaluates
-  to CONDITION for each element, or NIL upon the first failure. If
-  ARGS is NIL, then EMPTY-P is returned."
-  (declare (type list args))
-  (labels ((map-while-aux (pred args condition)
-             (cond ((null args)
-                    (values t))
-                   ((eql (funcall pred (first args)) condition)
-                    (map-while-aux pred (rest args) condition))
-                   (t (values nil)))))
-    (if (null args)
-        (values empty-p)
-      (map-while-aux predicate args condition))))
-
-(defun map-while-true (predicate args &key (empty-p nil))
-  "Maps PREDICATE over the list ARGS as long as PREDICATE remains
-  true."
-  (map-while predicate args :condition t :empty-p empty-p))
-
-(defun map-while-false (predicate args &key (empty-p nil))
-  "Maps PREDICATE over the list ARTS as long as PREDICATE remains
-  false."
-  (map-while predicate args :condition nil :empty-p empty-p))
-
 (defun make-interned-symbol (&rest args)
   (intern (make-symbol (apply #'format nil args))))
 
-(defun hash-to-list (func ht)
+(defun lsthash (func ht)
   "Applies FUNC to each entry in hashtable HT and, if FUNC so
   indicates, appends the object to a LIST. If NIL is an acceptible
   object, then FUNC should return two values; NIL and T."
@@ -110,9 +85,15 @@
                      (funcall func key val)
                    (unless (and (null obj)
                                 (not use-p))
-                     (setf seq
-                       (nconc seq `(,obj)))))) ht)
-    (values seq)))
+                     (push obj seq))) ht))
+    (nreverse seq)))
+
+(defun collect (predicate list)
+  (let ((collection (list)))
+    (dolist (obj list)
+      (when (funcall predicate obj)
+        (push obj collection)))
+    (nreverse collection)))
 
 ;;; Courtesy of Paul Graham...
 
