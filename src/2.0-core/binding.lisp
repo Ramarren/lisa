@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,10 +20,19 @@
 ;;; File: binding.lisp
 ;;; Description:
 
-;;; $Id: binding.lisp,v 1.3 2002/09/24 15:26:42 youngde Exp $
+;;; $Id: binding.lisp,v 1.4 2004/09/14 15:45:54 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
+(defstruct (binding
+            (:type list)
+            (:constructor %make-binding))
+  variable address slot-name)
+
+(defun make-binding (var address slot-name)
+  (%make-binding :variable var :address address :slot-name slot-name))
+
+#|
 (defun make-binding (var address slot-name)
   (list var address slot-name))
 
@@ -35,6 +44,7 @@
 
 (defun binding-slot-name (binding)
   (third binding))
+|#
 
 (defun pattern-binding-p (binding)
   (eq (binding-slot-name binding) :pattern))

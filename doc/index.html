@@ -270,7 +270,12 @@ platform. </p>
      lightweight, <i>current, freely-available</i> toolkits for constructing
      Lisp-based intelligent systems. There are a number of very fine commercial
      and restricted-use products out there (see the links below), but these
-     systems do not necessarily address the needs of the Open Source community.</li>
+     systems do not necessarily address the needs of developers attempting to
+  introduce Lisp into their organizations. This is exactly the position I found
+  myself in prior to Lisa. I was lead on a project that needed an expert system
+  shell, and if I'd had a modern implementation freely available for Lisp I
+  might have been able to successfully entrench Lisp within my company. Alas,
+  this was not the case, and thus was born Lisa.</li>
 </ul>
 
 <p class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
@@ -343,7 +348,7 @@ are also other features not listed here. </p>
 
 <p>LISA had its first production release (Version 1.0) on 31 August, 2001 and
 is considered &quot;stable&quot; software; it should now be possible to develop
-reasonably sophisticated knowledge bases for Real Systems. LISA has
+reasonably sophisticated knowledge bases for &quot;real systems&quot;. LISA has
 successfully run adaptations of the &quot;monkey and bananas&quot; (MAB)
 planning problem on all four target Lisp platforms, and full reasoning
 capabilities are available for CLOS objects in a multi-threaded environment.
@@ -376,6 +381,16 @@ gets in the way, feel free to contact me to discuss some other type of license
 arrangement.</p>
 
 <h3>News</h3>
+
+<p class=MsoNormal><i>9 June, 2004</i>: Lisa now uses ASDF as its default system
+definition facility. The build and load procedure has also been simplified to
+help new folks get up and running quickly. I also have plans to write a tutorial
+that will be more useful than the reference guide. Also, note that Lisa
+officially no longer supports CMUCL. There's apparently a bug in PCL that
+prevents Lisa from running (or perhaps compiling; I forget). This situation has
+existed for awhile now, but I'm just getting around to announcing it.</p>
+
+<p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal><i>6 June, 2004</i>: Release 2.0.7. Yet another bug-fix
 release that corrects a problem reported by Aneil Mallavarapu. Lisa was having
@@ -467,7 +482,7 @@ system, or... you get the idea. <br>
    <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
        auto;mso-list:l2 level1 lfo16;tab-stops:list .5in'><a
        href="http://www.lispworks.com">LispWorks</a>: Xanalys, Inc. My Lisp
-       environment of choice. Reminds me of my Symbolics Days...</li>
+       environment of choice. Reminds me of my Symbolics days...</li>
    <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
        auto;mso-list:l2 level1 lfo16;tab-stops:list .5in'><a
        href="http://www.franz.com">Allegro Common Lisp</a>: Franz, Inc.</li>

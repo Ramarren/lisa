@@ -20,13 +20,13 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.26 2004/09/13 19:27:47 youngde Exp $
+;;; $Id: language.lisp,v 1.27 2004/09/14 15:45:54 youngde Exp $
 
 (in-package :lisa)
 
 (defmacro defrule (name (&key (salience 0) 
                               (context nil)
-                              (cf 0.0)
+                              (cf nil)
                               (auto-focus nil))
                    &body body)
   (let ((rule-name (gensym)))
@@ -96,7 +96,7 @@
                             `(,value))))))
           body))
 
-(defmacro assert ((name &body body))
+(defmacro assert ((name &body body) &key (cf nil))
   (let ((fact (gensym))
         (fact-object (gensym)))
     `(let ((,fact-object 
@@ -105,14 +105,14 @@
                   `(,name)
                 `(',name))))
        (if (typep ,fact-object 'standard-object)
-           (parse-and-insert-instance ,fact-object)
+           (parse-and-insert-instance ,fact-object :cf ,cf)
          (progn
            (ensure-meta-data-exists ',name)
            (let ((,fact (make-fact ',name ,@(expand-slots body))))
              (when (and (in-rule-firing-p)
                         (logical-rule-p (active-rule)))
                (bind-logical-dependencies ,fact))
-             (assert-fact (inference-engine) ,fact)))))))
+             (assert-fact (inference-engine) ,fact :cf ,cf)))))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))

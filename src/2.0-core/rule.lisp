@@ -1,7 +1,7 @@
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
-;;; Copyright (C) 2000 David E. Young (de.young@computer.org)
+;;; Copyright (C) 2000 David E. Young
 
 ;;; This library is free software; you can redistribute it and/or
 ;;; modify it under the terms of the GNU Lesser General Public License
@@ -20,9 +20,9 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.30 2004/09/13 19:27:47 youngde Exp $
+;;; $Id: rule.lisp,v 1.31 2004/09/14 15:45:54 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass rule ()
   ((short-name :initarg :short-name
@@ -64,7 +64,7 @@
                    :initarg :logical-marker
                    :reader rule-logical-marker)
    (cf :initarg :cf
-       :initform 0.0
+       :initform nil
        :reader cf)
    (active-dependencies :initform (make-hash-table :test #'equal)
                         :reader rule-active-dependencies)
@@ -174,7 +174,7 @@
                        (salience 0) 
                        (context (active-context))
                        (auto-focus nil)
-                       (cf 0.0)
+                       (cf nil)
                        (compiled-behavior nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates

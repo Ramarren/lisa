@@ -20,7 +20,7 @@
 ;;; File: parser.lisp
 ;;; Description: The LISA programming language parser.
 ;;;
-;;; $Id: parser.lisp,v 1.76 2004/09/13 19:27:47 youngde Exp $
+;;; $Id: parser.lisp,v 1.77 2004/09/14 15:45:54 youngde Exp $
 
 (in-package :lisa)
 
@@ -67,8 +67,7 @@
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
     `(let ((*binding-table* (make-hash-table))
-           (*compound-patterns-p* nil)
-           (*cf-list* (list)))
+           (*compound-patterns-p* nil))
        (multiple-value-bind (,doc-string ,remains)
            (extract-rule-headers ,rule-form)
          (multiple-value-bind (,lhs ,rhs)
@@ -96,7 +95,7 @@
       (nreverse rulesets))))
 
 (defun define-rule (name body &key (salience 0) (context nil)
-                                   (auto-focus nil) (cf 0.0))
+                                   (auto-focus nil) (cf nil))
   (with-rule-components ((doc-string lhs rhs) body)
     #+ignore (format t "LHS: ~S~%" lhs)
     #+ignore (format t "RHS: ~S~%" rhs)
@@ -117,7 +116,7 @@
 
 (defun redefine-defrule (name body &key (salience 0)
                                         (context nil)
-                                        (cf 0.0)
+                                        (cf nil)
                                         (auto-focus nil))
   (define-rule name body :salience salience
                :context context
@@ -365,15 +364,14 @@
    (make-dependency-set (active-tokens) (rule-logical-marker (active-rule))))
   fact)
   
-(defun parse-and-insert-instance (instance)
+(defun parse-and-insert-instance (instance &key (cf nil))
   (ensure-meta-data-exists (class-name (class-of instance)))
   (let ((fact
          (make-fact-from-instance (class-name (class-of instance)) instance)))
     (when (and (in-rule-firing-p)
                (logical-rule-p (active-rule)))
       (bind-logical-dependencies fact))
-;;;    (register-clos-instance (inference-engine) instance fact)
-    (assert-fact (inference-engine) fact)))
+    (assert-fact (inference-engine) fact :cf cf)))
 
 (defun parse-and-retract-instance (instance engine)
   (retract-fact engine instance))
