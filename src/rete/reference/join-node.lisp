@@ -20,7 +20,7 @@
 ;;; File: join-node.lisp
 ;;; Description:
 
-;;; $Id: join-node.lisp,v 1.14 2002/11/14 14:45:38 youngde Exp $
+;;; $Id: join-node.lisp,v 1.15 2005/07/30 20:44:02 youngde Exp $
 
 (in-package "LISA")
 
@@ -77,18 +77,20 @@
 (defmethod pass-tokens-to-successor ((self join-node) left-tokens)
   (call-successor (join-node-successor self) left-tokens))
 
+#+ignore
 (defmethod combine-tokens ((left-tokens add-token) (right-token token))
   (token-push-fact 
    (replicate-token left-tokens) (token-top-fact right-token)))
 
+#+ignore
 (defmethod combine-tokens ((left-tokens add-token) (right-token t))
   (token-push-fact (replicate-token left-tokens) right-token))
 
 (defmethod combine-tokens ((left-tokens token) (right-token token))
-  (token-push-fact left-tokens (token-top-fact right-token)))
+  (token-push-fact (replicate-token left-tokens) (token-top-fact right-token)))
 
 (defmethod combine-tokens ((left-tokens token) (right-token t))
-  (token-push-fact left-tokens right-token))
+  (token-push-fact (replicate-token left-tokens) right-token))
 
 (defmethod add-successor ((self join-node) successor-node connector)
   (setf (join-node-successor self)
