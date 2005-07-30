@@ -22,7 +22,7 @@
 ;;; File: install.lisp
 ;;; Description: 
 
-;;; $Id: install.lisp,v 1.6 2004/09/17 14:24:32 youngde Exp $
+;;; $Id: install.lisp,v 1.7 2005/07/30 22:42:00 youngde Exp $
 
 (in-package :cl-user)
 
@@ -77,6 +77,8 @@
         :directory '(:relative "misc")
         :name "asdf" :type "lisp" :case :local)
        *load-truename*))
+
+(push *lisa-root-pathname* asdf:*central-registry*)
 
 (eval-when (:load-toplevel :execute)
   (flet ((find-or-load-system (system path)
