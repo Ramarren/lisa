@@ -22,18 +22,18 @@ w\:* {behavior:url(#default#VML);}
  <o:DocumentProperties>
   <o:Author>David E. Young</o:Author>
   <o:Template>Normal</o:Template>
-  <o:LastAuthor>Bloodhound</o:LastAuthor>
-  <o:Revision>25</o:Revision>
-  <o:TotalTime>26</o:TotalTime>
+  <o:LastAuthor>David E. Young</o:LastAuthor>
+  <o:Revision>26</o:Revision>
+  <o:TotalTime>28</o:TotalTime>
   <o:Created>2003-11-01T18:08:00Z</o:Created>
-  <o:LastSaved>2005-08-12T17:38:00Z</o:LastSaved>
+  <o:LastSaved>2006-02-21T14:51:00Z</o:LastSaved>
   <o:Pages>4</o:Pages>
-  <o:Words>1900</o:Words>
-  <o:Characters>10834</o:Characters>
-  <o:Lines>90</o:Lines>
+  <o:Words>1915</o:Words>
+  <o:Characters>10920</o:Characters>
+  <o:Lines>91</o:Lines>
   <o:Paragraphs>21</o:Paragraphs>
-  <o:CharactersWithSpaces>13304</o:CharactersWithSpaces>
-  <o:Version>9.2720</o:Version>
+  <o:CharactersWithSpaces>13410</o:CharactersWithSpaces>
+  <o:Version>9.3821</o:Version>
  </o:DocumentProperties>
 </xml><![endif]-->
 <style>
@@ -281,12 +281,11 @@ object-oriented implementation of the Rete algorithm, a very efficient
 mechanism for solving the difficult many-to-many matching problem (&quot;Rete:
 A Fast Algorithm for the Many Pattern/Many Object Pattern Match Problem&quot;,
 Charles L. Forgy, Artificial Intelligence 19(1982), 17-37.) Intrinsic to Lisa
-is the ability to reason over CLOS objects without imposing special class
-hierarchy requirements; thus it should be possible to easily augment existing
-CLOS applications with reasoning capabilities. As Lisa is an extension to
-Common Lisp, the full power of the Lisp environment is always available.
-Lisa-enabled applications should run on any ANSI-compliant Common Lisp
-platform. </p>
+is the ability to reason over CLOS objects without imposing special class hierarchy
+requirements; thus it should be possible to easily augment existing CLOS
+applications with reasoning capabilities. As Lisa is an extension to Common
+Lisp, the full power of the Lisp environment is always available. Lisa-enabled
+applications should run on any ANSI-compliant Common Lisp platform. </p>
 
 <h3>Project Goals</h3>
 
@@ -370,7 +369,7 @@ margin-left:.25in'>&nbsp;</p>
 
 <h3>Project Status</h3>
 
-<p class=MsoNormal>Release 2.3 is the latest official release. The major
+<p class=MsoNormal>Release 2.4 is the latest official release. The major
 addition after version 2.1 is support for Certainty Factors (CF), as described
 in Peter Norvig's <i>Paradigms of Artificial Intelligence Programming</i>.
 There's also a simplified install facility based on ASDF. </p>
@@ -392,8 +391,8 @@ capabilities are available for CLOS objects in a multi-threaded environment.
 Release 1.1 offers support for <i>dynamic rule definition</i>, the ability to
 create new rules from existing rules at runtime; version 1.2 includes a new
 query facility that allows interactive and programmatic retrieval of CLOS
-instances from a knowledge base. For the most current information on the project,
-including mailing lists, latest news and available downloads, see the <a
+instances from a knowledge base. For the most current information on the
+project, including mailing lists, latest news and available downloads, see the <a
 href="http://sourceforge.net/projects/lisa">official project page</a>. If you
 prefer, you may contact the project staff directly (see <i>Project People</i>).</p>
 
@@ -408,8 +407,8 @@ Common Lisp family.</p>
 
 <p class=MsoNormal>Currently, documentation for Lisa is a work-in-progress.
 However, there is a beta-quality version of the <a href="ref-guide.html">Lisa</a>
-<a href="ref-guide.html">Reference Guide</a> that should help you get started. Also,
-you may see the source code for Lisa's two versions of the MAB, <a
+<a href="ref-guide.html">Reference Guide</a> that should help you get started.
+Also, you may see the source code for Lisa's two versions of the MAB, <a
 href="http://lisa.sourceforge.net/mab.lisp">mab.lisp</a> and <a
 href="http://lisa.sourceforge.net/mab-clos.lisp">mab-clos.lisp</a> (a
 &quot;CLOS-ified&quot; version of the default MAB implementation). </p>
@@ -426,10 +425,14 @@ arrangement.</p>
 
 <h3>News</h3>
 
+<p class=MsoNormal><i>21 February, 2006:</i> Release 2.4. This is a minor
+release that makes Lisa compatible with CLISP 2.38.</p>
+
+<p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
+
 <p class=MsoNormal><i>5 April, 2005:</i> Release 2.3. This version fixes a
-serious bug in Lisa&#8217;s join network; thanks to Andy Sloane for the patch.
-There&#8217;s also a patch from Fred Gilham that enables auto-notify support for
-CMUCL.</p>
+serious bug in Lisa&#8217;s join network; thanks to Andy Sloane for the patch. There&#8217;s
+also a patch from Fred Gilham that enables auto-notify support for CMUCL.</p>
 
 <p class=MsoNormal><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></p>
 
@@ -449,10 +452,9 @@ that Lisa is able to run the MAB on that platform.</p>
 system definition facility. The build and load procedure has also been
 simplified to help new folks get up and running quickly. I also have plans to
 write a tutorial that will be more useful than the reference guide. Also, note
-that Lisa officially no longer supports CMUCL. There's apparently a bug in PCL
-that prevents Lisa from running (or perhaps compiling; I forget). This
-situation has existed for awhile now, but I'm just getting around to announcing
-it.</p>
+that Lisa officially no longer supports CMUCL. There's apparently a bug in PCL that
+prevents Lisa from running (or perhaps compiling; I forget). This situation has
+existed for awhile now, but I'm just getting around to announcing it.</p>
 
 <p class=MsoNormal>&nbsp;</p>
 
