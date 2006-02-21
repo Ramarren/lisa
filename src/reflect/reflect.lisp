@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation-specific details.
 
-;;; $Id: reflect.lisp,v 1.11 2002/08/06 22:40:56 youngde Exp $
+;;; $Id: reflect.lisp,v 1.12 2006/02/21 14:41:57 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
@@ -49,7 +49,7 @@
              (slot-name (slot)
                #+(and allegro (not (version>= 6))) `(clos::slotd-name ,slot)
                #+(and allegro (version>= 6)) `(clos:slot-definition-name ,slot)
-               #+clisp `(clos::slotdef-name ,slot)
+               #+clisp `(clos:slot-definition-name ,slot)
                #+cmu `(slot-value ,slot 'pcl::name)
                #+cormanlisp `(getf ,slot :name)
                #+lispworks `(hcl::slot-definition-name ,slot)
@@ -59,7 +59,7 @@
                #+(and allegro (not (version>= 6))) `(clos::slotd-initargs ,slot)
                #+(and allegro (version>= 6))
                `(clos:slot-definition-initargs ,slot)
-               #+clisp `(clos::slotdef-initargs ,slot)
+               #+clisp `(clos:slot-definition-initargs ,slot)
                #+cmu `(slot-value ,slot 'pcl::initargs)
                #+cormanlisp `(getf ,slot :initargs)
                #+lispworks `(hcl::slot-definition-initargs ,slot)
@@ -71,7 +71,7 @@
                `(clos::slotd-allocation ,slot)
                #+(and allegro (version>= 6))
                `(clos:slot-definition-allocation ,slot)
-               #+clisp `(clos::slotdef-allocation ,slot)
+               #+clisp `(clos:slot-definition-allocation ,slot)
                #+cmu `(pcl::slot-definition-allocation ,slot)
                #+cormanlisp `(getf ,slot :allocation)
                #+lispworks `(hcl::slot-definition-allocation ,slot)
