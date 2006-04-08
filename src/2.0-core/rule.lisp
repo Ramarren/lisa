@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.34 2004/10/25 14:19:47 youngde Exp $
+;;; $Id: rule.lisp,v 1.35 2006/04/08 02:32:38 youngde Exp $
 
 (in-package :lisa)
 
@@ -63,9 +63,9 @@
    (logical-marker :initform nil
                    :initarg :logical-marker
                    :reader rule-logical-marker)
-   (cf :initarg :cf
-       :initform nil
-       :reader cf)
+   (belief-factor :initarg :belief
+                  :initform nil
+                  :reader belief-factor)
    (active-dependencies :initform (make-hash-table :test #'equal)
                         :reader rule-active-dependencies)
    (engine :initarg :engine
@@ -163,21 +163,18 @@
       (first addresses))))
 
 (defmethod initialize-instance :after ((self rule) &rest initargs)
-  (with-slots ((qual-name qualified-name)
-               (cf cf)) self
+  (with-slots ((qual-name qualified-name)) self
     (setf qual-name
       (intern (format nil "~A.~A" 
                       (context-name (rule-context self))
-                      (rule-short-name self))))
-    (unless cf
-      (setf cf 0.0))))
+                      (rule-short-name self))))))
                     
 (defun make-rule (name engine patterns actions 
                   &key (doc-string nil) 
                        (salience 0) 
                        (context (active-context))
                        (auto-focus nil)
-                       (cf nil)
+                       (belief nil)
                        (compiled-behavior nil))
   (flet ((make-rule-binding-set ()
            (delete-duplicates
@@ -191,7 +188,7 @@
        :actions actions
        :behavior compiled-behavior
        :comment doc-string
-       :cf cf
+       :belief belief
        :salience salience
        :context (if (null context)
                     (find-context (inference-engine) :initial-context)

@@ -22,12 +22,12 @@
 ;;; File: lisa.asd
 ;;; Description: Lisa's ASDF system definition file.
 
-;;; $Id: lisa.asd,v 1.2 2004/06/07 19:00:59 youngde Exp $
+;;; $Id: lisa.asd,v 1.3 2006/04/08 02:37:06 youngde Exp $
 
 (in-package :cl-user)
 
 (asdf:defsystem :lisa
-  :depends-on ("lisa.packages" "lisa.implementations" "lisa.utils"
+  :depends-on ("lisa.packages" "lisa.certainty-factors" "lisa.implementations" "lisa.utils"
                "lisa.reflect" "lisa.core" "lisa.rete" "lisa.config"
                "lisa.epilogue")
   :serial t)

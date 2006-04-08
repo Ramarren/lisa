@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.71 2004/09/17 18:06:21 youngde Exp $
+;;; $Id: rete.lisp,v 1.72 2006/04/08 02:32:38 youngde Exp $
 
 (in-package "LISA")
 
@@ -199,34 +199,24 @@
       (register-clos-instance self (find-instance-of-fact fact) fact)))
   fact)
   
-(defmethod recalculate-cf (rete fact (fact-cf number))
-   (cl:assert (cf:cf-p fact-cf) nil
-     "This is not a legal certainty factor: ~S" fact-cf)
+(defmethod adjust-belief (rete fact (belief-factor number))
    (with-unique-fact (rete fact)
-     (setf (cf fact) fact-cf))
-   t)
+     (setf (belief-factor fact) belief-factor)))
 
-(defmethod recalculate-cf (rete fact (fact-cf t))
-  (cl:assert (null fact-cf) nil
-      "This is not a legal certainty factor: ~S" fact-cf)
-  (unless *active-tokens*
-      (return-from  recalculate-cf t))
-  (let ((rule-cf (cf (active-rule)))
-        (orig (duplicate-fact-p rete fact))
-        (facts (token-make-fact-list *active-tokens*)))
-    (cond (orig
-           (setf (cf orig)
-             (cf:recalculate-cf facts rule-cf (cf orig)))
-           nil)
+(defmethod adjust-belief (rete fact (belief-factor t))
+  (when (in-rule-firing-p)
+    (let ((rule-belief (belief-factor (active-rule)))
+          (facts (token-make-fact-list *active-tokens*)))
+      (setf (belief-factor fact) (belief:adjust-belief facts rule-belief)))))
+
+(defmethod assert-fact ((self rete) fact &key belief)
+  (let ((duplicate (duplicate-fact-p self fact)))
+    (cond (duplicate
+           (adjust-belief self duplicate belief))
           (t
-           (setf (cf fact)
-             (cf:recalculate-cf facts rule-cf))
-           t))))
-
-(defmethod assert-fact ((self rete) fact &key cf)
-  (when (recalculate-cf self fact cf)
-    (assert-fact-aux self fact))
-  fact)
+           (adjust-belief self fact belief)
+           (assert-fact-aux self fact)))
+    (if duplicate duplicate fact)))
 
 (defmethod retract-fact ((self rete) (fact fact))
   (with-truth-maintenance (self)

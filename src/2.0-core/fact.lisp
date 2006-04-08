@@ -20,7 +20,7 @@
 ;;; File: fact.lisp
 ;;; Description:
 
-;;; $Id: fact.lisp,v 1.28 2004/09/15 20:38:48 youngde Exp $
+;;; $Id: fact.lisp,v 1.29 2006/04/08 02:32:38 youngde Exp $
 
 (in-package :lisa)
 
@@ -31,9 +31,9 @@
        :accessor fact-id)
    (slot-table :reader fact-slot-table
                :initform (make-hash-table :test #'equal))
-   (cf :initarg :cf
-       :initform 0.0
-       :accessor cf)
+   (belief :initarg :belief
+           :initform nil
+           :accessor belief-factor)
    (clos-instance :reader fact-clos-instance)
    (shadows :initform nil
             :reader fact-shadowsp)
@@ -134,20 +134,9 @@
 (defun reconstruct-fact (fact)
   `(,(fact-name fact) ,@(get-slot-values fact)))
 
-#+ignore
 (defmethod print-object ((self fact) strm)
-  (print-unreadable-object (self strm :type t)
-    (let ((slots (get-slot-values self)))
-      (format strm "F-~D ; ~S" (fact-id self) (fact-name self))
-      (unless (null slots)
-        (format strm " ; ~S" slots)))))
-
-(defmethod print-object ((self fact) strm)
-  (let ((slots (get-slot-values self)))
-    (print-unreadable-object (self strm :type t)
-      (format strm "F-~D, ~A, CF is ~,3F" (fact-id self) (fact-name self) (cf self))
-      (unless (null slots)
-        (format strm " ; ~S" slots)))))
+  (print-unreadable-object (self strm :type nil :identity t)
+    (format strm "~A ; id ~D" (fact-name self) (fact-id self))))
 
 (defmethod initialize-instance :after ((self fact) &key (slots nil)
                                                         (instance nil))
@@ -157,8 +146,7 @@
   INSTANCE is NIL then FACT is associated with a template and a suitable
   instance must be created; otherwise FACT is bound to a user-defined class."
   (with-slots ((slot-table slot-table)
-               (meta-data meta-data)
-               (cf cf)) self
+               (meta-data meta-data)) self
     (setf meta-data (find-meta-fact (fact-name self)))
     (mapc #'(lambda (slot-name)
               (setf (gethash slot-name slot-table) nil))
@@ -166,8 +154,6 @@
     (if (null instance)
         (initialize-fact-from-template self slots meta-data)
       (initialize-fact-from-instance self instance meta-data))
-    (unless cf
-      (setf cf 0.0))
     self))
 
 (defun initialize-fact-from-template (fact slots meta-data)

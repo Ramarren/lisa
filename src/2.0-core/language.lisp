@@ -20,13 +20,13 @@
 ;;; File: language.lisp
 ;;; Description: Code that implements the LISA programming language.
 ;;;
-;;; $Id: language.lisp,v 1.32 2004/09/16 20:04:00 youngde Exp $
+;;; $Id: language.lisp,v 1.33 2006/04/08 02:32:38 youngde Exp $
 
 (in-package :lisa)
 
 (defmacro defrule (name (&key (salience 0) 
                               (context nil)
-                              (cf nil)
+                              (belief nil)
                               (auto-focus nil))
                    &body body)
   (let ((rule-name (gensym)))
@@ -37,7 +37,7 @@
                          ',body
                          :salience ,salience
                          :context ,context
-                         :cf ,cf
+                         :belief ,belief
                          :auto-focus ,auto-focus))))
 
 (defun undefrule (rule-name)
@@ -96,7 +96,7 @@
                             `(,value))))))
           body))
 
-(defmacro assert ((name &body body) &key (cf nil))
+(defmacro assert ((name &body body) &key (belief nil))
   (let ((fact (gensym))
         (fact-object (gensym)))
     `(let ((,fact-object 
@@ -105,14 +105,14 @@
                   `(,name)
                 `(',name))))
        (if (typep ,fact-object 'standard-object)
-           (parse-and-insert-instance ,fact-object :cf ,cf)
+           (parse-and-insert-instance ,fact-object :belief ,belief)
          (progn
            (ensure-meta-data-exists ',name)
            (let ((,fact (make-fact ',name ,@(expand-slots body))))
              (when (and (in-rule-firing-p)
                         (logical-rule-p (active-rule)))
                (bind-logical-dependencies ,fact))
-             (assert-fact (inference-engine) ,fact :cf ,cf)))))))
+             (assert-fact (inference-engine) ,fact :belief ,belief)))))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
