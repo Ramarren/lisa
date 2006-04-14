@@ -17,20 +17,15 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: null-belief-system.lisp
+;;; File: belief-interface.lisp
 ;;; Description:
 
-;;; $Id: null-belief-system.lisp,v 1.2 2006/04/14 16:43:41 youngde Exp $
+;;; $Id: belief-interface.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
 
-(in-package :belief)
+(in-package :lisa)
 
-;;; interface into the generic belief system.
+(defmethod belief:belief-factor ((self fact))
+  (belief-factor self))
 
-(defmethod belief-factor ((obj t))
-  nil)
-
-(defmethod adjust-belief ((objects t) (rule-belief t) &optional (old-belief nil))
-  nil)
-
-(defmethod belief->english ((belief t))
-  nil)
+(defmethod belief:belief-factor ((self rule))
+  (belief-factor self))

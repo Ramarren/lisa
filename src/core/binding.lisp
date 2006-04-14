@@ -1,5 +1,3 @@
-;;; -*- mode: Lisp -*-
-	
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
@@ -19,14 +17,34 @@
 ;;; along with this library; if not, write to the Free Software
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-;;; File: belief-systems.asd
-;;; Description: System definition file.
+;;; File: binding.lisp
+;;; Description:
 
-;;; $Id: belief-systems.asd,v 1.1 2006/04/08 02:30:31 youngde Exp $
+;;; $Id: binding.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
 
-(in-package :cl-user)
+(in-package :lisa)
 
-(asdf:defsystem :lisa.certainty-factors
-  :components ((:file "certainty-factors"))
-  :serial t
-  :depends-on ("lisa.packages"))
+(defstruct (binding
+            (:type list)
+            (:constructor %make-binding))
+  variable address slot-name)
+
+(defun make-binding (var address slot-name)
+  (%make-binding :variable var :address address :slot-name slot-name))
+
+#|
+(defun make-binding (var address slot-name)
+  (list var address slot-name))
+
+(defun binding-variable (binding)
+  (first binding))
+
+(defun binding-address (binding)
+  (second binding))
+
+(defun binding-slot-name (binding)
+  (third binding))
+|#
+
+(defun pattern-binding-p (binding)
+  (eq (binding-slot-name binding) :pattern))

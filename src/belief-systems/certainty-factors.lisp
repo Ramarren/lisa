@@ -18,9 +18,10 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: certainty-factors.lisp
-;;; Description: Supporting code for Lisa's uncertainty mechanism.
 
-;;; $Id: certainty-factors.lisp,v 1.1 2006/04/08 02:30:31 youngde Exp $
+;;; Description: An implementation of Certainty Factors as found in Peter Norvig's PAIP.
+
+;;; $Id: certainty-factors.lisp,v 1.2 2006/04/14 16:43:41 youngde Exp $
 
 (in-package :belief)
 
@@ -46,13 +47,6 @@
 (defun unknown-p (cf)
   (check-type cf certainty-factor)
   (= cf +unknown+))
-
-;;; The principal interface by which outside code hooks objects that support some kind of belief-factor
-;;; interface into this library.
-
-(defgeneric belief-factor (obj)
-  (:method ((obj t))
-   nil))
 
 (defun cf-combine (a b)
   (check-type a certainty-factor)
@@ -92,7 +86,7 @@
          (* combined-cf 1.0)
        nil))))
 
-(defmethod cf->english (cf)
+(defun cf->english (cf)
   (cond ((= cf 1.0) "certain evidence")
         ((> cf 0.8) "strongly suggestive evidence")
         ((> cf 0.5) "suggestive evidence")
@@ -102,9 +96,12 @@
 
 ;;; interface into the generic belief system.
 
-(defun adjust-belief (objects rule-belief &optional (old-belief nil))
+(defmethod adjust-belief (objects (rule-belief number) &optional (old-belief nil))
   (recalculate-cf objects rule-belief old-belief))
 
-(defun belief->english (cf)
+(defmethod adjust-belief (objects (rule-belief t) &optional old-belief)
+  nil)
+
+(defmethod belief->english ((cf number))
   (cf->english cf))
 
