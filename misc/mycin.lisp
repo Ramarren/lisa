@@ -24,7 +24,7 @@
 ;;; operator right now. However, all rules are present and the two scenarios on pgs. 555 and
 ;;; 556 are represented (by the functions CULTURE-1 and CULTURE-2).
 
-;;; $Id: mycin.lisp,v 1.7 2006/04/08 02:37:44 youngde Exp $
+;;; $Id: mycin.lisp,v 1.8 2006/04/14 16:49:32 youngde Exp $
 
 (in-package :lisa-user)
 

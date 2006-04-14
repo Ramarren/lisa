@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation-specific details.
 
-;;; $Id: reflect.lisp,v 1.12 2006/02/21 14:41:57 youngde Exp $
+;;; $Id: reflect.lisp,v 1.13 2006/04/14 16:55:16 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
@@ -34,7 +34,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (macrolet ((class-slots* (class)
                #+allegro `(clos:class-slots ,class)
-               #+clisp `(clos::class-slots ,class)
+               #+clisp `(clos:class-slots ,class)
                #+cmu `(pcl::class-slots ,class)
                #+cormanlisp `(cl:class-slots ,class)
                #+lispworks `(hcl::class-slots ,class)
@@ -112,22 +112,17 @@ initargs for all slots are returned, otherwise only the slots with
 
 #+clisp
 (defun class-finalized-p (class)
-  (declare (ignore class))
-  t)
+  (clos:class-finalized-p class))
 
 #+clisp
 (defun finalize-inheritance (class)
-  (declare (ignore class))
-  (values))
+  (clos:finalize-inheritance class))
 
 (defun is-standard-classp (class)
   (or (eq (class-name class) 'standard-object)
        (eq (class-name class) t)))
 
 (defun find-direct-superclasses (class)
-  #+clisp
-  (remove-if #'is-standard-classp (clos::class-direct-superclasses class))
-  #-clisp
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
              
 (defun class-all-superclasses (class-or-symbol)

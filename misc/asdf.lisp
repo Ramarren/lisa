@@ -1,4 +1,4 @@
-;;; This is asdf: Another System Definition Facility.  $Revision: 1.1 $
+;;; This is asdf: Another System Definition Facility.  $Revision: 1.2 $
 ;;;
 ;;; Feedback, bug reports, and patches are all welcome: please mail to
 ;;; <cclan-list@lists.sf.net>.  But note first that the canonical
@@ -90,11 +90,13 @@
 	   #:*asdf-revision*
 	   
 	   #:operation-error #:compile-failed #:compile-warned #:compile-error
+	   #:error-component #:error-operation
 	   #:system-definition-error 
 	   #:missing-component
 	   #:missing-dependency
 	   #:circular-dependency	; errors
-
+	   #:duplicate-names
+	   
 	   #:retry
 	   #:accept                     ; restarts
 	   
@@ -107,7 +109,7 @@
 
 (in-package #:asdf)
 
-(defvar *asdf-revision* (let* ((v "$Revision: 1.1 $")
+(defvar *asdf-revision* (let* ((v "$Revision: 1.2 $")
 			       (colon (or (position #\: v) -1))
 			       (dot (position #\. v)))
 			  (and v colon dot 
@@ -155,6 +157,9 @@ and NIL NAME and TYPE components"
 
 (define-condition circular-dependency (system-definition-error)
   ((components :initarg :components :reader circular-dependency-components)))
+
+(define-condition duplicate-names (system-definition-error)
+  ((name :initarg :name :reader duplicate-names-name)))
 
 (define-condition missing-component (system-definition-error)
   ((requires :initform "(unnamed)" :reader missing-requires :initarg :requires)
@@ -354,6 +359,14 @@ and NIL NAME and TYPE components"
 	  (if (and file (probe-file file))
 	      (return file)))))))
 
+(defun make-temporary-package ()
+  (flet ((try (counter)
+           (ignore-errors
+                   (make-package (format nil "ASDF~D" counter)
+                                 :use '(:cl :asdf)))))
+    (do* ((counter 0 (+ counter 1))
+          (package (try counter) (try counter)))
+         (package package))))
 
 (defun find-system (name &optional (error-p t))
   (let* ((name (coerce-name name))
@@ -362,15 +375,18 @@ and NIL NAME and TYPE components"
     (when (and on-disk
 	       (or (not in-memory)
 		   (< (car in-memory) (file-write-date on-disk))))
-      (let ((*package* (make-package (gensym #.(package-name *package*))
-				     :use '(:cl :asdf))))
-	(format *verbose-out*
-		"~&~@<; ~@;loading system definition from ~A into ~A~@:>~%"
-		;; FIXME: This wants to be (ENOUGH-NAMESTRING
-		;; ON-DISK), but CMUCL barfs on that.
+      (let ((package (make-temporary-package)))
+        (unwind-protect
+             (let ((*package* package))
+               (format 
+                *verbose-out*
+                "~&~@<; ~@;loading system definition from ~A into ~A~@:>~%"
+                ;; FIXME: This wants to be (ENOUGH-NAMESTRING
+                ;; ON-DISK), but CMUCL barfs on that.
 		on-disk
 		*package*)
-	(load on-disk)))
+               (load on-disk))
+          (delete-package package))))
     (let ((in-memory (gethash name *defined-systems*)))
       (if in-memory
 	  (progn (if on-disk (setf (car in-memory) (file-write-date on-disk)))
@@ -424,17 +440,17 @@ system."))
 (defmethod source-file-type ((c static-file) (s module)) nil)
 
 (defmethod component-relative-pathname ((component source-file))
-  (let* ((*default-pathname-defaults* (component-parent-pathname component))
-	 (name-type
-	  (make-pathname
-	   :name (component-name component)
-	   :type (source-file-type component
-				   (component-system component)))))
-    (if (slot-value component 'relative-pathname)
-	(merge-pathnames
-	 (slot-value component 'relative-pathname)
-	 name-type)
-	name-type)))
+  (let ((relative-pathname (slot-value component 'relative-pathname)))
+    (if relative-pathname
+        relative-pathname
+        (let* ((*default-pathname-defaults* 
+                (component-parent-pathname component))
+               (name-type
+                (make-pathname
+                 :name (component-name component)
+                 :type (source-file-type component
+                                         (component-system component)))))
+          name-type))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; operations
@@ -925,21 +941,34 @@ Returns the new tree (which probably shares structure with the old one)"
 	      ;; remove-keys form.  important to keep them in sync
 	      components pathname default-component-class
 	      perform explain output-files operation-done-p
+	      weakly-depends-on
 	      depends-on serial in-order-to
 	      ;; list ends
 	      &allow-other-keys) options
-    (check-component-input type name depends-on components in-order-to)
+    (check-component-input type name weakly-depends-on depends-on components in-order-to)
+
+    (when (and parent
+	     (find-component parent name)
+	     ;; ignore the same object when rereading the defsystem
+	     (not 
+	      (typep (find-component parent name)
+		     (class-for-type parent type))))	     
+      (error 'duplicate-names :name name))
+    
     (let* ((other-args (remove-keys
 			'(components pathname default-component-class
 			  perform explain output-files operation-done-p
+			  weakly-depends-on
 			  depends-on serial in-order-to)
 			rest))
 	   (ret
 	    (or (find-component parent name)
 		(make-instance (class-for-type parent type)))))
+      (when weakly-depends-on
+	(setf depends-on (append depends-on (remove-if (complement #'find-system) weakly-depends-on))))
       (when (boundp '*serial-depends-on*)
 	(setf depends-on
-	      (concatenate 'list *serial-depends-on* depends-on)))
+	      (concatenate 'list *serial-depends-on* depends-on)))      
       (apply #'reinitialize-instance
 	     ret
 	     :name (coerce-name name)
@@ -957,7 +986,19 @@ Returns the new tree (which probably shares structure with the old one)"
 		      for c = (parse-component-form ret c-form)
 		      collect c
 		      if serial
-		      do (push (component-name c) *serial-depends-on*)))))
+		      do (push (component-name c) *serial-depends-on*))))
+
+	;; check for duplicate names
+	(let ((name-hash (make-hash-table :test #'equal)))
+	  (loop for c in (module-components ret)
+		do
+		(if (gethash (component-name c)
+			     name-hash)
+		    (error 'duplicate-names
+			   :name (component-name c))
+		  (setf (gethash (component-name c)
+				 name-hash)
+			t)))))
       
       (setf (slot-value ret 'in-order-to)
 	    (union-of-dependencies
@@ -983,11 +1024,15 @@ Returns the new tree (which probably shares structure with the old one)"
 		  (component-inline-methods ret))))
       ret)))
 
-(defun check-component-input (type name depends-on components in-order-to)
+(defun check-component-input (type name weakly-depends-on depends-on components in-order-to)
   "A partial test of the values of a component."
+  (when weakly-depends-on (warn "We got one! XXXXX"))
   (unless (listp depends-on)
     (sysdef-error-component ":depends-on must be a list."
 			    type name depends-on))
+  (unless (listp weakly-depends-on)
+    (sysdef-error-component ":weakly-depends-on must be a list."
+			    type name weakly-depends-on))
   (unless (listp components)
     (sysdef-error-component ":components must be NIL or a list of components."
 			    type name components))
@@ -1081,10 +1126,17 @@ output to *verbose-out*.  Returns the shell's exit code."
 	  (asdf:operate 'asdf:load-op name)
 	  t))))
 
-  (pushnew
-   '(merge-pathnames "systems/"
-     (truename (sb-ext:posix-getenv "SBCL_HOME")))
-   *central-registry*)
+  (defun contrib-sysdef-search (system)
+    (let* ((name (coerce-name system))
+           (home (truename (sb-ext:posix-getenv "SBCL_HOME")))
+           (contrib (merge-pathnames
+                     (make-pathname :directory `(:relative ,name)
+                                    :name name
+                                    :type "asd"
+                                    :case :local
+                                    :version :newest)
+                     home)))
+      (probe-file contrib)))
   
   (pushnew
    '(merge-pathnames "site-systems/"
@@ -1096,7 +1148,7 @@ output to *verbose-out*.  Returns the shell's exit code."
      (user-homedir-pathname))
    *central-registry*)
   
-  (pushnew 'module-provide-asdf sb-ext:*module-provider-functions*))
+  (pushnew 'module-provide-asdf sb-ext:*module-provider-functions*)
+  (pushnew 'contrib-sysdef-search *system-definition-search-functions*))
 
 (provide 'asdf)
-

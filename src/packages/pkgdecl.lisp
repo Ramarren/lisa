@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.78 2004/10/25 14:20:06 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.79 2006/04/14 16:53:15 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -101,11 +101,31 @@
            "FIND-DIRECT-SUPERCLASSES"
            "CLASS-ALL-SUPERCLASSES"))
 
-(defpackage "LISA.CF"
+(defpackage "LISA.BELIEF"
   (:use "COMMON-LISP")
-  (:nicknames "CF")
-  (:export "COMBINE" "CF-P" "CONJUNCT-CF" "RECALCULATE-CF"))
+  (:nicknames "BELIEF")
+  (:export
+   "ADJUST-BELIEF"
+   "BELIEF->ENGLISH"
+   "BELIEF-FACTOR"
+   "FALSE-P"
+   "TRUE-P"
+   "UKNOWN-P"))
 
+(defpackage "LISA.HEAP"
+  (:use "COMMON-LISP")
+  (:nicknames "HEAP")
+  (:export
+   "CREATE-HEAP"
+   "HEAP-CLEAR"
+   "HEAP-COUNT"
+   "HEAP-COLLECT"
+   "HEAP-EMPTY-P"
+   "HEAP-FIND"
+   "HEAP-INSERT"
+   "HEAP-PEEK"
+   "HEAP-REMOVE"))
+   
 (defpackage "LISA.UTILS"
   (:use "COMMON-LISP")
   (:nicknames "UTILS")

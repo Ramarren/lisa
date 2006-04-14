@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.49 2002/12/08 00:25:34 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.50 2006/04/14 16:55:49 youngde Exp $
 
 (in-package "LISA")
 
@@ -95,7 +95,7 @@
       of (rete-roots rete-network)
       do (accept-token root-node token)))
 
-(defun make-rete-network ()
+(defmethod make-rete-network ()
   (make-instance 'rete-network))
 
 ;;; The following functions serve as "connectors" between any two

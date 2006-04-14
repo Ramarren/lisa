@@ -1,5 +1,4 @@
-;;; -*- mode: Lisp -*-
-	
+;;; -*- Mode: LISP; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 ;;; This file is part of LISA, the Lisp-based Intelligent Software
 ;;; Agents platform.
 
@@ -20,15 +19,148 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: lisa.asd
-;;; Description: Lisa's ASDF system definition file.
 
-;;; $Id: lisa.asd,v 1.3 2006/04/08 02:37:06 youngde Exp $
+;;; Description: Lisa's ASDF system definition file. To use it, you must have asdf loaded; Lisa
+;;; provides a copy in "lisa:misc;asdf.lisp".
+
+;;; Assuming a loaded asdf, this is the easiest way to install Lisa:
+;;;   (push <lisa root directory> asdf:*central-registry*)
+;;;   (asdf:operate 'asdf:load-op :lisa)
+
+;;; $Id: lisa.asd,v 1.4 2006/04/14 16:46:49 youngde Exp $
 
 (in-package :cl-user)
 
-(asdf:defsystem :lisa
-  :depends-on ("lisa.packages" "lisa.certainty-factors" "lisa.implementations" "lisa.utils"
-               "lisa.reflect" "lisa.core" "lisa.rete" "lisa.config"
-               "lisa.epilogue")
-  :serial t)
-  
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (find-package :lisa-system)
+    (defpackage "LISA-SYSTEM"
+      (:use "COMMON-LISP" "ASDF"))))
+
+(in-package :lisa-system)
+
+(defsystem lisa
+    :name "Lisa"
+    :author "David E. Young"
+    :maintainer "David E. Young"
+    :licence "LGPL"
+    :description "The Lisa expert system shell"
+    :components
+    ((:module src
+              :components
+              ((:module packages
+                        :components
+                        ((:file "pkgdecl")))
+               (:module utils
+                        :components
+                        ((:file "compose")
+                         (:file "utils"))
+                        :serial t)
+               (:module belief-systems
+                        :components
+                        ((:file "belief")
+                         (:file "certainty-factors"))
+                        :serial t)
+               (:module reflect
+                        :components
+                        ((:file "reflect")))
+               (:module core
+                        :components
+                        ((:file "preamble")
+                         (:file "conditions")
+                         (:file "deffacts")
+                         (:file "fact")
+                         (:file "watches")
+                         (:file "activation")
+                         (:file "heap")
+                         (:file "conflict-resolution-strategies")
+                         (:file "context")
+                         (:file "rule")
+                         (:file "pattern")
+                         (:file "rule-parser")
+                         (:file "fact-parser")
+                         (:file "language")
+                         (:file "tms-support")
+                         (:file "rete")
+                         (:file "belief-interface")
+                         (:file "meta")
+                         (:file "binding")
+                         (:file "token")
+                         (:file "retrieve"))
+                        :serial t)
+               (:module implementations
+                        :components
+                        ((:file "workarounds")
+                         #+Lispworks
+                         (:file "lispworks-auto-notify")
+                         #+Allegro
+                         (:file "allegro-auto-notify"))
+                        :serial t)
+               (:module rete
+                        :pathname "rete/reference/"
+                        :components
+                        ((:file "node-tests")
+                         (:file "shared-node")
+                         (:file "successor")
+                         (:file "node-pair")
+                         (:file "terminal-node")
+                         (:file "node1")
+                         (:file "join-node")
+                         (:file "node2")
+                         (:file "node2-not")
+                         (:file "node2-test")
+                         (:file "node2-exists")
+                         (:file "rete-compiler")
+                         (:file "tms")
+                         (:file "network-ops")
+                         (:file "network-crawler"))
+                        :serial t)
+               (:module config
+                        :components
+                        ((:file "config")
+                         (:file "epilogue"))
+                        :serial t))
+              :serial t)))
+
+(defvar *lisa-root-pathname*
+  (make-pathname :directory
+                 (pathname-directory *load-truename*)
+                 :host (pathname-host *load-truename*)
+                 :device (pathname-device *load-truename*)))
+
+(defun make-lisa-path (relative-path)
+  (concatenate 'string (namestring *lisa-root-pathname*)
+               relative-path))
+
+(setf (logical-pathname-translations "lisa")
+      `(("src;**;" ,(make-lisa-path "src/**/"))
+        ("lib;**;*.*" ,(make-lisa-path "lib/**/"))
+        ("config;*.*" ,(make-lisa-path "config/"))
+        ("debugger;*.*" ,(make-lisa-path "src/debugger/"))
+        ("contrib;**;" ,(make-lisa-path "contrib/**/"))))
+
+(defun lisa-debugger ()
+  (translate-logical-pathname "lisa:debugger;lisa-debugger.lisp"))
+
+;;; Sets up the environment so folks can use the non-portable form of REQUIRE
+;;; with some implementations...
+
+#+Allegro
+(setf system:*require-search-list*
+  (append system:*require-search-list*
+          `(:newest ,(lisa-debugger))))
+
+#+clisp
+(setf custom:*load-paths*
+  (append custom:*load-paths* `(,(lisa-debugger))))
+
+#+LispWorks
+(let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))
+  (lw:defadvice (require lisa-require :around)
+      (module-name &optional pathname)
+    (let ((lisa-module
+           (find module-name loadable-modules
+                 :test #'string=
+                 :key #'car)))
+      (if (null lisa-module)
+          (lw:call-next-advice module-name pathname)
+        (lw:call-next-advice module-name (cdr lisa-module))))))
