@@ -20,7 +20,7 @@
 ;;; File: rule-parser.lisp
 ;;; Description: The Lisa rule parser, completely rewritten for release 3.0.
 ;;;
-;;; $Id: rule-parser.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: rule-parser.lisp,v 1.2 2006/05/06 18:23:03 youngde Exp $
 
 (in-package :lisa)
 
