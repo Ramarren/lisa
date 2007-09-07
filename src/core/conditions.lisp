@@ -20,7 +20,7 @@
 ;;; File: conditions.lisp
 ;;; Description:
 
-;;; $Id: conditions.lisp,v 1.2 2007/09/07 21:31:05 youngde Exp $
+;;; $Id: conditions.lisp,v 1.3 2007/09/07 21:32:05 youngde Exp $
 
 (in-package :lisa)
 

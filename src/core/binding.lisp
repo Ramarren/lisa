@@ -20,7 +20,7 @@
 ;;; File: binding.lisp
 ;;; Description:
 
-;;; $Id: binding.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: binding.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
 
 (in-package :lisa)
 
