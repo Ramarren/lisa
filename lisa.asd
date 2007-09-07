@@ -27,7 +27,7 @@
 ;;;   (push <lisa root directory> asdf:*central-registry*)
 ;;;   (asdf:operate 'asdf:load-op :lisa)
 
-;;; $Id: lisa.asd,v 1.4 2006/04/14 16:46:49 youngde Exp $
+;;; $Id: lisa.asd,v 1.5 2007/09/07 21:22:36 youngde Exp $
 
 (in-package :cl-user)
 
@@ -78,6 +78,7 @@
                          (:file "pattern")
                          (:file "rule-parser")
                          (:file "fact-parser")
+                         #+nil(:file "parser")
                          (:file "language")
                          (:file "tms-support")
                          (:file "rete")
