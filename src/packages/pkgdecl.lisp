@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.79 2006/04/14 16:53:15 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.80 2007/09/07 21:43:08 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -32,74 +32,125 @@
     (rename-package (find-package 'pcl) 'pcl
                     `(clos ,@(package-nicknames 'pcl)))))
 
-(defpackage "LISA"
-  (:export "USE-LISA" "DEFRULE" "DEFTEMPLATE" "ASSERT" "DEFIMPORT" "FACTS"
-           "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY" "WATCH"
-           "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE" "RETRACT-INSTANCE"
-           "MARK-INSTANCE-AS-CHANGED" "SLOT" "TEST" "ENGINE"
-           "USE-DEFAULT-ENGINE" "CURRENT-ENGINE" "WITH-INFERENCE-ENGINE"
-           "MAKE-INFERENCE-ENGINE" "RULE" "=>" "DEFFACTS"
-           "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE" "DEFAULT"
-           "INITIAL-FACT" "WITH-SIMPLE-QUERY" "WALK" "FACT" "SHOW-NETWORK"
-           "RETE-NETWORK" "INFERENCE-ENGINE" "ACTIVATION" "BREAKPOINTS"
-           "SET-BREAK" "CLEAR-BREAK" "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS"
-           "TOKEN" "INSTANCE" "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
-           "CONSIDER-TAXONOMY" "EXISTS" "DEFCONTEXT" "FOCUS" "REFOCUS"
-           "FIND-CONTEXT" "CONTEXTS" "CONTEXT" "FIND-RULE" "RULE-NAME"
-           "FOCUS-STACK" "UNDEFCONTEXT" "ALLOW-DUPLICATE-FACTS" "CONTEXT-NAME"
-           "RULE-SHORT-NAME" "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT"
-           "FACT-NAME" "FACT-ID" "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME"
-           "FIND-CONTEXT" "MAKE-INFERENCE-ENGINE" "RETE" "DUPLICATE-FACT"
-           "STANDARD-KB-CLASS" "USE-FANCY-ASSERT" "RULE-DEFAULT-NAME"
-           "SLOT-VALUE-OF-INSTANCE" "IN-RULE-FIRING-P" "ACTIVE-RULE" "CF"
-           "RULE-COMMENT")
-  (:shadow "ASSERT"))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defpackage "LISA"
+    (:use "COMMON-LISP")
+    (:export
+      "ASSERT"
+      "DEFAULT"
+      .
+      #1=(
+          "*SHOW-LISA-WARNINGS*"
+          "=>"
+          "ACTIVATION"
+          "ACTIVE-RULE"
+          "AGENDA"
+          "ALLOW-DUPLICATE-FACTS"
+          "ASSERT-INSTANCE"
+          "AUTO-FOCUS-P"
+          "BINDINGS"
+          "BREAKPOINTS"
+          "CLEAR"
+          "CLEAR-BREAK"
+          "CLEAR-BREAKS"
+          "CONSIDER-TAXONOMY"
+          "CONTEXT"
+          "CONTEXT-NAME"
+          "CONTEXTS"
+          "CURRENT-ENGINE"
+          "DEFCONTEXT"
+          "DEFFACTS"
+          "DEFIMPORT"
+          "DEFRULE"
+          "DEFTEMPLATE"
+          "DEPENDENCIES"
+          "DUPLICATE-FACT"
+          "ENGINE"
+          "EXISTS"
+          "FACT"
+          "FACT-ID"
+          "FACT-NAME"
+          "FACTS"
+          "FIND-CONTEXT"
+          "FIND-FACT-BY-ID"
+          "FIND-FACT-BY-NAME"
+          "FIND-RULE"
+          "FOCUS"
+          "FOCUS-STACK"
+          "HALT"
+          "IN-RULE-FIRING-P"
+          "INFERENCE-ENGINE"
+          "INITIAL-FACT"
+          "INSTANCE"
+          "LOGICAL"
+          "MAKE-INFERENCE-ENGINE"
+          "MARK-INSTANCE-AS-CHANGED"
+          "MODIFY"
+          "NEXT"
+          "REFOCUS"
+          "RESET"
+          "RESUME"
+          "RETE"
+          "RETE-NETWORK"
+          "RETRACT"
+          "RETRACT-INSTANCE"
+          "RETRIEVE"
+          "RULE"
+          "RULE-COMMENT"
+          "RULE-CONTEXT"
+          "RULE-DEFAULT-NAME"
+          "RULE-NAME"
+          "RULE-SALIENCE"
+          "RULE-SHORT-NAME"
+          "RULES"
+          "RUN"
+          "SET-BREAK"
+          "SHOW-NETWORK"
+          "SLOT"
+          "SLOT-VALUE-OF-INSTANCE"
+          "STANDARD-KB-CLASS"
+          "TEST"
+          "TOKEN"
+          "TOKENS"
+          "UNDEFCONTEXT"
+          "UNDEFRULE"
+          "UNWATCH"
+          "USE-DEFAULT-ENGINE"
+          "USE-FANCY-ASSERT"
+          "USE-LISA"
+          "WALK"
+          "WATCH"
+          "WATCHING"
+          "WITH-INFERENCE-ENGINE"
+          "WITH-SIMPLE-QUERY"))
+    (:shadow "ASSERT"))
 
-(defpackage "LISA-USER"
-  (:use "COMMON-LISP")
-  (:shadowing-import-from "LISA" "ASSERT" "DEFAULT")
-  (:import-from "LISA"
-                "DEFRULE" "DEFTEMPLATE" "DEFIMPORT" "FACTS"
-                "RULES" "AGENDA" "RESET" "CLEAR" "RUN" "RETRACT" "MODIFY"
-                "WATCH" "UNWATCH" "WATCHING" "HALT" "ASSERT-INSTANCE"
-                "RETRACT-INSTANCE" "MARK-INSTANCE-AS-CHANGED"
-                "SLOT" "TEST" "ENGINE" "USE-DEFAULT-ENGINE" "CURRENT-ENGINE"
-                "WITH-INFERENCE-ENGINE" "INFERENCE-ENGINE"
-                "MAKE-INFERENCE-ENGINE" "RULE" "=>" "DEFFACTS"
-                "*SHOW-LISA-WARNINGS*" "UNDEFRULE" "RETRIEVE" "INITIAL-FACT"
-                "WITH-SIMPLE-QUERY" "WALK" "FACT" "SHOW-NETWORK"
-                "RETE-NETWORK" "ACTIVATION" "BREAKPOINTS" "SET-BREAK"
-                "CLEAR-BREAK" "CLEAR-BREAKS" "NEXT" "RESUME" "TOKENS" "TOKEN"
-                "INSTANCE" "BINDINGS" "*BREAK-ON-SUBRULES*" "LOGICAL"
-                "CONSIDER-TAXONOMY" "EXISTS" "DEFCONTEXT" "FOCUS" "REFOCUS"
-                "FIND-CONTEXT" "CONTEXTS" "CONTEXT" "FIND-RULE" "RULE-NAME"
-                "RULE-SHORT-NAME" "FOCUS-STACK" "UNDEFCONTEXT"
-                "ALLOW-DUPLICATE-FACTS" "CONTEXT-NAME" "RULE-SHORT-NAME"
-                "RULE-SALIENCE" "AUTO-FOCUS-P" "RULE-CONTEXT" "FACT-NAME" "FACT-ID"
-                "DEPENDENCIES" "FIND-FACT-BY-ID" "FIND-FACT-BY-NAME" "FIND-CONTEXT"
-                "MAKE-INFERENCE-ENGINE" "RETE" "DUPLICATE-FACT"
-                "STANDARD-KB-CLASS" "USE-FANCY-ASSERT" "RULE-DEFAULT-NAME"
-                "SLOT-VALUE-OF-INSTANCE"))
+  (defpackage "LISA-USER"
+    (:use "COMMON-LISP")
+    (:shadowing-import-from "LISA" "ASSERT" "DEFAULT")
+    (:import-from "LISA" . #1#)))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
   (:nicknames "REFLECT")
   #+(or Allegro LispWorks)
   (:import-from "CLOS"
-                "FINALIZE-INHERITANCE"
                 "ENSURE-CLASS"
                 "CLASS-DIRECT-SUPERCLASSES"
-                "CLASS-FINALIZED-P")
+                "CLASS-FINALIZED-P"
+                "FINALIZE-INHERITANCE")
+
   #+CMU
   (:import-from "CLOS"
-                "FINALIZE-INHERITANCE"
-                "CLASS-FINALIZED-P")
-  (:export "CLASS-SLOT-LIST"
-           "FINALIZE-INHERITANCE"
-           "ENSURE-CLASS"
-           "CLASS-FINALIZED-P"
-           "FIND-DIRECT-SUPERCLASSES"
-           "CLASS-ALL-SUPERCLASSES"))
+                "CLASS-FINALIZED-P"
+                "FINALIZE-INHERITANCE")
+  (:export
+   "CLASS-ALL-SUPERCLASSES"
+   "CLASS-FINALIZED-P"
+   "CLASS-SLOT-LIST"
+   "ENSURE-CLASS"
+   "FINALIZE-INHERITANCE"
+   "FIND-DIRECT-SUPERCLASSES"))
 
 (defpackage "LISA.BELIEF"
   (:use "COMMON-LISP")
@@ -129,14 +180,15 @@
 (defpackage "LISA.UTILS"
   (:use "COMMON-LISP")
   (:nicknames "UTILS")
-  (:export "FIND-BEFORE"
-           "FIND-AFTER"
-           "FIND-IF-AFTER"
-           "LSTHASH"
-           "COLLECT"
-           "FLATTEN"
-           "MAP-IN"
-           "STRING-TOKENS"
-           "COMPOSE"
-           "COMPOSE-F"
-           "COMPOSE-ALL"))
+  (:export
+   "COLLECT"
+   "COMPOSE"
+   "COMPOSE-ALL"
+   "COMPOSE-F"
+   "FIND-AFTER"
+   "FIND-BEFORE"
+   "FIND-IF-AFTER"
+   "FLATTEN"
+   "LSTHASH"
+   "MAP-IN"
+   "STRING-TOKENS"))

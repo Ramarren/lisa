@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.50 2006/04/14 16:55:49 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.51 2007/09/07 21:39:00 youngde Exp $
 
 (in-package "LISA")
 
@@ -29,26 +29,29 @@
 (defvar *leaf-nodes* nil)
 (defvar *logical-block-marker*)
 
-(defmacro set-leaf-node (node address)
-  `(setf (aref *leaf-nodes* ,address) ,node))
+(declaim (inline set-leaf-node leaf-node left-input right-input logical-block-marker))
 
-(defmacro leaf-node ()
-  `(aref *leaf-nodes* (1- (length *leaf-nodes*))))
+(defun set-leaf-node (node address)
+  (setf (aref *leaf-nodes* address) node))
 
-(defmacro left-input (address)
-  `(aref *leaf-nodes* (1- ,address)))
+(defun leaf-node ()
+  (aref *leaf-nodes* (1- (length *leaf-nodes*))))
 
-(defmacro right-input (address)
-  `(aref *leaf-nodes* ,address))
+(defun left-input (address)
+  (aref *leaf-nodes* (1- address)))
+
+(defun right-input (address)
+  (aref *leaf-nodes* address))
 
 (defun logical-block-marker ()
-  (declare (inline logical-block-marker))
   *logical-block-marker*)
   
 (defclass rete-network ()
   ((root-nodes :initform (make-hash-table)
+               :initarg :root-nodes
                :reader rete-roots)
    (node-test-cache :initform (make-hash-table :test #'equal)
+                    :initarg :node-test-cache
                     :reader node-test-cache)))
 
 (defun record-node (node parent)
@@ -91,12 +94,12 @@
     (make-node1 test)))
 
 (defun distribute-token (rete-network token)
-  (loop for root-node being the hash-value 
+  (loop for root-node being the hash-values 
       of (rete-roots rete-network)
       do (accept-token root-node token)))
 
-(defmethod make-rete-network ()
-  (make-instance 'rete-network))
+(defmethod make-rete-network (&rest args &key &allow-other-keys)
+  (apply #'make-instance 'rete-network args))
 
 ;;; The following functions serve as "connectors" between any two
 ;;; nodes. PASS-TOKEN connects two pattern (one-input) nodes, or a join node 
@@ -203,6 +206,14 @@
 (defun add-terminal-node (rule)
   (add-successor (leaf-node) (make-terminal-node rule) #'pass-token))
 
+;;; addresses a problem reported by Andrew Philpot on 9/6/2007
+(defun copy-node-test-table (src)
+  (let ((target (make-hash-table :test #'equal)))
+    (maphash (lambda (key value)
+               (setf (gethash key target) value))
+             src)
+    target))
+
 (defun compile-rule-into-network (rete-network patterns rule)
   (let ((*root-nodes* (rete-roots rete-network))
         (*rule-specific-nodes* (list))
@@ -218,7 +229,9 @@
 
 (defun merge-rule-into-network (to-network patterns rule &key (loader nil))
   (let ((from-network
-         (compile-rule-into-network (make-rete-network) patterns rule)))
+         (compile-rule-into-network
+          (make-rete-network :node-test-cache (copy-node-test-table (node-test-cache to-network)))
+          patterns rule)))
     (unless (null loader)
       (funcall loader from-network))
     (attach-rule-nodes rule (merge-networks from-network to-network))
