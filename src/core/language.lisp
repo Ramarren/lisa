@@ -18,9 +18,9 @@
 ;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ;;; File: language.lisp
-;;; Description: Code that implements the LISA programming language.
+;;; Description: Code that implements the Lisa programming language.
 ;;;
-;;; $Id: language.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: language.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
 
 (in-package :lisa)
 

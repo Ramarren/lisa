@@ -20,9 +20,9 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: rete.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
 
-(in-package "LISA")
+(in-package :lisa)
 
 (defclass rete ()
   ((fact-table :initform (make-hash-table :test #'equalp)
@@ -55,9 +55,9 @@
   (reset-focus-stack self)
   self)
 
-;;; FACT-META-OBJECT represents data about facts. Every LISA fact is backed by
+;;; FACT-META-OBJECT represents data about facts. Every Lisa fact is backed by
 ;;; a CLOS instance that was either defined by the application or internally
-;;; by LISA (via DEFTEMPLATE).
+;;; by Lisa (via DEFTEMPLATE).
 
 (defstruct fact-meta-object
   (class-name nil :type symbol)
@@ -92,6 +92,7 @@
     (add-rule-to-context (rule-context rule) rule)
     rule))
 
+#+nil
 (defmethod forget-rule ((self rete) (rule-name symbol))
   (macrolet ((disable-activations (rete rule)
                `(mapc #'(lambda (activation)
@@ -104,9 +105,20 @@
       (remove-rule-from-network (rete-network self) rule)
       (remove-rule-from-context (rule-context rule) rule)
       (disable-activations self rule)
-      (when (composite-rule-p rule)
-        (dolist (subrule (rule-subrules rule))
-          (forget-rule self subrule)))
+      rule)))
+
+(defmethod forget-rule ((self rete) (rule-name symbol))
+  (flet ((disable-activations (rete rule)
+           (mapc #'(lambda (activation)
+                     (setf (activation-eligible activation) nil))
+                 (find-all-activations
+                  (context-strategy (rule-context rule)) rule))))
+    (let ((rule (find-rule self rule-name)))
+      (cl:assert (not (null rule)) nil
+        "The rule named ~S is not known to be defined." rule-name)
+      (remove-rule-from-network (rete-network self) rule)
+      (remove-rule-from-context (rule-context rule) rule)
+      (disable-activations self rule)
       rule)))
 
 (defmethod forget-rule ((self rete) (rule rule))
@@ -157,8 +169,7 @@
               (gethash (hash-key ,fact) (rete-fact-table ,rete))))
          (unless (or (null ,existing-fact)
                      (not (equals ,fact ,existing-fact)))
-           (error (make-condition 'duplicate-fact
-                    :existing-fact ,existing-fact)))))))
+           (error (make-condition 'duplicate-fact :existing-fact ,existing-fact)))))))
   
 (defmacro with-unique-fact ((rete fact) &body body)
   (let ((body-fn (gensym))
@@ -304,7 +315,7 @@
   (let ((fact (find-fact-using-instance self instance))
         (network (rete-network self)))
     (cond ((null fact)
-           (warn "This instance is not known to LISA: ~S." instance))
+           (warn "This instance is not known to Lisa: ~S." instance))
           (t
            (remove-fact-from-network network fact)
            (synchronize-with-instance fact slot-id)
@@ -392,8 +403,7 @@
 (defun copy-network (engine)
   (let ((new-engine (make-inference-engine)))
     (mapc #'(lambda (rule)
-              (unless (subrule-p rule)
-                (copy-rule rule new-engine)))
+              (copy-rule rule new-engine))
           (get-rule-list engine))
     new-engine))
 

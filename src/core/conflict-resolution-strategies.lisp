@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: conflict-resolution-strategies.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: conflict-resolution-strategies.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
 
 (in-package "LISA")
 
@@ -57,7 +57,8 @@
 (defmethod lookup-activations ((self priority-queue-mixin) rule)
   (heap:heap-collect (heap self) #'(lambda (heap activation)
                                      (declare (ignore heap))
-                                     (eq rule (activation-rule activation)))))
+                                     (and activation
+                                          (eq rule (activation-rule activation))))))
 
 (defmethod get-next-activation ((self priority-queue-mixin))
   (heap:heap-remove (heap self)))

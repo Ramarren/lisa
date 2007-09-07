@@ -20,14 +20,12 @@
 ;;; File: debugger.lisp
 ;;; Description: The LISA debugger.
 
-;;; $Id: lisa-debugger.lisp,v 1.10 2003/05/28 14:32:19 youngde Exp $
+;;; $Id: lisa-debugger.lisp,v 1.11 2007/09/07 21:34:37 youngde Exp $
 
 (in-package "LISA")
 
 (defvar *breakpoints* (make-hash-table))
 (defvar *stepping* nil)
-(defvar *break-on-subrules* nil)
-
 (defvar *read-eval-print*)
 (defvar *suspended-rule*)
 (defvar *tokens*)
@@ -67,11 +65,7 @@
     (cond ((null rule)
            (format t "There's no rule by this name (~A)~%" rule-name))
           (t
-           (funcall op (rule-name rule))
-           (when (and (composite-rule-p rule)
-                      *break-on-subrules*)
-             (dolist (subrule (rule-subrules rule))
-               (funcall op (rule-name subrule))))))
+           (funcall op (rule-name rule))))
     rule-name))
 
 (defun set-break (rule-name)

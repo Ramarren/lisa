@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation-specific details.
 
-;;; $Id: reflect.lisp,v 1.13 2006/04/14 16:55:16 youngde Exp $
+;;; $Id: reflect.lisp,v 1.14 2007/09/07 21:38:07 youngde Exp $
 
 (in-package "LISA.REFLECT")
 

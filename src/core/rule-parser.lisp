@@ -20,7 +20,7 @@
 ;;; File: rule-parser.lisp
 ;;; Description: The Lisa rule parser, completely rewritten for release 3.0.
 ;;;
-;;; $Id: rule-parser.lisp,v 1.2 2006/05/06 18:23:03 youngde Exp $
+;;; $Id: rule-parser.lisp,v 1.3 2007/09/07 21:32:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -33,7 +33,7 @@
 (defvar *special-initial-elements* '(not exists logical))
 
 (defvar *conditional-elements-table*
-  '((exists . parse-exisits-pattern)
+  '((exists . parse-exists-pattern)
     (not . parse-not-pattern)
     (test . parse-test-pattern)))
 
@@ -77,7 +77,7 @@
 (defmacro with-slot-components ((slot-name slot-value constraint) form &body body)
   `(progn
      (unless (consp ,form)
-       (error 'parsing-error :form ,form))
+       (error 'slot-parsing-error :slot-name ',slot-name :location *current-defrule-pattern-location*))
      (let ((,slot-name (first ,form))
            (,slot-value (second ,form))
            (,constraint (third ,form)))
@@ -120,8 +120,7 @@
 
 (defmacro with-rule-components (((doc-string lhs rhs) rule-form) &body body)
   (let ((remains (gensym)))
-    `(let ((*binding-table* (make-hash-table))
-           (*compound-patterns-p* nil))
+    `(let ((*binding-table* (make-hash-table)))
        (multiple-value-bind (,doc-string ,remains)
            (extract-rule-headers ,rule-form)
          (multiple-value-bind (,lhs ,rhs)
@@ -140,18 +139,12 @@
 (defun parse-one-slot-constraint (var constraint-form)
   "Parses a single slot constraint, eg. (slot-name ?var 1) or (slot-name ?var (equal ?var 1))"
   (let ((head (first constraint-form))
-        (args (rest constraint-form)))
+        (args (second constraint-form)))
     (cond ((eq head 'not)
            (values `(equal ,var ,@(if (symbolp args) `(',args) args))
                    `(,(find-slot-binding var)) t))
           (t
            (values constraint-form (collect-constraint-bindings constraint-form) nil)))))
-
-(defun slot-value-is-negated-atom-p (value)
-  "Is the slot value a simple negated constraint?"
-  (and (consp value)
-       (eq (first value) 'not)
-       (slot-value-is-atom-p (second value))))
 
 (defun slot-value-is-variable-p (value)
   "Is the slot value a Lisa variable?"
@@ -161,6 +154,17 @@
   "Is the slot value a simple constraint?"
   (and (atom value)
        (not (slot-value-is-variable-p value))))
+
+(defun slot-value-is-negated-atom-p (value)
+  "Is the slot value a simple negated constraint?"
+  (and (consp value)
+       (eq (first value) 'not)
+       (slot-value-is-atom-p (second value))))
+
+(defun slot-value-is-negated-variable-p (value)
+  (and (consp value)
+       (eq (first value) 'not)
+       (variable-p (second value))))
 
 (defun intra-pattern-bindings? (bindings location)
   "Is every variable in a pattern 'local'; i.e. does not reference a binding in a previous pattern?"
@@ -172,16 +176,27 @@
   "Parses a single raw pattern slot"
   (with-slot-components (slot-name slot-value constraint) form
     (cond ((slot-value-is-atom-p slot-value)
+           ;; eg. (slot-name "frodo")
            (make-pattern-slot :name slot-name :value slot-value))
+          ((slot-value-is-negated-variable-p slot-value)
+           ;; eg. (slot-name (not ?value))
+           (let ((binding (find-or-set-slot-binding (second slot-value) slot-name location)))
+             (make-pattern-slot :name slot-name
+                                :value (second slot-value)
+                                :negated t
+                                :slot-binding binding)))
           ((slot-value-is-negated-atom-p slot-value)
+           ;; eg. (slot-name (not "frodo"))
            (make-pattern-slot :name slot-name :value (second slot-value) :negated t))
           ((and (slot-value-is-variable-p slot-value)
                 (not constraint))
+           ;; eg. (slot-name ?value)
            (let ((binding (find-or-set-slot-binding slot-value slot-name location)))
              (make-pattern-slot :name slot-name :value slot-value :slot-binding binding
                                 :intra-pattern-bindings (intra-pattern-bindings? (list binding) location))))
           ((and (slot-value-is-variable-p slot-value)
                 constraint)
+           ;; eg. (slot-name ?value (equal ?value "frodo"))
            (let ((binding (find-or-set-slot-binding slot-value slot-name location)))
              (multiple-value-bind (constraint-form constraint-bindings negatedp)
                  (parse-one-slot-constraint slot-value constraint)
@@ -192,20 +207,20 @@
                                   :intra-pattern-bindings
                                   (intra-pattern-bindings? (list* binding constraint-bindings) location)))))
           (t (error 'rule-parsing-error :rule-name *current-defrule*
-                    :pattern-location *current-defrule-pattern-location*
+                    :location *current-defrule-pattern-location*
                     :text "malformed slot")))))
 
 (defun parse-rule-body (body)
-  (let ((location -1)
+  (let ((location 0)
         (patterns (list)))
     (labels ((parse-lhs (pattern-list)
                (let ((pattern (first pattern-list))
-                     (*current-defrule-pattern-location* (incf location)))
+                     (*current-defrule-pattern-location* location))
                  (unless (listp pattern)
                    (error 'rule-parsing-error
                           :text "pattern is not a list"
                           :rule-name *current-defrule*
-                          :pattern-location *current-defrule-pattern-location*))
+                          :location *current-defrule-pattern-location*))
                  (cond ((null pattern-list)
                         (unless *in-logical-pattern-p*
                           (nreverse patterns)))
@@ -214,7 +229,8 @@
                         (let ((*in-logical-pattern-p* t))
                           (parse-lhs (rest pattern))))
                        (t
-                        (push (funcall (find-conditional-element-parser (first pattern)) pattern location)
+                        (push (funcall (find-conditional-element-parser (first pattern)) pattern
+                                       (1- (incf location)))
                               patterns)
                         (parse-lhs (rest pattern-list))))))
              (parse-rhs (actions)
@@ -234,8 +250,8 @@
   (let ((head (first pattern)))
     (unless (symbolp head)
       (error 'rule-parsing-error :rule-name *current-defrule*
-             :pattern-location *current-defrule-pattern-location*
-             :text "The head of a pattern must be a symbol"))
+             :location *current-defrule-pattern-location*
+             :text "the head of a pattern must be a symbol"))
     (cond ((variable-p head)
            (set-pattern-binding head location)
            (parse-generic-pattern (second pattern) location head))
@@ -258,7 +274,7 @@
                           (= (length form) 1))
                (error 'rule-parsing-error
                       :rule-name *current-defrule*
-                      :pattern-location *current-defrule-pattern-location*
+                      :location *current-defrule-pattern-location*
                       :text "TEST must currently be followed by a list of length 1"))
              form)))
     (let* ((form (extract-test-pattern))
@@ -281,6 +297,27 @@
     pattern))
 
 ;;; High-level rule definition interfaces...
+
+#+nil
+(defun define-rule (name body &key (salience 0) (context nil) (auto-focus nil) (belief nil))
+  (let ((*current-defrule* name))
+    (with-rule-components ((doc-string lhs rhs) body)
+      (dolist (pattern lhs)
+        (princ #\()
+        (terpri)
+        (print (parsed-pattern-class pattern))
+        (terpri)
+        (dolist (slot (parsed-pattern-slots pattern))
+          (prin1 slot)
+          (terpri))
+        (princ #\))
+        (terpri))
+      (make-rule name (inference-engine) lhs rhs
+                 :doc-string doc-string
+                 :salience salience
+                 :context context
+                 :belief belief
+                 :auto-focus auto-focus))))
 
 (defun define-rule (name body &key (salience 0) (context nil) (auto-focus nil) (belief nil))
   (let ((*current-defrule* name))

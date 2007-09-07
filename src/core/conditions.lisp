@@ -20,7 +20,7 @@
 ;;; File: conditions.lisp
 ;;; Description:
 
-;;; $Id: conditions.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: conditions.lisp,v 1.2 2007/09/07 21:31:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -34,9 +34,22 @@
 (define-condition parsing-error (error)
   ((text :initarg :text
          :initform nil
-         :reader text))
+         :reader text)
+   (location :initarg :location
+             :initform nil
+             :reader location))
   (:report (lambda (condition strm)
              (format strm "Parsing error: ~A" (text condition)))))
+
+(define-condition slot-parsing-error (parsing-error)
+  ((slot-name :initarg :slot-name
+              :initform nil
+              :reader slot-name))
+  (:report (lambda (condition strm)
+             (format strm "Slot parsing error: slot ~A, pattern location ~A"
+                     (slot-name condition) (location condition))
+             (when (text condition)
+               (format strm " (~A)" (text condition))))))
 
 (define-condition class-parsing-error (parsing-error)
   ((class-name :initarg :class-name
@@ -48,10 +61,9 @@
 (define-condition rule-parsing-error (parsing-error)
   ((rule-name :initarg :rule-name
               :initform nil
-              :reader rule-name)
-   (pattern-location :initarg :pattern-location
-                     :initform nil
-                     :reader pattern-location))
+              :reader rule-name))
   (:report (lambda (condition strm)
              (format strm "Rule parsing error: rule name ~A, pattern location ~A"
-                     (rule-name condition) (pattern-location condition)))))
+                     (rule-name condition) (location condition))
+             (when (text condition)
+               (format strm " (~A)" (text condition))))))

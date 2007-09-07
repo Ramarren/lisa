@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.1 2006/04/14 16:44:37 youngde Exp $
+;;; $Id: rule.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
 
 (in-package :lisa)
 
@@ -56,10 +56,6 @@
    (actions :initform nil
             :initarg :actions
             :reader rule-actions)
-   (subrules :initform nil
-             :accessor rule-subrules)
-   (subrule-p :initform nil
-              :accessor subrule-p)
    (logical-marker :initform nil
                    :initarg :logical-marker
                    :reader rule-logical-marker)
@@ -124,13 +120,6 @@
   (compile-rule-behavior rule actions)
   (add-rule-to-network (rule-engine rule) rule patterns)
   rule)
-
-(defun composite-rule-p (rule)
-  (consp (rule-subrules rule)))
-
-(defun add-subrule (rule subrule)
-  (setf (subrule-p subrule) t)
-  (push subrule (rule-subrules rule)))
 
 (defun logical-rule-p (rule)
   (numberp (rule-logical-marker rule)))
@@ -198,21 +187,6 @@
        :binding-set (make-rule-binding-set))
      patterns actions)))
 
-(defun make-composite-rule (name engine patterns actions
-                            &rest args
-                            &key &allow-other-keys)
-  (flet ((make-composite-name (index)
-           (intern (format nil "~A~~~D" name index))))
-    (let ((primary-rule
-           (apply #'make-rule name engine (first patterns) actions args))
-          (index 0))
-      (dolist (pattern (rest patterns) primary-rule)
-        (add-subrule 
-         primary-rule
-         (apply #'make-rule
-                (make-composite-name (incf index))
-                engine pattern actions args))))))
-    
 (defun copy-rule (rule engine)
   (let ((initargs `(:doc-string ,(rule-comment rule)
                     :salience ,(rule-salience rule)
@@ -222,17 +196,9 @@
                     :compiled-behavior ,(rule-behavior rule)
                     :auto-focus ,(rule-auto-focus rule))))
     (with-inference-engine (engine)
-      (if (composite-rule-p rule)
-          (apply #'make-composite-rule
-                 (rule-short-name rule)
-                 engine
-                 (append `(,(rule-patterns rule))
-                         `(,@(mapcar #'rule-patterns (rule-subrules rule))))
-                 (rule-actions rule)
-                 initargs)
-        (apply #'make-rule
-               (rule-short-name rule)
-               engine
-               (rule-patterns rule)
-               (rule-actions rule)
-               initargs)))))
+      (apply #'make-rule
+             (rule-short-name rule)
+             engine
+             (rule-patterns rule)
+             (rule-actions rule)
+             initargs))))
