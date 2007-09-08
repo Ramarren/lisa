@@ -1,3 +1,9 @@
+2007-09-08  David E. Young  <youngde@pobox.com
+
+	* This is Lisa release 3.1
+	* Added patch for OpenMCL support. I'm not sure who offered this,
+	  so I can't offer proper attribution. Sorry.
+
 2007-09-08  David E. Young  <youngde@pobox.com>
 
 	* This is Lisa release 3.0.
