@@ -20,7 +20,7 @@
 ;;; File: pkgdecl.lisp
 ;;; Description: Package declarations for LISA.
 
-;;; $Id: pkgdecl.lisp,v 1.80 2007/09/07 21:43:08 youngde Exp $
+;;; $Id: pkgdecl.lisp,v 1.81 2007/09/08 14:48:59 youngde Exp $
 
 (in-package "CL-USER")
 
@@ -142,6 +142,10 @@
 
   #+CMU
   (:import-from "CLOS"
+                "CLASS-FINALIZED-P"
+                "FINALIZE-INHERITANCE")
+  #+:sbcl
+  (:import-from "SB-MOP"
                 "CLASS-FINALIZED-P"
                 "FINALIZE-INHERITANCE")
   (:export

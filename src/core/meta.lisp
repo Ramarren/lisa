@@ -26,7 +26,7 @@
 ;;; symbol, created by LISA, used to identify fact slots within rules; the
 ;;; latter refers to the actual, package-qualified slot name.
 
-;;; $Id: meta.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: meta.lisp,v 1.3 2007/09/08 14:48:58 youngde Exp $
 
 (in-package "LISA")
 
@@ -85,10 +85,6 @@
                class-object)))
     (import-class-object (find-class class-name))))
 
-(defconstant +no-meta-data-reason+
-    "LISA doesn't know about the template named by (~S). Either the name was
-    mistyped or you forgot to write a DEFTEMPLATE specification for it.")
-
 (defun ensure-meta-data-exists (class-name)
   (flet ((ensure-class-definition ()
            (loop
@@ -96,7 +92,7 @@
                (acquire-meta-data class-name)
                (return))
              (cerror "Enter a template definition now."
-                     +no-meta-data-reason+ class-name)
+                     "LISA doesn't know about the template named by (~S)." class-name)
              (format t "Enter a DEFTEMPLATE form: ")
              (eval (read))
              (fresh-line))))

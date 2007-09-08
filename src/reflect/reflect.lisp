@@ -21,7 +21,7 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation-specific details.
 
-;;; $Id: reflect.lisp,v 1.14 2007/09/07 21:38:07 youngde Exp $
+;;; $Id: reflect.lisp,v 1.15 2007/09/08 14:48:59 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
@@ -123,6 +123,9 @@ initargs for all slots are returned, otherwise only the slots with
        (eq (class-name class) t)))
 
 (defun find-direct-superclasses (class)
+  #+:sbcl
+  (remove-if #'is-standard-classp (sb-mop:class-direct-superclasses class))
+  #-:sbcl
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
              
 (defun class-all-superclasses (class-or-symbol)
