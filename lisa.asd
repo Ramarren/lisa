@@ -27,7 +27,7 @@
 ;;;   (push <lisa root directory> asdf:*central-registry*)
 ;;;   (asdf:operate 'asdf:load-op :lisa)
 
-;;; $Id: lisa.asd,v 1.5 2007/09/07 21:22:36 youngde Exp $
+;;; $Id: lisa.asd,v 1.6 2007/09/08 18:16:01 youngde Exp $
 
 (in-package :cl-user)
 
@@ -153,6 +153,10 @@
 #+clisp
 (setf custom:*load-paths*
   (append custom:*load-paths* `(,(lisa-debugger))))
+
+#+:openmcl
+(pushnew (pathname-directory (lisa-debugger)) ccl:*module-search-path* :test #'equal)
+
 
 #+LispWorks
 (let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))

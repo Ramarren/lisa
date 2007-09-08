@@ -21,14 +21,14 @@
 ;;; Description: Wrapper functions that provide the MOP functionality needed
 ;;; by LISA, hiding implementation-specific details.
 
-;;; $Id: reflect.lisp,v 1.15 2007/09/08 14:48:59 youngde Exp $
+;;; $Id: reflect.lisp,v 1.16 2007/09/08 18:16:01 youngde Exp $
 
 (in-package "LISA.REFLECT")
 
 ;;; The code contained with the following MACROLET form courtesy of the PORT
 ;;; module, CLOCC project, http://clocc.sourceforge.net.
 
-#+(or allegro clisp cmu cormanlisp lispworks lucid sbcl)
+#+(or allegro clisp cmu cormanlisp lispworks openmcl lucid sbcl)
 ;; we use `macrolet' for speed - so please be careful about double evaluations
 ;; and mapping (you cannot map or funcall a macro, you know)
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -39,6 +39,7 @@
                #+cormanlisp `(cl:class-slots ,class)
                #+lispworks `(hcl::class-slots ,class)
                #+lucid `(clos:class-slots ,class)
+	       #+openmcl `(ccl::class-slots ,class)
                #+sbcl `(sb-pcl::class-slots ,class))
              (class-slots1 (obj)
                `(class-slots*
@@ -54,6 +55,7 @@
                #+cormanlisp `(getf ,slot :name)
                #+lispworks `(hcl::slot-definition-name ,slot)
                #+lucid `(clos:slot-definition-name ,slot)
+               #+openmcl `(slot-value ,slot 'ccl::name)
                #+sbcl `(slot-value ,slot 'sb-pcl::name))
              (slot-initargs (slot)
                #+(and allegro (not (version>= 6))) `(clos::slotd-initargs ,slot)
@@ -64,6 +66,7 @@
                #+cormanlisp `(getf ,slot :initargs)
                #+lispworks `(hcl::slot-definition-initargs ,slot)
                #+lucid `(clos:slot-definition-initargs ,slot)
+               #+openmcl `(slot-value ,slot 'ccl::initargs)
                #+sbcl `(slot-value ,slot 'sb-pcl::initargs))
              (slot-one-initarg (slot) `(car (slot-initargs ,slot)))
              (slot-alloc (slot)
@@ -76,6 +79,7 @@
                #+cormanlisp `(getf ,slot :allocation)
                #+lispworks `(hcl::slot-definition-allocation ,slot)
                #+lucid `(clos:slot-definition-allocation ,slot)
+               #+openmcl `(ccl::slot-definition-allocation ,slot)
                #+sbcl `(sb-pcl::slot-definition-allocation ,slot)))
 
     (defun class-slot-list (class &optional (all t))
@@ -125,6 +129,8 @@ initargs for all slots are returned, otherwise only the slots with
 (defun find-direct-superclasses (class)
   #+:sbcl
   (remove-if #'is-standard-classp (sb-mop:class-direct-superclasses class))
+  #+:openmcl
+  (remove-if #'is-standard-classp (ccl::class-direct-superclasses class))
   #-:sbcl
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
              
