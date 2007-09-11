@@ -21,7 +21,7 @@
 ;;; Description: Classes that implement the various default conflict
 ;;; resolution strategies for Lisa's RETE implementation.
 
-;;; $Id: conflict-resolution-strategies.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: conflict-resolution-strategies.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,7 +64,9 @@
   (heap:heap-remove (heap self)))
 
 (defmethod get-all-activations ((self priority-queue-mixin))
-  (heap:heap-collect (heap self)))
+  (heap:heap-collect (heap self) (lambda (heap activation)
+                                   (declare (ignore heap))
+                                   activation)))
 
 (defclass builtin-strategy (strategy priority-queue-mixin)
   ()
@@ -75,6 +77,7 @@
   (insert-activation self activation))
 
 (defmethod find-activation ((self builtin-strategy) rule token)
+  (declare (ignore rule token))
   (cl:assert nil nil "Why are we calling FIND-ACTIVATION?"))
 
 (defmethod find-all-activations ((self builtin-strategy) rule)
@@ -100,10 +103,11 @@
                                              (cond ((> (activation-priority a)
                                                        (activation-priority b))
                                                     a)
-                                                   ((= (activation-priority a)
-                                                       (activation-priority b))
-                                                    (> (activation-timestamp a)
-                                                       (activation-timestamp b)))
+                                                   ((and (= (activation-priority a)
+                                                            (activation-priority b))
+                                                         (> (activation-timestamp a)
+                                                            (activation-timestamp b)))
+                                                    a)
                                                    (t nil))))))
 
 (defclass breadth-first-strategy (builtin-strategy)
@@ -117,10 +121,11 @@
                                              (cond ((> (activation-priority a)
                                                        (activation-priority b))
                                                     a)
-                                                   ((= (activation-priority a)
-                                                       (activation-priority b))
-                                                    (< (activation-timestamp a)
-                                                       (activation-timestamp b)))
+                                                   ((and (= (activation-priority a)
+                                                            (activation-priority b))
+                                                         (< (activation-timestamp a)
+                                                            (activation-timestamp b)))
+                                                    a)
                                                    (t nil))))))
 
 ;;; Test code.

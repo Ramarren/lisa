@@ -20,65 +20,53 @@
 ;;; File: node2-exists.lisp
 ;;; Description:
 
-;;; $Id: node2-exists.lisp,v 1.2 2002/11/18 17:55:01 youngde Exp $
+;;; $Id: node2-exists.lisp,v 1.3 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-exists (join-node) ())
 
-(defmethod test-against-right-memory ((self node2-exists) 
-                                      (left-tokens add-token))
-  (loop for right-token being the hash-value 
-      of (join-node-right-memory self)
+(defmethod test-against-right-memory ((self node2-exists) (left-tokens add-token))
+  (loop for right-token being the hash-values of (join-node-right-memory self)
       do (when (test-tokens self left-tokens right-token)
            (token-increment-exists-counter left-tokens)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
 
-(defmethod test-against-right-memory ((self node2-exists) 
-                                      (left-tokens remove-token))
-  (loop for right-token being the hash-value 
-      of (join-node-right-memory self)
+(defmethod test-against-right-memory ((self node2-exists) (left-tokens remove-token))
+  (loop for right-token being the hash-values of (join-node-right-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
 
-(defmethod test-against-left-memory ((self node2-exists) 
-                                     (right-token add-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+(defmethod test-against-left-memory ((self node2-exists) (right-token add-token))
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (and (test-tokens self left-tokens right-token)
                     (= (token-increment-exists-counter left-tokens) 1))
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
   
-(defmethod test-against-left-memory ((self node2-exists) 
-                                     (right-token remove-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+(defmethod test-against-left-memory ((self node2-exists) (right-token remove-token))
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (token-decrement-exists-counter left-tokens)
            (pass-tokens-to-successor
             self (combine-tokens
                   (make-remove-token left-tokens) right-token)))))
   
-(defmethod accept-tokens-from-left ((self node2-exists) 
-                                    (left-tokens add-token))
+(defmethod accept-tokens-from-left ((self node2-exists) (left-tokens add-token))
   (add-tokens-to-left-memory self left-tokens)
   (test-against-right-memory self left-tokens))
 
-(defmethod accept-token-from-right ((self node2-exists) 
-                                    (right-token add-token))
+(defmethod accept-token-from-right ((self node2-exists) (right-token add-token))
   (add-token-to-right-memory self right-token)
   (test-against-left-memory self right-token))
 
-(defmethod accept-tokens-from-left ((self node2-exists) 
-                                    (left-tokens remove-token))
+(defmethod accept-tokens-from-left ((self node2-exists) (left-tokens remove-token))
   (when (remove-tokens-from-left-memory self left-tokens)
     (test-against-right-memory self left-tokens)))
 
-(defmethod accept-token-from-right ((self node2-exists) 
-                                    (right-token remove-token))
+(defmethod accept-token-from-right ((self node2-exists) (right-token remove-token))
   (when (remove-token-from-right-memory self right-token)
     (test-against-left-memory self right-token)))
 

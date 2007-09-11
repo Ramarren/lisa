@@ -20,13 +20,12 @@
 ;;; File: network-ops.lisp
 ;;; Description:
 
-;;; $Id: network-ops.lisp,v 1.21 2002/12/08 00:25:34 youngde Exp $
+;;; $Id: network-ops.lisp,v 1.22 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
 (defun add-token-to-network (rete-network token-ctor)
-  (loop for root-node being the hash-value
-      of (rete-roots rete-network)
+  (loop for root-node being the hash-values of (rete-roots rete-network)
       do (accept-token root-node (funcall token-ctor))))
 
 (defun add-fact-to-network (rete-network fact)
@@ -120,7 +119,6 @@
                        existing-root 
                        (shared-node-all-successors new-root)))))))
     (let ((*node-set* (list)))
-      (loop for new-root being the hash-value
-          of (rete-roots from-rete)
+      (loop for new-root being the hash-values of (rete-roots from-rete)
           do (merge-root-node new-root))
       (nreverse *node-set*))))

@@ -20,7 +20,7 @@
 ;;; File: context.lisp
 ;;; Description:
 
-;;; $Id: context.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: context.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -64,7 +64,7 @@
   (list-activations (context-strategy context)))
 
 (defun context-rule-list (context)
-  (loop for rule being the hash-value of (context-rules context)
+  (loop for rule being the hash-values of (context-rules context)
       collect rule))
 
 (defun clear-context (context)
@@ -107,12 +107,4 @@
     :name (make-context-name name)
     :strategy (if (null strategy)
                   (make-breadth-first-strategy)
-                strategy)))
-
-#+nil
-(defun make-context (name &key (strategy nil))
-  (make-instance 'context
-    :name (make-context-name name)
-    :strategy (if (null strategy)
-                  (make-depth-first-strategy)
                 strategy)))

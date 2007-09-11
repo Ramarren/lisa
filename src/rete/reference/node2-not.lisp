@@ -20,15 +20,14 @@
 ;;; File: node2-not.lisp
 ;;; Description:
 
-;;; $Id: node2-not.lisp,v 1.14 2002/11/14 14:45:38 youngde Exp $
+;;; $Id: node2-not.lisp,v 1.15 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2-not (join-node) ())
 
 (defmethod test-against-right-memory ((self node2-not) left-tokens)
-  (loop for right-token being the hash-value 
-      of (join-node-right-memory self)
+  (loop for right-token being the hash-values of (join-node-right-memory self)
       do (when (test-tokens self left-tokens right-token)
            (token-increment-not-counter left-tokens)))
   (unless (token-negated-p left-tokens)
@@ -37,8 +36,7 @@
 
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token add-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (token-increment-not-counter left-tokens)
            (pass-tokens-to-successor 
@@ -46,8 +44,7 @@
   
 (defmethod test-against-left-memory ((self node2-not) 
                                      (right-token remove-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (and (test-tokens self left-tokens right-token)
                     (not (token-negated-p
                           (token-decrement-not-counter left-tokens))))

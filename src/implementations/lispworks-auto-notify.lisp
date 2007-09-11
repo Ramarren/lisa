@@ -23,7 +23,7 @@
 ;;; of LISA's control, are picked up via the MOP protocol and synchronized
 ;;; with KB facts.
 
-;;; $Id: lispworks-auto-notify.lisp,v 1.3 2002/12/03 17:39:04 youngde Exp $
+;;; $Id: lispworks-auto-notify.lisp,v 1.4 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -36,29 +36,23 @@
     (unless (ignore-instance instance)
       (mark-instance-as-changed instance :slot-id slot-name))))
   
-(defmethod initialize-instance :after ((self standard-kb-class)
-                                       &rest initargs) 
-  (dolist (slot (class-direct-slots self))
+(defmethod initialize-instance :after ((self standard-kb-class) &rest initargs) 
+  (dolist (slot (clos:class-direct-slots self))
     (dolist (writer (clos:slot-definition-writers slot))
       (let* ((gf (ensure-generic-function writer))
-             (method-class
-              (generic-function-method-class gf)))
+             (method-class (clos:generic-function-method-class gf)))
         (multiple-value-bind (body initargs)
-            (clos:make-method-lambda
-             gf
-             (class-prototype method-class)
-             '(new-value object)
-             nil
-             `(lispworks-respond-to-slot-change
-               object ',(clos:slot-definition-name slot)))
-          (clos:add-method
-           gf
-           (apply #'make-instance method-class
-                  :function (compile nil body)
-                  :specializers `(,(find-class t) ,self)
-                  :qualifiers '(:after)
-                  :lambda-list '(value object)
-                  initargs)))))))
+            (clos:make-method-lambda gf (clos:class-prototype method-class) '(new-value object)
+                                     nil
+                                     `(lispworks-respond-to-slot-change
+                                       object ',(clos:slot-definition-name slot)))
+          (clos:add-method gf
+                           (apply #'make-instance method-class
+                                  :function (compile nil body)
+                                  :specializers `(,(find-class t) ,self)
+                                  :qualifiers '(:after)
+                                  :lambda-list '(value object)
+                                  initargs)))))))
 
 (defmethod validate-superclass ((class standard-kb-class)
                                 (superclass standard-class))

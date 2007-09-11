@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.22 2002/11/07 19:22:22 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.23 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -49,6 +49,7 @@
              #'(lambda ()
                  (function
                   (lambda (token)
+                    (declare (optimize (speed 3) (debug 1) (safety 0)))
                     (let ((fact (token-top-fact token)))
                       (class-matches-p 
                        (find-instance-of-fact fact) fact class)))))))
@@ -60,6 +61,7 @@
        (let ((test
               (function
                (lambda (token)
+                 (declare (optimize (speed 3) (debug 1) (safety 0)))
                  (equal value
                         (get-slot-value
                          (token-top-fact token)
@@ -89,6 +91,7 @@
          (test
           (function
            (lambda (tokens)
+             (declare (optimize (speed 3) (debug 1) (safety 0)))
              (equal (get-slot-value (token-top-fact tokens)
                                     (pattern-slot-name slot))
                     (get-slot-value
@@ -113,6 +116,7 @@
              (progv
                  `(,@special-vars)
                  `(,@(mapcar #'(lambda (binding)
+                                 (declare (optimize (speed 3) (debug 1) (safety 0)))
                                  (if (pattern-binding-p binding)
                                      (token-find-fact 
                                       tokens (binding-address binding))
@@ -134,6 +138,7 @@
          (predicate
           (compile nil `(lambda ()
                           (declare (special ,@special-vars))
+                          (declare (optimize (speed 3) (debug 1) (safety 0)))
                           ,@body)))
          (test
           (function
@@ -141,6 +146,7 @@
              (progv
                  `(,@special-vars)
                  `(,@(mapcar #'(lambda (binding)
+                                 (declare (optimize (speed 3) (debug 1) (safety 0)))
                                  (if (pattern-binding-p binding)
                                      (token-find-fact 
                                       tokens (binding-address binding))
@@ -161,6 +167,7 @@
   (let ((test
          (function
           (lambda (tokens)
+            (declare (optimize (speed 3) (debug 1) (safety 0)))
             (equal (get-slot-value (token-top-fact tokens)
                                    (pattern-slot-name slot))
                    (get-slot-value (token-top-fact tokens)

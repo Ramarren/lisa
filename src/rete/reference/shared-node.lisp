@@ -20,7 +20,7 @@
 ;;; File: shared-node.lisp
 ;;; Description:
 
-;;; $Id: shared-node.lisp,v 1.11 2002/10/07 19:55:13 youngde Exp $
+;;; $Id: shared-node.lisp,v 1.12 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -43,18 +43,16 @@
   (plusp (node-use-count self)))
 
 (defmethod pass-token-to-successors ((self shared-node) token)
-  (loop for successor being the hash-value
-      of (shared-node-successors self)
+  (declare (optimize (speed 3) (debug 1) (safety 0)))
+  (loop for successor being the hash-values of (shared-node-successors self)
       do (funcall (successor-connector successor)
                   (successor-node successor)
                   token)))
 
 (defun shared-node-successor-nodes (shared-node)
-  (loop for successor being the hash-value
-      of (shared-node-successors shared-node)
+  (loop for successor being the hash-values of (shared-node-successors shared-node)
       collect (successor-node successor)))
 
 (defun shared-node-all-successors (shared-node)
-  (loop for successor being the hash-value
-      of (shared-node-successors shared-node)
+  (loop for successor being the hash-values of (shared-node-successors shared-node)
       collect successor))

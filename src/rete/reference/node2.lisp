@@ -20,29 +20,26 @@
 ;;; File: node2.lisp
 ;;; Description:
 
-;;; $Id: node2.lisp,v 1.20 2005/07/30 20:44:03 youngde Exp $
+;;; $Id: node2.lisp,v 1.21 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
 (defclass node2 (join-node) ())
 
 (defmethod test-against-right-memory ((self node2) left-tokens)
-  (loop for right-token being the hash-value 
-      of (join-node-right-memory self)
+  (loop for right-token being the hash-values of (join-node-right-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
 
 (defmethod test-against-left-memory ((self node2) (right-token add-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor 
             self (combine-tokens left-tokens right-token)))))
   
 (defmethod test-against-left-memory ((self node2) (right-token remove-token))
-  (loop for left-tokens being the hash-value 
-      of (join-node-left-memory self)
+  (loop for left-tokens being the hash-values of (join-node-left-memory self)
       do (when (test-tokens self left-tokens right-token)
            (pass-tokens-to-successor
             self (combine-tokens

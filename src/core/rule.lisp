@@ -20,7 +20,7 @@
 ;;; File: rule.lisp
 ;;; Description:
 
-;;; $Id: rule.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: rule.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 
 (in-package :lisa)
 
@@ -152,6 +152,7 @@
       (first addresses))))
 
 (defmethod initialize-instance :after ((self rule) &rest initargs)
+  (declare (ignore initargs))
   (with-slots ((qual-name qualified-name)) self
     (setf qual-name
       (intern (format nil "~A.~A" 

@@ -20,7 +20,7 @@
 ;;; File: rete-compiler.lisp
 ;;; Description:
 
-;;; $Id: rete-compiler.lisp,v 1.51 2007/09/07 21:39:00 youngde Exp $
+;;; $Id: rete-compiler.lisp,v 1.52 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
@@ -126,6 +126,7 @@
 ;;; end connector functions
 
 (defun add-intra-pattern-nodes (patterns)
+  "The alpha memory nodes and tests"
   (dolist (pattern patterns)
     (cond ((test-pattern-p pattern)
            (set-leaf-node t (parsed-pattern-address pattern)))
@@ -195,6 +196,7 @@
   join-node)
 
 (defun add-inter-pattern-nodes (patterns)
+  "The beta memory nodes and tests"
   (dolist (pattern (rest patterns))
     (let ((join-node (make-join-node pattern))
           (address (parsed-pattern-address pattern)))
@@ -232,7 +234,7 @@
          (compile-rule-into-network
           (make-rete-network :node-test-cache (copy-node-test-table (node-test-cache to-network)))
           patterns rule)))
-    (unless (null loader)
+    (when loader
       (funcall loader from-network))
     (attach-rule-nodes rule (merge-networks from-network to-network))
     to-network))

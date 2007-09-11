@@ -20,7 +20,7 @@
 ;;; File: token.lisp
 ;;; Description:
 
-;;; $Id: token.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: token.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 
 (in-package "LISA")
 
@@ -80,13 +80,15 @@
   (aref (slot-value token 'facts) address))
 
 (defun token-top-fact (token)
+  (declare (optimize (speed 3) (debug 1) (safety 0)))
   (with-slots ((fact-vector facts)) token
     (aref fact-vector (1- (length fact-vector)))))
 
 (defun token-push-fact (token fact)
-  (with-accessors ((facts token-facts)
+  (declare (optimize (speed 3) (debug 1) (safety 0)))
+  (with-accessors ((fact-vector token-facts)
                    (hash-code token-hash-code)) token
-    (vector-push-extend fact facts)
+    (vector-push-extend fact fact-vector)
     (push fact hash-code)
     token))
 
@@ -98,20 +100,16 @@
       (aref fact-vector (decf (fill-pointer fact-vector))))))
 
 (defun replicate-token (token &key (token-class nil))
+  (declare (optimize (speed 3) (safety 0) (debug 1)))
   (let ((new-token 
-         (make-instance 
-             (if (null token-class)
-                 (class-of token)
-               (find-class token-class)))))
+         (make-instance (if token-class
+                            (find-class token-class)
+                          (class-of token)))))
     (with-slots ((existing-fact-vector facts)) token
       (let ((length (length existing-fact-vector)))
         (dotimes (i length)
           (token-push-fact new-token (aref existing-fact-vector i)))))
     new-token))
-
-#+ignore
-(defmethod hash-key ((self token))
-  (coerce (token-facts self) 'list))
 
 (defmethod hash-key ((self token))
   (token-hash-code self))

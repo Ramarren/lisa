@@ -21,7 +21,7 @@
 
 ;;; Description: An implementation of Certainty Factors as found in Peter Norvig's PAIP.
 
-;;; $Id: certainty-factors.lisp,v 1.2 2006/04/14 16:43:41 youngde Exp $
+;;; $Id: certainty-factors.lisp,v 1.3 2007/09/11 21:14:08 youngde Exp $
 
 (in-package :belief)
 
@@ -100,6 +100,7 @@
   (recalculate-cf objects rule-belief old-belief))
 
 (defmethod adjust-belief (objects (rule-belief t) &optional old-belief)
+  (declare (ignore objects old-belief))
   nil)
 
 (defmethod belief->english ((cf number))

@@ -20,7 +20,7 @@
 ;;; File: rete.lisp
 ;;; Description: Class representing the inference engine itself.
 
-;;; $Id: rete.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: rete.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 
 (in-package :lisa)
 
@@ -51,6 +51,7 @@
                  :accessor rete-firing-count)))
 
 (defmethod initialize-instance :after ((self rete) &rest initargs)
+  (declare (ignore initargs))
   (register-new-context self (make-context :initial-context))
   (reset-focus-stack self)
   self)
@@ -92,23 +93,8 @@
     (add-rule-to-context (rule-context rule) rule)
     rule))
 
-#+nil
 (defmethod forget-rule ((self rete) (rule-name symbol))
-  (macrolet ((disable-activations (rete rule)
-               `(mapc #'(lambda (activation)
-                          (setf (activation-eligible activation) nil))
-                      (find-all-activations
-                       (context-strategy (rule-context ,rule)) ,rule))))
-    (let ((rule (find-rule self rule-name)))
-      (cl:assert (not (null rule)) nil
-        "The rule named ~S is not known to be defined." rule-name)
-      (remove-rule-from-network (rete-network self) rule)
-      (remove-rule-from-context (rule-context rule) rule)
-      (disable-activations self rule)
-      rule)))
-
-(defmethod forget-rule ((self rete) (rule-name symbol))
-  (flet ((disable-activations (rete rule)
+  (flet ((disable-activations (rule)
            (mapc #'(lambda (activation)
                      (setf (activation-eligible activation) nil))
                  (find-all-activations
@@ -118,7 +104,7 @@
         "The rule named ~S is not known to be defined." rule-name)
       (remove-rule-from-network (rete-network self) rule)
       (remove-rule-from-context (rule-context rule) rule)
-      (disable-activations self rule)
+      (disable-activations rule)
       rule)))
 
 (defmethod forget-rule ((self rete) (rule rule))
@@ -152,7 +138,7 @@
 (defun get-fact-list (rete)
   (delete-duplicates
    (sort
-    (loop for fact being the hash-value of (rete-fact-table rete)
+    (loop for fact being the hash-values of (rete-fact-table rete)
         collect fact)
     #'(lambda (f1 f2) (< (fact-id f1) (fact-id f2))))))
 
@@ -215,6 +201,7 @@
      (setf (belief-factor fact) belief-factor)))
 
 (defmethod adjust-belief (rete fact (belief-factor t))
+  (declare (ignore rete))
   (when (in-rule-firing-p)
     (let ((rule-belief (belief-factor (active-rule)))
           (facts (token-make-fact-list *active-tokens*)))
@@ -258,7 +245,7 @@
   fact)
 
 (defun clear-contexts (rete)
-  (loop for context being the hash-value of (rete-contexts rete)
+  (loop for context being the hash-values of (rete-contexts rete)
       do (clear-activations context)))
 
 (defun clear-focus-stack (rete)
@@ -288,14 +275,16 @@
 
 (defun get-rule-list (rete &optional (context-name nil))
   (if (null context-name)
-      (loop for context being the hash-value of (rete-contexts rete)
+      (loop for context being the hash-values of (rete-contexts rete)
           append (context-rule-list context))
     (context-rule-list (find-context rete context-name))))
 
 (defun get-activation-list (rete &optional (context-name nil))
-  (if (null context-name)
-      (loop for context being the hash-value of (rete-contexts rete)
-          append (context-activation-list context))
+  (if (not context-name)
+      (loop for context being the hash-values of (rete-contexts rete)
+            for activations = (context-activation-list context)
+            when activations
+              nconc activations)
     (context-activation-list (find-context rete context-name))))
 
 (defun find-fact-using-instance (rete instance)
@@ -358,7 +347,7 @@
   (next-context rete))
 
 (defun retrieve-contexts (rete)
-  (loop for context being the hash-value of (rete-contexts rete)
+  (loop for context being the hash-values of (rete-contexts rete)
       collect context))
 
 (defmethod add-activation ((self rete) activation)
@@ -409,7 +398,6 @@
 
 (defun make-query-engine (source-rete)
   (let* ((query-engine (make-inference-engine)))
-    (loop for fact being the hash-value 
-        of (rete-fact-table source-rete)
+    (loop for fact being the hash-values of (rete-fact-table source-rete)
         do (remember-fact query-engine fact))
     query-engine))

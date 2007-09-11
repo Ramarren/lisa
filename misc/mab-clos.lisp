@@ -23,7 +23,7 @@
 ;;; find and eat some bananas. This iteration also illustrates the use of
 ;;; pattern matching on an object hierarchy.
 
-;;; $Id: mab-clos.lisp,v 1.11 2002/11/08 20:14:26 youngde Exp $
+;;; $Id: mab-clos.lisp,v 1.12 2007/09/11 21:14:08 youngde Exp $
 
 (in-package "LISA-USER")
 
@@ -446,12 +446,12 @@
              (run))))
     (time (repeat-mab))))
 
-#+Allegro
+#+allegro
 (defun profile-mab (&optional (ntimes 10))
   (prof:with-profiling (:type :time)
     (run-mab ntimes)))
 
-#+LispWorks
+#+:lispworks
 (defun profile-mab (&optional (ntimes 10))
-  (hcl:set-up-profiler :packages '("LISA" "CLOS"))
+  (hcl:set-up-profiler :packages :all)
   (hcl:profile (run-mab ntimes)))

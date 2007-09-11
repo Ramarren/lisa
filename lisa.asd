@@ -27,7 +27,7 @@
 ;;;   (push <lisa root directory> asdf:*central-registry*)
 ;;;   (asdf:operate 'asdf:load-op :lisa)
 
-;;; $Id: lisa.asd,v 1.6 2007/09/08 18:16:01 youngde Exp $
+;;; $Id: lisa.asd,v 1.7 2007/09/11 21:14:07 youngde Exp $
 
 (in-package :cl-user)
 
@@ -78,7 +78,6 @@
                          (:file "pattern")
                          (:file "rule-parser")
                          (:file "fact-parser")
-                         #+nil(:file "parser")
                          (:file "language")
                          (:file "tms-support")
                          (:file "rete")
@@ -91,9 +90,11 @@
                (:module implementations
                         :components
                         ((:file "workarounds")
-                         #+Lispworks
+                         #+:lispworks
                          (:file "lispworks-auto-notify")
-                         #+Allegro
+                         #+:cmucl
+                         (:file "cmucl-auto-notify")
+                         #+:allegro
                          (:file "allegro-auto-notify"))
                         :serial t)
                (:module rete
@@ -145,20 +146,19 @@
 ;;; Sets up the environment so folks can use the non-portable form of REQUIRE
 ;;; with some implementations...
 
-#+Allegro
+#+:allegro
 (setf system:*require-search-list*
   (append system:*require-search-list*
           `(:newest ,(lisa-debugger))))
 
-#+clisp
+#+:clisp
 (setf custom:*load-paths*
   (append custom:*load-paths* `(,(lisa-debugger))))
 
 #+:openmcl
 (pushnew (pathname-directory (lisa-debugger)) ccl:*module-search-path* :test #'equal)
 
-
-#+LispWorks
+#+:lispworks
 (let ((loadable-modules `(("lisa-debugger" . ,(lisa-debugger)))))
   (lw:defadvice (require lisa-require :around)
       (module-name &optional pathname)

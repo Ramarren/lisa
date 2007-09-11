@@ -20,7 +20,7 @@
 ;;; File: rule-parser.lisp
 ;;; Description: The Lisa rule parser, completely rewritten for release 3.0.
 ;;;
-;;; $Id: rule-parser.lisp,v 1.3 2007/09/07 21:32:05 youngde Exp $
+;;; $Id: rule-parser.lisp,v 1.4 2007/09/11 21:14:09 youngde Exp $
 
 (in-package :lisa)
 
@@ -84,7 +84,7 @@
        ,@body)))
 
 (defun make-binding-set ()
-  (loop for binding being the hash-value of *binding-table*
+  (loop for binding being the hash-values of *binding-table*
       collect binding))
 
 (defun find-or-set-slot-binding (var slot-name location)
@@ -166,7 +166,7 @@
        (eq (first value) 'not)
        (variable-p (second value))))
 
-(defun intra-pattern-bindings? (bindings location)
+(defun intra-pattern-bindings-p (bindings location)
   "Is every variable in a pattern 'local'; i.e. does not reference a binding in a previous pattern?"
   (every #'(lambda (b)
              (= location (binding-address b)))
@@ -193,7 +193,7 @@
            ;; eg. (slot-name ?value)
            (let ((binding (find-or-set-slot-binding slot-value slot-name location)))
              (make-pattern-slot :name slot-name :value slot-value :slot-binding binding
-                                :intra-pattern-bindings (intra-pattern-bindings? (list binding) location))))
+                                :intra-pattern-bindings (intra-pattern-bindings-p (list binding) location))))
           ((and (slot-value-is-variable-p slot-value)
                 constraint)
            ;; eg. (slot-name ?value (equal ?value "frodo"))
@@ -205,7 +205,7 @@
                                   :constraint constraint-form
                                   :constraint-bindings constraint-bindings
                                   :intra-pattern-bindings
-                                  (intra-pattern-bindings? (list* binding constraint-bindings) location)))))
+                                  (intra-pattern-bindings-p (list* binding constraint-bindings) location)))))
           (t (error 'rule-parsing-error :rule-name *current-defrule*
                     :location *current-defrule-pattern-location*
                     :text "malformed slot")))))
@@ -275,7 +275,7 @@
                (error 'rule-parsing-error
                       :rule-name *current-defrule*
                       :location *current-defrule-pattern-location*
-                      :text "TEST must currently be followed by a list of length 1"))
+                      :text "TEST takes a single Lisp form as argument"))
              form)))
     (let* ((form (extract-test-pattern))
            (bindings (collect-bindings form)))
@@ -297,27 +297,6 @@
     pattern))
 
 ;;; High-level rule definition interfaces...
-
-#+nil
-(defun define-rule (name body &key (salience 0) (context nil) (auto-focus nil) (belief nil))
-  (let ((*current-defrule* name))
-    (with-rule-components ((doc-string lhs rhs) body)
-      (dolist (pattern lhs)
-        (princ #\()
-        (terpri)
-        (print (parsed-pattern-class pattern))
-        (terpri)
-        (dolist (slot (parsed-pattern-slots pattern))
-          (prin1 slot)
-          (terpri))
-        (princ #\))
-        (terpri))
-      (make-rule name (inference-engine) lhs rhs
-                 :doc-string doc-string
-                 :salience salience
-                 :context context
-                 :belief belief
-                 :auto-focus auto-focus))))
 
 (defun define-rule (name body &key (salience 0) (context nil) (auto-focus nil) (belief nil))
   (let ((*current-defrule* name))

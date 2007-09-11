@@ -20,17 +20,16 @@
 ;;; File: network-crawler.lisp
 ;;; Description:
 
-;;; $Id: network-crawler.lisp,v 1.4 2002/09/13 15:12:34 youngde Exp $
+;;; $Id: network-crawler.lisp,v 1.5 2007/09/11 21:14:10 youngde Exp $
 
 (in-package "LISA")
 
 (defun show-network (rete-network &optional (strm *terminal-io*))
   (labels ((get-roots ()
-             (loop for node being the hash-value of (rete-roots rete-network)
+             (loop for node being the hash-values of (rete-roots rete-network)
                  collect node))
            (get-successors (shared-node)
-             (loop for s being the hash-value 
-                 of (shared-node-successors shared-node) 
+             (loop for s being the hash-values of (shared-node-successors shared-node) 
                  collect (successor-node s)))
            (get-successor (join-node)
              (list (successor-node (join-node-successor join-node))))

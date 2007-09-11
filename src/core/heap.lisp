@@ -1,6 +1,6 @@
 ;;; -*- Lisp -*-
 ;;;
-;;; $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/src/core/heap.lisp,v 1.2 2007/09/07 21:32:05 youngde Exp $
+;;; $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/src/core/heap.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
 ;;;
 ;;; Copyright (c) 2002, 2003 Gene Michael Stover.
 ;;; 
@@ -60,16 +60,19 @@ that percolates up."
         ((not (funcall less x (aref a parent))) i)
       (setf (aref a i) (aref a parent)))))
 
+(defvar *heap* nil)
+
 (defun heap-init (heap less-fn &key (order 2) (initial-contents nil))
   "Initialize the indicated heap.  If INITIAL-CONTENTS is a non-empty
 list, the heap's contents are intiailized to the values in that
 list; they are ordered according to LESS-FN.  INITIAL-CONTENTS must
 be a list or NIL."
+  (setf *heap* heap)
   (setf (heap-less-fn heap) less-fn
-    (heap-order heap)   order
-    (heap-a heap)       (make-array 2 :initial-element nil
-                                    :adjustable t :fill-pointer 1)
-    (heap-max-count heap)  0)
+        (heap-order heap)   order
+        (heap-a heap)       (make-array 2 :initial-element nil
+                                        :adjustable t :fill-pointer 1)
+        (heap-max-count heap)  0)
   (when initial-contents
     (dolist (i initial-contents) (vector-push-extend i (heap-a heap)))
     (loop for i from (floor (/ (length (heap-a heap)) order)) downto 1
@@ -124,11 +127,11 @@ an error if the heap is already empty.  (Should that be an error?)"
   (let ((a (heap-a heap))
 	(i (heap-find-idx heap fn)))
     (cond ((< i (fill-pointer a));; We found an element to remove.
-	   (let ((x (aref a i))
-		 (last-object (vector-pop a)))
-	     (setf (aref a (percolate-down heap i last-object)) last-object)
-	     x))
-	  (t nil))));; Nothing to remove
+           (let ((x (aref a i))
+                 (last-object (vector-pop a)))
+             (setf (aref a (percolate-down heap i last-object)) last-object)
+             x))
+          (t nil))));; Nothing to remove
 
 (defun heap-find (heap &optional (fn #'default-search-predicate))
   (let ((a (heap-a heap))
@@ -138,9 +141,11 @@ an error if the heap is already empty.  (Should that be an error?)"
           (t nil))))
 
 (defun heap-collect (heap &optional (fn #'default-search-predicate))
-  (loop for obj across (heap-a heap)
-        if (funcall fn heap obj)
-        collect obj))
+  (if (heap-empty-p heap)
+      nil
+    (loop for obj across (heap-a heap)
+          when (funcall fn heap obj)
+            collect obj)))
 
 (defun heap-peek (heap)
   "Return the first element in the heap, but don't remove it.  It'll
