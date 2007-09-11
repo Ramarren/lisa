@@ -1,6 +1,13 @@
-2007-09-08  David E. Young  <youngde@pobox.com
+2007-09-11  David E. Young  <youngde@pobox.com>
 
-	* This is Lisa release 3.1
+	* Release 3.1.
+	* Fixed bug reported by Andrew Philpot in Lisa's new conflict
+	  resolution machinery. The trouble actually lay in the heap
+	  library that Lisa borrowed. This bug affected the retrieval and
+	  display of activations.
+	* Addressed warnings reported by CLISP and Lispworks when
+	  compiling Lisa. Lisa now compiles warning-free on these
+	  platforms.
 	* Added patch for OpenMCL support. I'm not sure who offered this,
 	  so I can't offer proper attribution. Sorry.
 
