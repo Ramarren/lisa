@@ -1,3 +1,9 @@
+2007-09-17  David E. Young  <youngde@pobox.com>
+
+	* Release 3.2
+	* Fixed bug reported by Aneil Mallavarapu. Lisa's refactored rule
+	  parser broke the TEST conditional element.
+
 2007-09-11  David E. Young  <youngde@pobox.com>
 
 	* Release 3.1.

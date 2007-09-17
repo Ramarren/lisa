@@ -1,6 +1,6 @@
 ;;; -*- Lisp -*-
 ;;;
-;;; $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/src/core/heap.lisp,v 1.3 2007/09/11 21:14:09 youngde Exp $
+;;; $Header: /home/ramarren/LISP/git-repos/lisa-tmp/lisa/src/core/heap.lisp,v 1.4 2007/09/17 22:42:39 youngde Exp $
 ;;;
 ;;; Copyright (c) 2002, 2003 Gene Michael Stover.
 ;;; 
@@ -140,12 +140,22 @@ an error if the heap is already empty.  (Should that be an error?)"
            (aref a i))
           (t nil))))
 
+#+nil
 (defun heap-collect (heap &optional (fn #'default-search-predicate))
   (if (heap-empty-p heap)
       nil
     (loop for obj across (heap-a heap)
           when (funcall fn heap obj)
             collect obj)))
+
+(defun heap-collect (heap &optional (fn #'default-search-predicate))
+  (let ((vec (heap-a heap)))
+    (if (heap-empty-p heap)
+        nil
+      (loop for i from 1 below (fill-pointer vec)
+            with obj = (aref vec i)
+            when (funcall fn heap obj)
+              collect obj))))
 
 (defun heap-peek (heap)
   "Return the first element in the heap, but don't remove it.  It'll

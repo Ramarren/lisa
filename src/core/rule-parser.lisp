@@ -20,7 +20,7 @@
 ;;; File: rule-parser.lisp
 ;;; Description: The Lisa rule parser, completely rewritten for release 3.0.
 ;;;
-;;; $Id: rule-parser.lisp,v 1.4 2007/09/11 21:14:09 youngde Exp $
+;;; $Id: rule-parser.lisp,v 1.5 2007/09/17 22:42:39 youngde Exp $
 
 (in-package :lisa)
 
@@ -281,6 +281,7 @@
            (bindings (collect-bindings form)))
       (make-parsed-pattern :test-bindings bindings
                            :type :test
+                           :slots form
                            :pattern-binding nil
                            :binding-set (make-binding-set)
                            :logical *in-logical-pattern-p*

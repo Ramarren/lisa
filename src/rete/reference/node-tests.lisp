@@ -20,7 +20,7 @@
 ;;; File: node-tests.lisp
 ;;; Description:
 
-;;; $Id: node-tests.lisp,v 1.23 2007/09/11 21:14:10 youngde Exp $
+;;; $Id: node-tests.lisp,v 1.24 2007/09/17 22:42:39 youngde Exp $
 
 (in-package "LISA")
 
@@ -116,7 +116,6 @@
              (progv
                  `(,@special-vars)
                  `(,@(mapcar #'(lambda (binding)
-                                 (declare (optimize (speed 3) (debug 1) (safety 0)))
                                  (if (pattern-binding-p binding)
                                      (token-find-fact 
                                       tokens (binding-address binding))
