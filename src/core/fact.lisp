@@ -103,6 +103,9 @@
 (defmethod get-slot-value ((self fact) (slot-name (eql :object)))
   (fact-clos-instance self))
 
+(defmethod get-slot-value ((self fact) (slot-name (eql :belief)))
+  (belief-factor self))
+
 (defun find-instance-of-fact (fact)
   "Retrieves the CLOS instance associated with a fact. FACT is a FACT
   instance."
