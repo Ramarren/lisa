@@ -123,12 +123,16 @@
           "WATCHING"
           "WITH-INFERENCE-ENGINE"
           "WITH-SIMPLE-QUERY"))
-    (:shadow "ASSERT"))
+    (:shadow "ASSERT" #:class-name))
 
   (defpackage "LISA-USER"
     (:use "COMMON-LISP")
     (:shadowing-import-from "LISA" "ASSERT" "DEFAULT")
     (:import-from "LISA" . #1#)))
+
+(defgeneric lisa::class-name (instance)
+    (:method (instance)
+      (common-lisp:class-name instance)))
 
 (defpackage "LISA.REFLECT"
   (:use "COMMON-LISP")
