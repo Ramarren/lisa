@@ -35,7 +35,8 @@
 (defvar *conditional-elements-table*
   '((exists . parse-exists-pattern)
     (not . parse-not-pattern)
-    (test . parse-test-pattern)))
+    (test . parse-test-pattern)
+    (or . parse-or-pattern)))
 
 (defun extract-rule-headers (body)
   (if (stringp (first body))
@@ -297,17 +298,53 @@
     (setf (parsed-pattern-type pattern) :negated)
     pattern))
 
+(defun parse-or-pattern (pattern location)
+  (let ((sub-patterns (mapcar #'(lambda (pat)
+				   (parse-generic-pattern pat location))
+			       (cdr pattern))))
+    (make-parsed-pattern :sub-patterns sub-patterns :type :or)))
+
+;;; Create subrules from or patterns
+
+(defun split-subpatterns (lhs)
+  "Takes a lhs containing OR patterns and returns a list of lhses for subrules."
+  (let (non-compounds compounds)
+    (dolist (and-clause lhs)
+      (if (compound-pattern-p and-clause)
+	  (push and-clause compounds)
+	  (push and-clause non-compounds)))
+    (let ((sub-patterns (mapcar #'parsed-pattern-sub-patterns compounds)))
+      (labels ((product-patterns (patterns)
+		 (destructuring-bind (this-patterns . next-patterns) patterns
+		     (if (null next-patterns)
+			 (mapcar #'list this-patterns)
+			 (let ((next-product (product-patterns next-patterns)))
+			   (mapcar #'(lambda (pat)
+				       (append pat next-product))
+				   this-patterns))))))
+	(mapcar #'(lambda (subpat)
+		    (append non-compounds subpat))
+		(product-patterns sub-patterns))))))
+
 ;;; High-level rule definition interfaces...
 
 (defun define-rule (name body &key (salience 0) (context nil) (auto-focus nil) (belief nil))
   (let ((*current-defrule* name))
     (with-rule-components ((doc-string lhs rhs) body)
-      (make-rule name (inference-engine) lhs rhs
-                 :doc-string doc-string
-                 :salience salience
-                 :context context
-                 :belief belief
-                 :auto-focus auto-focus))))
+      (let ((sub-rules (split-subpatterns lhs)))
+       (make-rule name (inference-engine) (car sub-rules) rhs
+		  :doc-string doc-string
+		  :salience salience
+		  :context context
+		  :belief belief
+		  :auto-focus auto-focus)
+       (loop for sub-lhs in (cdr sub-rules) for k from 1 do
+	    (make-rule (make-symbol (format nil "~a~~~a" name k)) (inference-engine) sub-lhs rhs
+		  :doc-string doc-string
+		  :salience salience
+		  :context context
+		  :belief belief
+		  :auto-focus auto-focus))))))
 
 (defun redefine-defrule (name body &key (salience 0) (context nil) (belief nil) (auto-focus nil))
   (define-rule name body :salience salience
