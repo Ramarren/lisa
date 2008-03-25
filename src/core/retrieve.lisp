@@ -82,11 +82,10 @@
                            (query-fact)
                            ,@body
                            =>
-                           (push (list ,@(mapcar #'(lambda (var)
-                                                     var)
+                           (push (list ,@(mapcar #'make-query-binding
                                                  varlist))
                                  *query-result*))))
-           (run-query ,query))))))
+           (values (run-query ,query) ,query-name))))))
 
 (defmacro with-simple-query ((var value) query &body body)
   "For each variable/instance pair in a query result, invoke BODY with VAR
