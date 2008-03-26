@@ -319,17 +319,24 @@
 
 (defun split-subpatterns (lhs)
   "Takes a lhs containing OR patterns and returns a list of lhses for subrules."
-  (let (non-compounds compounds)
-    (dolist (and-clause lhs)
-      (if (compound-pattern-p and-clause)
-	  (push and-clause compounds)
-	  (push and-clause non-compounds)))
-    (if (null compounds)
-	(list lhs)
-	(let ((sub-patterns (mapcar #'parsed-pattern-sub-patterns compounds)))
-	  (mapcar #'(lambda (subpat)
-		      (append (reverse non-compounds) subpat))
-		  (product-patterns sub-patterns))))))
+  (if (notany #'compound-pattern-p lhs)
+      lhs
+      (let (clauses-template or-clauses)
+	(dolist (clause lhs)
+	  (cond ((compound-pattern-p clause)
+		 (push :or clauses-template)
+		 (push clause or-clauses))
+		(t (push clause clauses-template))))
+	(setf clauses-template (nreverse clauses-template))
+	(setf or-clauses (nreverse or-clauses))
+	(let ((clauses-product (product-patterns (mapcar #'parsed-pattern-sub-patterns or-clauses))))
+	  (mapcar #'(lambda (or-product)
+		      (let (new-clauses)
+		       (dolist (clause clauses-template (nreverse new-clauses))
+			 (if (eql clause :or)
+			     (push (pop or-product) new-clauses)
+			     (push clause new-clauses)))))
+		  clauses-product)))))
 
 ;;; High-level rule definition interfaces...
 
