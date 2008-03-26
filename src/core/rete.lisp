@@ -93,12 +93,22 @@
     (add-rule-to-context (rule-context rule) rule)
     rule))
 
+(defvar *forgetting-subrules* nil)
+
 (defmethod forget-rule ((self rete) (rule-name symbol))
+  (print *forgetting-subrules*)
   (flet ((disable-activations (rule)
            (mapc #'(lambda (activation)
                      (setf (activation-eligible activation) nil))
                  (find-all-activations
                   (context-strategy (rule-context rule)) rule))))
+    (unless *forgetting-subrules*
+      (let ((*forgetting-subrules* t))
+	(loop for i from 1
+	   for subrule = (find-rule (inference-engine) (find-symbol (format nil "~a~~~a" rule-name i)))
+	   while subrule
+	   do
+	     (forget-rule (inference-engine) subrule))))
     (let ((rule (find-rule self rule-name)))
       (cl:assert (not (null rule)) nil
         "The rule named ~S is not known to be defined." rule-name)
