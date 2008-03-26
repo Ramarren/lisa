@@ -306,6 +306,17 @@
 
 ;;; Create subrules from or patterns
 
+(defun product-patterns (patterns)
+  (destructuring-bind (this-patterns . next-patterns) patterns
+    (if (null next-patterns)
+	(mapcar #'list this-patterns)
+	(let ((next-product (product-patterns next-patterns)))
+	  (mapcar #'(lambda (pat)
+		      (mapcar #'(lambda (nproduct)
+				  (cons pat nproduct))
+			      next-product))
+		  this-patterns)))))
+
 (defun split-subpatterns (lhs)
   "Takes a lhs containing OR patterns and returns a list of lhses for subrules."
   (let (non-compounds compounds)
@@ -316,17 +327,9 @@
     (if (null compounds)
 	(list lhs)
 	(let ((sub-patterns (mapcar #'parsed-pattern-sub-patterns compounds)))
-	  (labels ((product-patterns (patterns)
-		     (destructuring-bind (this-patterns . next-patterns) patterns
-		       (if (null next-patterns)
-			   (mapcar #'list this-patterns)
-			   (let ((next-product (product-patterns next-patterns)))
-			     (mapcar #'(lambda (pat)
-					 (append pat next-product))
-				     this-patterns))))))
-	    (mapcar #'(lambda (subpat)
-			(append (reverse non-compounds) subpat))
-		    (product-patterns sub-patterns)))))))
+	  (mapcar #'(lambda (subpat)
+		      (append (reverse non-compounds) subpat))
+		  (product-patterns sub-patterns))))))
 
 ;;; High-level rule definition interfaces...
 
