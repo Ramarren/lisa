@@ -313,18 +313,20 @@
       (if (compound-pattern-p and-clause)
 	  (push and-clause compounds)
 	  (push and-clause non-compounds)))
-    (let ((sub-patterns (mapcar #'parsed-pattern-sub-patterns compounds)))
-      (labels ((product-patterns (patterns)
-		 (destructuring-bind (this-patterns . next-patterns) patterns
-		     (if (null next-patterns)
-			 (mapcar #'list this-patterns)
-			 (let ((next-product (product-patterns next-patterns)))
-			   (mapcar #'(lambda (pat)
-				       (append pat next-product))
-				   this-patterns))))))
-	(mapcar #'(lambda (subpat)
-		    (append non-compounds subpat))
-		(product-patterns sub-patterns))))))
+    (if (null compounds)
+	(list lhs)
+	(let ((sub-patterns (mapcar #'parsed-pattern-sub-patterns compounds)))
+	  (labels ((product-patterns (patterns)
+		     (destructuring-bind (this-patterns . next-patterns) patterns
+		       (if (null next-patterns)
+			   (mapcar #'list this-patterns)
+			   (let ((next-product (product-patterns next-patterns)))
+			     (mapcar #'(lambda (pat)
+					 (append pat next-product))
+				     this-patterns))))))
+	    (mapcar #'(lambda (subpat)
+			(append (reverse non-compounds) subpat))
+		    (product-patterns sub-patterns)))))))
 
 ;;; High-level rule definition interfaces...
 
