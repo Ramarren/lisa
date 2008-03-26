@@ -96,7 +96,6 @@
 (defvar *forgetting-subrules* nil)
 
 (defmethod forget-rule ((self rete) (rule-name symbol))
-  (print *forgetting-subrules*)
   (flet ((disable-activations (rule)
            (mapc #'(lambda (activation)
                      (setf (activation-eligible activation) nil))
