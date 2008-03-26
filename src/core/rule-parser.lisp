@@ -311,7 +311,7 @@
     (if (null next-patterns)
 	(mapcar #'list this-patterns)
 	(let ((next-product (product-patterns next-patterns)))
-	  (mapcar #'(lambda (pat)
+	  (mapcan #'(lambda (pat)
 		      (mapcar #'(lambda (nproduct)
 				  (cons pat nproduct))
 			      next-product))
@@ -344,19 +344,19 @@
   (let ((*current-defrule* name))
     (with-rule-components ((doc-string lhs rhs) body)
       (let ((sub-rules (split-subpatterns lhs)))
-       (make-rule name (inference-engine) (car sub-rules) rhs
-		  :doc-string doc-string
-		  :salience salience
-		  :context context
-		  :belief belief
-		  :auto-focus auto-focus)
-       (loop for sub-lhs in (cdr sub-rules) for k from 1 do
-	    (make-rule (make-symbol (format nil "~a~~~a" name k)) (inference-engine) sub-lhs rhs
-		  :doc-string doc-string
-		  :salience salience
-		  :context context
-		  :belief belief
-		  :auto-focus auto-focus))))))
+	(make-rule name (inference-engine) (car sub-rules) rhs
+		   :doc-string doc-string
+		   :salience salience
+		   :context context
+		   :belief belief
+		   :auto-focus auto-focus)
+	(loop for sub-lhs in (cdr sub-rules) for k from 1 do
+	     (make-rule (make-symbol (format nil "~a~~~a" name k)) (inference-engine) sub-lhs rhs
+			:doc-string doc-string
+			:salience salience
+			:context context
+			:belief belief
+			:auto-focus auto-focus))))))
 
 (defun redefine-defrule (name body &key (salience 0) (context nil) (belief nil) (auto-focus nil))
   (define-rule name body :salience salience
