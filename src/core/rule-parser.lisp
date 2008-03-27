@@ -320,7 +320,7 @@
 (defun split-subpatterns (lhs)
   "Takes a lhs containing OR patterns and returns a list of lhses for subrules."
   (if (notany #'compound-pattern-p lhs)
-      lhs
+      (list lhs)
       (let (clauses-template or-clauses)
 	(dolist (clause lhs)
 	  (cond ((compound-pattern-p clause)
