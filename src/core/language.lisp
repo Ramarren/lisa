@@ -90,20 +90,25 @@
 (defmacro assert ((name &body body) &key (belief nil))
   (let ((fact (gensym))
         (fact-object (gensym)))
-    `(let ((,fact-object 
-            ,@(if (or (consp name)
-                      (variablep name))
-                  `(,name)
-                `(',name))))
-       (if (typep ,fact-object 'standard-object)
-           (parse-and-insert-instance ,fact-object :belief ,belief)
-         (progn
-           (ensure-meta-data-exists ',name)
-           (let ((,fact (make-fact ',name ,@(expand-slots body))))
-             (when (and (in-rule-firing-p)
-                        (logical-rule-p (active-rule)))
-               (bind-logical-dependencies ,fact))
-             (assert-fact (inference-engine) ,fact :belief ,belief)))))))
+    (let ((not-object-progn
+	   `(progn
+	      (ensure-meta-data-exists ',name)
+	      (let ((,fact (make-fact ',name ,@(expand-slots body))))
+		(when (and (in-rule-firing-p)
+			   (logical-rule-p (active-rule)))
+		  (bind-logical-dependencies ,fact))
+		(assert-fact (inference-engine) ,fact :belief ,belief)))))
+      (if (and (symbolp name)
+	       (not (variablep name)))
+	  not-object-progn
+	  `(let ((,fact-object 
+		  ,@(if (or (consp name)
+			    (variablep name))
+			`(,name)
+			`(',name))))
+	     (if (typep ,fact-object 'standard-object)
+		 (parse-and-insert-instance ,fact-object :belief ,belief)
+		 ,not-object-progn))))))
 
 (defmacro deffacts (name (&key &allow-other-keys) &body body)
   (parse-and-insert-deffacts name body))
