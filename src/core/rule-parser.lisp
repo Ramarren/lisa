@@ -228,12 +228,13 @@
                        ;; logical CEs are "special"; they don't have their own parser.
                        ((logical-element-p pattern)
                         (let ((*in-logical-pattern-p* t))
-                          (parse-lhs (rest pattern))))
+                          (parse-lhs (rest pattern)))
+                        (parse-lhs (rest pattern-list)))
                        (t
-                        (push (funcall (find-conditional-element-parser (first pattern)) pattern
-                                       (1- (incf location)))
-                              patterns)
-                        (parse-lhs (rest pattern-list))))))
+                        (let* ((parser (find-conditional-element-parser (first pattern)))
+                               (parsed (funcall parser pattern (1- (incf location)))))
+                          (push parsed patterns)
+                          (parse-lhs (rest pattern-list)))))))
              (parse-rhs (actions)
                (make-rule-actions
                 :bindings (collect-bindings actions :errorp nil)
@@ -363,4 +364,3 @@
                :context context
                :belief belief
                :auto-focus auto-focus))
-
