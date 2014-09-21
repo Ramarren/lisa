@@ -131,18 +131,18 @@ initargs for all slots are returned, otherwise only the slots with
   (remove-if #'is-standard-classp (sb-mop:class-direct-superclasses class))
   #+:openmcl
   (remove-if #'is-standard-classp (ccl::class-direct-superclasses class))
-  #-:sbcl
+  #-(or sbcl openmcl)
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
-             
+
 (defun class-all-superclasses (class-or-symbol)
   (labels ((find-superclasses (class-list superclass-list)
              (let ((class (first class-list)))
                (if (or (null class-list)
                        (is-standard-classp class))
                    superclass-list
-                 (find-superclasses 
+                 (find-superclasses
                   (find-direct-superclasses class)
-                  (find-superclasses 
+                  (find-superclasses
                    (rest class-list) (pushnew class superclass-list)))))))
     (let ((class
            (if (symbolp class-or-symbol)
