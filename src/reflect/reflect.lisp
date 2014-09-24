@@ -28,11 +28,12 @@
 ;;; The code contained with the following MACROLET form courtesy of the PORT
 ;;; module, CLOCC project, http://clocc.sourceforge.net.
 
-#+(or allegro clisp cmu cormanlisp lispworks openmcl lucid sbcl)
+#+(or abcl allegro clisp cmu cormanlisp lispworks openmcl lucid sbcl)
 ;; we use `macrolet' for speed - so please be careful about double evaluations
 ;; and mapping (you cannot map or funcall a macro, you know)
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (macrolet ((class-slots* (class)
+               #+abcl `(mop:class-slots ,class)
                #+allegro `(clos:class-slots ,class)
                #+clisp `(clos:class-slots ,class)
                #+cmu `(pcl::class-slots ,class)
@@ -48,6 +49,7 @@
                    (symbol (find-class ,obj))
                    (t (class-of ,obj)))))
              (slot-name (slot)
+               #+abcl `(mop:slot-definition-name ,slot)
                #+(and allegro (not (version>= 6))) `(clos::slotd-name ,slot)
                #+(and allegro (version>= 6)) `(clos:slot-definition-name ,slot)
                #+clisp `(clos:slot-definition-name ,slot)
@@ -58,6 +60,7 @@
                #+openmcl `(slot-value ,slot 'ccl::name)
                #+sbcl `(slot-value ,slot 'sb-pcl::name))
              (slot-initargs (slot)
+               #+abcl `(mop:slot-definition-initargs ,slot)
                #+(and allegro (not (version>= 6))) `(clos::slotd-initargs ,slot)
                #+(and allegro (version>= 6))
                `(clos:slot-definition-initargs ,slot)
@@ -70,6 +73,7 @@
                #+sbcl `(slot-value ,slot 'sb-pcl::initargs))
              (slot-one-initarg (slot) `(car (slot-initargs ,slot)))
              (slot-alloc (slot)
+               #+abcl `(mop:slot-definition-allocation ,slot)
                #+(and allegro (not (version>= 6)))
                `(clos::slotd-allocation ,slot)
                #+(and allegro (version>= 6))
@@ -118,9 +122,17 @@ initargs for all slots are returned, otherwise only the slots with
 (defun class-finalized-p (class)
   (clos:class-finalized-p class))
 
+#+abcl
+(defun class-finalized-p (class)
+  (mop:class-finalized-p class))
+
 #+clisp
 (defun finalize-inheritance (class)
   (clos:finalize-inheritance class))
+
+#+abcl
+(defun finalize-inheritance (class)
+  (mop:finalize-inheritance class))
 
 (defun is-standard-classp (class)
   (or (eq (class-name class) 'standard-object)
@@ -131,7 +143,9 @@ initargs for all slots are returned, otherwise only the slots with
   (remove-if #'is-standard-classp (sb-mop:class-direct-superclasses class))
   #+:openmcl
   (remove-if #'is-standard-classp (ccl::class-direct-superclasses class))
-  #-(or sbcl openmcl)
+  #+:abcl
+  (remove-if #'is-standard-classp (mop:class-direct-superclasses class))
+  #-(or sbcl openmcl abcl)
   (remove-if #'is-standard-classp (clos:class-direct-superclasses class)))
 
 (defun class-all-superclasses (class-or-symbol)
